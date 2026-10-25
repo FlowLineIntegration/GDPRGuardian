@@ -1,0 +1,55 @@
+name: Identifiant mal traité / Mishandled identifier
+description: Un identifiant non masqué, ou un texte masqué à tort / an identifier left visible, or text masked wrongly.
+labels: ["détection"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ⚠ Données fictives uniquement / Fictitious data only
+        Une issue est **publique et permanente**. N'y mettez **jamais** un nom, un numéro, une adresse ou un document
+        réels. Reproduisez le cas avec des valeurs inventées de même forme (par exemple un IBAN de test).
+        An issue is **public and permanent**. **Never** put a real name, number, address or document here.
+        Reproduce the case with invented values of the same shape.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Cas / Case
+      options:
+        - Identifiant resté visible / identifier left visible
+        - Texte masqué à tort / text masked by mistake
+        - Balises incohérentes / inconsistent placeholders
+    validations:
+      required: true
+  - type: input
+    id: type
+    attributes:
+      label: Type d'identifiant / Identifier type
+      placeholder: "nom, IBAN, NIR, téléphone, adresse…"
+    validations:
+      required: true
+  - type: textarea
+    id: input
+    attributes:
+      label: Exemple FICTIF en entrée / FICTITIOUS input example
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Sortie obtenue / Output obtained
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: options
+    attributes:
+      label: Options (pays, profil) / Options (countries, profile)
+      placeholder: "countries=FR, profile=standard"
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Confirmation
+      options:
+        - label: Mon exemple ne contient aucune donnée personnelle réelle / my example contains no real personal data.
+          required: true

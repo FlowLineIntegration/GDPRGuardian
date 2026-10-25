@@ -1,0 +1,27 @@
+name: Autre problème / Other problem
+description: Erreur, comportement inattendu, documentation / error, unexpected behaviour, documentation.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Ne collez aucune donnée personnelle réelle.** **Never paste real personal data.**
+  - type: textarea
+    id: what
+    attributes:
+      label: Ce qui se passe / What happens
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Ce qui était attendu / What was expected
+  - type: textarea
+    id: steps
+    attributes:
+      label: Étapes pour reproduire / Steps to reproduce
+  - type: input
+    id: version
+    attributes:
+      label: Version et canal / Version and channel
+      placeholder: "1.0.0, site / API / MCP"

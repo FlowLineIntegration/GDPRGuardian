@@ -1,0 +1,34 @@
+name: Demande d'évolution / Feature request
+description: Proposer une nouvelle fonction ou une amélioration / suggest a new feature or an improvement.
+labels: ["évolution"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Ne collez aucune donnée personnelle réelle.** Les exemples doivent être fictifs.
+        **Never paste real personal data.** Examples must be fictitious.
+  - type: textarea
+    id: need
+    attributes:
+      label: Besoin / Need
+      description: Ce que vous voulez faire et pourquoi / what you want to do and why.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposition / Proposal
+      description: Comment vous l'imaginez (facultatif) / how you picture it (optional).
+  - type: dropdown
+    id: channel
+    attributes:
+      label: Où / Where
+      options:
+        - Site / Website
+        - API REST
+        - MCP en ligne / online MCP
+        - MCP local / local MCP
+        - Bibliothèque Python / Python library
+        - Autre / Other
+    validations:
+      required: true

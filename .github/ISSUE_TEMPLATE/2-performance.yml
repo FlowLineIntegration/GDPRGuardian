@@ -1,0 +1,40 @@
+name: Problème de performance / Performance problem
+description: Lenteur, délai dépassé, limite atteinte / slowness, timeout, limit reached.
+labels: ["performance"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Ne joignez jamais de document réel.** Décrivez-le (type, taille, nombre de pages) ou fournissez un fichier
+        fictif équivalent. **Never attach a real document**: describe it or provide an equivalent fictitious file.
+  - type: dropdown
+    id: channel
+    attributes:
+      label: Où / Where
+      options:
+        - Site / Website
+        - API REST
+        - MCP en ligne / online MCP
+        - MCP local / local MCP
+        - Bibliothèque Python / Python library
+    validations:
+      required: true
+  - type: input
+    id: document
+    attributes:
+      label: Document (type, taille, pages) / Document (kind, size, pages)
+      placeholder: "PDF, 8 Mo, 120 pages"
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Constaté / Observed
+      description: Temps mesuré, code d'erreur (429, 503, 422…), heure approximative / measured time, error code, time.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: "1.0.0"
