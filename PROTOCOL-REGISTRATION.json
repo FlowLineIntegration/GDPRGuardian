@@ -1,0 +1,32 @@
+{
+  "note_fr": "Enregistrement public du protocole d'auto-évaluation de Gardien RGPD, publié AVANT la première campagne de mesure. La campagne et ses résultats doivent correspondre à ces empreintes : le protocole (docs/PROTOCOLE.md), sa spécification (tools/protocol/spec.py), les outils et le paquet exécuté sur le serveur, et le plan de 1 019 385 documents. Le code complet suit dans ce dépôt.",
+  "note_en": "Public registration of the GDPR Guardian self-rating protocol, published BEFORE the first measurement campaign. The campaign and its results must match these digests: the protocol (docs/PROTOCOLE.md), its specification (tools/protocol/spec.py), the tools and the bundle run on the server, and the plan of 1,019,385 documents. The full code follows in this repository.",
+  "protocol": "1.0",
+  "written": "2026-10-25",
+  "published": "2026-10-26",
+  "tools_sha256": "c30dcaeeb99c8cb1bd2fac3eaaae7429dedcfdeaa743777027b7139224a7a81b",
+  "spec_sha256": "0fc63f33da622fc4a5b87b094af5a756915be3407036442cef6c718813ba8247",
+  "protocole_md_sha256": "cf12db6696e5d158eb1118f7e031eea08b250079b6c5e047fa33c570e3047007",
+  "bundle": {
+    "path": "gg-protocol.pyz",
+    "bundle_sha256": "4a041ea19f5f11363965271dfb4dbf27391d345aa19f9ba2a018a489583ee100"
+  },
+  "registered_plan": {
+    "faker": "40.43.0",
+    "documents": {
+      "synthetic_fr": 450000,
+      "redteam_bases": 12000,
+      "redteam_fr": 548907,
+      "real_annotated": 8478
+    },
+    "synthetic_sha256": "0b91be78435e5434ee5a3b136ab8f08dd10a2c3673dad56fc6dca469c87a955b",
+    "redteam_sha256": "d984ee1bf9dba70bf2ccf32957cab9da9bbf1fdf02adf5b7444956fa0137760b"
+  },
+  "engine": {
+    "version": "1.0.0",
+    "packs_sha256": "0e6be79d84cd2495a4201ebef2b951091ce9f48bc5337aebeedc1902f31894b7",
+    "probe_docs": 200,
+    "probe_sha256": "eeb38986e44cc18cd71517f075c575936e276556dabd2050ce0ffe241db63423"
+  },
+  "confidence_index": "share of documents in which no direct identifier stays readable, 7 French-scope families equally weighted, real corpora counted on their test halves only, 95% stratified bootstrap interval (2,000 resamples, seed 20261025)"
+}
