@@ -1,6 +1,6 @@
 {
-  "tests_windows": 3751,
-  "tests_linux": 3701,
+  "tests_windows": 4347,
+  "tests_linux": 4294,
   "tests_offline_image": 12,
   "parity_docs": 1000,
   "eval_docs": 540,
@@ -24,14 +24,14 @@
   "image_mb": 103,
   "core_mb": 3.6,
   "measured_on": "2026-10-25",
-  "confidence_index": "—",
-  "confidence_ci_low": "—",
-  "confidence_ci_high": "—",
-  "mention_recall_pct": "—",
-  "protocol_docs": "—",
-  "protocol_families": "—",
-  "real_corpora": "—",
-  "real_docs": "—",
-  "protocol_date": "—",
-  "protocol_engine": "—"
+  "confidence_index": 61.8,
+  "confidence_ci_low": 58.6,
+  "confidence_ci_high": 66.9,
+  "mention_recall_pct": 79.8,
+  "protocol_docs": 1019385,
+  "protocol_families": 7,
+  "real_corpora": 14,
+  "real_docs": 8178,
+  "protocol_date": "2026-10-26",
+  "protocol_engine": "1.0.0+0c3ff9fc1fb0"
 }

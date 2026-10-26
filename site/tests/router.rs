@@ -407,7 +407,7 @@ fn api_stats_is_the_contract_json() {
 }
 
 #[test]
-fn protocol_runs_are_shown_apart_and_inside_the_total() {
+fn protocol_runs_are_counted_apart_and_inside_the_total() {
     let app = app();
     for datagram in [
         // Sans « src » (ancien service) : public / without "src" (older service): public.
@@ -445,18 +445,27 @@ fn protocol_runs_are_shown_apart_and_inside_the_total() {
         )
     );
     assert_eq!(app.stats().failed_total(), 1);
+    // La page montre un seul total de documents, essais du protocole compris (choix du propriétaire) ; la part du
+    // protocole reste dans /api/stats. The page shows one document total, protocol runs included (owner's choice);
+    // the protocol share stays in /api/stats.
     for (host, lang) in [("gardienrgpd.fr", Lang::Fr), ("gdprguardian.com", Lang::En)] {
         let html = text_of(&get(&app, "/", &[("host", host)]));
-        for live in [Live::DocsProtocol, Live::UsesHourProtocol] {
+        for live in [Live::DocsTotal, Live::UsesHour] {
+            let name = live.name();
             assert!(
                 embedded::live_values(lang).contains(&live),
-                "{lang:?}: {{{{live.{}}}}} absent de la page / missing from the page",
-                live.name()
+                "{lang:?}: {{{{live.{name}}}}} absent de la page / missing from the page"
             );
             assert!(
-                html.contains(&format!("data-live=\"{}\"", live.name())),
-                "{lang:?} {}",
-                live.name()
+                html.contains(&format!("data-live=\"{name}\"")),
+                "{lang:?} {name}"
+            );
+        }
+        for live in [Live::DocsProtocol, Live::UsesHourProtocol] {
+            let name = live.name();
+            assert!(
+                !html.contains(&format!("data-live=\"{name}\"")),
+                "{lang:?} {name}"
             );
         }
     }

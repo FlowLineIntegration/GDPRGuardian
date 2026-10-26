@@ -29,6 +29,7 @@
 <header class="bar">
 <h1 class="brand"><a href="#poste"><svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path class="mk" d="M7 4H4v16h3M17 4h3v16h-3"/><rect class="mb" x="7.5" y="10" width="9" height="4"/></svg>Gardien RGPD</a><span><span class="vh">, </span>anonymisation irréversible avant l’IA</span></h1>
 <a class="keep" href="#confidentialite"><i aria-hidden="true"></i><span>Aucun document conservé<span>, ni ici ni sur le serveur</span></span></a>
+<a class="src" target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian" aria-label="Code source sur GitHub">Code<span> source</span></a>
 <nav class="more" aria-label="En savoir plus"><a href="#video">Vidéo</a><a href="#defi">Le défi</a><a href="#histoire">L’histoire</a><a href="#architecture">Architecture</a><a href="#protocole">Protocole et scores</a><a href="#utiliser">Utiliser</a><a href="#appel">L’appel</a><a href="#merci">Merci</a></nav>
 <a class="lang" href="https://gdprguardian.com" hreflang="en" lang="en">EN</a>
 </header>
@@ -43,7 +44,7 @@
 <fieldset class="seg"><legend>Profil</legend><label><input type="radio" name="profile" value="standard" checked><span>standard</span></label><label><input type="radio" name="profile" value="strict"><span>strict</span></label></fieldset>
 <label class="chk"><input type="checkbox" name="explain" checked><span>Explications</span></label>
 </fieldset>
-<p class="hint" data-r="hint" hidden>Hors de France, seuls les identifiants du pays sont vérifiés : les noms passent par les lexiques français (sur des textes réels, 23 à 41 % des noms retrouvés en droit, 95 % dans des cas cliniques espagnols).</p>
+<p class="hint" data-r="hint" hidden>Hors de France, seuls les identifiants du pays sont vérifiés et les noms passent par les lexiques français : textes juridiques de cinq pays (DE, ES, IT, NL, PT), 23 à 42 % des noms masqués, 78 à 89 % des documents avec fuite (mesure interne hors protocole).</p>
 <p class="hint">Strict : masque davantage, avec plus de faux positifs.</p>
 <div class="go"><button class="btn" type="submit" data-r="go" disabled>Anonymiser</button><input class="vh" type="file" id="ck-f" multiple accept=".pdf,.docx,.docm,.dotx,.dotm,.xlsx,.xlsm,.xlsb,.xls,.pptx,.pptm,.ppsx,.potx,.odt,.ott,.fodt,.ods,.odp,.otp,.fodp,.odg,.rtf,.eml,.mht,.mhtml,.msg,.html,.htm,.xhtml,.csv,.tsv,.txt,.text,.md,.markdown"><label class="btn2" for="ck-f">Ajouter des documents</label></div>
 <p class="keys" data-r="keys">Ctrl + Entrée anonymiser · Ctrl + Maj + C copier · Ctrl + S télécharger · Échap vider la saisie</p>
@@ -87,38 +88,40 @@
 <section class="g gc q" data-v="{{q.confidence_index}}" aria-labelledby="t-ci"><h2 id="t-ci">Indice de confiance</h2>
 <div class="t ci"><p class="ci-v"><span class="n">{{q.confidence_index}}<small>%</small></span><span class="pd">pas encore mesuré</span></p>
 <p class="ci-ic n">IC 95 % : {{q.confidence_ci_low}} – {{q.confidence_ci_high}} %</p>
-<p class="ci-d">Part des documents rendus sans aucun identifiant direct lisible.<span class="pd"> Première campagne : pas encore lancée.</span></p>
+<p class="ci-d">Part des documents de test sans aucun identifiant direct lisible<span class="n"> : 7 familles, {{q.protocol_date}}</span>.<span class="pd"> Première campagne : pas encore lancée.</span></p>
 <a class="ci-a" href="#protocole">Le protocole</a></div></section>
-<section class="g gm" aria-labelledby="t-m"><div class="gh"><h2 id="t-m">Mesures du jour</h2><p class="live-st">{{q.measured_on}}</p></div>
+<section class="g gm" aria-labelledby="t-m"><div class="gh"><h2 id="t-m">Sans fuite, par famille</h2><p class="live-st">26 octobre 2026</p></div>
 <table class="sheet mt"><tbody>
-<tr class="rl"><th scope="row">Textes réels en français, 6 corpus annotés : documents gardant une mention lisible</th><td>30 à 97 %</td></tr>
-<tr><th scope="row">Corpus synthétique, {{q.eval_docs}} documents : documents gardant un identifiant direct lisible</th><td>{{q.docs_leak_direct_pct}} %</td></tr>
-<tr><th scope="row">Même mesure, identifiants structurés seuls</th><td>{{q.docs_leak_structured_pct}} %</td></tr>
-<tr><th scope="row">Rappel, identifiants directs, noms et adresses compris</th><td>{{q.recall_direct_pct}} %</td></tr>
-<tr><th scope="row">Rappel · précision, identifiants structurés</th><td>{{q.recall_structured_pct}} % · {{q.precision_structured_pct}} %</td></tr>
+<tr><th scope="row">ParlaMint-FR, débats (borne haute)</th><td>93,0 %</td></tr>
+<tr><th scope="row">Synthétique, 450 000 documents</th><td>91,9 %</td></tr>
+<tr><th scope="row">BODACC, annonces commerciales</th><td>89,9 %</td></tr>
+<tr class="rl"><th scope="row">Équipe rouge, 51 déguisements</th><td>63,7 %</td></tr>
+<tr class="rl"><th scope="row">BOAMP, marchés publics</th><td>60,7 %</td></tr>
+<tr class="rl"><th scope="row">MAPA FR, 6 documents</th><td>16,7 %</td></tr>
+<tr class="rl"><th scope="row">Presse ancienne</th><td>16,5 %</td></tr>
 </tbody></table>
-<p class="note">Détail par corpus, méthode et limites : <a href="#protocole">Protocole et scores</a>.</p>
+<p class="note">Leur moyenne fait l’indice. Détail et limites : <a href="#protocole">Protocole et scores</a>.</p>
 </section>
 <section class="g gl" aria-labelledby="t-live" data-live-root>
 <div class="gh"><h2 id="t-live"><i class="dot" aria-hidden="true"></i>Service en direct</h2><p class="live-st" data-live-status data-on="toutes les 2 s" data-off="flux coupé, nouvel essai…">relevé au chargement</p></div>
 <dl class="tl">
-<div class="t w"><dt>Dernière heure</dt><dd class="v" data-live="uses_hour">{{live.uses_hour}}</dd><dd class="u">documents, dont essais du protocole : <span data-live="uses_hour_protocol">{{live.uses_hour_protocol}}</span> · <span data-live="bytes_hour">{{live.bytes_hour}}</span></dd></div>
-<div class="t w"><dt>Depuis le lancement</dt><dd class="v" data-live="docs_total">{{live.docs_total}}</dd><dd class="u">dont essais du protocole : <span data-live="docs_protocol">{{live.docs_protocol}}</span> · <span data-live="bytes_total">{{live.bytes_total}}</span> depuis le {{live.since}}</dd></div>
+<div class="t w"><dt>Dernière heure</dt><dd class="v" data-live="uses_hour">{{live.uses_hour}}</dd><dd class="u">documents · <span data-live="bytes_hour">{{live.bytes_hour}}</span></dd></div>
+<div class="t w"><dt>Depuis le {{live.since}}</dt><dd class="v" data-live="docs_total">{{live.docs_total}}</dd><dd class="u">documents · <span data-live="bytes_total">{{live.bytes_total}}</span></dd></div>
 <div class="t"><dt>Visiteurs, approx.</dt><dd class="v" data-live="visitors_total">{{live.visitors_total}}</dd><dd class="u"><span data-live="visitors_today">{{live.visitors_today}}</span> aujourd’hui</dd></div>
 <div class="t"><dt>Processeur</dt><dd class="v"><span data-live="cpu_percent">{{live.cpu_percent}}</span><small>%</small></dd><dd class="u">tous cœurs, 2 s<span class="meter" data-meter="cpu_percent" aria-hidden="true"><i></i></span></dd></div>
 <div class="t"><dt>Mémoire</dt><dd class="v"><span data-live="ram_percent">{{live.ram_percent}}</span><small>%</small></dd><dd class="u"><span data-live="ram_used">{{live.ram_used}}</span> sur <span data-live="ram_total">{{live.ram_total}}</span><span class="meter" data-meter="ram_percent" aria-hidden="true"><i></i></span></dd></div>
 <div class="t"><dt>Votre requête</dt><dd class="v"><span data-r="lat">—</span><small data-r="latu"></small></dd><dd class="u" data-r="lats">aucune encore, mesurée ici</dd></div>
 </dl>
 <p class="vh" aria-live="polite" data-live-say data-tpl="{u} documents traités dans la dernière heure, {v} visiteurs au total."></p>
-<p class="note">Serveur de production, chiffres réels. Jamais le contenu, le nom du fichier ni l’adresse IP.</p>
+<p class="note">Chiffres réels du serveur. Rien n’est conservé ni journalisé : ni document, ni adresse IP ; seuls ces totaux sont tenus.</p>
 </section>
 </aside>
 
 <section class="pn" id="video" aria-labelledby="h-vi"><div class="ph"><p>Vidéo</p><a class="x" href="#poste">Fermer</a></div>
 <h2 id="h-vi" tabindex="-1">La vidéo de lancement</h2>
-<video class="vid" controls preload="none" playsinline poster="/media/gardien-rgpd-lancement-fr-poster.png?v=080b84ca" src="/media/gardien-rgpd-lancement-fr.mp4?v=fdfe4edf" aria-labelledby="h-vi"></video>
-<p>Vidéo muette : tout son texte est dans la <a href="/media/gardien-rgpd-lancement-fr-transcript.txt?v=fb8c0875" target="_blank" rel="noopener">transcription</a>. Montage court en 4:5, pour les réseaux : <a href="/media/gardien-rgpd-lancement-fr-social.mp4?v=ae04e889" download>MP4, 4,5 Mo</a>.</p>
-<p class="fine">L’indice de confiance de la vidéo est celui mesuré au jour de son rendu ; le chiffre à jour : <a href="#protocole">Protocole et scores</a>.</p>
+<video class="vid" controls preload="none" playsinline poster="/media/gardien-rgpd-lancement-fr-poster.png?v=3c16c019" src="/media/gardien-rgpd-lancement-fr.mp4?v=f6a1f0ae" aria-labelledby="h-vi"></video>
+<p>Vidéo muette : tout son texte est dans la <a href="/media/gardien-rgpd-lancement-fr-transcript.txt?v=22c5f2e4" target="_blank" rel="noopener">transcription</a>. Montage court en 4:5, pour les réseaux : <a href="/media/gardien-rgpd-lancement-fr-social.mp4?v=629f0f12" download>MP4, 5,0 Mo</a>.</p>
+<p class="fine">L’indice de la vidéo date de son rendu ; le chiffre à jour : <a href="#protocole">Protocole et scores</a>.</p>
 </section>
 
 <section class="pn" id="defi" aria-labelledby="h-defi"><div class="ph"><p>Le défi</p><a class="x" href="#poste">Fermer</a></div>
@@ -137,7 +140,7 @@
 <p class="lab">Gardien RGPD</p><p class="txt"><mark class="p1">[PERSONNE_1]</mark> embête <mark class="p2">[PERSONNE_2]</mark>. <mark class="p2">[PERSONNE_2]</mark> frappe <mark class="p1">[PERSONNE_1]</mark>. <span class="why">Les rôles survivent, les identités non.</span></p>
 </div>
 <p>Sur l’exemple du poste de travail, la version 1.0.0 rend « Jean Dupont », « M. Dupont » et « DUPONT Jean » par une seule balise, <code>[PERSONNE_1]</code> ; « Mme Claire Martin » devient <code>Mme [PERSONNE_2]</code>. La civilité reste, elle aide à suivre le texte. Le numéro de facture et le montant restent aussi : ce ne sont pas des données personnelles.</p>
-<p>Pas toujours, cependant : sur les 2 463 personnes du corpus synthétique, 92,1 % ont une seule balise ; 194 sont éclatées sur plusieurs, 44 partagent celle d’une autre.</p>
+<p>Pas toujours, cependant : mesuré le 26 octobre sur 2 463 personnes fictives, le moteur déployé donne une seule balise à 92,2 % d’entre elles ; 192 sont éclatées sur plusieurs, 44 partagent celle d’une autre.</p>
 <p>Chaque document est anonymisé séparément, avec sa propre clé détruite : <code>[PERSONNE_1]</code> d’un document n’est pas forcément celle d’un autre. Plus tard, sur la feuille de route : traiter un ensemble de documents avec un même code, pour garder les mêmes balises d’un document à l’autre, toujours sans retour possible (clé de l’ensemble détruite à la fin).</p>
 </section>
 
@@ -172,7 +175,7 @@
 </div>
 <h3>Un cœur de processeur suffit</h3>
 <table class="sheet">
-<caption>{{q.ms_per_doc}} ms pour un document de 2 Ko, sur un cœur (médiane). Deux premières lignes : Ryzen 7 5800H, portable partagé, Windows 11, le {{q.measured_on}} ; les autres : Linux, mesures antérieures, service sur 16 cœurs. Noyau en Rust, appelé depuis Python, aux résultats identiques au moteur de référence (tests différentiels) ; pas de GPU.</caption>
+<caption>{{q.ms_per_doc}} ms pour un document de 2 Ko, sur un cœur (médiane). Deux premières lignes : Ryzen 7 5800H, portable partagé, Windows 11, le {{q.measured_on}} ; les autres : Linux, mesures antérieures, service sur 16 cœurs. Noyau en Rust, aux résultats identiques au moteur de référence en Python ; pas de GPU.</caption>
 <tbody>
 <tr><th scope="row">Débit par cœur, documents de 2 Ko, coût de chaque appel compris</th><td>{{q.mb_per_s}} Mo/s</td></tr>
 <tr><th scope="row">Texte de 10 Mo, un cœur</th><td>{{q.text_10mb_s}} s</td></tr>
@@ -186,13 +189,13 @@
 
 <section class="pn" id="protocole" aria-labelledby="h-pr"><div class="ph"><p>Protocole et scores</p><a class="x" href="#poste">Fermer</a></div>
 <h2 id="h-pr" tabindex="-1">Comment nous nous notons</h2>
-<p class="lead">Un indice ne vaut que si chacun peut le recalculer. Sa définition est fixée avant la première mesure ; le protocole passera par le vrai service et publiera tout : corpus, commandes, résultats bruts datés, faiblesses comprises.</p>
+<p class="lead">Un indice ne vaut que si chacun peut le recalculer. Sa définition a été fixée avant la campagne, et ses empreintes publiées 21 minutes avant le lancement ; la campagne est passée par le vrai service, et tout est publié : corpus, commandes, résultats bruts datés, faiblesses comprises. Réserve : les moitiés test avaient déjà été mesurées 7 fois pendant la mise au point.</p>
 <div class="two">
 <dl class="defs">
 <dt>Indice de confiance</dt><dd>Part des documents dans lesquels aucun identifiant direct ne reste lisible : un seul caractère d’une mention annotée resté visible, et le document compte comme raté. Calculé par famille de corpus, puis moyenné à poids égal ; intervalle à 95 % par rééchantillonnage stratifié des documents (2 000 tirages, graine fixe).</dd>
-<dt>Périmètre français</dt><dd>Sept familles : synthétique français (générateur à graines multiples, avec leurres), mutations de l’équipe rouge, BODACC, BOAMP, ParlaMint-FR, presse ancienne (Europeana et HIPE NewsEye, une seule famille), MAPA FR. Le volume n’achète aucun poids : un million de documents synthétiques comptent pour une famille.</dd>
-<dt>Publié à part, bien en vue</dt><dd>Les autres langues (MAPA DE, ES, IT, NL, PT ; MEDDOCAN ; LER allemand ; TAB anglais) et le contrôle négatif Judilibre, pour la précision seule.</dd>
-<dt>Sur le serveur de production</dt><dd>Par son socket local, à faible priorité : sans TLS, ni nginx, ni limiteur. Chaque essai compte dans les usages et apparaît à part dans les instruments.</dd>
+<dt>Périmètre français</dt><dd>Sept familles : synthétique français (générateur à graines multiples, avec leurres), mutations de l’équipe rouge, BODACC, BOAMP, ParlaMint-FR, presse ancienne (Europeana et HIPE NewsEye, une seule famille), MAPA FR. Le volume n’achète aucun poids : les 450 000 documents synthétiques comptent autant que les 6 de MAPA FR.</dd>
+<dt>Publié à part</dt><dd>Les autres langues (MAPA DE, ES, IT, NL, PT ; MEDDOCAN ; LER allemand ; TAB anglais), au bas du tableau ; Judilibre, contrôle négatif, pour la précision seule.</dd>
+<dt>Sur le serveur de production</dt><dd>Par son socket local, à faible priorité : sans TLS, ni nginx, ni limiteur. Ses documents comptent dans les usages, signalés à part.</dd>
 </dl>
 <table class="sheet">
 <caption class="q" data-v="{{q.confidence_index}}"><span class="pd">Première campagne : pas encore lancée ; chaque case attend sa publication.</span><span class="n">Campagne du {{q.protocol_date}}, moteur {{q.protocol_engine}}.</span></caption>
@@ -202,57 +205,45 @@
 <tr><th scope="row">Mentions directes entièrement masquées</th><td class="q" data-v="{{q.mention_recall_pct}}"><span class="n">{{q.mention_recall_pct}} %</span><span class="pd">pas encore mesuré</span></td></tr>
 <tr><th scope="row">Documents évalués</th><td class="q" data-v="{{q.protocol_docs}}"><span class="n">{{q.protocol_docs}}</span><span class="pd">pas encore mesuré</span></td></tr>
 <tr><th scope="row">Familles</th><td class="q" data-v="{{q.protocol_families}}"><span class="n">{{q.protocol_families}}</span><span class="pd">pas encore mesuré</span></td></tr>
-<tr><th scope="row">Corpus réels · documents réels annotés</th><td class="q" data-v="{{q.real_docs}}"><span class="n">{{q.real_corpora}} · {{q.real_docs}}</span><span class="pd">pas encore mesuré</span></td></tr>
+<tr><th scope="row">Corpus réels · documents annotés</th><td class="q" data-v="{{q.real_docs}}"><span class="n">{{q.real_corpora}} · {{q.real_docs}}</span><span class="pd">pas encore mesuré</span></td></tr>
 </tbody>
 </table>
 </div>
-<h3>Textes réels en français, 25 octobre 2026</h3>
-<p class="meta">6 corpus publics annotés, 6 660 documents ; moteur 1.0.0, pays FR, profil standard. Une mention compte comme lisible dès qu’un seul de ses caractères reste visible.</p>
-<div class="figs f2">
-<div><p class="fig">30 à 97 %</p><p>des documents gardent au moins une mention lisible, selon le corpus.</p></div>
-<div><p class="fig">35 à 93 %</p><p>des mentions sont entièrement masquées, selon le corpus.</p></div>
-</div>
+<h3>Campagne du 26 octobre 2026, par famille</h3>
+<p class="meta">Moitié test des corpus réels, moteur déployé, profil standard, pays FR (autres langues : le leur ; TAB : FR). Moitié dev, qui a servi à régler le moteur : 59,9 % ; tous les documents réels : 61,2 %.</p>
 <div class="xs" tabindex="0" role="region" aria-labelledby="c-rc"><table class="sheet rc">
-<caption id="c-rc">Par corpus. Annotations partielles pour ParlaMint (à son avantage), titres compris dans les noms de HIPE (à son désavantage) ; MAPA ne compte que 12 documents.</caption>
-<thead><tr><th scope="col">Corpus</th><th scope="col">Documents</th><th scope="col">Mentions masquées</th><th scope="col">Documents avec une mention lisible</th></tr></thead>
+<caption id="c-rc">L’indice est la moyenne à poids égal de la colonne « Sans fuite » ; en gras, nos points faibles. ParlaMint n’annote que les orateurs et personnes listées : 93,0 % est une borne haute. Un document de MAPA FR déplace l’indice de 2,4 points. Presse ancienne : Europeana 21,1 %, HIPE 1,6 %. Hors indice, précision mesurable sur MEDDOCAN seul. Garde-fous tenus : texte neutre masqué à tort 0,07 %, leurres masqués 3,7 %. Résultats bruts : <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/benchmarks/results/protocol-2026-10-26.md">protocol-2026-10-26.md</a>.</caption>
+<thead><tr><th scope="col">Famille</th><th scope="col">Docu­ments notés</th><th scope="col">Sans fuite</th><th scope="col">Mentions masquées</th><th scope="col">Précision</th></tr></thead>
 <tbody>
-<tr><th scope="row">ParlaMint-FR, débats de l’Assemblée nationale</th><td>300</td><td>93,2 %</td><td>30,1 %</td></tr>
-<tr><th scope="row">BOAMP, avis de marchés publics</th><td>3 000</td><td>84,5 %</td><td>53,8 %</td></tr>
-<tr><th scope="row">BODACC, annonces commerciales</th><td>2 693</td><td>78,9 %</td><td>92,6 %</td></tr>
-<tr><th scope="row">Europeana, presse ancienne numérisée</th><td>515</td><td>71,4 %</td><td>75,1 %</td></tr>
-<tr><th scope="row">HIPE NewsEye, presse ancienne numérisée</th><td>140</td><td>45,6 %</td><td>96,7 %</td></tr>
-<tr><th scope="row">MAPA, textes juridiques de l’UE</th><td>12</td><td>34,8 %</td><td>88,9 %</td></tr>
-<tr><th scope="row">Hors périmètre : TAB, arrêts de la CEDH, en anglais</th><td>127</td><td>83,3 %</td><td>37,8 %</td></tr>
-</tbody>
-</table></div>
-<h3>Mesures du jour, corpus synthétique</h3>
-<p class="meta">{{q.eval_docs}} documents, {{q.eval_mentions}} mentions annotées, {{q.eval_decoys}} leurres, mesurés le {{q.measured_on}}. Le meilleur cas : les textes réels ci-dessus font nettement moins bien.</p>
-<div class="figs">
-<div><p class="fig">{{q.docs_leak_direct_pct}} %</p><p>des documents gardent au moins un identifiant direct lisible, nom ou adresse compris ; structurés seuls : {{q.docs_leak_structured_pct}} %.</p></div>
-<div><p class="fig">{{q.recall_direct_pct}} %</p><p>du texte à masquer l’est, identifiants directs, noms et adresses compris.</p></div>
-<div><p class="fig">{{q.recall_structured_pct}} %</p><p>de rappel sur les identifiants structurés : NIR, IBAN, téléphones…</p></div>
-<div><p class="fig">{{q.precision_structured_pct}} %</p><p>de précision sur les identifiants structurés : part du texte masqué qui devait l’être ; texte neutre masqué à tort, tous types : {{q.overmask_pct}} %.</p></div>
-</div>
+<tr><th scope="row">Synthétique, 10 graines, avec leurres</th><td>450 000</td><td>91,9 %</td><td>98,4 %</td><td>98,8 %</td></tr>
+<tr class="rl"><th scope="row">Équipe rouge, 51 façons de déguiser</th><td>548 907</td><td>63,7 %</td><td>86,7 %</td><td>98,7 %</td></tr>
+<tr><th scope="row">BODACC, annonces légales</th><td>1 335</td><td>89,9 %</td><td>97,8 %</td><td>99,1 %</td></tr>
+<tr class="rl"><th scope="row">BOAMP, avis de marchés publics</th><td>1 408</td><td>60,7 %</td><td>89,6 %</td><td>87,3 %</td></tr>
+<tr><th scope="row">ParlaMint-FR, débats de l’Assemblée nationale</th><td>143</td><td>93,0 %</td><td>98,5 %</td><td>—</td></tr>
+<tr class="rl"><th scope="row">Presse ancienne numérisée</th><td>272</td><td>16,5 %</td><td>54,6 %</td><td>75,5 %</td></tr>
+<tr class="rl"><th scope="row">MAPA FR, textes juridiques de l’UE</th><td>6</td><td>16,7 %</td><td>33,1 %</td><td>47,1 %</td></tr>
+<tr><th scope="row">Hors indice : TAB, arrêts de la CEDH en anglais</th><td>55</td><td>67,3 %</td><td>82,8 %</td><td>77,9 %</td></tr>
+<tr><th scope="row">Hors indice : allemand, espagnol, italien, néerlandais, portugais</th><td>591</td><td>0 %</td><td>0 à 10,7 %</td><td>61,1 %</td></tr>
+</tbody></table></div>
 <div class="two">
 <div class="limits"><h3>Limites connues, mesurées</h3>
 <ul>
-<li>La barrière réduit le risque, elle ne l’annule pas, et c’est nettement moins bien sur des textes réels (tableau ci-dessus) ; dans les annonces du BODACC, 5 % seulement des numéros RCS sont masqués.</li>
-<li>Toutes ces mesures portent sur du texte : la conversion des PDF, Word et Excel n’est pas mesurée, et une page numérisée (une image, sans texte) est écartée, sans reconnaissance de caractères.</li>
-<li>Par l’API, un pays choisi sans la France ne masque ni noms ni adresses : 0 % sur des textes réels allemands, espagnols, italiens, néerlandais et portugais ; avec la France en plus, 22 à 50 % des mentions (des noms : 23 à 41 % en droit, 95 % dans des cas cliniques espagnols).</li>
-<li>Des mots courants à majuscule passent pour des noms (« Avenant » en titre devient <code>[PERSONNE_1]</code>) : sur des décisions de justice, 32 % des masques tirés au hasard étaient à tort.</li>
-<li>Un RIB écrit en champs séparés (banque, guichet, compte, clé) n’est jamais reconnu ; un numéro coupé par une tabulation ou un retour à la ligne passe presque toujours (0 % et 4,5 % masqués), un <span class="nw">e-mail</span> écrit « &amp;#64; », « %40 », « [dot] » ou « (point) » aussi (0 %).</li>
-<li>27,3 % des identifiants d’entreprise masqués le sont à tort.</li>
+<li>La barrière réduit le risque sans l’annuler, et fait nettement moins bien sur des textes réels difficiles : un document sur six sans fuite pour la presse ancienne et MAPA FR.</li>
+<li>BOAMP, marchés publics : 4 avis sur 10 gardent une mention lisible (adresses masquées à 82 %) ; près d’un sur deux en 2019 et 2021 (mesure interne hors protocole).</li>
+<li>Mesures sur du texte seulement : la conversion des PDF, Word et Excel n’est pas mesurée ; une page numérisée (image sans texte) est écartée, sans reconnaissance de caractères.</li>
+<li>Par l’API, un pays choisi sans la France ne masque ni noms ni adresses : 0 % sur les textes réels des cinq autres langues.</li>
+<li>Équipe rouge : nom ou adresse en minuscules, 27 % des documents sans fuite ; barres obliques ou doubles espaces entre chiffres, tabulations, confusions d’OCR : 4 à 12 %. Lettres espacées, chiffres en exposant ou en gras mathématique, <span class="nw">e-mail</span> maquillé (« %40 », « [dot] »…) : aucun document sans fuite. Coupé par un retour à la ligne, un identifiant ne reste masqué qu’une fois sur trois ; un RIB en champs séparés n’est presque jamais reconnu.</li>
+<li>Le moteur masque aussi à tort : précision de 47 % sur MAPA FR, 76 % sur la presse ancienne, 87 % sur le BOAMP ; 3,7 % des leurres (montants, références, identifiants de société) sont masqués à tort ; dans 300 décisions de justice, environ 3 zones masquées sur 10 à tort (120 relues).</li>
 <li>Le contexte (fonction, lieu, date, événement rare) peut permettre une ré-identification indirecte : aucune détection automatique ne l’empêche.</li>
 </ul></div>
 <table class="sheet">
-<caption>Ce qui est testé à chaque version</caption>
+<caption>Non-régression interne, à chaque version</caption>
 <tbody>
 <tr><th scope="row">Tests automatisés, Windows · Linux</th><td>{{q.tests_windows}} · {{q.tests_linux}}</td></tr>
 <tr><th scope="row">Tests dans l’image hors réseau</th><td>{{q.tests_offline_image}}</td></tr>
 <tr><th scope="row">Documents de parité Rust et Python, sorties identiques</th><td>{{q.parity_docs}}</td></tr>
 <tr><th scope="row">Équipe rouge : documents piégés</th><td>{{q.redteam_docs}}</td></tr>
 <tr><th scope="row">Équipe rouge : façons de déguiser un identifiant</th><td>{{q.redteam_operators}}</td></tr>
-<tr><th scope="row">Documents traités par les mesures du jour</th><td>{{q.docs_tested}}</td></tr>
 </tbody>
 </table>
 </div>
@@ -278,7 +269,7 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 <div><h3>Sur votre poste</h3>
 <p>Pour les documents très sensibles : le même logiciel, en serveur MCP local ou en conteneur sans réseau ; rien ne part par Gardien RGPD. Installation : <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/docs/LOCAL.md">guide de la version locale</a> ; questions : <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>.</p>
 <h3>Limites du service public</h3>
-<p>Par client : une requête traitée à la fois et deux en attente, environ 20 secondes de calcul d’avance, rechargées à 0,5 s par seconde. Votre réseau (/24 en IPv4, /48 en IPv6) partage un budget deux fois plus large et 12 requêtes en vol. Au-delà : 429 et un délai à respecter (<code>Retry-After</code>), que ce poste de travail applique seul en envoyant un document à la fois ; serveur saturé (attente estimée au-delà de 10 s) : 503 ; envoi trop lent (15 s, plus 128 Kio par seconde de corps) : 408.</p>
+<p>Par client : une requête traitée à la fois et deux en attente, environ 20 secondes de calcul d’avance, rechargées à 0,5 s par seconde. Votre réseau (/24 en IPv4, /48 en IPv6) partage un budget deux fois plus large et 12 requêtes en vol. Au-delà : 429 et un délai à respecter (<code>Retry-After</code>), que ce poste applique seul ; serveur saturé (attente estimée au-delà de 10 s) : 503 ; envoi trop lent (15 s, plus 128 Kio par seconde de corps) : 408.</p>
 <p>Taille : 50 Mo par fichier, un million de caractères par texte ; par document, 12,5 millions de caractères de résultat, 10 000 pages ou diapositives, un million de balises HTML (ouvrantes et fermantes), 100 000 paragraphes Word (cellules de tableau comprises). Un texte brut, un CSV ou un tableur très denses atteignent ce plafond avant 50 Mo (vers 13 Mo de texte, 16 Mo de CSV, 4 Mo de tableur) : 413, limite nommée. Un document de 50 Mo illustré se traite en quelques secondes ; chacun a droit à 60 s plus 1 s par 250 Ko (4 min 30 à 50 Mo).</p></div>
 </div>
 </section>
@@ -290,7 +281,7 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 <ul class="list">
 <li>auditer le code et la méthode ;</li>
 <li>reprendre, héberger et exploiter le service sur une infrastructure publique ;</li>
-<li>constituer le corpus de documents réels annotés qui manque aujourd’hui pour mesurer l’outil.</li>
+<li>constituer le corpus de documents bureautiques annotés (PDF, Word, Excel) qui manque aujourd’hui pour mesurer la conversion.</li>
 </ul>
 <p class="cta">Pour répondre : <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>. Aucun partenariat n’existe à ce jour : cet appel est ouvert.</p>
 </section>

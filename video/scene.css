@@ -203,7 +203,7 @@ b,.b{font-weight:600;color:var(--ink)}
 .figs .f{font:600 92px/1 var(--sans);letter-spacing:-.03em;white-space:nowrap}
 .figs .l{margin-top:22px;font:400 34px/1.3 var(--sans);color:var(--ink2)}
 .social .figs{display:block}
-.social .figs>div{display:grid;grid-template-columns:400px 1fr;align-items:center;gap:28px;margin:0;padding:16px 0;border:0;border-bottom:1px solid var(--line)}
+.social .figs>div{display:grid;grid-template-columns:400px 1fr;align-items:center;gap:28px;margin:0;padding:12px 0;border:0;border-bottom:1px solid var(--line)}
 .social .figs>div:first-child{border-top:2px solid var(--ink)}
 .social .figs .f{font-size:84px}
 .social .figs .l{margin-top:0;font-size:42px;line-height:1.25}
@@ -221,23 +221,24 @@ b,.b{font-weight:600;color:var(--ink)}
 .lim{position:absolute;left:800px;right:0;top:136px}
 .lim .k{padding-bottom:18px;font:600 46px/1.1 var(--sans);letter-spacing:-.012em;border-bottom:2px solid var(--ink)}
 .lim ul{list-style:none}
-.lim li{position:relative;padding:24px 0 24px 34px;border-bottom:1px solid var(--line);font:400 39px/1.3 var(--sans);color:var(--ink2)}
-.lim li::before{content:"";position:absolute;left:0;top:calc(24px + .48em);width:12px;height:12px;background:var(--ink)}
-.lim .lk{margin-top:30px;font:400 36px/1.35 var(--sans);color:var(--ink2)}
+.lim li{position:relative;padding:18px 0 18px 34px;border-bottom:1px solid var(--line);font:400 36px/1.3 var(--sans);color:var(--ink2)}
+.lim li::before{content:"";position:absolute;left:0;top:calc(18px + .48em);width:12px;height:12px;background:var(--ink)}
+.lim .lk{margin-top:24px;font:400 34px/1.35 var(--sans);color:var(--ink2)}
 .lim .lk .mono{color:var(--ink)}
 /* social: figures, the index and the limits stacked in one scene */
-.social .stack{position:absolute;left:0;right:0;top:108px;display:flex;flex-direction:column;gap:26px}
+.social .stack{position:absolute;left:0;right:0;top:108px;display:flex;flex-direction:column;gap:20px}
 .social .stack .figs{position:static}
-.social .stack .ci{position:static;width:auto;height:auto;padding:28px 36px}
+.social .stack .ci{position:static;width:auto;height:auto;padding:24px 36px}
 .social .ci .k{font-size:46px}
 .social .ci .val{margin-top:12px;font-size:100px}
 .social .ci .val.pd{margin-top:14px;font-size:88px}
 .social .ci .ic{font-size:40px}
-.social .ci .g{font-size:34px}
+.social .ci .g{font-size:30px}
+.social .ci .d{margin-top:12px;font-size:30px;color:var(--ink)}
 .social .lims{list-style:none}
-.social .lims li{position:relative;padding:20px 0 20px 40px;border-bottom:1px solid var(--line);font:400 42px/1.25 var(--sans);color:var(--ink2)}
+.social .lims li{position:relative;padding:16px 0 16px 40px;border-bottom:1px solid var(--line);font:400 42px/1.25 var(--sans);color:var(--ink2)}
 .social .lims li:first-child{border-top:2px solid var(--ink)}
-.social .lims li::before{content:"";position:absolute;left:0;top:calc(22px + .42em);width:16px;height:16px;background:var(--ink)}
+.social .lims li::before{content:"";position:absolute;left:0;top:calc(18px + .42em);width:16px;height:16px;background:var(--ink)}
 
 /* 7. Closing */
 .close{position:absolute;left:40px;right:40px;top:-168px;bottom:-120px;display:flex;flex-direction:column;justify-content:center}

@@ -56,8 +56,8 @@ code,pre,kbd{font-family:var(--mono);font-size:.92em}
 .more a{display:inline-flex;align-items:center;min-height:30px;padding:0 9px;font-size:13px;color:var(--ink2);text-decoration:none;white-space:nowrap}
 .more a:hover{color:var(--ink);background:var(--bg)}
 .more a[aria-current=true]{color:var(--ink);box-shadow:inset 0 -2px 0 var(--ink)}
-.lang{font:500 12px/1 var(--mono);padding:7px 8px;border:1px solid var(--line);text-decoration:none}
-.lang:hover{border-color:var(--field)}
+.lang,.src{font:500 12px/1 var(--mono);padding:7px 8px;border:1px solid var(--line);text-decoration:none;white-space:nowrap}
+.lang:hover,.src:hover{border-color:var(--field)}
 .foot{display:flex;flex-wrap:wrap;align-items:center;gap:2px 18px;padding:7px 16px;background:var(--pane);border-top:1px solid var(--line);font-size:12px;color:var(--mu)}
 .foot p:last-child{margin-left:auto;display:flex;gap:14px}
 .foot a{color:var(--ink2)}
@@ -220,9 +220,9 @@ mark{background:none;color:inherit;padding:.05em .2em;border-radius:2px;white-sp
 .q[data-v="\2014"] .pd{display:inline}
 .rail .note{margin-top:8px;font-size:12px;color:var(--mu)}
 .rail .mt{font-size:12.5px}
-.rail .mt th,.rail .mt td{padding:5px 0}
+.rail .mt th,.rail .mt td{padding:4px 0}
 .rail .mt td{font-size:12.5px}
-.mt .rl>*{color:var(--ink);font-weight:600}
+.sheet .rl>*{color:var(--ink);font-weight:600}
 
 /* Learn-more panels (:target). Wide screens: over the result and the instruments. */
 .pn{display:none}
@@ -274,7 +274,7 @@ mark{background:none;color:inherit;padding:.05em .2em;border-radius:2px;white-sp
 .meta{margin-top:-2px;font:400 12.5px/1.5 var(--mono);color:var(--mu)}
 .figs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;margin-top:10px;background:var(--line);border:1px solid var(--line)}
 .figs.f2{grid-template-columns:repeat(2,minmax(0,1fr))}
-.xs{overflow-x:auto;margin-top:14px}
+.xs{overflow-x:auto;margin-top:14px;contain:inline-size}
 .rc thead th{font-size:12.5px;color:var(--mu);vertical-align:bottom;padding-bottom:6px}
 .rc thead th+th{text-align:right;padding:0 0 6px 14px}
 .rc td{padding-left:14px}
@@ -306,13 +306,18 @@ blockquote p:first-child{font-size:clamp(19px,1rem + .8vw,24px);line-height:1.3;
   .ql button{grid-template-columns:2.4em minmax(4em,1fr) minmax(0,max-content)}
   .ql .z{display:none}
   .ql .s{grid-column:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.65}
+  .rail{gap:10px 12px;padding-top:8px}
+  .rail .mt th,.rail .mt td{padding:2px 0}
+  .gc .t{min-height:160px}
+  .t{min-height:84px}
 }
 /* Narrower rails (office laptops, tablets): tiles grow with their text instead of clipping it; the bar keeps one
    line (the privacy pill's second half stays in its panel title). */
 @media (max-width:1699px){.t,.t.w,.gc .t{aspect-ratio:auto;min-height:96px}.gc .t{min-height:180px}}
-@media (min-width:761px) and (max-width:1439px){.keep span span,.foot p:first-child span{display:none}}
+@media (min-width:761px) and (max-width:1439px){.keep span span,.src span,.foot p:first-child span{display:none}}
+@media (min-width:1440px) and (max-width:1599px){:lang(en) .keep span span,:lang(en) .src span{display:none}}
 @media (min-width:761px) and (max-width:1499px){.more a{padding:0 7px}}
-@media (min-width:1200px) and (max-width:1279px){.bar{column-gap:12px}.more a{padding:0 5px}}
+@media (min-width:1200px) and (max-width:1279px){.bar{column-gap:8px}.more a{padding:0 3px}}
 /* Two columns, instruments below */
 @media (max-width:1199px){
   .ws{grid-template-columns:minmax(17rem,1fr) minmax(0,1.35fr);grid-template-rows:minmax(560px,calc(100svh - 90px)) auto}
@@ -345,9 +350,11 @@ blockquote p:first-child{font-size:clamp(19px,1rem + .8vw,24px);line-height:1.3;
   .t,.t.w,.gc .t{aspect-ratio:auto;min-height:104px}
   .gc .t{min-height:150px}
   .t .v,.t.w .v{font-size:28px}
-  .ci-v,.q[data-v="\2014"] .ci-v{font-size:28px}
+  .ci-v{font-size:48px}
+  .q[data-v="\2014"] .ci-v{font-size:28px}
   .gl .tl{grid-template-columns:repeat(2,minmax(0,1fr))}
   .pn:target{order:-1;padding:0 16px 40px}
+  .rc td,.rc thead th+th{padding-left:8px}
   .foot p:last-child{margin-left:0;flex-wrap:wrap}
   .spec{grid-template-columns:minmax(0,1fr);gap:2px}
   .spec .lab{padding-top:8px}

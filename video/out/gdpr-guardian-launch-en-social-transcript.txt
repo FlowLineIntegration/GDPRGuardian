@@ -1,6 +1,6 @@
 GDPR Guardian · launch video · all on-screen text, in order
 Silent video (no voice, no music): this file lists every on-screen text at the moment it appears.
-74.2 s · 1080 x 1350 · 30 fps
+84.4 s · 1080 x 1350 · 30 fps
 
 [00:00] GDPR Guardian
 [00:00] Mr Jean Dupont, 06 12 34 56 78
@@ -30,22 +30,25 @@ Silent video (no voice, no music): this file lists every on-screen text at the m
 [00:35] 100% local: Claude plugin, Python, Docker without network.
 [00:39] Copy the repository, make your own version.
 [00:39] $ git clone https://github.com/FlowLineIntegration/GDPRGuardian
-[00:41] Code published when the public repository opens.
+[00:41] Code published on GitHub.
 [00:42] MIT licence — use it, change it, share it
-[00:47] Your server — docker compose
-[00:50] Measured, published
-[00:50] 99.2% — masked, synthetic data: the best case
-[00:53] 35–93% — masked, real French texts, by corpus
+[00:45] Your server — docker compose
+[00:49] Measured, published
+[00:49] 91.9% — of synthetic documents with no leak
+[00:52] 16.5% — of old newspapers with no leak: our worst case
 [00:55] Confidence index
-[00:56] Being measured
-[00:57] German, Spanish, Italian, Dutch, Portuguese names: not detected.
-[01:00] A first barrier, not a GDPR certification.
-[01:03] GDPR Guardian
-[01:03] The best open-source tool for GDPR and AI!
-[01:06] You be the judge.
-[01:08] gdprguardian.com · gardienrgpd.fr
-[01:08] github.com/FlowLineIntegration/GDPRGuardian
-[01:09] Offered by Flow Line Intégration
-[01:09] Guillaume CLEMENT, CTO Data & AI
-[01:10] Design: Claude Design
-[01:10] MIT licence · version 1.0.0
+[00:56] 61.8%
+[00:56] 95% CI: 58.6–66.9%
+[00:56] Mentions masked 79.8% · precision 99.1% BODACC, 87.3% BOAMP · neutral text masked by mistake 0.07%
+[00:56] Share of documents with no readable direct identifier · run of 26 October 2026.
+[01:07] German, Spanish, Italian, Dutch, Portuguese names: not detected.
+[01:10] A first barrier, not a GDPR certification.
+[01:13] GDPR Guardian
+[01:13] The best open-source tool for GDPR and AI!
+[01:16] You be the judge.
+[01:18] gdprguardian.com · gardienrgpd.fr
+[01:19] github.com/FlowLineIntegration/GDPRGuardian
+[01:19] Offered by Flow Line Intégration
+[01:20] Guillaume CLEMENT, CTO Data & AI
+[01:20] Design: Claude Design
+[01:20] MIT licence · version 1.0.0

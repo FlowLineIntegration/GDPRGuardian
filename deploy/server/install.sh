@@ -698,7 +698,14 @@ print("api/stats :", ", ".join(f"{key}={stats.get(key)}" for key in ("uses_hour"
     printf '%s\n' "$sse" | grep -q '^event: stats$' || fail "aucun événement en 5 s / no event within 5 s ($host)"
     echo "api/live : événement « stats » reçu / \"stats\" event received"
     curl -fsS "https://$host/.well-known/security.txt" | grep -E '^(Contact|Expires):' || fail "security.txt ($host)"
-    verify_media "$host"
+    # Vidéo contrôlée quand la page la cite (un site peut tourner sans, le temps d'un lancement) / the video is checked
+    # when the page cites it (a site may run without it until a launch).
+    if curl -fsS "https://$host/" | grep -q '/media/'; then
+      verify_media "$host"
+    else
+      echo "la page ne cite aucune vidéo : /media/ non contrôlé / the page cites no video: /media/ not checked"
+      expect_code 404 "https://$host/media/absent.mp4"
+    fi
   done
   step "Nom inconnu refusé / unknown name refused"
   expect_code 000 -k --resolve "intrus.example:443:127.0.0.1" https://intrus.example/

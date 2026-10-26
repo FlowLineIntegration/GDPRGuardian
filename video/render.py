@@ -7,9 +7,10 @@
     python video/render.py --lang en --format social --frame 4 20   # PNGs at 4 s and 20 s, for a quick look
 
 Two formats: wide (1920 x 1080, the full video) and social (1080 x 1350, a shorter cut with larger type for phone
-feeds). Reads video/facts.<lang>.json (all text and figures) and site/data/quality.json (test counts, synthetic
-figures and the confidence index, shown as "being measured" while it is "—"): re-run the same command once
-quality.json changes and the video follows.
+feeds). Reads video/facts.<lang>.json (all text and figures) and site/data/quality.json (test counts, red-team and
+real-corpus counts and the confidence index, shown as "being measured" while it is "—"): re-run the same command once
+quality.json changes and the video follows. The poster is written as a palette PNG (lighten_poster), since the site
+loads it with the page.
 
 Writes into video/out/: <stem>.mp4 (30 fps, H.264 High yuv420p BT.709, CRF 17, faststart, no audio),
 <stem>-poster.png, <stem>-transcript.txt (every on-screen text, in order), and review/ (timeline and reading check,
@@ -170,9 +171,9 @@ def load_facts(lang: str) -> dict:
     return json.loads((VIDEO / f"facts.{lang}.json").read_text(encoding="utf-8"))
 
 
-QUALITY_KEYS = ("tests_windows", "tests_linux", "eval_docs", "redteam_operators", "recall_direct_pct",
+QUALITY_KEYS = ("tests_windows", "tests_linux", "redteam_operators", "real_corpora", "real_docs",
                 "confidence_index", "confidence_ci_low", "confidence_ci_high", "mention_recall_pct",
-                "precision_structured_pct", "overmask_pct", "protocol_docs", "protocol_date")
+                "protocol_docs", "protocol_date")
 
 
 def stem_of(facts: dict, fmt: str) -> str:
@@ -219,11 +220,29 @@ def inspect(lang: str, fmt: str, quality: Path | None, poster: Path | None = Non
         if poster:
             page.evaluate("t => window.render(t)", page.evaluate("window.posterTime()"))
             page.screenshot(path=str(poster), type="png")
+            lighten_poster(poster)
         for t, png in frames or ():
             page.evaluate("t => window.render(t)", t)
             page.screenshot(path=str(png), type="png")
         browser.close()
     return info
+
+
+POSTER_MAX_BYTES = 30_000  # the site loads the poster with the page
+
+
+def lighten_poster(png: Path) -> int:
+    """Rewrite the poster as a palette PNG (median cut, no dithering): white paper, ink, greys and the orange of the
+    tags need few colours, and text stays sharp. 32 colours first, fewer only if the file is still too heavy.
+    Measured on 26 October 2026: 85 to 92 KB down to 20 to 30 KB, mean error under 0.1 level out of 255."""
+    from PIL import Image
+
+    rgb = Image.open(png).convert("RGB")
+    for colors in (32, 24, 16):
+        rgb.quantize(colors=colors, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).save(png, optimize=True)
+        if png.stat().st_size <= POSTER_MAX_BYTES:
+            break
+    return png.stat().st_size
 
 
 def probe(ffmpeg: str, mp4: Path) -> dict:
@@ -306,7 +325,7 @@ def render_one(lang: str, fmt: str, args, ffmpeg: str, tmp_root: Path) -> None:
     log(f"[{tag}] transcript -> {tr}\n[{tag}] timeline   -> {rep}")
     if args.check:
         return
-    log(f"[{tag}] poster     -> {poster}")
+    log(f"[{tag}] poster     -> {poster} ({poster.stat().st_size} bytes, palette PNG)")
 
     fps = int(info["timeline"]["fps"])
     total = round(info["timeline"]["duration"] * fps)
@@ -344,7 +363,8 @@ def main() -> None:
     ap.add_argument("--lang", choices=(*LANGS, "all"), default="all")
     ap.add_argument("--format", choices=(*FORMATS, "all"), default="all",
                     help="wide (1920 x 1080, full video), social (1080 x 1350, short cut) or all")
-    ap.add_argument("--workers", type=int, default=max(1, min(6, (os.cpu_count() or 2) // 2)))
+    # 3 navigateurs au plus par défaut : chacun prend 300 à 400 Mo / at most 3 browsers by default (300-400 MB each).
+    ap.add_argument("--workers", type=int, default=max(1, min(3, (os.cpu_count() or 2) // 2)))
     ap.add_argument("--crf", type=int, default=17, help="x264 quality (default 17, visually lossless; lower is larger)")
     ap.add_argument("--quality", help="another quality.json to render with (default: site/data/quality.json)")
     ap.add_argument("--tmp", help="folder for temporary segments (default: the system temporary folder)")

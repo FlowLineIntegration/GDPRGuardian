@@ -1,6 +1,6 @@
 GDPR Guardian · launch video · all on-screen text, in order
 Silent video (no voice, no music): this file lists every on-screen text at the moment it appears.
-160.5 s · 1920 x 1080 · 30 fps
+169.8 s · 1920 x 1080 · 30 fps
 
 [00:00] GDPR Guardian
 [00:00] Mr Jean Dupont, 06 12 34 56 78
@@ -35,50 +35,53 @@ Silent video (no voice, no music): this file lists every on-screen text at the m
 [00:50] The roles survive, the identities do not.
 [00:55] Six principles
 [00:55] Irreversible — 256-bit key destroyed, no table.
-[00:57] Consistent — One person, one tag.
-[00:59] Verified — Official check digits.
-[01:00] Explainable — A rule per tag, no LLM.
-[01:03] Fast — 2 KB in 0.5 ms, on CPU.
-[01:05] Nothing kept — All in memory.
-[01:09] Three ways in, one engine
-[01:09] Website — Drop or paste, then download.
-[01:09] MCP — Claude and other agents, no key.
-[01:10] REST API — /v1/anonymize/text /v1/anonymize/file
-[01:15] GDPR Guardian — One fresh process per request, nothing kept.
-[01:18] Anonymised Markdown
-[01:18] Your AI
-[01:20] Over MCP, send the file: it never goes through the model. Pasted text has already left.
-[01:26] 100% local: Claude plugin, Python package, Docker without network.
-[01:30] Copy the repository, make your own version.
-[01:30] $ git clone https://github.com/FlowLineIntegration/GDPRGuardian
-[01:32] Code published when the public repository opens.
-[01:32] MIT licence — Use it, change it, share it.
-[01:37] Your rules — In the call, never stored. — CLT-204518 → [CLIENT_ID_1]
-[01:40] Your server — docker compose deploy/README.md
+[00:57] Consistent — One person, one tag, most of the time.
+[01:00] Verified — Official check digits.
+[01:02] Explainable — A rule per tag, no LLM.
+[01:04] Fast — 2 KB in under a millisecond, on CPU.
+[01:07] Nothing kept — All in memory.
+[01:10] Three ways in, one engine
+[01:11] Website — Drop or paste, then download.
+[01:11] MCP — Claude and other agents, no key.
+[01:11] REST API — /v1/anonymize/text /v1/anonymize/file
+[01:16] GDPR Guardian — One fresh process per request, nothing kept.
+[01:20] Anonymised Markdown
+[01:20] Your AI
+[01:22] Over MCP, send the file: it never goes through the model. Pasted text has already left.
+[01:27] 100% local: Claude plugin, Python package, Docker without network.
+[01:31] Copy the repository, make your own version.
+[01:32] $ git clone https://github.com/FlowLineIntegration/GDPRGuardian
+[01:34] Code published on GitHub.
+[01:34] MIT licence — Use it, change it, share it.
+[01:38] Your rules — In the call, never stored. — CLT-204518 → [CLIENT_ID_1]
+[01:41] Your server — docker compose deploy/README.md
 [01:42] Contribute — Improve, propose: /issues
-[01:45] Tested, measured, published
-[01:45] 3,700+ — automated tests, Windows and Linux
-[01:47] 51 — ways to disguise an identifier
-[01:50] 99.2% — of the text to mask is masked (540 synthetic documents: the best case)
-[01:55] 15 — real-text datasets, 8,478 documents
-[01:57] 35–93% — of mentions masked in real French texts, by corpus (1.0.0)
-[02:01] 79 → 98% — of mentions masked in BODACC notices (unseen data): 1.0.0, then the 25 October rules
-[02:07] How we grade ourselves
-[02:07] Confidence index
-[02:07] Being measured
-[02:08] Share of documents with no readable direct identifier.
-[02:09] Protocol written before measuring: 1,019,385 documents, 8,478 of them real, through the real service.
-[02:16] Known limits
-[02:16] German, Spanish, Italian, Dutch, Portuguese names: not detected.
-[02:19] Old newspapers, EU legal texts (names as initials): weak.
-[02:23] A first barrier, not a GDPR certification.
-[02:25] The protocol: gdprguardian.com/#protocol
-[02:29] GDPR Guardian
-[02:29] The best open-source tool for GDPR and AI!
-[02:32] You be the judge.
-[02:34] gdprguardian.com · gardienrgpd.fr
-[02:34] github.com/FlowLineIntegration/GDPRGuardian
-[02:35] Offered by Flow Line Intégration
-[02:35] Guillaume CLEMENT, CTO Data & AI
-[02:36] Design: Claude Design
-[02:36] MIT licence · version 1.0.0
+[01:46] Tested, measured, published
+[01:46] 4,200+ — automated tests, Windows and Linux
+[01:48] 91.9% — of 450,000 synthetic documents with no leak
+[01:51] 63.7% — of adversarial documents with no leak, 51 ways to disguise an identifier
+[01:56] 14 — annotated real-text datasets, 6 of them French, 8,178 documents
+[01:59] 16.5–93% — of real French documents with no leak, by family
+[02:03] 89.9% — of BODACC notices with no leak, 97.8% of mentions masked
+[02:08] How we grade ourselves
+[02:08] Confidence index
+[02:08] 61.8%
+[02:08] 95% CI: 58.6–66.9%
+[02:09] Mentions masked: 79.8% · precision: 99.1% BODACC, 87.3% BOAMP · neutral text masked by mistake: 0.07%
+[02:15] Share of documents with no readable direct identifier.
+[02:15] Run of 26 October 2026: 1,019,385 documents, protocol written beforehand.
+[02:21] Known limits
+[02:22] Old newspapers, MAPA FR: one document in six with no leak.
+[02:26] BOAMP: 4 notices in 10 keep a readable mention.
+[02:29] German, Spanish, Italian, Dutch, Portuguese names: not detected.
+[02:32] A first barrier, not a GDPR certification.
+[02:35] The protocol: gdprguardian.com/#protocol
+[02:38] GDPR Guardian
+[02:38] The best open-source tool for GDPR and AI!
+[02:41] You be the judge.
+[02:43] gdprguardian.com · gardienrgpd.fr
+[02:43] github.com/FlowLineIntegration/GDPRGuardian
+[02:44] Offered by Flow Line Intégration
+[02:45] Guillaume CLEMENT, CTO Data & AI
+[02:45] Design: Claude Design
+[02:45] MIT licence · version 1.0.0

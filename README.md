@@ -16,7 +16,7 @@ Offert gratuitement par [Flow Line Intégration](https://www.flowlineintegration
 Offered free of charge by Flow Line Intégration · designed by Guillaume CLEMENT, CTO Data & AI · MIT licence.
 Version 1.0.0, en phase de recherche et développement / in research and development.
 
-**Vidéo / Video** (muette, 2 min 40 / silent) : [lancement en français](video/out/gardien-rgpd-lancement-fr.mp4) ·
+**Vidéo / Video** (muette, 2 min 48 / silent, 2 min 50) : [lancement en français](video/out/gardien-rgpd-lancement-fr.mp4) ·
 [launch in English](video/out/gdpr-guardian-launch-en.mp4) ; sur le site / on the site :
 <https://gardienrgpd.fr/#video>, <https://gdprguardian.com/#video>.
 
@@ -27,7 +27,7 @@ Version 1.0.0, en phase de recherche et développement / in research and develop
 | | |
 |---|---|
 | 🔒 **Irréversible, par conception** | Une clé aléatoire est créée pour chaque document puis détruite. Aucune table de correspondance n'existe : ni vous, ni nous, ni l'IA ne pouvons retrouver les noms d'origine. |
-| 🧠 **Cohérent pour l'IA** | « M. Dupont », « Jean Dupont », « J. Dupont » et « DUPONT Jean » deviennent la même `[PERSONNE_1]`. Les rôles, les relations et le fil du document sont préservés. |
+| 🧠 **Cohérent pour l'IA** | « M. Dupont », « Jean Dupont », « J. Dupont » et « DUPONT Jean » deviennent la même `[PERSONNE_1]` ; sur 2 463 personnes fictives, 92,2 % gardent une seule balise (26 octobre 2026). Les rôles, les relations et le fil du document sont préservés. |
 | 🇫🇷 **Expert des identifiants européens** | NIR (y compris Corse, DOM, NIA), SIREN/SIRET (exception La Poste), TVA, RIB, IBAN de 89 pays, CNI, passeport, permis, RPPS, FINESS… validés par leurs **clés de contrôle officielles**, et pas seulement par des expressions régulières. |
 | 🌍 **Packs pays** | `countries=["FR"]` (défaut), plusieurs pays, ou `"all"` pour un document d'origine inconnue : identifiants à clé forte masqués partout, identifiants faibles seulement avec leurs mots-clés locaux. Le mode `"auto"` (pays deviné) reste expérimental. |
 | ⚡ **Rapide, sur CPU** | Aucun GPU, aucun appel à un LLM. Noyau optionnel en **Rust** (sans GIL) aux résultats identiques au moteur Python : un message de 2 Ko est traité en moins d'une milliseconde. |
@@ -113,19 +113,57 @@ archive into `~/.claude/skills/`. Details and limits: [`integrations/claude/READ
 
 ## Indice de confiance : nous nous notons en public / confidence index: we rate ourselves in public
 
-Part des documents dont **aucun identifiant direct ne reste lisible** (pas un seul caractère alphanumérique d'une
-mention annotée), mesurée par le **vrai service**, sept familles à poids égal, intervalle de confiance à 95 %. La
-campagne envoie plus d'un million de documents, mais le volume n'achète aucun poids : **cinq septièmes de l'indice
-reposent sur les 3 164 documents notés des moitiés test des corpus réels, dont 6 seulement pour MAPA FR** (un
-document MAPA FR déplace l'indice de 2,4 points). Définitions, garde-fous, limites et commandes pour tout rejouer,
-écrits **avant** la campagne : [docs/PROTOCOLE.md](docs/PROTOCOLE.md). Chiffres publiés sur le site et dans
-`benchmarks/results/protocol-<date>.md` ; tant que la campagne n'a pas tourné, le site affiche « pas encore mesuré ».
-Share of documents in which **no direct identifier stays readable** (not one alphanumeric character of an annotated
-mention), measured through the real service, seven families equally weighted, with a 95% interval. The campaign
-sends over a million documents, but volume buys no weight: **five sevenths of the index rest on the 3,164 scored
-documents of the real corpora's test halves, only 6 of them MAPA FR** (one MAPA FR document moves the index by 2.4
-points). Pre-registered protocol in [docs/PROTOCOLE.md](docs/PROTOCOLE.md); until the campaign has run, the site
-shows "not measured yet".
+**61,8 %** [58,6–66,9] (IC 95 %), campagne du **26 octobre 2026** : 1 019 385 documents passés par le **vrai
+service**, moteur déployé `1.0.0+0c3ff9fc1fb0`. Le protocole a été écrit le 25 octobre, puis enregistré avant le
+lancement : empreintes publiées à 05 h 46 UTC, campagne lancée à 06 h 07
+([PROTOCOL-REGISTRATION.json](PROTOCOL-REGISTRATION.json)). Réserve : les moitiés test des corpus réels avaient déjà
+été mesurées 7 fois pendant la mise au point du moteur (liste publiée : [docs/PROTOCOLE.md](docs/PROTOCOLE.md),
+section 3). C'est la part des documents dont **aucun identifiant direct ne reste lisible** (pas un seul caractère
+alphanumérique d'une mention annotée), moyenne à poids égal de sept familles ; mentions directes entièrement
+masquées : 79,8 % [78,1–82,5]. Sur la moitié dev, qui a servi à régler le moteur, l'indice vaut 59,9 %, et 61,2 % sur
+tous les documents réels. Résultats complets :
+[benchmarks/results/protocol-2026-10-26.md](benchmarks/results/protocol-2026-10-26.md).
+
+| Famille (corpus réels : moitié test) / family (real corpora: test half) | Documents | Sans fuite / no leak | Mentions masquées / masked | Précision / precision |
+|---|---:|---:|---:|---:|
+| Synthétique FR, 10 graines, leurres / synthetic FR, 10 seeds, decoys | 450 000 | 91,9 % | 98,4 % | 98,8 % |
+| Équipe rouge FR, 51 déguisements / red team FR, 51 disguises | 548 907 | **63,7 %** | 86,7 % | 98,7 % |
+| BODACC | 1 335 | 89,9 % | 97,8 % | 99,1 % |
+| BOAMP | 1 408 | **60,7 %** | 89,6 % | 87,3 % |
+| ParlaMint-FR (gold partiel : borne haute / partial gold: upper bound) | 143 | 93,0 % | 98,5 % | — |
+| Presse ancienne (Europeana + HIPE) / old press | 272 | **16,5 %** | 54,6 % | 75,5 % |
+| MAPA FR | 6 | **16,7 %** | 33,1 % | 47,1 % |
+
+Nos points faibles, sans détour : la presse ancienne numérisée et les textes juridiques européens (MAPA FR) ne
+sortent sans fuite qu'une fois sur six. Le BOAMP garde une mention lisible dans 4 avis sur 10 (adresses masquées à
+82 %), et près d'un sur deux sur les années 2019 et 2021 (mesure interne hors protocole). Les identifiants déguisés
+font tomber l'équipe rouge à 63,7 % : noms et adresses en minuscules (27 % des documents sans fuite), barres obliques
+ou doubles espaces entre les chiffres, tabulations, confusions d'OCR (4 à 12 %), lettres espacées, e-mails écrits
+« %40 », numéros coupés par un retour à la ligne. Dans 300 décisions de justice (Judilibre, sans annotation),
+environ 3 zones masquées sur 10 le sont à tort (relecture de 120 zones). Hors périmètre, jamais dans l'indice : noms
+allemands, espagnols, italiens, néerlandais, portugais **non détectés** (0 %) ; TAB, arrêts de la CEDH en anglais,
+67,3 % sans fuite. Garde-fous tenus : texte neutre masqué à tort 0,07 %, leurres masqués 3,7 %. Le volume n'achète
+aucun poids : **cinq septièmes de l'indice reposent sur les 3 164 documents notés des moitiés test des corpus réels,
+dont 6 seulement pour MAPA FR** (un document MAPA FR déplace l'indice de 2,4 points). Définitions, garde-fous et
+commandes pour tout rejouer : [docs/PROTOCOLE.md](docs/PROTOCOLE.md).
+
+**EN.** **61.8%** [58.6–66.9] (95% CI), run of **26 October 2026**: 1,019,385 documents through the real service, the
+deployed engine `1.0.0+0c3ff9fc1fb0`. The protocol was written on 25 October, then registered before the launch
+(digests published at 05:46 UTC, run started at 06:07). One caveat: the test halves of the real corpora had already
+been measured 7 times while the engine was tuned (list in docs/PROTOCOLE.md, section 3). It is the share of
+documents in which **no direct identifier stays readable** (not one alphanumeric character of an annotated mention),
+the equal-weight mean of seven families; direct mentions fully masked: 79.8% [78.1–82.5]; dev half, used to tune the
+engine, 59.9%; all real documents, 61.2%. Our weak spots, plainly: old digitised newspapers and EU legal texts
+(MAPA FR) come out with no leak only one time in six; BOAMP keeps a readable mention in 4 notices in 10, and in
+nearly one in two for 2019 and 2021 (internal measurement, outside the protocol); disguised identifiers bring the red
+team down to 63.7% (names and addresses in lower case: 27% of documents with no leak; slashes, double spaces, tabs,
+OCR confusions: 4–12%); in 300 court decisions, about 3 masked spans in 10 are wrong (120 checked by hand).
+ParlaMint's 93.0% is an upper bound (it annotates only speakers and listed people). Out of scope, never in the index:
+German, Spanish, Italian, Dutch and Portuguese names are **not detected** (0%); TAB, ECHR judgments in English, 67.3%
+with no leak. Guards held (over-masking 0.07%, decoys masked 3.7%). Volume buys no weight: five sevenths of the index
+rest on the 3,164 scored documents of the real corpora's test halves, only 6 of them MAPA FR (one MAPA FR document
+moves the index by 2.4 points). Full results:
+[benchmarks/results/protocol-2026-10-26.md](benchmarks/results/protocol-2026-10-26.md).
 
 ## Démarrage rapide
 
@@ -188,7 +226,9 @@ service : 16 cœurs sous Linux).
 | Service, 100 fichiers de 10 Mo (Word, PDF, Excel, texte) | tous traités en 34,8 s |
 
 Les temps du service comprennent l'isolement de chaque requête dans un processus neuf. Le noyau Rust donne des
-résultats identiques au moteur Python, qui reste la référence. Méthode et détails :
+résultats identiques au moteur Python, qui reste la référence. Moteur déployé, remesuré le 26 octobre sur un
+portable Windows partagé (Ryzen 7 5800H) : 0,30 ms pour 1 000 caractères, 2,2 ms pour 10 000, médianes sur un cœur
+([bench-2026-10-26-standard-rules3.md](benchmarks/results/bench-2026-10-26-standard-rules3.md)). Méthode et détails :
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) et [deploy/README.md](deploy/README.md).
 
 ## Nous écrire / Contact us

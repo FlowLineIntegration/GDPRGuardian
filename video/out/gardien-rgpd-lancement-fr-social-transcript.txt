@@ -1,6 +1,6 @@
 Gardien RGPD · vidéo de lancement · tout le texte à l’écran, dans l’ordre
 Vidéo muette (aucune voix, aucune musique) : ce fichier reprend chaque texte au moment où il apparaît.
-75.0 s · 1080 x 1350 · 30 fps
+83.0 s · 1080 x 1350 · 30 fps
 
 [00:00] Gardien RGPD
 [00:00] M. Jean Dupont, 06 12 34 56 78
@@ -30,22 +30,25 @@ Vidéo muette (aucune voix, aucune musique) : ce fichier reprend chaque texte 
 [00:36] 100 % local : plugin Claude, Python, Docker sans réseau.
 [00:39] Copiez le dépôt, faites votre version.
 [00:40] $ git clone https://github.com/FlowLineIntegration/GDPRGuardian
-[00:42] Code publié à l’ouverture du dépôt public.
+[00:42] Code publié sur GitHub.
 [00:42] Licence MIT — utilisez, modifiez, redistribuez
-[00:46] Votre serveur — docker compose
-[00:49] Mesuré, publié
-[00:49] 99,2 % — masqué, données synthétiques : le meilleur cas
-[00:52] 35 à 93 % — masqué, textes réels français, selon le corpus
-[00:55] Indice de confiance
-[00:55] Mesure en cours
-[00:57] Noms allemands, espagnols, italiens, néerlandais, portugais : non détectés.
-[01:00] Une première barrière, pas une certification RGPD.
-[01:03] Gardien RGPD
-[01:03] Le meilleur outil open source pour le RGPD et l’IA !
-[01:07] À vous de juger.
-[01:09] gardienrgpd.fr · gdprguardian.com
-[01:09] github.com/FlowLineIntegration/GDPRGuardian
-[01:10] Offert par Flow Line Intégration
-[01:10] Guillaume CLEMENT, CTO Data & IA
-[01:11] Conception : Claude Design
-[01:11] Licence MIT · version 1.0.0
+[00:45] Votre serveur — docker compose
+[00:48] Mesuré, publié
+[00:48] 91,9 % — des documents synthétiques sans fuite
+[00:51] 16,5 % — de presse ancienne sans fuite : notre pire cas
+[00:54] Indice de confiance
+[00:54] 61,8 %
+[00:54] IC 95 % : 58,6 – 66,9 %
+[00:54] Mentions masquées 79,8 % · précision 99,1 % BODACC, 87,3 % BOAMP · texte neutre masqué à tort 0,07 %
+[00:55] Part des documents sans identifiant direct lisible · campagne du 26 octobre 2026.
+[01:05] Noms allemands, espagnols, italiens, néerlandais, portugais : non détectés.
+[01:08] Première barrière, pas une certification RGPD.
+[01:11] Gardien RGPD
+[01:11] Le meilleur outil open source pour le RGPD et l’IA !
+[01:15] À vous de juger.
+[01:17] gardienrgpd.fr · gdprguardian.com
+[01:17] github.com/FlowLineIntegration/GDPRGuardian
+[01:18] Offert par Flow Line Intégration
+[01:18] Guillaume CLEMENT, CTO Data & IA
+[01:19] Conception : Claude Design
+[01:19] Licence MIT · version 1.0.0

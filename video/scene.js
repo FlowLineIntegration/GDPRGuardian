@@ -1,7 +1,8 @@
 /* Gardien RGPD / GDPR Guardian, launch video.
    One page, one deterministic timeline: render(t) sets every animated property from t alone (no CSS transition or
    animation, no clock), so a frame is identical whenever it is captured. All text comes from facts.<lang>.json; the
-   test count, the synthetic figures and the confidence index come from ../site/data/quality.json at every render, so
+   test count, the red-team and real-corpus counts and the confidence index come from ../site/data/quality.json at
+   every render (the other figures of the public run are written in the facts files), so
    the video says what the site says and switches from "being measured" to the measured index by itself.
    Two formats from the same source: ?fmt=wide (1920 x 1080, the full video) and ?fmt=social (1080 x 1350, a short
    cut for phone feeds, with larger type and fewer words; facts.<lang>.json "social" overrides the texts).
@@ -795,24 +796,29 @@ function buildNumbers() {
   });
 }
 
-// The confidence index as quality.json has it. The protocol publishes the index only with its interval, and next to
-// recall, precision and over-masking (docs/PROTOCOLE.md, guards): the value shows only when all of them are there.
+// The confidence index as quality.json has it. The protocol publishes the index only with its interval and the
+// mention recall (from quality.json), next to the campaign's precision and over-masking guards (written in the facts
+// files, "guards"): the value shows only when the four keys are there. The definition may carry the campaign's date
+// ("{date}"; "definition_nodate" without one).
 function indexState(T) {
   const ci = qv('confidence_index'), lo = qv('confidence_ci_low'), hi = qv('confidence_ci_high');
-  const mr = qv('mention_recall_pct'), pr = qv('precision_structured_pct'), om = qv('overmask_pct');
+  const mr = qv('mention_recall_pct');
   const docs = qv('protocol_docs'), date = fmtDate(Q.protocol_date);
-  const measured = [ci, lo, hi, mr, pr, om].every(v => v != null);
-  if (!measured) return { measured, pending: T.pending, proto: T.protocol_pending ?? null };
+  const measured = [ci, lo, hi, mr].every(v => v != null);
+  const defn = String(T.definition ?? '').includes('{date}')
+    ? (measured && date ? T.definition.replace('{date}', date) : T.definition_nodate ?? T.definition.replace('{date}', ''))
+    : T.definition;
+  if (!measured) return { measured, pending: T.pending, proto: T.protocol_pending ?? null, definition: defn };
   let proto = T.protocol_pending ?? null;
   if (docs != null && T.protocol_done) {
     proto = date ? T.protocol_done.replace('{date}', date).replace('{docs}', fmtInt(docs))
       : T.protocol_done_nodate.replace('{docs}', fmtInt(docs));
   }
   return {
-    measured, proto,
+    measured, proto, definition: defn,
     value: T.value.replace('{v}', fmtDec(ci)),
     ci: T.ci.replace('{lo}', fmtDec(lo)).replace('{hi}', fmtDec(hi)),
-    guards: T.guards.replace('{mr}', fmtDec(mr)).replace('{p}', fmtDec(pr)).replace('{o}', fmtDec(om)),
+    guards: T.guards.replace('{mr}', fmtDec(mr)),
   };
 }
 function indexBox(T, I) {
@@ -830,7 +836,7 @@ function buildIndex() {
   const T = F.index, S = new Scene('index', 'numbers'), I = indexState(T);
   const hd = hr('h2', 'h1', T.headline); S.fr.append(hd);
   const { box, k, val, ic, g } = indexBox(T, I); S.fr.append(box);
-  const d = hr('p', 'd', T.definition);
+  const d = hr('p', 'd', I.definition);
   box.append(d);
   const p = I.proto ? hr('p', 'p', I.proto) : null;
   if (p) box.append(p);
@@ -849,9 +855,9 @@ function buildIndex() {
   S.after(link, { anim: 'fade' });
 }
 
-// The social cut: two figures, the confidence index and the limits, in one scene.
+// The social cut: two figures, the confidence index (with its definition and date) and the limits, in one scene.
 function buildNumbersSocial() {
-  const T = pick('numbers'), TI = F.index, S = new Scene('numbers', 'numbers'), I = indexState(TI);
+  const T = pick('numbers'), TI = pick('index'), S = new Scene('numbers', 'numbers'), I = indexState(TI);
   const hd = hr('h2', 'h1', T.headline); S.fr.append(hd);
   const col = h('div', 'stack'), grid = h('div', 'figs'); col.append(grid); S.fr.append(col);
   const rows = T.figures.map(f0 => {
@@ -860,13 +866,19 @@ function buildNumbersSocial() {
     return { d, o: { text: plain(f.fig) + ' — ' + plain(f.label), words: 1 + countWords(plain(f.label)) } };
   });
   const { box, k, val, ic, g } = indexBox(TI, I); col.append(box);
+  const d = I.definition ? hr('p', 'd', I.definition) : null;
+  if (d) box.append(d);
+  const p = I.proto ? hr('p', 'p', I.proto) : null;
+  if (p) box.append(p);
   const ul = h('ul', 'lims'), lis = T.limits.map(x => { const li = hr('li', null, x); ul.append(li); return li; });
   col.append(ul);
   S.headline(hd);
-  rows.forEach(({ d, o }) => { S.step(); S.show(d, o); });
+  rows.forEach(({ d: row, o }) => { S.step(); S.show(row, o); });
   S.step(); S.show(box, { anim: 'fade', words: 0, transcript: false }); S.show(k, { label: true }); S.show(val, { dt: 0.2 });
   if (ic) S.show(ic, { dt: 0.4 });
   if (g) S.show(g, { dt: 0.6 });
+  if (d) S.show(d, { dt: 0.8 });
+  if (p) S.show(p, { dt: 1.0 });
   lis.forEach(li => { S.step(); S.show(li); });
 }
 

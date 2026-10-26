@@ -70,10 +70,10 @@
     "headline": "Six principes",
     "tiles": [
       ["Irréversible", "Clé de 256 bits détruite, aucune table."],
-      ["Cohérent", "Une personne, une balise."],
+      ["Cohérent", "Une personne, une balise, le plus souvent."],
       ["Vérifié", "Clés de contrôle officielles."],
       ["Explicable", "Une règle par balise, sans LLM."],
-      ["Rapide", "2\u00a0Ko en 0,5\u00a0ms, sur CPU."],
+      ["Rapide", "2\u00a0Ko en moins d’une milliseconde, sur CPU."],
       ["Rien de conservé", "Tout en mémoire."]
     ]
   },
@@ -104,12 +104,12 @@
   "numbers": {
     "headline": "Testé, mesuré, publié",
     "figures": [
-      {"id": "tests", "fig": "{tests}+", "fallback_fig": "3\u202f700+", "label": "tests automatisés, Windows et Linux"},
-      {"id": "redteam", "fig": "{q.redteam_operators}", "fallback_fig": "51", "label": "façons de déguiser un identifiant"},
-      {"id": "recall", "fig": "{q.recall_direct_pct}\u202f%", "fallback_fig": "99,2\u202f%", "label": "du texte à masquer l’est ({q.eval_docs} documents synthétiques\u202f: le meilleur cas)", "fallback_label": "du texte à masquer l’est (540 documents synthétiques\u202f: le meilleur cas)"},
-      {"id": "real", "fig": "15", "label": "jeux de textes réels, 8\u202f478 documents"},
-      {"id": "range", "fig": "35 à 93\u202f%", "label": "des mentions masquées, textes réels français, selon le corpus (1.0.0)"},
-      {"id": "bodacc", "fig": "79 <arrow/> 98\u202f%", "label": "des mentions masquées au BODACC (données inédites)\u202f: 1.0.0, puis règles du 25 octobre"}
+      {"id": "tests", "fig": "{tests}+", "fallback_fig": "4\u202f200+", "label": "tests automatisés, Windows et Linux"},
+      {"id": "synthetic", "fig": "91,9\u202f%", "label": "des 450\u202f000 documents synthétiques sans fuite"},
+      {"id": "redteam", "fig": "63,7\u202f%", "label": "des documents piégés sans fuite, {q.redteam_operators} façons de déguiser un identifiant", "fallback_label": "des documents piégés sans fuite, 51 façons de déguiser un identifiant"},
+      {"id": "real", "fig": "{q.real_corpora}", "fallback_fig": "14", "label": "jeux de textes réels annotés, dont 6 français, {q.real_docs} documents", "fallback_label": "jeux de textes réels annotés, dont 6 français, 8\u202f178 documents"},
+      {"id": "range", "fig": "16,5 à 93\u202f%", "label": "des documents réels français sans fuite, selon la famille"},
+      {"id": "bodacc", "fig": "89,9\u202f%", "label": "des annonces du BODACC sans fuite, 97,8\u202f% des mentions masquées"}
     ]
   },
   "index": {
@@ -118,15 +118,16 @@
     "pending": "Mesure en cours",
     "value": "{v}\u202f%",
     "ci": "IC 95\u202f%\u202f: {lo} – {hi}\u202f%",
-    "guards": "Mentions masquées\u202f:\u00a0{mr}\u202f%\u00a0· précision\u202f:\u00a0{p}\u202f%\u00a0· texte neutre masqué à tort\u202f:\u00a0{o}\u202f%",
+    "guards": "Mentions masquées\u202f:\u00a0{mr}\u202f%\u00a0· précision\u202f:\u00a099,1\u202f%\u00a0BODACC, 87,3\u202f%\u00a0BOAMP\u00a0· texte neutre masqué à tort\u202f:\u00a00,07\u202f%",
     "definition": "Part des documents sans identifiant direct lisible.",
     "protocol_pending": "Protocole écrit avant la mesure\u202f: 1\u202f019\u202f385 documents, dont 8\u202f478 réels, par le vrai service.",
     "protocol_done": "Campagne du {date}\u202f: {docs} documents, protocole écrit avant.",
     "protocol_done_nodate": "Campagne de {docs} documents, protocole écrit avant.",
     "limits_title": "Limites connues",
     "limits": [
+      "Presse ancienne, MAPA FR\u202f: un document sur six sans fuite.",
+      "BOAMP\u202f: 4 avis sur 10 gardent une mention lisible.",
       "Noms allemands, espagnols, italiens, néerlandais, portugais\u202f: non détectés.",
-      "Presse ancienne, textes juridiques européens (noms en initiales)\u202f: faibles.",
       "Une première barrière, pas une certification RGPD."
     ],
     "link": "Le protocole\u202f: <m>gardienrgpd.fr/#protocole</m>"
@@ -173,39 +174,50 @@
     "numbers": {
       "headline": "Mesuré, publié",
       "figures": [
-        {"id": "recall", "fig": "{q.recall_direct_pct}\u202f%", "fallback_fig": "99,2\u202f%", "label": "masqué, données synthétiques\u202f: le meilleur cas"},
-        {"id": "range", "fig": "35 à 93\u202f%", "label": "masqué, textes réels français, selon le corpus"}
+        {"id": "synthetic", "fig": "91,9\u202f%", "label": "des documents synthétiques sans fuite"},
+        {"id": "weak", "fig": "16,5\u202f%", "label": "de presse ancienne sans fuite\u202f: notre pire cas"}
       ],
       "limits": [
         "Noms allemands, espagnols, italiens, néerlandais, portugais\u202f: non détectés.",
-        "Une première barrière, pas une certification RGPD."
+        "Première barrière, pas une certification RGPD."
       ]
+    },
+    "index": {
+      "guards": "Mentions masquées\u00a0{mr}\u202f%\u00a0· précision\u00a099,1\u202f%\u00a0BODACC, 87,3\u202f%\u00a0BOAMP\u00a0· texte neutre masqué à tort\u00a00,07\u202f%",
+      "definition": "Part des documents sans identifiant direct lisible · campagne du {date}.",
+      "definition_nodate": "Part des documents sans identifiant direct lisible.",
+      "protocol_pending": null,
+      "protocol_done": null,
+      "protocol_done_nodate": null
     }
   },
   "sources": [
     {"figure": "Ligne d’ouverture « M. Jean Dupont, 06 12 34 56 78 » → « M. [PERSONNE_1], [TEL_1] »", "source": "Exemple de l’API du site (site/templates/index.fr.html, panneau « Utiliser ») ; sortie identique du moteur du dépôt et des paquets publiés dist/1.0.0, vérifiée le 26 octobre 2026"},
     {"figure": "Données des cartes du problème (Jean Dupont, FR76 3000 6000, diabète de type 2, c.martin@exemple.fr)", "source": "Données fictives d’illustration, reprises du document de démonstration (mêmes personnes fictives) ; aucune mesure"},
     {"figure": "Clé aléatoire de 256 bits par document, détruite ; aucune table de correspondance", "source": "site/templates/index.fr.html, panneau Architecture (« Une clé par document, puis détruite. 256 bits aléatoires ») ; README.md, « Irréversible, par conception »"},
-    {"figure": "« M. Dupont », « Jean Dupont », « DUPONT Jean » → une seule [PERSONNE_1] ; « Mme Claire Martin » → Mme [PERSONNE_2] ; facture conservée", "source": "Sortie réelle, Anonymizer(countries=\"FR\", explain=True, label_language=\"fr\"), identique avec les paquets publiés dist/1.0.0 et avec le moteur du dépôt, vérifiée le 26 octobre 2026 sur les quatre lignes affichées"},
+    {"figure": "« M. Dupont », « Jean Dupont », « DUPONT Jean » → une seule [PERSONNE_1] ; « Mme Claire Martin » → Mme [PERSONNE_2] ; facture conservée ; tuile « Une personne, une balise, le plus souvent »", "source": "Sortie réelle, Anonymizer(countries=\"FR\", explain=True, label_language=\"fr\"), identique avec les paquets publiés dist/1.0.0 et avec le moteur du dépôt, vérifiée le 26 octobre 2026 sur les quatre lignes affichées"},
+    {"figure": "Une personne, une balise, le plus souvent", "source": "tools/corpus/evaluate.py --no-mutations, moteur du dépôt dont l’empreinte de sonde est celle du moteur déployé (eeb38986e44c), 26 octobre 2026 : 2 271 personnes fictives sur 2 463 (92,2 %) gardent une seule balise, 192 sont éclatées, 44 partagent la balise d’une autre (benchmarks/results/corpus_fr_standard-2026-10-26-rules3.json)"},
     {"figure": "Guillaume embête Nadège / [PERSONNE_1] embête [PERSONNE_2]", "source": "site/templates/index.fr.html, panneau « L’histoire » (texte repris tel quel) ; sortie vérifiée le 26 octobre 2026 (1.0.0 publié et dépôt)"},
     {"figure": "NIR, SIRET, TVA, IBAN de 89 pays validés par leurs clés de contrôle officielles", "source": "README.md, « Expert des identifiants européens »"},
     {"figure": "Chaque balise a sa règle et sa raison (explain=true)", "source": "README.md, « Explicable » ; docs/REGLES.md"},
-    {"figure": "Environ 0,5 ms pour un document de 2 Ko, sur un cœur, sans GPU ni LLM", "source": "README.md, « Performances » : 0,45 ms sous Windows, 0,48 ms sous Linux (noyau Rust) ; site/data/quality.json, ms_per_doc = 0,56 ms (25 octobre 2026, portable partagé)"},
+    {"figure": "Moins d’une milliseconde pour un document de 2 Ko, sur un cœur, sans GPU ni LLM", "source": "README.md, « Performances » : 0,45 ms sous Windows, 0,48 ms sous Linux (noyau Rust) ; site/data/quality.json, ms_per_doc = 0,56 ms (25 octobre 2026, portable partagé) ; moteur déployé, 26 octobre 2026 : 0,30 ms pour 1 000 caractères, 2,2 ms pour 10 000 (benchmarks/results/bench-2026-10-26-standard-rules3.md)"},
     {"figure": "Un processus neuf par requête, en mémoire, rien de conservé ; ni journal de contenu, ni cookie, ni compte, ni clé", "source": "README.md, « Service en ligne, gratuit et sans clé » ; deploy/README.md, « Construire et lancer »"},
     {"figure": "Site web, MCP public sans clé (/mcp), API REST /v1/anonymize/text et /v1/anonymize/file", "source": "README.md, « Service en ligne » ; site/templates/index.fr.html, panneau « Utiliser »"},
     {"figure": "Par MCP, le fichier ne passe pas par le modèle ; un texte collé dans la conversation est déjà parti", "source": "site/templates/index.fr.html, panneau « Utiliser » (« create_upload … le fichier part droit vers le service, sans passer par le modèle … Un texte collé dans la conversation est déjà parti : anonymize_text ne le rattrape pas »)"},
     {"figure": "100 % local : plugin Claude (MCP local), paquet Python, conteneur Docker sans réseau", "source": "README.md, « Sur votre poste, sans rien envoyer » ; docs/LOCAL.md ; deploy/README.md (docker run --network none)"},
     {"figure": "Licence MIT ; git clone ; code publié sur GitHub", "source": "README.md (licence MIT) ; site/templates/index.fr.html, mentions (« code dans le dépôt public »)"},
     {"figure": "Règles de l’organisation passées dans l’appel, jamais conservées ; CLT-204518 → [CLIENT_ID_1] ; docker compose ; tickets", "source": "README.md, « Vos règles en plus » (règle CLIENT_ID, « Client CLT-204518 » → « Client [CLIENT_ID_1] », vérifiée avec le moteur le 26 octobre 2026) ; deploy/README.md et deploy/server/compose.yaml ; https://github.com/FlowLineIntegration/GDPRGuardian/issues"},
-    {"figure": "Tests automatisés, Windows et Linux : le plus petit des deux, arrondi à la centaine inférieure, suivi de « + »", "source": "site/data/quality.json (tests_windows, tests_linux), lu à chaque rendu : 3 751 · 3 701 → « 3 700+ » le 26 octobre 2026. Les suites complètes relancées les 25-26 octobre (4 162 · 4 109, deux tests de script de skill en échec) n’y sont pas encore reportées : la vidéo suivra quality.json."},
-    {"figure": "51 façons de déguiser un identifiant (opérateurs de l’équipe rouge)", "source": "site/data/quality.json (redteam_operators), lu à chaque rendu ; docs/PROTOCOLE.md § 2"},
-    {"figure": "99,2 % du texte à masquer l’est (identifiants directs), sur 540 documents synthétiques, le meilleur cas", "source": "site/data/quality.json (recall_direct_pct, eval_docs), lus à chaque rendu ; formulation du site (index.fr.html, « Mesures du jour, corpus synthétique ») ; docs/CORPUS_REELS.md § 12.6"},
-    {"figure": "15 jeux de textes réels, 8 478 documents", "source": "docs/CORPUS_REELS.md § 1 (« 8 478 documents distincts, 22 passages (15 principaux, 7 variantes) » : BODACC, BOAMP, ParlaMint-FR, Europeana, HIPE NewsEye, MAPA FR, DE, ES, IT, NL, PT, MEDDOCAN, German LER, TAB, Judilibre ; Judilibre sans annotation, témoin négatif)"},
-    {"figure": "35 à 93 % des mentions entièrement masquées sur des textes réels français, selon le corpus, moteur 1.0.0", "source": "site/templates/index.fr.html, « Textes réels en français, 25 octobre 2026 » ; docs/CORPUS_REELS.md § 1 (MAPA FR 34,8 % … ParlaMint-FR 93,2 %)"},
-    {"figure": "BODACC : 79 → 98 % des mentions entièrement masquées, 1.0.0 puis règles du 25 octobre, sur données inédites", "source": "docs/CORPUS_REELS.md § 12.1 (avant : paquets publiés dist/1.0.0 ; après : ce dépôt, règles « rules2 ») et § 12.4 : moitié test 78,9 → 97,8 % ; inédit (août 2026) 79,3 → 97,6 %. Ces règles ne sont pas dans les paquets 1.0.0 publiés : l’écran le dit."},
-    {"figure": "Indice de confiance (valeur, IC 95 %, mentions masquées, précision, sur-masquage, documents, date)", "source": "site/data/quality.json, lu à chaque rendu (confidence_index, confidence_ci_low, confidence_ci_high, mention_recall_pct, precision_structured_pct, overmask_pct, protocol_docs, protocol_date) ; « Mesure en cours » tant que l’une de ces valeurs manque (docs/PROTOCOLE.md : l’indice n’est publié qu’à côté de la précision et du sur-masquage)"},
+    {"figure": "Tests automatisés, Windows et Linux : le plus petit des deux, arrondi à la centaine inférieure, suivi de « + »", "source": "site/data/quality.json (tests_windows, tests_linux), lu à chaque rendu : 4 347 · 4 294 → « 4 200+ » le 26 octobre 2026"},
+    {"figure": "91,9 % des 450 000 documents synthétiques sans fuite (montage court : 91,9 % des documents synthétiques sans fuite)", "source": "Campagne publique du 26 octobre 2026, moteur déployé 1.0.0+0c3ff9fc1fb0 : benchmarks/results/protocol-2026-10-26.md, famille « Synthétique FR (10 graines, leurres) » : 450 000 documents, sans fuite 91,9 % [91,8–92,0], rappel des mentions 98,4 %, précision 98,8 %. Même mesure (documents sans fuite) que l’indice et que les autres chiffres en pourcentage de la scène"},
+    {"figure": "63,7 % des documents piégés sans fuite, 51 façons de déguiser un identifiant", "source": "Campagne du 26 octobre 2026 (protocol-2026-10-26.md), famille « Équipe rouge FR (51 opérateurs) » : 548 907 documents, sans fuite 63,7 % [63,6–63,8], rappel des mentions 86,7 % ; le nombre d’opérateurs est lu dans site/data/quality.json (redteam_operators) à chaque rendu"},
+    {"figure": "14 jeux de textes réels annotés, dont 6 français, 8 178 documents", "source": "site/data/quality.json (real_corpora, real_docs), lus à chaque rendu, clés de la campagne du 26 octobre 2026 (protocol-2026-10-26.md, « Clés du site ») : 14 corpus annotés, dont 6 du périmètre français (BODACC, BOAMP, ParlaMint-FR, Europeana, HIPE NewsEye, MAPA FR) et 8 hors périmètre (MAPA DE, ES, IT, NL, PT, MEDDOCAN, LER allemand, TAB), plus le témoin négatif Judilibre (300 décisions, sans annotation)"},
+    {"figure": "16,5 à 93 % des documents réels français sans fuite, selon la famille", "source": "Campagne du 26 octobre 2026 (protocol-2026-10-26.md), moitié test, documents sans fuite par famille réelle : presse ancienne 16,5 %, MAPA FR 16,7 %, BOAMP 60,7 %, BODACC 89,9 %, ParlaMint-FR 93,0 % (borne haute : gold partiel)"},
+    {"figure": "89,9 % des annonces du BODACC sans fuite, 97,8 % des mentions masquées", "source": "Campagne du 26 octobre 2026 (protocol-2026-10-26.md), famille BODACC, moitié test : 1 335 documents, sans fuite 89,9 % [88,2–91,4], rappel des mentions 97,8 %, précision 99,1 %"},
+    {"figure": "16,5 % de la presse ancienne sans fuite, le point le plus faible (montage court)", "source": "Campagne du 26 octobre 2026 (protocol-2026-10-26.md), famille « Presse ancienne FR (Europeana + HIPE) », moitié test : 272 documents notés, sans fuite 16,5 % [12,6–21,4], la plus basse des sept familles (MAPA FR 16,7 %)"},
+    {"figure": "Indice de confiance (valeur, IC 95 %, mentions masquées, documents, date)", "source": "site/data/quality.json, lu à chaque rendu (confidence_index, confidence_ci_low, confidence_ci_high, mention_recall_pct, protocol_docs, protocol_date) ; « Mesure en cours » tant que l’une des quatre premières manque. Campagne du 26 octobre 2026 : 61,8 % [58,6–66,9], mentions 79,8 %. Montage court : définition et date de la campagne sur la carte de l’indice"},
+    {"figure": "Précision 99,1 % BODACC, 87,3 % BOAMP ; texte neutre masqué à tort 0,07 %", "source": "Garde-fous de la campagne du 26 octobre 2026 (protocol-2026-10-26.md, « Garde-fous ») : precision_bodacc_fr 99,13 %, precision_boamp_fr 87,26 %, overmask_synthetic 0,07 % ; docs/PROTOCOLE.md § 7 (la précision et le sur-masquage sont toujours publiés à côté de l’indice). À reporter à la main dans « guards » après une nouvelle campagne"},
     {"figure": "Protocole écrit avant la mesure : 1 019 385 documents, dont 8 478 réels, par le vrai service", "source": "docs/PROTOCOLE.md, résumé (« 1,019,385 documents, of which 1,010,907 synthetic and 8,478 real ») et en-tête (version 1.0 écrite le 25 octobre 2026, avant toute campagne)"},
-    {"figure": "Limites : noms DE, ES, IT, NL, PT non détectés ; presse ancienne (OCR) et textes juridiques de l’UE aux noms en initiales faibles ; première barrière, pas une certification", "source": "docs/CORPUS_REELS.md § 1 (MAPA DE, ES, IT, NL, PT : 0,0 % ; HIPE 45,6 % ; MAPA FR 34,8 %) et § 12.8 ; README.md, « Avertissement »"},
+    {"figure": "Limites : presse ancienne et MAPA FR, un document sur six sans fuite ; BOAMP, 4 avis sur 10 avec une mention lisible ; noms DE, ES, IT, NL, PT non détectés ; première barrière, pas une certification", "source": "Campagne du 26 octobre 2026 (protocol-2026-10-26.md) : presse ancienne 16,5 %, MAPA FR 16,7 % (6 documents) sans fuite ; BOAMP 60,7 % sans fuite, soit 39,3 % des avis avec une mention lisible ; hors périmètre, MAPA DE, ES, IT, NL, PT et LER allemand 0,0 % des mentions ; README.md, « Avertissement »"},
     {"figure": "Le protocole : gardienrgpd.fr/#protocole", "source": "site/templates/index.fr.html, section id=\"protocole\""},
     {"figure": "Offert par Flow Line Intégration ; Guillaume CLEMENT, CTO Data & IA ; Conception : Claude Design ; licence MIT, version 1.0.0", "source": "site/templates/index.fr.html, pied de page et panneau « Merci »"}
   ]
