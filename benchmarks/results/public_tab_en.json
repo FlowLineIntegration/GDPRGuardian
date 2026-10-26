@@ -1,0 +1,71 @@
+{
+  "dataset": "tab_en",
+  "records": 127,
+  "evaluated": 127,
+  "errors": {},
+  "error_samples": [],
+  "chars": 647638,
+  "seconds": 1.401,
+  "chars_per_second": 462416,
+  "docs_per_second": 90.68,
+  "over_masking": {
+    "detected_spans": 971,
+    "false_mask_spans": 107,
+    "chars_outside_gold": 1260,
+    "non_gold_chars": 578900,
+    "char_rate": 0.0022
+  },
+  "direct_identifiers": {
+    "gold": 958,
+    "masked": 351,
+    "leaked": 136,
+    "masked_rate": 0.3664,
+    "leak_rate": 0.142
+  },
+  "families": {
+    "PERSON": {
+      "gold": 958,
+      "masked": 351,
+      "leaked": 136,
+      "masked_rate": 0.3664,
+      "leak_rate": 0.142,
+      "expected_masked_by_policy": true
+    },
+    "DATE": {
+      "gold": 2487,
+      "masked": 0,
+      "leaked": 2487,
+      "masked_rate": 0.0,
+      "leak_rate": 1.0,
+      "expected_masked_by_policy": false
+    },
+    "LOCATION": {
+      "gold": 294,
+      "masked": 5,
+      "leaked": 284,
+      "masked_rate": 0.017,
+      "leak_rate": 0.966,
+      "expected_masked_by_policy": false
+    },
+    "ORG": {
+      "gold": 550,
+      "masked": 8,
+      "leaked": 525,
+      "masked_rate": 0.0145,
+      "leak_rate": 0.9545,
+      "expected_masked_by_policy": false
+    },
+    "OTHER": {
+      "gold": 857,
+      "masked": 1,
+      "leaked": 853,
+      "masked_rate": 0.0012,
+      "leak_rate": 0.9953,
+      "expected_masked_by_policy": false
+    }
+  },
+  "meta": {
+    "countries": "FR",
+    "revision": "NorskRegnesentral/text-anonymization-benchmark@558e09e26d6b36f5f78440074e6a233946d98bd9 (MIT)"
+  }
+}

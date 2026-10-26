@@ -1,0 +1,94 @@
+# Gardien RGPD · GDPR Guardian : service public en ligne derrière Nginx (deploy/server/install.sh).
+# Le conteneur n'a AUCUN réseau : Nginx le joint par un socket Unix, dans un tmpfs dédié de l'hôte (run-gdprguardian.mount).
+# Online public service behind Nginx. The container has NO network at all: Nginx reaches it through a Unix socket in a
+# dedicated host tmpfs, so the service can neither be reached directly nor call out.
+name: gdprguardian
+
+services:
+  gdprguardian:
+    # Version vérifiée par install.sh (image, start, verify) ; jamais tirée d'un registre.
+    # Version checked by install.sh (image, start, verify); never pulled from a registry.
+    image: gdprguardian:1.0.0
+    pull_policy: never
+    # Journal au niveau « warning » : aucun événement par requête ou par document (pas de journal d'activité), seuls
+    # les avertissements et erreurs du service. Log level "warning": no per-request or per-document event (no
+    # activity log), only the service's warnings and errors.
+    command: ["gdprguardian", "serve", "--uds", "/run/gdprguardian/app.sock", "--log-level", "warning"]
+    network_mode: none
+    read_only: true
+    user: "10001:10001"
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    # Pas d'init : le service, durci et non lisible, est le PID 1 ; aucun processus lisible du conteneur ne porte
+    # son environnement. No init: the hardened, non-dumpable service is PID 1.
+    restart: unless-stopped
+    stop_grace_period: 15s
+    # Réglages facultatifs de l'exploitant (mode du limiteur, GDPRGUARDIAN_LIMIT_*), root 0600 ; jamais une clé. Puis
+    # l'empreinte du jeton local (install.sh base, root 0600) : seules les requêtes du serveur qui présentent ce jeton
+    # (X-GG-Local, fichier réservé à root) comptent comme les siennes, pas celles d'un travailleur compromis.
+    # Optional operator settings, root 0600; never a key. Then the local token's digest (install.sh base, root 0600):
+    # only the server's requests presenting that token count as its own, not those of a compromised worker.
+    env_file:
+      - /etc/gdprguardian/gdprguardian.env
+      - /etc/gdprguardian/local.env
+    # Réglages du service public, prioritaires sur le fichier ci-dessus / public service settings, which win.
+    environment:
+      TMPDIR: /tmp
+      # Aucune clé : REST et MCP ouverts à tous, limites par client (pseudonyme en mémoire de l'adresse que Nginx
+      # pose dans X-GG-Client ; sans cet en-tête, la requête vient du serveur lui-même).
+      # No key: REST and MCP open to all, per-client limits (in-memory pseudonym of the address Nginx puts in
+      # X-GG-Client; without that header, the request comes from the server itself).
+      GDPRGUARDIAN_PUBLIC: "1"
+      GDPRGUARDIAN_CLIENT_IP_HEADER: X-GG-Client
+      GDPRGUARDIAN_PUBLIC_URL: https://api.gdprguardian.com
+      GDPRGUARDIAN_ALLOWED_HOSTS: api.gdprguardian.com,api.gardienrgpd.fr
+      # Mémoire : 3 × 1,25 Gio de travailleurs + 1 Gio de file (corps reçus et sorties des travailleurs jusqu'à la
+      # fin de chaque réponse) + 0,1 à 0,4 Gio de résultats différés (100 M caractères, de 1 à 4 octets chacun ; 1/8
+      # par client, 1/4 par réseau ; un résultat de 12,5 M caractères au plus) + ~0,5 Gio d'accueil ≈ 5,6 Gio au pire
+      # sous les 6 Gio du conteneur ; le travailleur est la victime préférée du tueur OOM. Memory: 3 × 1.25 GiB of
+      # workers + 1 GiB queue (bodies received and worker outputs until each response ends) + 0.1 to 0.4 GiB of
+      # deferred results (100 M characters, 1 to 4 bytes each; 1/8 per client, 1/4 per network; a result of at most
+      # 12.5 M characters) + ~0.5 GiB front ≈ 5.6 GiB at worst under 6 GiB.
+      # Mesuré (octobre 2026, deploy/README.md « Gros documents ») : documents légitimes de 50 Mo, pic d'un travailleur
+      # 0,92 Gio, du service 1,3 Gio, trois à la fois compris ; documents adverses (Word denses, avant ses limites),
+      # jusqu'à 1,5 Gio de RSS par travailleur (pages partagées du zygote comprises), trois à la fois 4,3 Gio sur 6, sans
+      # dépassement ; sous ses limites, 0,97 Gio au pire (un million d'éléments Word). Measured: legitimate 50 MB
+      # documents, one worker's peak 0.92 GiB, the service's 1.3 GiB, three at once included; adversarial documents
+      # (dense Word, before its limits), up to 1.5 GiB RSS per worker (shared zygote pages included), three at once
+      # 4.3 GiB of 6, never over; under its limits, 0.97 GiB at worst (one million Word elements).
+      GDPRGUARDIAN_MAX_CONCURRENCY: "3"
+      GDPRGUARDIAN_WORKER_MEMORY_MB: "1280"
+      GDPRGUARDIAN_QUEUE_MB: "1024"
+      GDPRGUARDIAN_MAX_STORE_CHARS: "100000000"
+      # Un datagramme par opération terminée vers le démon du site (sorte, format, taille, durée, réussite,
+      # provenance ; jamais de contenu ni d'identifiant). One datagram per finished operation to the site daemon.
+      GDPRGUARDIAN_USAGE_SOCKET: /run/gdprguardian-stats/usage.sock
+    # Envois de plus de 1 Mo : fichiers temporaires en mémoire, jamais sur disque.
+    # Uploads over 1 MB spill to temporary files: in memory, never on disk.
+    tmpfs:
+      - /tmp:size=1g,mode=1777,noexec,nosuid,nodev
+    volumes:
+      # tmpfs dédié de 64 Kio, monté avant Docker : le conteneur ne peut ni remplir /run ni y viser autre chose.
+      # Dedicated 64 KiB tmpfs mounted before Docker: the container can neither fill /run nor reach anything else.
+      - /run/gdprguardian:/run/gdprguardian
+      # Dossier en mémoire du socket d'usage (gdprguardian-site.tmpfiles), au même chemin que pour le démon : le nom
+      # d'expéditeur qu'il attend en dépend. In-memory usage socket folder, at the daemon's path: the sender name it
+      # expects depends on it.
+      - /run/gdprguardian-stats:/run/gdprguardian-stats
+    # Mémoire sans swap, pas de vidage mémoire, nombre de processus borné.
+    # Memory without swap, no core dump, bounded process count.
+    mem_limit: 6g
+    memswap_limit: 6g
+    pids_limit: 512
+    ulimits:
+      core: 0
+    # Sonde côté hôte par le socket (gdprguardian-watchdog.timer, toutes les 2 min) : aucune commande lancée dans le
+    # conteneur. Host-side probe through the socket (every 2 min): no command run inside the container.
+    healthcheck:
+      disable: true
+    # Le service ne journalise que des métadonnées (jamais de contenu ni d'adresse) / metadata only.
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "3"

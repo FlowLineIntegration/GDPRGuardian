@@ -1,0 +1,19 @@
+# Gardien RGPD · GDPR Guardian : tmpfs dédié du socket du service, /etc/systemd/system/run-gdprguardian.mount.
+# Dedicated tmpfs of the service socket. 64 Kio et 16 inodes : le conteneur (10001) n'y crée que son socket et ne
+# peut ni remplir le /run de l'hôte ni y poser un lien vers un autre socket ; lisible par Nginx (www-data, gid 33)
+# seul. 64 KiB and 16 inodes: the container can neither fill the host's /run nor plant a link to another socket;
+# reachable by Nginx (www-data, gid 33) only. Monté avant Docker (docker.service.d/gdprguardian.conf).
+[Unit]
+Description=Gardien RGPD - GDPR Guardian service socket folder (dedicated tmpfs)
+DefaultDependencies=no
+Conflicts=umount.target
+Before=local-fs.target umount.target
+
+[Mount]
+What=tmpfs
+Where=/run/gdprguardian
+Type=tmpfs
+Options=size=64k,nr_inodes=16,mode=0750,uid=10001,gid=33,nosuid,nodev,noexec
+
+[Install]
+WantedBy=local-fs.target

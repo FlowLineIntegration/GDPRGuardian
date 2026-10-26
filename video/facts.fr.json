@@ -1,0 +1,212 @@
+{
+  "lang": "fr",
+  "file_stem": "gardien-rgpd-lancement-fr",
+  "html_title": "Gardien RGPD · vidéo de lancement",
+  "transcript_title": "Gardien RGPD · vidéo de lancement · tout le texte à l’écran, dans l’ordre",
+  "transcript_note": "Vidéo muette (aucune voix, aucune musique)\u202f: ce fichier reprend chaque texte au moment où il apparaît.",
+  "chrome": {
+    "brand": "Gardien RGPD",
+    "site": "gardienrgpd.fr"
+  },
+  "chapters": {
+    "problem": "01 · Le problème",
+    "answer": "02 · Notre réponse",
+    "use": "03 · Trois accès",
+    "fork": "04 · Votre version",
+    "numbers": "05 · Les mesures"
+  },
+  "months": ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
+  "title": {
+    "name": "Gardien RGPD",
+    "specimen": [
+      [["M. "], ["Jean Dupont", "[PERSONNE_1]", "p1"], [", "], ["06 12 34 56 78", "[TEL_1]", "p3"]]
+    ],
+    "kicker": "Anonymisez vos documents, irréversiblement, avant l’IA.",
+    "line1": "Le meilleur outil open source pour le RGPD et l’IA\u202f!",
+    "line2": "À vous de juger.",
+    "urls": "gardienrgpd.fr · gdprguardian.com"
+  },
+  "problem": {
+    "headline": "Chaque jour, de vrais documents partent vers l’IA.",
+    "docs": [
+      ["Contrat", "Jean Dupont"],
+      ["Dossier RH", "FR76 3000 6000"],
+      ["Dossier médical", "Diabète\nde type 2"],
+      ["E-mail", "c.martin@\nexemple.fr"]
+    ],
+    "ai": "Assistant d’IA",
+    "caption": "Les données personnelles arrivent chez un tiers."
+  },
+  "shortfalls": {
+    "headline": "Les réponses actuelles ne suffisent pas.",
+    "rows": [
+      ["Caviardage manuel", "Lent, et des oublis."],
+      ["Pseudonymisation réversible", "La table de correspondance reste une donnée personnelle."],
+      ["<p0>[CENSURÉ]</p0> partout", "L’IA perd le sens."],
+      ["Boîte noire", "Rien n’explique le masquage."]
+    ]
+  },
+  "demo": {
+    "headline": "Retirer les noms, garder le sens.",
+    "label": "sortie réelle, version 1.0.0",
+    "lines": [
+      [["M. "], ["Jean Dupont", "[PERSONNE_1]", "p1"], [" · "], ["jean.dupont@exemple.fr", "[EMAIL_1]", "p3"], [" · "], ["06 12 34 56 78", "[TEL_1]", "p3"]],
+      [["IBAN "], ["FR76 3000 6000 0112 3456 7890 189", "[IBAN_1]", "p3"]],
+      [["M. "], ["Dupont", "[PERSONNE_1]", "p1"], [" rappellera Mme "], ["Claire Martin", "[PERSONNE_2]", "p2"], ["."]],
+      [["DUPONT Jean", "[PERSONNE_1]", "p1"], [" réglera la facture n° 2026-0042."]]
+    ],
+    "key_on": "Clé aléatoire de 256 bits, propre à ce document",
+    "key_off": "Clé détruite\u202f: aucun retour possible.",
+    "caption": "Même personne, même balise."
+  },
+  "story": {
+    "headline": "<n1>Guillaume</n1> embête <n2>Nadège</n2>. <n2>Nadège</n2> frappe <n1>Guillaume</n1>.",
+    "rows": [
+      {"label": "Masquage naïf", "text": "<p0>[Personne]</p0> embête <p0>[Personne]</p0>.\n<p0>[Personne]</p0> frappe <p0>[Personne]</p0>.", "why": "Qui frappe qui\u202f?"},
+      {"label": "Gardien RGPD", "text": "<p1>[PERSONNE_1]</p1> embête <p2>[PERSONNE_2]</p2>.\n<p2>[PERSONNE_2]</p2> frappe <p1>[PERSONNE_1]</p1>.", "why": "Les rôles survivent, les identités non."}
+    ]
+  },
+  "pillars": {
+    "headline": "Six principes",
+    "tiles": [
+      ["Irréversible", "Clé de 256 bits détruite, aucune table."],
+      ["Cohérent", "Une personne, une balise."],
+      ["Vérifié", "Clés de contrôle officielles."],
+      ["Explicable", "Une règle par balise, sans LLM."],
+      ["Rapide", "2\u00a0Ko en 0,5\u00a0ms, sur CPU."],
+      ["Rien de conservé", "Tout en mémoire."]
+    ]
+  },
+  "use": {
+    "headline": "Trois accès, un moteur",
+    "entries": [
+      ["Site web", "Déposez ou collez, puis téléchargez."],
+      ["MCP", "Claude et les agents, sans clé."],
+      ["API REST", "<m>/v1/anonymize/text</m>\n<m>/v1/anonymize/file</m>"]
+    ],
+    "engine": ["Gardien RGPD", "Un processus neuf par requête, rien de gardé."],
+    "output": "Markdown anonymisé",
+    "ai": "Votre IA",
+    "note": "Par MCP, envoyez le fichier\u202f: il ne passe pas par le modèle. Un texte collé est déjà parti.",
+    "local": "<b>100\u202f% local</b>\u202f: plugin Claude, paquet Python, Docker sans réseau."
+  },
+  "fork": {
+    "headline": "Copiez le dépôt, faites votre version.",
+    "command": "git clone https://github.com/FlowLineIntegration/GDPRGuardian",
+    "note": "Code publié sur GitHub.",
+    "steps": [
+      ["Licence MIT", "Utilisez, modifiez, redistribuez."],
+      ["Vos règles", "Dans l’appel, jamais conservées.", "<m>CLT-204518</m>\n<arrow/> <p3>[CLIENT_ID_1]</p3>"],
+      ["Votre serveur", "<m>docker compose</m>\n<m>deploy/README.md</m>"],
+      ["Contribuez", "Améliorez, proposez\u202f: <m>/issues</m>"]
+    ]
+  },
+  "numbers": {
+    "headline": "Testé, mesuré, publié",
+    "figures": [
+      {"id": "tests", "fig": "{tests}+", "fallback_fig": "3\u202f700+", "label": "tests automatisés, Windows et Linux"},
+      {"id": "redteam", "fig": "{q.redteam_operators}", "fallback_fig": "51", "label": "façons de déguiser un identifiant"},
+      {"id": "recall", "fig": "{q.recall_direct_pct}\u202f%", "fallback_fig": "99,2\u202f%", "label": "du texte à masquer l’est ({q.eval_docs} documents synthétiques\u202f: le meilleur cas)", "fallback_label": "du texte à masquer l’est (540 documents synthétiques\u202f: le meilleur cas)"},
+      {"id": "real", "fig": "15", "label": "jeux de textes réels, 8\u202f478 documents"},
+      {"id": "range", "fig": "35 à 93\u202f%", "label": "des mentions masquées, textes réels français, selon le corpus (1.0.0)"},
+      {"id": "bodacc", "fig": "79 <arrow/> 98\u202f%", "label": "des mentions masquées au BODACC (données inédites)\u202f: 1.0.0, puis règles du 25 octobre"}
+    ]
+  },
+  "index": {
+    "headline": "Comment nous nous notons",
+    "title": "Indice de confiance",
+    "pending": "Mesure en cours",
+    "value": "{v}\u202f%",
+    "ci": "IC 95\u202f%\u202f: {lo} – {hi}\u202f%",
+    "guards": "Mentions masquées\u202f:\u00a0{mr}\u202f%\u00a0· précision\u202f:\u00a0{p}\u202f%\u00a0· texte neutre masqué à tort\u202f:\u00a0{o}\u202f%",
+    "definition": "Part des documents sans identifiant direct lisible.",
+    "protocol_pending": "Protocole écrit avant la mesure\u202f: 1\u202f019\u202f385 documents, dont 8\u202f478 réels, par le vrai service.",
+    "protocol_done": "Campagne du {date}\u202f: {docs} documents, protocole écrit avant.",
+    "protocol_done_nodate": "Campagne de {docs} documents, protocole écrit avant.",
+    "limits_title": "Limites connues",
+    "limits": [
+      "Noms allemands, espagnols, italiens, néerlandais, portugais\u202f: non détectés.",
+      "Presse ancienne, textes juridiques européens (noms en initiales)\u202f: faibles.",
+      "Une première barrière, pas une certification RGPD."
+    ],
+    "link": "Le protocole\u202f: <m>gardienrgpd.fr/#protocole</m>"
+  },
+  "closing": {
+    "brand": "Gardien RGPD",
+    "line1": "Le meilleur outil open source pour le RGPD et l’IA\u202f!",
+    "big": "À vous de juger.",
+    "urls": "gardienrgpd.fr · gdprguardian.com",
+    "repo": "github.com/FlowLineIntegration/GDPRGuardian",
+    "credits": [
+      "Offert par\n<b>Flow Line Intégration</b>",
+      "<b>Guillaume CLEMENT</b>,\nCTO Data & IA",
+      "Conception\u202f:\n<b>Claude Design</b>"
+    ],
+    "licence": "Licence MIT · version 1.0.0"
+  },
+  "social": {
+    "title": {
+      "specimen": [
+        [["M. "], ["Jean Dupont", "[PERSONNE_1]", "p1"], [","]],
+        [["06 12 34 56 78", "[TEL_1]", "p3"]]
+      ],
+      "line1": null,
+      "line2": null
+    },
+    "problem": {
+      "headline": "Chaque jour, des documents partent vers l’IA.",
+      "caption": "Leurs données personnelles aussi."
+    },
+    "use": {
+      "entries": [["Site web"], ["MCP"], ["API REST"]],
+      "engine": ["Gardien RGPD", "Rien n’est conservé."],
+      "note": "Par MCP, envoyez le fichier, pas un texte collé.",
+      "local": "<b>100\u202f% local</b>\u202f: plugin Claude, Python, Docker sans réseau."
+    },
+    "fork": {
+      "command": "git clone https://github.com/\nFlowLineIntegration/GDPRGuardian",
+      "steps": [
+        ["Licence MIT", "utilisez, modifiez, redistribuez"],
+        ["Votre serveur", "<m>docker compose</m>"]
+      ]
+    },
+    "numbers": {
+      "headline": "Mesuré, publié",
+      "figures": [
+        {"id": "recall", "fig": "{q.recall_direct_pct}\u202f%", "fallback_fig": "99,2\u202f%", "label": "masqué, données synthétiques\u202f: le meilleur cas"},
+        {"id": "range", "fig": "35 à 93\u202f%", "label": "masqué, textes réels français, selon le corpus"}
+      ],
+      "limits": [
+        "Noms allemands, espagnols, italiens, néerlandais, portugais\u202f: non détectés.",
+        "Une première barrière, pas une certification RGPD."
+      ]
+    }
+  },
+  "sources": [
+    {"figure": "Ligne d’ouverture « M. Jean Dupont, 06 12 34 56 78 » → « M. [PERSONNE_1], [TEL_1] »", "source": "Exemple de l’API du site (site/templates/index.fr.html, panneau « Utiliser ») ; sortie identique du moteur du dépôt et des paquets publiés dist/1.0.0, vérifiée le 26 octobre 2026"},
+    {"figure": "Données des cartes du problème (Jean Dupont, FR76 3000 6000, diabète de type 2, c.martin@exemple.fr)", "source": "Données fictives d’illustration, reprises du document de démonstration (mêmes personnes fictives) ; aucune mesure"},
+    {"figure": "Clé aléatoire de 256 bits par document, détruite ; aucune table de correspondance", "source": "site/templates/index.fr.html, panneau Architecture (« Une clé par document, puis détruite. 256 bits aléatoires ») ; README.md, « Irréversible, par conception »"},
+    {"figure": "« M. Dupont », « Jean Dupont », « DUPONT Jean » → une seule [PERSONNE_1] ; « Mme Claire Martin » → Mme [PERSONNE_2] ; facture conservée", "source": "Sortie réelle, Anonymizer(countries=\"FR\", explain=True, label_language=\"fr\"), identique avec les paquets publiés dist/1.0.0 et avec le moteur du dépôt, vérifiée le 26 octobre 2026 sur les quatre lignes affichées"},
+    {"figure": "Guillaume embête Nadège / [PERSONNE_1] embête [PERSONNE_2]", "source": "site/templates/index.fr.html, panneau « L’histoire » (texte repris tel quel) ; sortie vérifiée le 26 octobre 2026 (1.0.0 publié et dépôt)"},
+    {"figure": "NIR, SIRET, TVA, IBAN de 89 pays validés par leurs clés de contrôle officielles", "source": "README.md, « Expert des identifiants européens »"},
+    {"figure": "Chaque balise a sa règle et sa raison (explain=true)", "source": "README.md, « Explicable » ; docs/REGLES.md"},
+    {"figure": "Environ 0,5 ms pour un document de 2 Ko, sur un cœur, sans GPU ni LLM", "source": "README.md, « Performances » : 0,45 ms sous Windows, 0,48 ms sous Linux (noyau Rust) ; site/data/quality.json, ms_per_doc = 0,56 ms (25 octobre 2026, portable partagé)"},
+    {"figure": "Un processus neuf par requête, en mémoire, rien de conservé ; ni journal de contenu, ni cookie, ni compte, ni clé", "source": "README.md, « Service en ligne, gratuit et sans clé » ; deploy/README.md, « Construire et lancer »"},
+    {"figure": "Site web, MCP public sans clé (/mcp), API REST /v1/anonymize/text et /v1/anonymize/file", "source": "README.md, « Service en ligne » ; site/templates/index.fr.html, panneau « Utiliser »"},
+    {"figure": "Par MCP, le fichier ne passe pas par le modèle ; un texte collé dans la conversation est déjà parti", "source": "site/templates/index.fr.html, panneau « Utiliser » (« create_upload … le fichier part droit vers le service, sans passer par le modèle … Un texte collé dans la conversation est déjà parti : anonymize_text ne le rattrape pas »)"},
+    {"figure": "100 % local : plugin Claude (MCP local), paquet Python, conteneur Docker sans réseau", "source": "README.md, « Sur votre poste, sans rien envoyer » ; docs/LOCAL.md ; deploy/README.md (docker run --network none)"},
+    {"figure": "Licence MIT ; git clone ; code publié sur GitHub", "source": "README.md (licence MIT) ; site/templates/index.fr.html, mentions (« code dans le dépôt public »)"},
+    {"figure": "Règles de l’organisation passées dans l’appel, jamais conservées ; CLT-204518 → [CLIENT_ID_1] ; docker compose ; tickets", "source": "README.md, « Vos règles en plus » (règle CLIENT_ID, « Client CLT-204518 » → « Client [CLIENT_ID_1] », vérifiée avec le moteur le 26 octobre 2026) ; deploy/README.md et deploy/server/compose.yaml ; https://github.com/FlowLineIntegration/GDPRGuardian/issues"},
+    {"figure": "Tests automatisés, Windows et Linux : le plus petit des deux, arrondi à la centaine inférieure, suivi de « + »", "source": "site/data/quality.json (tests_windows, tests_linux), lu à chaque rendu : 3 751 · 3 701 → « 3 700+ » le 26 octobre 2026. Les suites complètes relancées les 25-26 octobre (4 162 · 4 109, deux tests de script de skill en échec) n’y sont pas encore reportées : la vidéo suivra quality.json."},
+    {"figure": "51 façons de déguiser un identifiant (opérateurs de l’équipe rouge)", "source": "site/data/quality.json (redteam_operators), lu à chaque rendu ; docs/PROTOCOLE.md § 2"},
+    {"figure": "99,2 % du texte à masquer l’est (identifiants directs), sur 540 documents synthétiques, le meilleur cas", "source": "site/data/quality.json (recall_direct_pct, eval_docs), lus à chaque rendu ; formulation du site (index.fr.html, « Mesures du jour, corpus synthétique ») ; docs/CORPUS_REELS.md § 12.6"},
+    {"figure": "15 jeux de textes réels, 8 478 documents", "source": "docs/CORPUS_REELS.md § 1 (« 8 478 documents distincts, 22 passages (15 principaux, 7 variantes) » : BODACC, BOAMP, ParlaMint-FR, Europeana, HIPE NewsEye, MAPA FR, DE, ES, IT, NL, PT, MEDDOCAN, German LER, TAB, Judilibre ; Judilibre sans annotation, témoin négatif)"},
+    {"figure": "35 à 93 % des mentions entièrement masquées sur des textes réels français, selon le corpus, moteur 1.0.0", "source": "site/templates/index.fr.html, « Textes réels en français, 25 octobre 2026 » ; docs/CORPUS_REELS.md § 1 (MAPA FR 34,8 % … ParlaMint-FR 93,2 %)"},
+    {"figure": "BODACC : 79 → 98 % des mentions entièrement masquées, 1.0.0 puis règles du 25 octobre, sur données inédites", "source": "docs/CORPUS_REELS.md § 12.1 (avant : paquets publiés dist/1.0.0 ; après : ce dépôt, règles « rules2 ») et § 12.4 : moitié test 78,9 → 97,8 % ; inédit (août 2026) 79,3 → 97,6 %. Ces règles ne sont pas dans les paquets 1.0.0 publiés : l’écran le dit."},
+    {"figure": "Indice de confiance (valeur, IC 95 %, mentions masquées, précision, sur-masquage, documents, date)", "source": "site/data/quality.json, lu à chaque rendu (confidence_index, confidence_ci_low, confidence_ci_high, mention_recall_pct, precision_structured_pct, overmask_pct, protocol_docs, protocol_date) ; « Mesure en cours » tant que l’une de ces valeurs manque (docs/PROTOCOLE.md : l’indice n’est publié qu’à côté de la précision et du sur-masquage)"},
+    {"figure": "Protocole écrit avant la mesure : 1 019 385 documents, dont 8 478 réels, par le vrai service", "source": "docs/PROTOCOLE.md, résumé (« 1,019,385 documents, of which 1,010,907 synthetic and 8,478 real ») et en-tête (version 1.0 écrite le 25 octobre 2026, avant toute campagne)"},
+    {"figure": "Limites : noms DE, ES, IT, NL, PT non détectés ; presse ancienne (OCR) et textes juridiques de l’UE aux noms en initiales faibles ; première barrière, pas une certification", "source": "docs/CORPUS_REELS.md § 1 (MAPA DE, ES, IT, NL, PT : 0,0 % ; HIPE 45,6 % ; MAPA FR 34,8 %) et § 12.8 ; README.md, « Avertissement »"},
+    {"figure": "Le protocole : gardienrgpd.fr/#protocole", "source": "site/templates/index.fr.html, section id=\"protocole\""},
+    {"figure": "Offert par Flow Line Intégration ; Guillaume CLEMENT, CTO Data & IA ; Conception : Claude Design ; licence MIT, version 1.0.0", "source": "site/templates/index.fr.html, pied de page et panneau « Merci »"}
+  ]
+}

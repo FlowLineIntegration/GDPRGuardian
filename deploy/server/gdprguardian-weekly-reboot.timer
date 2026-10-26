@@ -1,0 +1,13 @@
+# Gardien RGPD · GDPR Guardian : /etc/systemd/system/gdprguardian-weekly-reboot.timer. Chaque lundi à 2 h (heure de
+# Paris), après le passage de sécurité de 1 h 45. Pas de rattrapage au démarrage : un lundi manqué n'entraîne pas de
+# redémarrage à contretemps. Every Monday at 2 am (Paris time), after the 1:45 security run. No catch-up at boot.
+[Unit]
+Description=Gardien RGPD - GDPR Guardian weekly reboot, Monday 2 am (Paris time)
+
+[Timer]
+OnCalendar=Mon *-*-* 02:00 Europe/Paris
+RandomizedDelaySec=0
+Persistent=false
+
+[Install]
+WantedBy=timers.target

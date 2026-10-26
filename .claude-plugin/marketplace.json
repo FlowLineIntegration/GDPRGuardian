@@ -1,0 +1,33 @@
+{
+  "name": "gdprguardian",
+  "owner": {
+    "name": "Guillaume CLEMENT - Flow Line Intégration"
+  },
+  "metadata": {
+    "description": "Gardien RGPD : anonymisation irréversible des documents avant l'IA, sur le poste ou par le service public / GDPR Guardian: irreversible anonymisation of documents before AI, on your computer or through the public service",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "gdprguardian",
+      "source": "./integrations/claude/plugin",
+      "description": "Version locale : serveur MCP local, skill gdprguardian-local et garde-fou ; rien ne quitte la machine. / Local version: local MCP server, gdprguardian-local skill and guardrail; nothing leaves the machine.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Guillaume CLEMENT - Flow Line Intégration"
+      },
+      "license": "MIT",
+      "keywords": ["rgpd", "gdpr", "anonymisation", "pii", "privacy", "mcp", "local"]
+    },
+    {
+      "name": "gdprguardian-online",
+      "source": "./integrations/claude/plugin-online",
+      "description": "Version légère : serveur MCP en ligne (HTTP, sans clé) et skill gdprguardian-online ; rien à installer. / Light version: online MCP server (HTTP, no key) and gdprguardian-online skill; nothing to install.",
+      "author": {
+        "name": "Guillaume CLEMENT - Flow Line Intégration"
+      },
+      "license": "MIT",
+      "keywords": ["rgpd", "gdpr", "anonymisation", "pii", "privacy", "mcp", "online"]
+    }
+  ]
+}

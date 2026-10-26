@@ -1,0 +1,84 @@
+# Gardien RGPD · GDPR Guardian : démon du site (gardienrgpd.fr, gdprguardian.com), installé par install.sh dans
+# /etc/systemd/system/gdprguardian-site.service. Website daemon.
+#
+# Aucun réseau : un socket Unix pour Nginx (/run/gdprguardian-site/site.sock, groupe www-data), un socket de
+# datagrammes pour les comptes d'usage du service (/run/gdprguardian-stats/usage.sock, groupe gdprguardian = 10001,
+# l'utilisateur du conteneur ; seuls comptent les datagrammes du processus d'accueil du service, reconnu à son nom
+# abstrait). Ni cookie, ni journal de requêtes ; l'état (/var/lib/gdprguardian-site/state.json) ne contient que des
+# compteurs. No network: one Unix socket for Nginx, one datagram socket for the service's usage counts (only the
+# service's front process counts, recognised by its abstract name). No cookie, no request log; the state file
+# holds counters only.
+
+[Unit]
+Description=Gardien RGPD - GDPR Guardian website daemon
+Documentation=https://gardienrgpd.fr/
+After=local-fs.target systemd-tmpfiles-setup.service
+
+[Service]
+Type=simple
+User=gdprguardian-site
+Group=www-data
+SupplementaryGroups=gdprguardian
+ExecStart=/usr/local/bin/gdprguardian-site --socket /run/gdprguardian-site/site.sock --stats-socket /run/gdprguardian-stats/usage.sock --state /var/lib/gdprguardian-site/state.json
+Environment=GDPRGUARDIAN_STATS_GID=10001
+Restart=always
+RestartSec=1s
+TimeoutStopSec=10s
+# Fichiers créés pour le seul démon ; ses deux sockets sont passés en 0660 explicitement.
+# Files created for the daemon alone; its two sockets are set to 0660 explicitly.
+UMask=0077
+RuntimeDirectory=gdprguardian-site
+RuntimeDirectoryMode=0750
+StateDirectory=gdprguardian-site
+StateDirectoryMode=0700
+# Dossier du socket d'usage, créé par tmpfiles (gdprguardian-site.tmpfiles) / usage socket folder, from tmpfiles.
+ReadWritePaths=/run/gdprguardian-stats
+# Le groupe www-data (pour que Nginx joigne site.sock) ouvrirait aussi le socket du service et ses réglages :
+# cachés au démon, qui ne passe donc jamais à côté de Nginx (TLS, débit, noms). The www-data group (so that Nginx
+# reaches site.sock) would also open the service's socket and settings: hidden from the daemon, which therefore
+# never goes around Nginx (TLS, rate limits, names).
+InaccessiblePaths=-/run/gdprguardian -/etc/gdprguardian
+
+# Ressources bornées, pas de vidage mémoire / bounded resources, no core dump.
+# Jusqu'à 2000 flux /api/live (environ 35 Mo) et 4096 connexions / up to 2000 live streams and 4096 connections.
+MemoryMax=128M
+MemorySwapMax=0
+TasksMax=64
+LimitNOFILE=8192
+LimitCORE=0
+
+# Bac à sable / sandbox.
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+DevicePolicy=closed
+PrivateNetwork=yes
+PrivateIPC=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+# /proc/stat et /proc/meminfo restent lisibles (charge du serveur) ; les autres processus sont cachés.
+# /proc/stat and /proc/meminfo stay readable (server load); other processes are hidden.
+ProtectProc=invisible
+RestrictAddressFamilies=AF_UNIX
+IPAddressDeny=any
+RestrictNamespaces=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+RemoveIPC=yes
+KeyringMode=private
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+
+[Install]
+WantedBy=multi-user.target

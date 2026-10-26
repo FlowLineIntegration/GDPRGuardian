@@ -1,0 +1,269 @@
+/* Gardien RGPD / GDPR Guardian launch video. The site's identity on a white page: GR Sans (Red Hat Text) and GR Mono
+   (Red Hat Mono) from site/static/fonts, near-black ink, the orange signal colour for placeholders and the mark only,
+   square blocks, hairlines, no decoration. Two formats: 1920 x 1080 (html) and 1080 x 1350 (html.social, for phone
+   feeds: body text 44 px and up). Everything that moves is driven by render(t) in scene.js, never by CSS. */
+
+@font-face{font-family:"GR Sans";src:url(../site/static/fonts/gr-sans.woff2) format("woff2");font-weight:400 600;font-style:normal;font-display:block}
+@font-face{font-family:"GR Mono";src:url(../site/static/fonts/gr-mono.woff2) format("woff2");font-weight:400;font-style:normal;font-display:block}
+
+:root{
+  --paper:#fff;--bg:#f3f4f6;--well:#f7f8f9;--ink:#0e1116;--ink2:#3c434c;--mu:#5f6670;--line:#dde0e5;--field:#868d97;
+  --sig:#c23c00;--tint:#fff0e6;
+  --sans:"GR Sans",Arial,sans-serif;--mono:"GR Mono",Consolas,monospace;
+  --W:1920px;--H:1080px;
+}
+html.social{--W:1080px;--H:1350px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:var(--W);height:var(--H);overflow:hidden;background:var(--paper)}
+body{color:var(--ink);font:400 40px/1.35 var(--sans);font-variant-numeric:tabular-nums;text-rendering:geometricPrecision}
+#stage{position:relative;width:var(--W);height:var(--H);overflow:hidden;background:var(--paper)}
+.scene{position:absolute;inset:0;display:none}
+.fr{position:absolute;left:120px;top:168px;width:1680px;height:792px}
+.social .fr{left:72px;top:160px;width:936px;height:1130px}
+
+b,.b{font-weight:600;color:var(--ink)}
+.mono{font-family:var(--mono);font-weight:400}
+.mu{color:var(--mu)}
+.arr{display:inline-block;width:.95em;height:.46em;vertical-align:.08em;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:square}
+/* Placeholders: p1 and p2 are two different people (filled, outlined), p3 anything that is not a person (plain). */
+.ph{font-family:var(--mono);font-weight:400;color:var(--sig);padding:0 .14em;white-space:nowrap}
+.ph.p1{background:var(--tint)}
+.ph.p2{box-shadow:inset 0 0 0 2px var(--sig)}
+.ph.p0{background:var(--bg);color:var(--mu)}
+.nm{padding:0 .14em;white-space:nowrap}
+.nm.n1{background:#e6e8ec}
+.nm.n2{box-shadow:inset 0 0 0 2px var(--field)}
+/* No word left alone on a last line. */
+.h1,.cap,.v,.l,.d,.p,.g,li,.why,.kick,.unote,.fnote,.lk,.local,.olab{text-wrap:balance}
+
+/* The mark: brackets around a masked span (the signal bar). */
+.mark{display:block;flex:none}
+.mark .mk{fill:none;stroke:var(--ink);stroke-width:2.2;stroke-linecap:butt}
+.mark .mb{fill:var(--sig);transform-box:fill-box;transform-origin:center}
+
+/* The signature move: the mark's brackets close over a name, leave the bar, open on the placeholder. */
+.mo{position:relative;display:inline-block;vertical-align:top;white-space:pre}
+.mo-o{display:inline-block}
+.mo .mo-p{position:absolute;left:0;display:inline-block;line-height:1.2;opacity:0}
+.mo-k{position:absolute;left:0;border:0 solid var(--ink);opacity:0}
+.mo-b{position:absolute;left:0;width:0;background:var(--sig);opacity:0}
+
+/* Chrome: the site's bar and a quiet footer. */
+.bar{position:absolute;left:0;right:0;top:0;height:112px;display:flex;align-items:center;padding:0 120px;border-bottom:1px solid var(--line);background:var(--paper);z-index:5}
+.bar .brand{display:flex;align-items:center;gap:16px;font:600 32px/1 var(--sans);letter-spacing:-.01em}
+.bar .brand .mark{width:34px;height:34px}
+.bar .chap{margin-left:auto;font:400 28px/1 var(--mono);color:var(--mu)}
+.foot{position:absolute;left:120px;right:120px;bottom:44px;display:flex;align-items:center;font:400 28px/1 var(--mono);color:var(--mu);z-index:5}
+.foot .sq{margin-left:auto;display:flex;gap:12px}
+.foot .sq i{display:block;width:16px;height:16px;border:1.5px solid var(--field)}
+.foot .sq i.on{background:var(--ink);border-color:var(--ink)}
+.social .bar{height:104px;padding:0 72px}
+.social .bar .brand{gap:14px;font-size:34px}
+.social .bar .brand .mark{width:36px;height:36px}
+.social .bar .chap{font-size:28px}
+.social .foot{left:72px;right:72px;bottom:40px;font-size:28px}
+.social .foot .sq{display:none}
+
+.h1{position:absolute;left:0;top:0;max-width:1680px;font:600 60px/1.15 var(--sans);letter-spacing:-.022em}
+.social .h1{max-width:936px;font-size:66px;line-height:1.12}
+
+/* 1. Title: a line of a document, already a full frame, then the name, what it does and the owner's line. */
+.ttl{position:absolute;left:40px;right:40px;top:-168px;bottom:-120px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
+.ttl .top0{display:flex;flex-direction:column;align-items:flex-start}
+.ttl .name{display:flex;align-items:center;gap:40px;font:600 132px/1 var(--sans);letter-spacing:-.035em}
+.ttl .name .mark{width:124px;height:124px}
+.ttl .spec0{margin-top:60px;padding:4px 40px;border:1.5px solid var(--ink);font:400 58px/1.5 var(--mono);white-space:pre}
+.ttl .kick{margin-top:46px;font:600 54px/1.2 var(--sans);letter-spacing:-.015em}
+.ttl .rule{align-self:stretch;height:2px;margin:46px 0 40px;background:var(--ink);transform-origin:0 50%}
+.ttl .l1{font:400 48px/1.25 var(--sans);color:var(--ink2);letter-spacing:-.01em}
+.ttl .l2{margin-top:6px;font:600 48px/1.25 var(--sans);letter-spacing:-.01em}
+.ttl .urls{margin-top:46px;font:400 36px/1 var(--mono);color:var(--mu)}
+.social .ttl{left:0;right:0;top:-160px;bottom:-220px}
+.social .ttl .name{gap:26px;font-size:100px}
+.social .ttl .name .mark{width:92px;height:92px}
+.social .ttl .spec0{margin-top:64px;padding:12px 36px;font-size:52px}
+.social .ttl .kick{margin-top:56px;font-size:62px;line-height:1.15}
+.social .ttl .rule{margin:52px 0 44px}
+.social .ttl .urls{margin-top:0;font-size:38px;line-height:1.3}
+
+/* 2. The problem */
+.card{position:absolute;padding:24px 22px 22px;border:1.5px solid var(--ink);background:var(--paper);display:flex;flex-direction:column;z-index:1}
+.card .bars i{display:block;height:10px;margin-bottom:14px;background:var(--line)}
+.card .dat{margin-top:12px;font:400 29px/1.3 var(--mono);color:var(--ink);white-space:pre}
+.card .lab{margin-top:auto;font:600 32px/1.12 var(--sans);letter-spacing:-.01em;white-space:nowrap}
+.social .card{padding:22px 26px}
+.social .card .dat{margin-top:0;font-size:38px}
+.social .card .lab{font-size:44px}
+.flowline{position:absolute;overflow:visible;fill:none;stroke:var(--ink);stroke-width:2}
+.aibox{position:absolute;padding:28px;border:1.5px solid var(--ink);background:var(--bg)}
+.aibox .lab{font:600 40px/1.15 var(--sans);letter-spacing:-.01em}
+.social .aibox{padding:24px 28px}
+.social .aibox .lab{font-size:46px}
+.slot{position:absolute;width:48px;height:60px;border:1.5px dashed var(--field)}
+.pk{position:absolute;left:0;top:0;width:48px;height:60px;padding:10px 8px;border:1.5px solid var(--ink);background:var(--paper);z-index:2}
+.pk i{display:block;height:6px;margin-bottom:6px;background:var(--line)}
+.pk i.pd{width:62%;background:var(--ink)}
+.pk.anon i.pd{background:var(--sig)}
+.cap{position:absolute;left:0;max-width:1600px;font:400 46px/1.3 var(--sans);color:var(--ink2)}
+.problem .cap{top:668px;font-weight:600;color:var(--ink);letter-spacing:-.01em}
+.social .cap{max-width:936px;font-size:56px;line-height:1.2}
+.social .problem .cap{top:930px}
+
+.tbl{position:absolute;left:0;right:0;top:150px}
+.tbl .r{display:grid;grid-template-columns:96px 720px 1fr;align-items:baseline;padding:30px 0 32px;border-top:1px solid var(--line)}
+.tbl .r:first-child{border-top:2px solid var(--ink)}
+.tbl .n{font:400 30px/1 var(--mono);color:var(--mu)}
+.tbl .k{font:600 46px/1.15 var(--sans);letter-spacing:-.012em}
+.tbl .v{font:400 42px/1.3 var(--sans);color:var(--ink2)}
+
+/* 3. Our answer: the document and its key */
+.doc{position:absolute;left:0;right:0;top:150px;padding:40px 56px 44px;border:1.5px solid var(--ink);background:var(--paper)}
+.doc .lab{position:absolute;right:0;top:-48px;font:400 28px/1 var(--mono);color:var(--mu)}
+.doc .ln{position:relative;font:400 42px/1.8 var(--mono);white-space:pre}
+.doc .cur{position:absolute;left:0;width:6px;background:var(--ink)}
+.doc .lnbg{position:absolute;left:0;right:0;background:var(--well)}
+.ent{white-space:pre}
+.ent.hit{background:#e3e6ea}
+.keyl{position:absolute;left:0;right:0;top:576px;height:44px}
+.keyl p{position:absolute;left:0;top:0;font:400 34px/1.2 var(--sans);color:var(--ink2);white-space:nowrap}
+.keyl p.off{color:var(--ink);font-weight:600}
+.keysq{position:absolute;left:0;right:0;top:632px;display:grid;grid-template-columns:repeat(32,1fr);gap:8px}
+.keysq i{display:block;height:38px}
+.answer-doc .cap{top:704px;color:var(--ink)}
+
+.story-h .nm{font-weight:600}
+.spec{position:absolute;left:0;right:0;top:150px;border-top:2px solid var(--ink)}
+.spec .r{display:grid;grid-template-columns:360px 1fr;padding:26px 0 28px;border-bottom:1px solid var(--line)}
+.spec .k{font:400 38px/1.55 var(--sans);color:var(--mu)}
+.spec .t{font:400 42px/1.55 var(--mono)}
+.spec .why{margin-top:10px;font:400 40px/1.3 var(--sans);color:var(--ink2)}
+.social .story-h{font-size:60px;line-height:1.3}
+.social .spec{top:200px}
+.social .spec .r{display:block;padding:24px 0 30px}
+.social .spec .k{font-size:40px;line-height:1.3}
+.social .spec .t{margin-top:10px;font-size:44px;line-height:1.5}
+.social .spec .why{margin-top:12px;font-size:48px;line-height:1.25;color:var(--ink)}
+
+/* Tile grids: each tile carries its own hairline (overlapping its neighbour's by 1px), so a grid shows nothing until
+   its tiles appear. */
+.tiles{position:absolute;left:0;right:0;top:120px;display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:316px}
+.tile{position:relative;margin:0 -1px -1px 0;padding:28px 34px 30px;border:1px solid var(--line);background:var(--paper)}
+.tile .n{font:400 28px/1 var(--mono);color:var(--mu)}
+.tile .k{margin-top:24px;font:600 50px/1.1 var(--sans);letter-spacing:-.018em}
+.tile .v{margin-top:16px;font:400 37px/1.3 var(--sans);color:var(--ink2)}
+
+/* 4. Three ways in */
+.blk{position:absolute;padding:22px 28px;border:1.5px solid var(--ink);background:var(--paper);z-index:2}
+.blk .k{font:600 42px/1.15 var(--sans);letter-spacing:-.01em}
+.blk .v{margin-top:8px;font:400 34px/1.25 var(--sans);color:var(--ink2)}
+.blk .v .mono{font-size:33px}
+.eng{border-width:2.5px;background:var(--bg);padding:30px 32px}
+.eng .k{display:flex;align-items:center;gap:16px;font-size:46px}
+.eng .k .mark{width:44px;height:44px}
+.eng .v{margin-top:18px}
+.ai2{display:flex;align-items:center;justify-content:center;background:var(--bg)}
+.olab{position:absolute;font:400 36px/1.2 var(--sans);color:var(--ink2);text-align:center;z-index:1}
+.unote{position:absolute;padding-left:34px;font:400 34px/1.3 var(--sans);color:var(--ink);z-index:1}
+.unote::before{content:"";position:absolute;left:0;top:.42em;width:12px;height:12px;background:var(--ink)}
+.local{position:absolute;left:0;right:0;top:722px;height:76px;display:flex;align-items:center;padding:0 30px;border:1.5px dashed var(--field);font:400 36px/1.2 var(--sans);color:var(--ink2)}
+.social .blk .k{font-size:46px}
+.social .ent3{display:flex;align-items:center;justify-content:center;padding:0 16px}
+.social .eng{padding:32px 36px}
+.social .eng .k{font-size:52px}
+.social .eng .k .mark{width:50px;height:50px}
+.social .eng .v{margin-top:16px;font-size:44px}
+.social .olab{font-size:42px}
+.social .ai2 .k{font-size:50px}
+.social .unote{padding-left:40px;font-size:48px;line-height:1.25}
+.social .unote::before{width:16px;height:16px;top:.38em}
+.social .local{display:block;top:944px;height:auto;padding:20px 28px;font-size:42px;line-height:1.25}
+
+/* 5. Your own version */
+.cmd{position:absolute;left:0;right:0;top:136px;padding:30px 36px;border:1.5px solid var(--ink);font:400 40px/1.2 var(--mono);white-space:pre}
+.cmd .pr{color:var(--mu)}
+.cmd .caret{display:inline-block;width:.6em;height:1em;margin-left:2px;vertical-align:-.15em;background:var(--ink)}
+.fnote{position:absolute;left:0;top:268px;font:400 30px/1.25 var(--mono);color:var(--mu)}
+.steps{position:absolute;left:0;right:0;top:336px;display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:424px}
+.steps .tile .k{font-size:46px}
+.steps .tile .v{font-size:36px}
+.steps .tile .v .mono{font-size:33px}
+.steps .ex{position:absolute;left:34px;right:20px;bottom:30px;font:400 34px/1.5 var(--mono)}
+.social .cmd{top:190px;padding:26px 30px;font-size:40px;line-height:1.3}
+.social .fnote{top:388px;font-size:38px;line-height:1.3}
+.social .rows{position:absolute;left:0;right:0;top:500px}
+.social .row{padding:24px 0 26px;border-bottom:1px solid var(--line)}
+.social .row:first-child{border-top:2px solid var(--ink)}
+.social .row .k{font:600 52px/1.15 var(--sans);letter-spacing:-.015em}
+.social .row .v{margin-top:6px;font:400 44px/1.25 var(--sans);color:var(--ink2)}
+.social .row .v .mono{font-size:42px}
+
+/* 6. The numbers */
+.figs{position:absolute;left:0;right:0;top:120px;display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:322px}
+.figs>div{margin:0 -1px -1px 0;padding:30px 34px;border:1px solid var(--line);background:var(--paper)}
+.figs .f{font:600 92px/1 var(--sans);letter-spacing:-.03em;white-space:nowrap}
+.figs .l{margin-top:22px;font:400 34px/1.3 var(--sans);color:var(--ink2)}
+.social .figs{display:block}
+.social .figs>div{display:grid;grid-template-columns:400px 1fr;align-items:center;gap:28px;margin:0;padding:16px 0;border:0;border-bottom:1px solid var(--line)}
+.social .figs>div:first-child{border-top:2px solid var(--ink)}
+.social .figs .f{font-size:84px}
+.social .figs .l{margin-top:0;font-size:42px;line-height:1.25}
+/* the index box fits its content: top-aligned while the value is pending, never a band of empty space */
+.ci{position:absolute;left:0;top:136px;width:720px;padding:36px 42px;border:2px solid var(--ink);display:flex;flex-direction:column}
+.ci .k{font:600 46px/1.1 var(--sans);letter-spacing:-.012em}
+.ci .val{margin-top:14px;font:600 120px/1 var(--sans);letter-spacing:-.04em;white-space:nowrap}
+.ci .val.pd{margin-top:44px;font-size:84px;line-height:1.05;letter-spacing:-.025em}
+.ci .ic{margin-top:12px;font:500 36px/1.2 var(--sans);color:var(--ink2)}
+.ci .g{margin-top:10px;font:400 28px/1.3 var(--sans);color:var(--ink2)}
+.ci .d{margin-top:20px;font:400 34px/1.3 var(--sans);color:var(--ink2)}
+.ci.pending .d{margin-top:28px;font-size:37px}
+.ci .p{margin-top:16px;padding-top:16px;border-top:1px solid var(--line);font:400 32px/1.3 var(--sans);color:var(--ink2)}
+.ci.pending .p{font-size:34px}
+.lim{position:absolute;left:800px;right:0;top:136px}
+.lim .k{padding-bottom:18px;font:600 46px/1.1 var(--sans);letter-spacing:-.012em;border-bottom:2px solid var(--ink)}
+.lim ul{list-style:none}
+.lim li{position:relative;padding:24px 0 24px 34px;border-bottom:1px solid var(--line);font:400 39px/1.3 var(--sans);color:var(--ink2)}
+.lim li::before{content:"";position:absolute;left:0;top:calc(24px + .48em);width:12px;height:12px;background:var(--ink)}
+.lim .lk{margin-top:30px;font:400 36px/1.35 var(--sans);color:var(--ink2)}
+.lim .lk .mono{color:var(--ink)}
+/* social: figures, the index and the limits stacked in one scene */
+.social .stack{position:absolute;left:0;right:0;top:108px;display:flex;flex-direction:column;gap:26px}
+.social .stack .figs{position:static}
+.social .stack .ci{position:static;width:auto;height:auto;padding:28px 36px}
+.social .ci .k{font-size:46px}
+.social .ci .val{margin-top:12px;font-size:100px}
+.social .ci .val.pd{margin-top:14px;font-size:88px}
+.social .ci .ic{font-size:40px}
+.social .ci .g{font-size:34px}
+.social .lims{list-style:none}
+.social .lims li{position:relative;padding:20px 0 20px 40px;border-bottom:1px solid var(--line);font:400 42px/1.25 var(--sans);color:var(--ink2)}
+.social .lims li:first-child{border-top:2px solid var(--ink)}
+.social .lims li::before{content:"";position:absolute;left:0;top:calc(22px + .42em);width:16px;height:16px;background:var(--ink)}
+
+/* 7. Closing */
+.close{position:absolute;left:40px;right:40px;top:-168px;bottom:-120px;display:flex;flex-direction:column;justify-content:center}
+.close .brand{display:flex;align-items:center;gap:22px;font:600 60px/1 var(--sans);letter-spacing:-.02em}
+.close .brand .mark{width:64px;height:64px}
+.close .l1{margin-top:64px;font:400 54px/1.2 var(--sans);color:var(--ink2);letter-spacing:-.01em}
+.close .big{margin-top:12px;font:600 150px/1.05 var(--sans);letter-spacing:-.035em}
+.close .rule{height:2px;margin:52px 0 40px;background:var(--ink);transform-origin:0 50%}
+.close .urls{font:400 40px/1.3 var(--mono)}
+.close .repo{margin-top:8px;font:400 36px/1.3 var(--mono);color:var(--mu)}
+.close .cred{display:grid;grid-template-columns:repeat(3,auto);justify-content:start;margin-top:56px;font:400 38px/1.3 var(--sans);color:var(--ink2)}
+.close .cred p{padding:0 48px;border-left:1px solid var(--line);white-space:nowrap}
+.close .cred p:first-child{padding-left:0;border-left:0}
+.close .lic{margin-top:30px;font:400 30px/1 var(--mono);color:var(--mu)}
+.social .close{left:0;right:0;top:-160px;bottom:-220px}
+.social .close .brand{font-size:64px}
+.social .close .brand .mark{width:66px;height:66px}
+.social .close .l1{margin-top:56px;font-size:54px;line-height:1.2}
+.social .close .big{margin-top:16px;font-size:104px}
+.social .close .rule{margin:44px 0 36px}
+.social .close .urls{font-size:40px}
+.social .close .repo{font-size:33px}
+.social .close .cred{grid-template-columns:1fr;row-gap:10px;margin-top:44px;font-size:42px}
+.social .close .cred p{padding:0;border:0}
+.social .close .lic{margin-top:30px;font-size:32px}
+
+/* Preview controls (never in a capture) */
+.pv{position:fixed;left:16px;bottom:16px;z-index:99;display:flex;gap:10px;align-items:center;padding:8px 12px;background:var(--ink);color:#fff;font:400 18px/1 var(--mono)}
+.pv input{width:900px}

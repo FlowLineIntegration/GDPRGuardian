@@ -1,0 +1,11 @@
+# Gardien RGPD · GDPR Guardian : sonde de santé du service, /etc/systemd/system/gdprguardian-watchdog.service,
+# lancée par gdprguardian-watchdog.timer. Health probe of the service, run by the timer.
+[Unit]
+Description=Gardien RGPD - GDPR Guardian health probe (restarts an unresponsive container)
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/gdprguardian-watchdog
+# Trois sondes de 30 s au plus, deux pauses de 10 s, puis le redémarrage (15 s) / three 30 s probes, two pauses, restart.
+TimeoutStartSec=180

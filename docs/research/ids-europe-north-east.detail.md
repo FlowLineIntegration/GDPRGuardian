@@ -1,0 +1,325 @@
+# ids-europe-north-east details
+
+### Items
+| name | license | verdict | reco | status | notes |
+|---|---|---|---|---|---|
+| python-stdnum | LGPL-2.1-or-later (PyPI classifier says LGPLv2+) | caution | optional | 2.2 released 2026-01-04 (2.1 2025-05-17; 2.0 yanked); active | Best coverage here: SE/DK/FI/NO/IS/EE/LV/LT/PL/CZ/SK/HU-VAT/RO/BG/HR/SI plus eu.vat and EU OSS. Gaps: HU TAJ, adóazonosító and személyi azonosító; PL ID card; EORI; EHIC; driving licence. Outdated: is_.kennitala enforces the checksum (abolished 2026-02-18); no NO 2032 rule seen. LGPL: fine as an unmodified pip dependency or test oracle; do not copy code into the MIT repo. |
+| django-localflavor | BSD-3-Clause | caution | borrow-ideas | 5.1 released 2026-08-01; requires_dist django>=4.2, python-stdnum>=2.2 | BSD itself, but installing it brings in Django and LGPL python-stdnum. Useful as a readable reference for PL (PESEL/NIP/REGON/ID card), CZ birth number and IČO, RO CNP/CIF, BG EGN/EIK, SI EMŠO/tax number, HR JMBG, EE, LT, LV, NO, FI, IS, SE. Its LV field rejects the new '32' codes, IS enforces mod 11, HR OIB is length-only, and DK/HU/SK have no ID fields. |
+| Faker | MIT | ok | adopt | 40.43.0 (latest seen on PyPI; upload date not captured) | Use as a dev dependency for test corpora. Valid generators: sv_SE ssn/org_id, fi_FI ssn (old signs only), no_NO ssn, et_EE ssn, lv_LV ssn (old format), pl_PL pesel/nip/regon/identity_card_number, cs_CZ/sk_SK birth_number, hu_HU ssn (személyi szám; K=10 bug), ro_RO ssn/vat_id, hr_HR ssn (OIB). Missing: DK CPR, IS, LT, BG EGN, SI EMŠO, HU TAJ; most vat_id outputs have no checksum. |
+| Microsoft Presidio (now data-privacy-stack/presidio) | MIT | ok | borrow-ideas | presidio-analyzer 2.2.364 released 2026-07-22; docs moved to presidio.dataprivacystack.org; announced as becoming community-owned | In this scope only PL_PESEL (pattern has no word boundaries), FI_PERSONAL_IDENTITY_CODE (new century signs; case-sensitive century map), SE_PERSONNUMMER (Luhn, day+60) and SE_ORGANISATIONSNUMMER. Fine to reuse its PatternRecognizer architecture and code under MIT. |
+| VIES / EC EORI validation / Skatteetaten PID validation services | n/a (public web services) | avoid | avoid | operational | Do not call them at runtime. They send the detected identifier to a third party (against GDPR Guardian's purpose), add latency and are rate-limited. Use offline checksums only. |
+
+### Identifiers
+- **SE SE_PERSONNUMMER** (personnummer; national id; FP medium)
+  - format: YYMMDD-NNNC (10 digits); 12-digit storage YYYYMMDDNNNC; '-' becomes '+' in the year the holder turns 100; NNN odd=male, even=female; C=check digit
+  - regex: `(?<!\d)(?:(?:18|19|20)\d{2}|\d{2})(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01]|6[1-9]|[78]\d|9[01])\s?[-+]?\s?\d{4}(?!\d)`
+  - checksum: Luhn / modulus-10 with weights 2,1,2,1,2,1,2,1,2 over YYMMDDNNN (sum the digits of the products); C=(10 - sum mod 10) mod 10. The century digits are not part of the check.
+  - edge: Samordningsnummer = day+60 (61-91), issued since 2000. A bare 10-digit form collides with orgnr (third digit >=2) and phone numbers. Since 1990 the birth-number digits no longer encode the county. Excel drops the leading zero for 2000-2009 births.
+  - ctx: personnummer, personnr, pnr, p-nr, födelsenummer, samordningsnummer, id-nummer, personbeteckning
+  - impls: Presidio SE_PERSONNUMMER (MIT; Luhn + date, handles day+60, no stdnum); python-stdnum se.personnummer (LGPL); django-localflavor SEPersonalIdentityNumberField (BSD; coordination numbers on by default); Faker sv_SE ssn (MIT; Luhn, long=True form, no samordningsnummer)
+  - src: https://docs.swedenconnect.se/technical-framework/mirror/skv/skv704-8.pdf ; https://www.skatteverket.se/offentligaaktorer/informationsutbyte/folkbokforingsamordningsnummer.4.46ae6b26141980f1e2d3643.html ; https://raw.githubusercontent.com/data-privacy-stack/presidio/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/country_specific/sweden/se_personnummer_recognizer.py
+- **SE SE_SAMORDNINGSNUMMER** (samordningsnummer; national id; FP low)
+  - format: Same as personnummer, with 60 added to the birth day (e.g. 701063-2391). Valid 5 years, renewable; status can be active or dormant ('vilande').
+  - regex: `(?<!\d)(?:(?:18|19|20)\d{2}|\d{2})(?:0[1-9]|1[0-2])(?:6[1-9]|[78]\d|9[01])\s?[-+]?\s?\d{4}(?!\d)`
+  - checksum: Same Luhn as personnummer, computed on the digits with the day already +60
+  - edge: Can be merged into the SE_PERSONNUMMER recognizer. Day values 61-91 must not fail date validation.
+  - ctx: samordningsnummer, samordningsnr, personnummer, id-nummer
+  - impls: Presidio SE_PERSONNUMMER (covers it); python-stdnum se.personnummer (LGPL); django-localflavor (coordination_number=True); Faker: not generated
+  - src: https://www.skatteverket.se/offentligaaktorer/informationsutbyte/folkbokforingsamordningsnummer.4.46ae6b26141980f1e2d3643.html ; https://docs.swedenconnect.se/technical-framework/mirror/skv/skv704-8.pdf
+- **SE SE_ORGANISATIONSNUMMER** (organisationsnummer; company; FP medium)
+  - format: GNNNNN-NNNK, 10 digits; the third digit is always >=2 so it cannot be confused with a personnummer; G=group number; often stored with a '16' prefix (12 digits). VAT = 'SE' + orgnr + '01'. Sole traders use their personnummer.
+  - regex: `(?<![\dA-Z])(?:SE\s?)?(?:16)?[1-9]\d[2-9]\d{3}[-\s]?\d{4}(?:01)?(?!\d)`
+  - checksum: Luhn (mod 10, weights 2,1,...) over the first 9 digits
+  - edge: The code for legal form is not part of the number. Some legal entities share the 10-digit pattern with a personnummer (sole traders).
+  - ctx: organisationsnummer, org.nr, orgnr, org nr, momsregistreringsnummer, momsnr, VAT-nummer, Bolagsverket
+  - impls: Presidio SE_ORGANISATIONSNUMMER (MIT); python-stdnum se.orgnr, se.vat (LGPL); django-localflavor SEOrganisationNumberField (BSD); Faker sv_SE org_id/vat_id (MIT, Luhn)
+  - src: https://docs.swedenconnect.se/technical-framework/mirror/skv/skv709-8.pdf ; https://presidio.dataprivacystack.org/supported_entities/
+- **DK DK_CPR** (CPR-nummer (personnummer); national id; FP high)
+  - format: DDMMYY-SSSS. Digit 7 together with YY gives the century: 0-3 = 1900s; 4 or 9 = 2000s if YY<=36, else 1900s; 5-8 = 2000s if YY<=57, else 1800s. Last digit odd=male, even=female.
+  - regex: `(?<!\d)(?:0[1-9]|[12]\d|3[01]|6[1-9]|[78]\d|9[01])(?:0[1-9]|1[0-2])\d{2}[-\s]?\d{4}(?!\d)`
+  - checksum: None guaranteed. Legacy modulus 11 (weights 4,3,2,7,6,5,4,3,2,1, sum ≡ 0 mod 11) was abandoned around 2007; numbers without a check digit are now issued. Validate the date and century only; a mod-11 pass can raise the score slightly.
+  - edge: Erstatningspersonnummer (substitute number) adds 6 to the first day digit (day+60). Excel turns days 01-09 into 9-digit numbers. Strings that look like a date plus 4 digits are common (invoices).
+  - ctx: CPR, CPR-nr, CPR-nummer, cpr.nr., personnummer, personnr, fødselsdato, sygesikringsbevis
+  - impls: python-stdnum dk.cpr (LGPL; date and century check, checksum deliberately not enforced); Presidio: none; django-localflavor: none (dk has only postal code/municipality); Faker: none (dk_DK has vat_id only)
+  - src: https://www.dst.dk/da/Statistik/dokumentation/Times/cpr-oplysninger/bef-personnummer/pnr ; https://cpr.dk/cpr-systemet/erstatningspersonnummer-i-eksterne-systemer ; https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/dk/cpr.py
+- **DK DK_CVR** (CVR-nummer / momsnummer; company; FP medium)
+  - format: 8 digits, first digit not 0; VAT = 'DK' + CVR; often written as 4 groups of 2
+  - regex: `(?<![\dA-Z])(?:DK[\s-]?)?[1-9]\d(?:[\s-]?\d{2}){3}(?!\d)`
+  - checksum: Weights 2,7,6,5,4,3,2,1; weighted sum ≡ 0 mod 11
+  - edge: Can collide with Danish phone numbers (8 digits, often grouped 2-2-2-2). Keep a context window.
+  - ctx: CVR, CVR-nr, CVR-nummer, momsnummer, SE-nr, virksomhed
+  - impls: python-stdnum dk.cvr (LGPL); Faker dk_DK vat_id (random digits, no checksum); Presidio/localflavor: none
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/dk/cvr.py ; https://raw.githubusercontent.com/joke2k/faker/master/faker/providers/ssn/dk_DK/__init__.py
+- **FI FI_HETU** (henkilötunnus (HETU) / personbeteckning; national id; FP low)
+  - format: DDMMYYCZZZQ. Century sign C: '+' = 1800s; '-', Y, X, W, V, U = 1900s; A, B, C, D, E, F = 2000s (the extra signs have been used since 1 Jan 2023). ZZZ = 002-899, 900-999 = temporary. Q = check character.
+  - regex: `(?i)(?<![\dA-Z])(?:0[1-9]|[12]\d|3[01])(?:0[1-9]|1[0-2])\d{2}[-+A-FU-Y]\d{3}[0-9A-FHJ-NPR-Y](?![\dA-Z])`
+  - checksum: Q = '0123456789ABCDEFHJKLMNPRSTUVWXY'[int(DDMMYYZZZ) mod 31] (G, I, O, Q and Z are not used)
+  - edge: Planned: new codes from 2027 issued without regard to gender (status not confirmed). Lowercase input: Presidio's century map is case-sensitive. Temporary IDs 900-999.
+  - ctx: henkilötunnus, hetu, HETU, sotu, personbeteckning, syntymäaika, personal identity code
+  - impls: Presidio FI_PERSONAL_IDENTITY_CODE (MIT; new signs supported); python-stdnum fi.hetu (LGPL; new signs, allow_temporary); django-localflavor FISocialSecurityNumber (BSD; regex accepts new signs); Faker fi_FI ssn (MIT; only + - A, so the new signs are missing)
+  - src: https://fi.wikipedia.org/wiki/Henkil%C3%B6tunnus ; https://www.silta.fi/uutiset-ja-blogi/henkilotunnuksen-muutos-2023 ; https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/fi/hetu.py ; https://raw.githubusercontent.com/data-privacy-stack/presidio/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/country_specific/finland/fi_personal_identity_code_recognizer.py ; https://uusisuomi.fi/uutiset/hallitusohjelman-kirjaus-hylataan-sukupuolineutraali-hetu-uudistus-ei-toteudu-suunniteltuna-mutta-sukupuolisidonnaisuudesta-luovutaan-silti/4cc03361-6b1e-4783-b082-341e87108a59
+- **FI FI_YTUNNUS** (Y-tunnus / ALV-numero (FO-nummer); company; FP medium)
+  - format: NNNNNNN-K (Y-tunnus). VAT = 'FI' + 8 digits with no hyphen.
+  - regex: `(?<![\dA-Z])(?:FI\s?)?\d{7}-?\d(?!\d)`
+  - checksum: Weights 7,9,10,5,8,4,2,1 over all 8 digits; sum ≡ 0 mod 11. Equivalently K = 11 - (S mod 11), K = 0 when the remainder is 0; remainder 1 means the number is invalid.
+  - edge: Without the hyphen it is a bare 8-digit number. FI also has a 12-digit veronumero (individual tax number; python-stdnum fi.veronumero).
+  - ctx: Y-tunnus, y-tunnus, yritystunnus, ALV-numero, ALV nro, arvonlisäverotunniste, FO-nummer, business ID
+  - impls: python-stdnum fi.ytunnus/fi.alv (LGPL); Faker fi_FI vat_id (no checksum); Presidio/localflavor: none
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/fi/alv.py ; https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/fi/ytunnus.py
+- **NO NO_FODSELSNUMMER** (fødselsnummer / D-nummer / H-nummer; national id; FP low)
+  - format: DDMMYY III K1 K2 (11 digits). D-number: day+40. H-number: month+40. FH-number: first digit 8 or 9, no date. Existing numbers: the individual digits encode the century and the third one encodes gender. From 1 Jan 2032 new numbers carry neither gender nor century.
+  - regex: `(?<!\d)\d{6}[\s-]?\d{5}(?!\d)`
+  - checksum: K1 = (11 - S1 mod 11) mod 11 with weights 3,7,6,1,8,9,4,5,2. K2 = same rule with weights 5,4,3,2,7,6,5,4,3,2 over the 9 digits plus K1. A result of 10 makes the number invalid. Numbers issued from 2032: k1 = {11,12,13,14} - (S1 mod 11), minus 11 if >10, so 4 values are valid; k2 is unchanged. Validators must accept both rules.
+  - edge: Synthetic test numbers exist (Skatteetaten offers a validation service). Do not call it at runtime, because that sends the identifier to a third party. Excel drops the leading zero for days 01-09.
+  - ctx: fødselsnummer, fnr, f.nr., fødselsnr, personnummer, D-nummer, d-nr, identitetsnummer, H-nummer
+  - impls: python-stdnum no.fodselsnummer (LGPL; D and H numbers, FH rejected, 2032 rule not seen in source); django-localflavor NOSocialSecurityNumber (BSD; both mod-11, D and H rejected through the date check); Faker no_NO ssn (MIT; both check digits, no D/H); Presidio: none
+  - src: https://skatteetaten.github.io/folkeregisteret-api-dokumentasjon/nytt-fodselsnummer-fra-2032/ ; https://www.skatteetaten.no/deling/folkeregisteret/pid/ ; https://no.wikipedia.org/wiki/F%C3%B8dselsnummer ; https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/no/fodselsnummer.py
+- **NO NO_ORGNR** (organisasjonsnummer / MVA-nummer; company; FP medium)
+  - format: 9 digits, usually starting with 8 or 9, written 3-3-3. VAT: 'NO' + orgnr + 'MVA'.
+  - regex: `(?<![\dA-Z])(?:NO\s?)?[89]\d{2}[\s.]?\d{3}[\s.]?\d{3}(?:\s?MVA)?(?!\d)`
+  - checksum: Weights 3,2,7,6,5,4,3,2,1; sum ≡ 0 mod 11
+  - edge: The 8/9 first digit is a convention not confirmed from a primary source (python-stdnum does not enforce it). Norwegian kontonummer (11 digits, mod 11) is a separate financial ID.
+  - ctx: organisasjonsnummer, org.nr, orgnr, foretaksnummer, MVA, Foretaksregisteret, Brønnøysundregistrene
+  - impls: python-stdnum no.orgnr, no.mva (LGPL); Presidio/localflavor: none; Faker no_NO: not verified
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/no/orgnr.py
+- **IS IS_KENNITALA** (kennitala; national id; FP medium)
+  - format: DDMMYY-RRVC: RR random (usually >=20), V check digit, C century (8 = 1800s, 9 = 1900s, 0 = 2000s). Organisations: day+40.
+  - regex: `(?<!\d)[0-7]\d(?:0[1-9]|1[0-2])\d{2}[-\s]?\d{3}[890](?!\d)`
+  - checksum: Legacy: V = 11 - (sum with weights 3,2,7,6,5,4,3,2 mod 11), 0 if the remainder is 0. ABOLISHED: Þjóðskrá issues kennitölur (personal and system IDs) without a calculated check digit; the change takes effect from 18 Feb 2026, starting with test numbers. Treat the checksum as optional.
+  - edge: python-stdnum and django-localflavor still enforce mod 11, so they produce false negatives after 2026. Kerfiskennitala (system IDs for foreigners). The VSK (VAT) number has 5-6 digits and no checksum.
+  - ctx: kennitala, kt., kt, kennitölu, kennitölur, kerfiskennitala, VSK-númer, virðisaukaskattsnúmer
+  - impls: python-stdnum is_.kennitala (LGPL; enforces checksum, outdated); django-localflavor ISIdNumberField (BSD; enforces mod 11); Faker: no Icelandic locale; Presidio: none
+  - src: https://www.skra.is/folk/eg-i-thjodskra/um-kennitolur/kennitolur-an-vartolu ; https://is.wikipedia.org/wiki/Kennitala ; https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/is_/kennitala.py
+- **EE EE_ISIKUKOOD** (isikukood; national id; FP low)
+  - format: GYYMMDDSSSC (11 digits). G = 1-8 gives sex and century (1/2 = 1800s, 3/4 = 1900s, 5/6 = 2000s, odd = male). SSS = serial.
+  - regex: `(?<!\d)[1-8]\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])\d{4}(?!\d)`
+  - checksum: C = sum(d_i * w_i) mod 11 with w = 1,2,3,4,5,6,7,8,9,1. If the result is 10, use w = 3,4,5,6,7,8,9,1,2,3. If 10 again, C = 0.
+  - edge: Serial ranges were assigned per hospital until 2013. 11 digits collide with PESEL, LT, NO and HR numbers.
+  - ctx: isikukood, IK, isikukoodi, sünniaeg, личный код, personal code
+  - impls: python-stdnum ee.ik (LGPL); django-localflavor EEPersonalIdentificationCode (BSD); Faker et_EE ssn (MIT, checksum); Presidio: none
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/ee/ik.py ; https://www.riigiteataja.ee/akt/106032012004
+- **EE EE_REGISTRIKOOD** (registrikood / KMKR; company; FP high)
+  - format: Registrikood: 8 digits, first digit 1 (companies), 7 (state bodies), 8 (non-profits) or 9 (foundations). VAT (KMKR): 'EE' + 9 digits starting with '10'.
+  - regex: `(?<![\dA-Z])(?:[1789]\d{7}|EE\s?10\d{7})(?!\d)`
+  - checksum: Registrikood: same algorithm as isikukood over the first 7 digits (undocumented officially). KMKR: weights 3,7,1,3,7,1,3,7,1; sum ≡ 0 mod 10.
+  - edge: A bare 8-digit number needs context.
+  - ctx: registrikood, reg. kood, äriregistri kood, KMKR, käibemaksukohustuslase number
+  - impls: python-stdnum ee.registrikood, ee.kmkr (LGPL); django-localflavor EEBusinessRegistryCode (BSD); Faker et_EE vat_id (no checksum)
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/ee/registrikood.py ; https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/ee/kmkr.py
+- **LV LV_PERSONAS_KODS** (personas kods; national id; FP low)
+  - format: Old: DDMMYY-CNNNX (C century: 0 = 1800s, 1 = 1900s, 2 = 2000s). Since 1 July 2017 new codes have no birth date: '32' + 9 digits (32XXXX-XXXXX).
+  - regex: `(?<!\d)(?:(?:0[1-9]|[12]\d|3[01])(?:0[1-9]|1[0-2])\d{2}[-\s]?[012]\d{4}|32\d{4}[-\s]?\d{5})(?!\d)`
+  - checksum: X = ((1 - sum(d_i * w_i)) mod 11) mod 10 with w = 1,6,3,7,9,10,5,8,4,2 (equivalent to stdnum's (1 + sum with 10,5,8,4,2,1,6,3,7,9) mod 11 mod 10). python-stdnum applies the same check to '32' codes and notes the algorithm 'has not been confirmed by an independent source'.
+  - edge: django-localflavor and Faker know only the old format (localflavor rejects '32' codes). The '32' prefix could be read as day 32.
+  - ctx: personas kods, p.k., pers. kods, PK, персональный код, personal code
+  - impls: python-stdnum lv.pvn (LGPL; personal codes incl. '32' handled inside the VAT module); django-localflavor LVPersonalCodeField (BSD; old format only); Faker lv_LV ssn (MIT; old format only); Presidio: none
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/lv/pvn.py ; https://raw.githubusercontent.com/django/django-localflavor/master/localflavor/lv/forms.py ; https://en.wikipedia.org/wiki/National_identification_number
+- **LV LV_REG_NR** (vienotais reģistrācijas numurs / PVN numurs; company; FP medium)
+  - format: Legal entities: 11 digits, first digit >3. VAT = 'LV' + 11 digits (legal entity number, or personas kods for natural persons).
+  - regex: `(?<![\dA-Z])(?:LV\s?)?[4-9]\d{10}(?!\d)`
+  - checksum: Weights 9,1,4,8,3,10,2,5,7,6,1; sum mod 11 == 3
+  - edge: Collides with other 11-digit IDs; the first digit separates it from old-format personas kods (days 01-31).
+  - ctx: reģistrācijas numurs, reģ. nr., vienotais reģistrācijas numurs, PVN maksātāja numurs, nodokļu maksātāja kods
+  - impls: python-stdnum lv.pvn (LGPL); Faker lv_LV vat_id (no checksum)
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/lv/pvn.py
+- **LT LT_ASMENS_KODAS** (asmens kodas; national id; FP low)
+  - format: G YYMMDD NNN K (11 digits). G = 1-6 gives sex and century (odd = male). Standard LST 1185-91.
+  - regex: `(?<!\d)[1-69]\d{2}(?:0\d|1[0-2])(?:[0-2]\d|3[01])\d{4}(?!\d)`
+  - checksum: Same as EE isikukood: weights 1-9,1 mod 11; if 10, weights 3-9,1,2,3; if 10 again, K = 0.
+  - edge: Codes starting with 9 are special: no date and, per lt.wikipedia, no check digit, yet python-stdnum still checks it. Month or day can be 00 when unknown. Opaque codes were proposed in 2014; status unknown.
+  - ctx: asmens kodas, a.k., AK, asmens kodą, личный код
+  - impls: python-stdnum lt.asmens (LGPL; reuses ee.ik); django-localflavor LTIDCodeField (BSD; checksum); Faker: none (lt_LT has vat_id only); Presidio: none
+  - src: https://lt.wikipedia.org/wiki/Asmens_kodas ; https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/lt/asmens.py
+- **LT LT_PVM** (PVM mokėtojo kodas / įmonės kodas; vat; FP medium)
+  - format: VAT: 'LT' + 9 digits (8th digit '1', legal entities) or 12 digits (11th digit '1', temporarily registered). Company code (įmonės kodas): 9 digits.
+  - regex: `(?<![\dA-Z])LT\s?(?:\d{7}1\d|\d{10}1\d)(?!\d)`
+  - checksum: VAT: weights 1..9 cycling mod 11; if 10, weights 3..9,1,2 cycling; result mod 10 = last digit. Company code checksum not verified in this run.
+  - edge: Company codes have no check rule confirmed in this run, so detect them through context only.
+  - ctx: PVM mokėtojo kodas, PVM kodas, įmonės kodas, juridinio asmens kodas
+  - impls: python-stdnum lt.pvm (LGPL); Faker lt_LT vat_id (no checksum)
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/lt/pvm.py
+- **PL PL_PESEL** (numer PESEL; national id; FP medium)
+  - format: RRMMDDPPPPK (11 digits). Month offset by century: +80 = 1800s, +0 = 1900s, +20 = 2000s, +40 = 2100s, +60 = 2200s. The 10th digit is even for women, odd for men.
+  - regex: `(?<!\d)\d{2}(?:[02468][1-9]|[13579][0-2])(?:0[1-9]|[12]\d|3[01])\d{5}(?!\d)`
+  - checksum: K = (10 - (sum of d_i * w_i mod 10)) mod 10 with w = 1,3,7,9,1,3,7,9,1,3
+  - edge: Births in 2000-2009 start with '0', which Excel drops. Presidio's pattern has no word boundaries, so it matches inside longer digit strings. Foreigners can also be given a PESEL.
+  - ctx: PESEL, nr PESEL, numer PESEL, numer ewidencyjny, PESEL:
+  - impls: Presidio PL_PESEL (MIT); python-stdnum pl.pesel (LGPL); django-localflavor PLPESELField (BSD); Faker pl_PL pesel()/ssn (MIT)
+  - src: https://www.gov.pl/web/gov/czym-jest-numer-pesel ; https://raw.githubusercontent.com/data-privacy-stack/presidio/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/country_specific/poland/pl_pesel_recognizer.py
+- **PL PL_NIP** (NIP (Numer Identyfikacji Podatkowej); tax; FP medium)
+  - format: 10 digits, written XXX-XXX-XX-XX or XXX-XX-XX-XXX. EU VAT = 'PL' + NIP.
+  - regex: `(?<![\dA-Z])(?:PL\s?)?\d{3}[-\s]?(?:\d{3}[-\s]?\d{2}[-\s]?\d{2}|\d{2}[-\s]?\d{2}[-\s]?\d{3})(?!\d)`
+  - checksum: Check digit = sum(d_i * w_i) mod 11 with w = 6,5,7,2,3,4,5,6,7. A result of 10 is never issued.
+  - edge: Polish phone numbers (9 digits) and bank fragments. Sole traders' NIP is personal data.
+  - ctx: NIP, nr NIP, numer identyfikacji podatkowej, VAT-UE, NIP UE, NIP:
+  - impls: python-stdnum pl.nip (LGPL); django-localflavor PLNIPField (BSD); Faker pl_PL nip()/company_vat() (MIT, checksum); Presidio: none
+  - src: https://raw.githubusercontent.com/django/django-localflavor/master/localflavor/pl/forms.py ; https://arthurdejong.org/python-stdnum/doc/
+- **PL PL_REGON** (REGON; company; FP high)
+  - format: 9 digits (entities) or 14 digits (local units)
+  - regex: `(?<!\d)\d{9}(?:\d{5})?(?!\d)`
+  - checksum: 9-digit: weights 8,9,2,3,4,5,6,7; check = (S mod 11) mod 10. 14-digit: the 9-digit check must pass, then weights 2,4,8,5,0,9,7,3,6,1,2,4,8, same rule.
+  - edge: A bare 9-digit number is close to a mobile phone number, so context is required.
+  - ctx: REGON, nr REGON, numer REGON, rejestr gospodarki narodowej
+  - impls: python-stdnum pl.regon (LGPL); django-localflavor PLREGONField (BSD); Faker pl_PL regon()/local_regon() (MIT, checksum)
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/pl/regon.py ; https://raw.githubusercontent.com/joke2k/faker/master/faker/providers/company/pl_PL/__init__.py
+- **PL PL_ID_CARD** (numer dowodu osobistego; travel doc; FP medium)
+  - format: 3-letter series + 6 digits (e.g. ABC123456). The first digit is the check digit.
+  - regex: `(?i)(?<![A-Z0-9])[A-Z]{3}[\s-]?\d{6}(?!\d)`
+  - checksum: Letters map to A=10 ... Z=35. Weights 7,3,1,9,7,3,1,7,3 over all 9 characters; sum ≡ 0 mod 10 (localflavor uses -1 for the check position).
+  - edge: Polish passport numbers (2 letters + 7 digits) use a similar scheme and are not covered here.
+  - ctx: dowód osobisty, nr dowodu, seria i numer dowodu, numer dowodu osobistego, seria dowodu
+  - impls: django-localflavor PLNationalIDCardNumberField (BSD); Faker pl_PL identity_card_number (MIT); python-stdnum: none; Presidio: none
+  - src: https://raw.githubusercontent.com/django/django-localflavor/master/localflavor/pl/forms.py ; https://raw.githubusercontent.com/joke2k/faker/master/faker/providers/person/pl_PL/__init__.py
+- **CZ CZ_SK_RODNE_CISLO** (rodné číslo (CZ & SK); national id; FP low)
+  - format: YYMMDD/SSS (born before 1954, no check digit) or YYMMDD/SSSC (from 1954). Women: month+50. Since 2004 (CZ law 53/2004) month+20, or +70 for women, when a day's serials run out.
+  - regex: `(?<!\d)\d{2}(?:0[1-9]|1[0-2]|2[1-9]|3[0-2]|5[1-9]|6[0-2]|7[1-9]|8[0-2])(?:0[1-9]|[12]\d|3[01])\s?/?\s?\d{3,4}(?!\d)`
+  - checksum: The 10-digit number ≡ 0 mod 11. Exception: if the first 9 digits mod 11 = 10, then C = 0 (about 1000 such numbers, issued until 1985). 9-digit numbers: date check only.
+  - edge: Two-digit year is ambiguous (10-digit numbers with YY<54 mean 2000s). Excel drops the leading zero for 2000-2009 births. SK: a meaningless replacement ID (BIFO) was proposed in 2019; status unknown.
+  - ctx: rodné číslo, RČ, r. č., rč., r.č., birth number
+  - impls: python-stdnum cz.rc, sk.rc (LGPL); django-localflavor CZBirthNumberField (BSD; CZ only, SK has no field); Faker cs_CZ/sk_SK birth_number (MIT); Presidio: none
+  - src: https://cs.wikipedia.org/wiki/Rodn%C3%A9_%C4%8D%C3%ADslo ; https://sk.wikipedia.org/wiki/Rodn%C3%A9_%C4%8D%C3%ADslo ; https://raw.githubusercontent.com/django/django-localflavor/master/localflavor/cz/forms.py
+- **CZ CZ_SK_ICO_DIC** (IČO / DIČ (CZ), IČO / IČ DPH (SK); company; FP high)
+  - format: IČO: 8 digits. CZ DIČ = 'CZ' + IČO (legal entity), or + rodné číslo, or + 9 digits starting with 6. SK IČ DPH = 'SK' + 10 digits.
+  - regex: `(?<![\dA-Z])(?:(?:CZ\s?)?\d{8,10}|SK\s?[1-9]\d[234789]\d{7})(?!\d)`
+  - checksum: IČO: r = (weights 8,7,6,5,4,3,2 over 7 digits) mod 11; check = 1 if r is 0 or 10, 0 if r = 1, else 11 - r. SK IČ DPH: first digit not 0, third digit in {2,3,4,7,8,9}, number ≡ 0 mod 11.
+  - edge: A bare 8-digit number needs context. A CZ DIČ for a natural person contains the rodné číslo.
+  - ctx: IČO, IČ, identifikační číslo osoby, DIČ, daňové identifikační číslo, IČ DPH, identifikačné číslo organizácie
+  - impls: django-localflavor CZICNumberField (BSD); python-stdnum cz.dic, sk.dph (LGPL); Faker cs_CZ/sk_SK vat_id (no checksum)
+  - src: https://raw.githubusercontent.com/django/django-localflavor/master/localflavor/cz/forms.py ; https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/sk/dph.py
+- **HU HU_TAJ** (TAJ-szám (társadalombiztosítási azonosító jel); health; FP high)
+  - format: 9 digits printed as 'SSS SSS SSK'; 8-digit running serial + check digit
+  - regex: `(?<!\d)\d{3}[\s-]?\d{3}[\s-]?\d{3}(?!\d)`
+  - checksum: K = (3d1 + 7d2 + 3d3 + 7d4 + 3d5 + 7d6 + 3d7 + 7d8) mod 10
+  - edge: About 10% of random 9-digit strings pass; collides with Hungarian phone numbers. Health data context (GDPR Art. 9).
+  - ctx: TAJ, TAJ-szám, TAJ szám, tajszám, társadalombiztosítási azonosító jel, tb-szám
+  - impls: None: python-stdnum, django-localflavor (hu has only a county widget), Faker and Presidio do not implement it. Build in-house.
+  - src: https://hu.wikipedia.org/wiki/T%C3%A1rsadalombiztos%C3%ADt%C3%A1si_azonos%C3%ADt%C3%B3_jel ; https://njt.hu/jogszabaly/1997-80-00-00
+- **HU HU_ADOAZONOSITO_JEL** (adóazonosító jel; tax; FP low)
+  - format: 10 digits: '8' + days since 1867-01-01 (5 digits) + random (3) + check digit
+  - regex: `(?<!\d)8\d{9}(?!\d)`
+  - checksum: K = sum(d_i * i for i = 1..9) mod 11. A remainder of 10 is never issued.
+  - edge: The birth date can be derived (1867 epoch); reject future dates. Distinct from the company 'adószám'.
+  - ctx: adóazonosító jel, adóazonosító, adóazonosító szám, NAV, személyi adószám
+  - impls: None in python-stdnum, django-localflavor, Faker or Presidio
+  - src: https://hu.wikipedia.org/wiki/Ad%C3%B3azonos%C3%ADt%C3%B3_jel ; http://www.jogiforum.hu/torvenytar/tv/1996/XX
+- **HU HU_SZEMELYI_AZONOSITO** (személyi azonosító (személyi szám); national id; FP medium)
+  - format: 11 digits: M YYMMDD SSS K. M = 1/2 (1900s), 3/4 (2000s), 5-8 historically foreigners. Its general use was ruled unconstitutional (Constitutional Court decision 15/1991).
+  - regex: `(?<!\d)[1-8][\s-]?\d{6}[\s-]?\d{4}(?!\d)`
+  - checksum: K = sum(d_i * i) mod 11 for people born before 1997-01-01; K = sum(d_i * (11 - i)) mod 11 for later births. 10 is not issued.
+  - edge: The ID card number (igazolvány szám, e.g. 123456AB) is a different identifier. Faker can emit a 12-character value when K = 10.
+  - ctx: személyi azonosító, személyi szám, személyi azonosító szám, szem. az., személyi igazolvány
+  - impls: Faker hu_HU ssn (MIT; checksum, K = 10 bug); python-stdnum, localflavor, Presidio: none
+  - src: https://raw.githubusercontent.com/joke2k/faker/master/faker/providers/ssn/hu_HU/__init__.py ; https://en.wikipedia.org/wiki/National_identification_number
+- **HU HU_ADOSZAM** (adószám / közösségi adószám (ANUM); company; FP medium)
+  - format: 11 digits xxxxxxxx-y-zz: 8-digit base number + VAT code (1-5) + county code. EU VAT = 'HU' + the 8-digit base.
+  - regex: `(?<![\dA-Z])(?:HU\s?)?\d{8}(?:-?[1-5]-?\d{2})?(?!\d)`
+  - checksum: Base number: weights 9,7,3,1,9,7,3,1; sum ≡ 0 mod 10
+  - edge: The 8-digit form alone needs context.
+  - ctx: adószám, közösségi adószám, csoportazonosító szám, cégjegyzékszám, EU adószám
+  - impls: python-stdnum hu.anum (LGPL); Faker hu_HU vat_id (no checksum)
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/hu/anum.py
+- **RO RO_CNP** (CNP (cod numeric personal); national id; FP low)
+  - format: S YYMMDD JJ NNN C (13 digits). S: 1/2 = 1900s, 3/4 = 1800s, 5/6 = 2000s, 7/8 = resident foreigners, 9 = foreigners. JJ county: 01-52 (40 = Bucharest, 41-46 = sectors), 70 = any, 80-83.
+  - regex: `(?<!\d)[1-9]\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])(?:0[1-9]|[1-4]\d|5[12]|70|8[0-3])\d{4}(?!\d)`
+  - checksum: C = sum(d_i * w_i) mod 11 with w = 2,7,9,1,4,6,3,5,8,2,7,9; a result of 10 gives C = 1
+  - edge: python-stdnum flags its check algorithm as 'not confirmed by an independent source' (it matches localflavor, Faker and Wikipedia). Sector codes 47 and 48 were abolished.
+  - ctx: CNP, cod numeric personal, codul numeric personal, C.N.P., nr. CNP
+  - impls: python-stdnum ro.cnp (LGPL); django-localflavor ROCNPField (BSD); Faker ro_RO ssn (MIT, checksum); Presidio: none
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/ro/cnp.py ; https://raw.githubusercontent.com/django/django-localflavor/master/localflavor/ro/forms.py
+- **RO RO_CUI_CIF** (CUI / CIF (cod unic de înregistrare); company; FP high)
+  - format: 2-10 digits; 'RO' prefix when VAT-registered. The trade register number (ONRC, e.g. J40/123/2005) is separate.
+  - regex: `(?<![\dA-Z])(?:RO\s?)?[1-9]\d{1,9}(?!\d)`
+  - checksum: Weights 7,5,3,2,1,7,5,3,2, right-aligned on the digits before the check digit; check = ((S * 10) mod 11) mod 10
+  - edge: Variable length makes a bare match nearly useless; require the RO prefix or context. A CIF can also be a CNP (natural persons).
+  - ctx: CUI, CIF, cod unic de înregistrare, cod fiscal, cod de identificare fiscală, C.I.F., atribut fiscal
+  - impls: python-stdnum ro.cui, ro.cf, ro.onrc (LGPL); django-localflavor ROCIFField (BSD); Faker ro_RO vat_id (MIT, checksum)
+  - src: https://raw.githubusercontent.com/django/django-localflavor/master/localflavor/ro/forms.py ; https://raw.githubusercontent.com/joke2k/faker/master/faker/providers/ssn/ro_RO/__init__.py
+- **BG BG_EGN** (ЕГН (единен граждански номер); national id; FP low)
+  - format: YYMMDDSSSC (10 digits). Month +20 = 1800s, +40 = 2000s. 9th digit even = male, odd = female.
+  - regex: `(?<!\d)\d{2}(?:0[1-9]|1[0-2]|2[1-9]|3[0-2]|4[1-9]|5[0-2])(?:0[1-9]|[12]\d|3[01])\d{4}(?!\d)`
+  - checksum: C = (sum(d_i * w_i) mod 11) mod 10 with w = 2,4,8,5,10,9,7,3,6
+  - edge: Context words are in Cyrillic, so Unicode-aware matching is needed. Collides with other 10-digit IDs (LNCh, BG VAT).
+  - ctx: ЕГН, EGN, единен граждански номер, ЕГН/ЛНЧ, ЕГН:
+  - impls: python-stdnum bg.egn (LGPL); django-localflavor bg egn_validator (BSD); Faker: none (bg_BG has vat_id only); Presidio: none
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/bg/egn.py ; https://raw.githubusercontent.com/django/django-localflavor/master/localflavor/bg/validators.py
+- **BG BG_LNCH** (ЛНЧ (личен номер на чужденец); national id; FP high)
+  - format: 10 digits, no date
+  - regex: `(?<!\d)\d{10}(?!\d)`
+  - checksum: C = sum(d_i * w_i) mod 10 with w = 21,19,17,13,11,9,7,3,1
+  - edge: Detect only with context.
+  - ctx: ЛНЧ, личен номер на чужденец, LNCh, ЕГН/ЛНЧ
+  - impls: python-stdnum bg.pnf (LGPL); others: none
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/bg/pnf.py
+- **BG BG_EIK_BULSTAT** (ЕИК / БУЛСТАТ; company; FP high)
+  - format: 9 digits (entities) or 13 digits (branches). VAT = 'BG' + 9 or 10 digits (10 = EGN/LNCh/other).
+  - regex: `(?<![\dA-Z])(?:BG\s?)?\d{9}(?:\d{1}|\d{4})?(?!\d)`
+  - checksum: 9-digit: weights 1..8 mod 11; if 10, weights 3..10 mod 11; result mod 10. 13-digit: additionally digits 9-12 with weights 2,7,3,5 (fallback 4,9,5,7). VAT 10-digit 'other': (11 - sum with weights 4,3,2,7,6,5,4,3,2) mod 11.
+  - edge: Overlaps with EGN and LNCh for 10-digit VAT numbers.
+  - ctx: ЕИК, БУЛСТАТ, ЕИК/БУЛСТАТ, ИН по ДДС, ДДС номер, идентификационен номер
+  - impls: django-localflavor bg eik_validator (BSD); python-stdnum bg.vat (LGPL); Faker bg_BG vat_id (no checksum)
+  - src: https://raw.githubusercontent.com/django/django-localflavor/master/localflavor/bg/validators.py ; https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/bg/vat.py
+- **HR HR_OIB** (OIB (osobni identifikacijski broj); tax; FP high)
+  - format: 11 digits: 10 random digits + check digit; used for persons and legal entities (since 2009). VAT = 'HR' + OIB.
+  - regex: `(?<![\dA-Z])(?:HR\s?)?\d{11}(?!\d)`
+  - checksum: ISO 7064 MOD 11,10: a = 10; for each digit: a = (a + d) mod 10, a = 10 if 0, a = (2a) mod 11; check = (11 - a) mod 10
+  - edge: Random digits, so no date check is possible and about 10% of random 11-digit strings pass. Requires context. Overlaps PESEL, NO fnr and EE/LT codes.
+  - ctx: OIB, osobni identifikacijski broj, OIB:, PDV ID, porezni broj
+  - impls: python-stdnum hr.oib (LGPL); django-localflavor HROIBField (BSD; length only, no checksum); Faker hr_HR ssn (MIT; ISO 7064); Presidio: none
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/hr/oib.py ; https://raw.githubusercontent.com/joke2k/faker/master/faker/providers/ssn/hr_HR/__init__.py ; https://raw.githubusercontent.com/django/django-localflavor/master/localflavor/hr/forms.py
+- **SI SI_EMSO** (EMŠO (SI) / JMBG-MBG (HR legacy); national id; FP low)
+  - format: DDMMYYYRRBBBK (13 digits). YYY = last 3 digits of the year (9xx = 1900s, 0xx = 2000s). RR = region (50-59 Slovenia, 30-39 Croatia). BBB 000-499 = male, 500-999 = female.
+  - regex: `(?<!\d)(?:0[1-9]|[12]\d|3[01])(?:0[1-9]|1[0-2])[09]\d{2}\d{6}(?!\d)`
+  - checksum: r = sum(d_i * w_i) mod 11 with w = 7,6,5,4,3,2,7,6,5,4,3,2; K = 0 if r = 0, else 11 - r. When r = 1 (K would be 10), django-localflavor rejects the number but python-stdnum maps K to 0. Accept both behaviours.
+  - edge: The same 13-digit structure is used in other ex-Yugoslav countries (BA, RS, MK, ME).
+  - ctx: EMŠO, EMSO, enotna matična številka občana, JMBG, MBG, matični broj građana
+  - impls: python-stdnum si.emso (LGPL); django-localflavor SIEMSOField and HRJMBGField (BSD); Faker: none; Presidio: none
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/si/emso.py ; https://raw.githubusercontent.com/django/django-localflavor/master/localflavor/si/forms.py ; https://raw.githubusercontent.com/django/django-localflavor/master/localflavor/hr/forms.py
+- **SI SI_DAVCNA_STEVILKA** (davčna številka / ID za DDV; tax; FP medium)
+  - format: 8 digits, first digit not 0. VAT = 'SI' + 8 digits.
+  - regex: `(?<![\dA-Z])(?:SI\s?)?[1-9]\d{7}(?!\d)`
+  - checksum: r = (weights 8,7,6,5,4,3,2 over the first 7 digits) mod 11; K = 11 - r; 10 gives K = 0; r = 0 is never valid
+  - edge: Assigned to individuals too, so it is personal data. A bare 8-digit number needs context.
+  - ctx: davčna številka, DŠ, ID za DDV, identifikacijska številka za DDV, davčna št.
+  - impls: python-stdnum si.ddv (LGPL); django-localflavor SITaxNumberField (BSD); Faker sl_SI vat_id (no checksum)
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/si/ddv.py ; https://raw.githubusercontent.com/django/django-localflavor/master/localflavor/si/forms.py
+- **SI SI_MATICNA** (matična številka poslovnega subjekta; company; FP high)
+  - format: 7 digits (6 + check digit), optionally followed by a 3-digit unit code (000 = main seat)
+  - regex: `(?<!\d)\d{7}(?:\d{3})?(?!\d)`
+  - checksum: r = -(weights 7,6,5,4,3,2 over 6 digits) mod 11; r = 0 is invalid; check = r mod 10
+  - edge: Context is required.
+  - ctx: matična številka, MŠ, matična št.
+  - impls: python-stdnum si.maticna (LGPL); others: none
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/si/maticna.py
+- **INTL EU_VAT** (VAT identification number (VIES); vat; FP low)
+  - format: Prefix + national part. AT U+8d | BE [01]+9d | BG 9-10d | CY 8d+letter | CZ 8-10d | DE 9d | DK 8d | EE 9d (10…) | EL 9d | ES [A-Z0-9]7d[A-Z0-9] | FI 8d | FR 2 chars [0-9A-HJ-NP-Z] + 9-digit SIREN | HR 11d | HU 8d | IE 7d+1-2 letters (or old d[A-Z+*]5d letter) | IT 11d | LT 9 or 12d | LU 8d | LV 11d | MT 8d | NL 9d+'B'+2d | PL 10d | PT 9d | RO 2-10d | SE 10d+'01' | SI 8d | SK 10d | XI 9 or 12d, or GD/HA+3d | EU 9d (OSS non-Union scheme)
+  - regex: `(?<![A-Z0-9])(?:ATU\d{8}|BE[01]\d{9}|BG\d{9,10}|CY\d{8}[A-Z]|CZ\d{8,10}|DE\d{9}|DK\d{8}|EE\d{9}|EL\d{9}|ES[A-Z0-9]\d{7}[A-Z0-9]|FI\d{8}|FR[0-9A-HJ-NP-Z]{2}\d{9}|HR\d{11}|HU\d{8}|IE\d{7}[A-W][A-IW]?|IE\d[A-Z+*]\d{5}[A-W]|IT\d{11}|LT(?:\d{9}|\d{12})|LU\d{8}|LV\d{11}|MT\d{8}|NL\d{9}B\d{2}|PL\d{10}|PT\d{9}|RO\d{2,10}|SE\d{10}01|SI\d{8}|SK\d{10}|XI(?:\d{9}|\d{12}|GD\d{3}|HA\d{3})|EU\d{9})(?![A-Z0-9]) -- apply to a copy normalised by deleting [\s.\-] after a 2-letter prefix`
+  - checksum: AT (6 - Luhn checksum(7 digits)) mod 10; BE (first8 + last2) mod 97 = 0; BG EIK or EGN/LNCh rules; CY letter = (sum of odd positions mapped 0→1, 1→0, 2→5, 3→7, 4→9, 5→13, 6→15, 7→17, 8→19, 9→21, plus even positions) mod 26, and must not start with '12'; CZ IČO mod 11 or rodné číslo; DE ISO 7064 MOD 11,10; DK weights 2,7,6,5,4,3,2,1, sum ≡ 0 mod 11; EE weights 3,7,1 ×3, sum ≡ 0 mod 10; EL check = (sum of d_i·2^(9-i)) mod 11 mod 10; ES DNI/NIE mod-23 letter, CIF Luhn-like with letters 'JABCDEFGHI'; FI weights 7,9,10,5,8,4,2,1, sum ≡ 0 mod 11; FR old key = (SIREN·100 + 12) mod 97, new alphanumeric key per stdnum, Monaco '000'; HR ISO 7064 MOD 11,10; HU weights 9,7,3,1 mod 10; IE mod-23 letter ('WABCDEFGHIJKLMNOPQRSTUV') with weights 8..2, second letter ×9; IT Luhn; LT weights 1..9 mod 11 (fallback 3..) mod 10; LU first6 mod 89 = last2; LV legal: weights 9,1,4,8,3,10,2,5,7,6,1, sum mod 11 = 3; MT weights 3,4,6,7,8,9,10,1 mod 37 = 0; NL BSN 11-test OR ISO 7064 MOD 97-10 on 'NL'+number (since 2020); PL NIP weights mod 11; PT weights 9..2, check = 11 - S mod 11 (≥10 → 0); RO weights 7,5,3,2,1,7,5,3,2, check = (10·S mod 11) mod 10; SE Luhn on 10d + '01'; SI weights 8..2 mod 11; SK number ≡ 0 mod 11, third digit in {2,3,4,7,8,9}; XI GB weights 8..2,10,1 mod 97 (0, or 55 variant); EU OSS: none
+  - edge: Greece uses EL, not GR. GB numbers are not EU since 2021, but XI (Northern Ireland) is. Several states embed personal IDs (CZ/SK rodné číslo, BG EGN, LV personas kods, SE personnummer for sole traders, IT/PT/ES individual numbers), so treat those as personal data. Never call VIES at runtime: it sends the number to the EC and is rate-limited.
+  - ctx: VAT, USt-IdNr, TVA, IVA, BTW, moms, momsnummer, ALV, MVA, PVN, PVM, KMKR, NIP UE, DIČ, IČ DPH, adószám, CUI, ДДС, PDV, DDV, ΑΦΜ, Umsatzsteuer-Identifikationsnummer
+  - impls: python-stdnum eu.vat (LGPL; all member states + XI + EU OSS; optional VIES call); django-localflavor generic VATINValidator (BSD; format only, 28 patterns incl. GB, no checksum); Faker per-locale vat_id (MIT; mostly no checksum, ro_RO and pl_PL compute it); Presidio: none
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/eu/vat.py ; https://raw.githubusercontent.com/django/django-localflavor/master/localflavor/generic/validators.py ; https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/nl/btw.py ; https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/fr/tva.py ; https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/cy/vat.py ; https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/mt/vat.py
+- **INTL EU_EORI** (EORI number; company; FP high)
+  - format: 2-letter code of the issuing country + a national identifier of up to 15 alphanumeric characters (often derived from the VAT or tax ID)
+  - regex: `(?<![A-Z0-9])(?:AT|BE|BG|CY|CZ|DE|DK|EE|ES|FI|FR|GR|HR|HU|IE|IT|LT|LU|LV|MT|NL|PL|PT|RO|SE|SI|SK|XI)[A-Z0-9]{1,15}(?![A-Z0-9])`
+  - checksum: None at EU level (only the national part may carry its own check, e.g. an embedded VAT number)
+  - edge: Mostly company data; personal data only for sole traders. Greece's prefix in EORI (GR vs EL) not confirmed. The EC online validation service must not be called at runtime.
+  - ctx: EORI, EORI number, EORI-Nummer, numer EORI, EORI-nummer, EORI-numero, číslo EORI
+  - impls: None (no python-stdnum, localflavor, Faker or Presidio module)
+  - src: https://taxation-customs.ec.europa.eu/customs-4/customs-procedures-import-and-export-0/customs-procedures/economic-operators-registration-and-identification-number-eori_en
+- **INTL EU_EHIC** (European Health Insurance Card (EHIC/CEAM/EKVK/EKUZ); health; FP medium)
+  - format: Card fields set by Administrative Commission Decision S2 (12 June 2009): field 6 = holder's national personal ID (CPR, PESEL, TAJ etc.); field 7 = institution ID; field 8 = card identification number. NOT VERIFIED: field 8 is commonly 20 digits starting with '80' + the ISO 3166-1 numeric country code (e.g. 80250 France, 80276 Germany).
+  - regex: `(?<!\d)80\d{3}[\s-]?\d{5}[\s-]?\d{10}(?!\d)`
+  - checksum: Not verified (EUR-Lex returned empty pages). Possibly a Luhn digit per ISO/IEC 7812; confirm before relying on it.
+  - edge: Health context (GDPR Art. 9). Excel truncates 20-digit numbers stored as numbers to 15 significant digits. Field 6 is detected by the national recognizers.
+  - ctx: EHIC, European Health Insurance Card, CEAM, EKVK, EKUZ, Europæisk sygesikringskort, eurooppalainen sairaanhoitokortti, europeiskt sjukförsäkringskort, Europeisk helsetrygdkort, CEASS, ЕЗОК, EKZO, Európai Egészségbiztosítási Kártya
+  - impls: None
+  - src: https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:32010D0424(09) ; https://en.wikipedia.org/wiki/European_Health_Insurance_Card
+- **INTL EU_DRIVING_LICENCE** (EU driving licence number (field 5); travel doc; FP high)
+  - format: Field 5 'licence number' has a national format; there is no EU-wide structure. Legal basis: Directive 2006/126/EC; replaced by Directive (EU) 2025/2205 (OJ 5 Nov 2025, in force 25 Nov 2025, applies 26 Nov 2029; digital licence based on ISO/IEC 18013-5).
+  - regex: `(?i)(?:licence|license|körkort|kørekort|ajokortti|førerkort|ökuskírteini|juhiluba|vadītāja apliecība|vairuotojo pažymėjimas|prawo jazdy|řidičský průkaz|vodičský preukaz|vezetői engedély|permis de conducere|свидетелство за управление|vozačka dozvola|vozniško dovoljenje)\W{0,20}(?:n[or]\.?|numer|číslo|szám|nr\.?)?\W{0,5}([A-Z0-9][A-Z0-9 /-]{4,18}[A-Z0-9])`
+  - checksum: None at EU level
+  - edge: Some countries print the personal ID or leave field 5 unused, so national recognizers catch those. Detect through context only.
+  - ctx: körkort, kørekort, ajokortti, førerkort, ökuskírteini, juhiluba, vadītāja apliecība, vairuotojo pažymėjimas, prawo jazdy, řidičský průkaz, vodičský preukaz, vezetői engedély, permis de conducere, свидетелство за управление на МПС, vozačka dozvola, vozniško dovoljenje
+  - impls: None (Presidio's driver licence recognizer is US only)
+  - src: https://en.wikipedia.org/wiki/European_driving_licence ; https://data.europa.eu/eli/dir/2025/2205/oj ; https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32006L0126
+

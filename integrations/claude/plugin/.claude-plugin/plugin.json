@@ -1,0 +1,18 @@
+{
+  "name": "gdprguardian",
+  "version": "1.0.0",
+  "description": "Anonymisation irréversible des documents avant que Claude les lise, sur votre poste : rien ne quitte la machine. / Irreversible anonymisation of documents before Claude reads them, on your computer: nothing leaves the machine.",
+  "author": {
+    "name": "Guillaume CLEMENT - Flow Line Intégration"
+  },
+  "license": "MIT",
+  "keywords": ["rgpd", "gdpr", "anonymisation", "anonymization", "pii", "privacy", "mcp"],
+  "userConfig": {
+    "allowed_dir": {
+      "type": "directory",
+      "title": "Dossier des documents à anonymiser / Folder of the documents to anonymise",
+      "description": "Seuls les fichiers de ce dossier peuvent être anonymisés. Défaut : GDPRGuardian dans votre dossier personnel (~/GDPRGuardian), à créer. Choisissez un dossier dédié, jamais votre dossier personnel entier. / Only files in this folder can be anonymised. Default: GDPRGuardian in your home folder (~/GDPRGuardian), to be created. Choose a dedicated folder, never your whole home folder.",
+      "default": "~/GDPRGuardian"
+    }
+  }
+}

@@ -1,0 +1,353 @@
+# ids-intl-universal details
+
+### Items
+| name | license | verdict | reco | status | notes |
+|---|---|---|---|---|---|
+| phonenumbers / phonenumberslite | Apache-2.0 | ok | adopt | 9.0.41, 2026-10-08, active | Pure Python with lazy metadata (~2 MiB core). The lite variant drops geocoder, carrier and timezone data. Call load_all() at startup. |
+| python-stdnum | LGPL-2.1-or-later | caution | optional | 2.2, 2026-01-04, active | LGPL: acceptable as an unmodified pip dependency, but never copy its code into the MIT repo. Best used as a CI test oracle while reimplementing from specs. No bech32m, no VIN. |
+| Presidio (data-privacy-stack) | MIT | ok | borrow-ideas | moved from microsoft/presidio to data-privacy-stack org in 2026 | Reuse the recognizer logic (SSN invalidation, AU Medicare, bech32m, context words). Its 8-region phone loop and spaCy-centric pipeline do not fit a latency-focused design. |
+| gitleaks config (gitleaks.toml) | MIT | ok | borrow-ideas | feature-complete; v8.30.1 reported Mar 2026 (secondary source) | About 222 rules with keywords and optional entropy; generic-api-key uses entropy 3.5. Port to Python re and keep the license notice. |
+| Betterleaks | MIT | ok | borrow-ideas | v2 in development, backed by Aikido | TOML rules with a BPE-based 'rarity' filter in place of entropy. A good source for an up-to-date rule catalog. |
+| Kingfisher (MongoDB) | Apache-2.0 | ok | borrow-ideas | active; forked from Nosey Parker (archived 2025) | Hundreds of YAML rules, catalog based on Betterleaks plus Google Veles detectors. |
+| detect-secrets (Yelp) | Apache-2.0 | ok | optional | 1.5.0, 2024-05-06, slow activity | 28 plugins: entropy (base64/hex), keyword, JWT, private key. Usable in-process from Python, but the rule set is aging. |
+| TruffleHog | AGPL-3.0 | avoid | avoid | active | AGPL since v3; do not embed its detectors or rules. |
+| py3langid | BSD-3-Clause | ok | adopt | 0.4.0, 2026-09-02 | 139 classes including 'zxx'; can restrict to a language subset; about 10x faster than langid.py on sentences. Training corpora (Wikipedia, Leipzig, CC100, Tatoeba, GlotCC) have undocumented licenses. |
+| lingua-language-detector | Apache-2.0 | ok | optional | 2.2.0, 2026-03-09 | Most accurate on short text, 75 languages, a few dozen MB of RAM, but about 170 MB wheels. |
+| pycld2 | Apache-2.0 | ok | optional | 0.42, 2025-03-28; wheels CPython 3.6-3.13 incl. Windows | Fastest in benchmarks (0.029 ms/text). The CLD2 engine itself is unmaintained, and no 3.14 wheels are listed. |
+| gcld3 | Apache-2.0 (upstream; not stated on PyPI) | ok | avoid | 3.0.13, 2020-08-19; no wheels for Python 3.12+ | Stale and needs a protobuf build. |
+| langdetect | Apache-2.0 | ok | avoid | 1.0.9, 2021-05-07 | About 12 ms per text and non-deterministic unless seeded. |
+| fastText lid.176 (via fast-langdetect) | CC-BY-SA-3.0 weights; wrapper MIT | caution | optional | fast-langdetect 1.1.0, 2026-10-17 | 176 languages, about 0.16 ms per text. ShareAlike applies to the model file, so offer it as an optional download with attribution and do not bundle it. fast-langdetect bundles the .ftz file. |
+| NLLB lid218e | CC-BY-NC-4.0 | avoid | avoid | Meta NLLB release | Non-commercial; incompatible with hosted service. |
+| OpenLID-v2 | GPL-3.0 | avoid | avoid | HF model | GPL weights. |
+| GlotLID v3 | Apache-2.0 + notices | caution | avoid | v3 | The notice disclaims the licensing status of the training data. Overkill for our needs. |
+| whatlang (Rust) | MIT | ok | borrow-ideas | Python bindings are only a third-party port (unverified) | 70 languages, trigrams, script detection. The PyPI package named 'whatlang' is an unrelated 2017 fastText wrapper. |
+| Babel (CLDR) | BSD-3-Clause + Unicode License (CLDR data) | ok | adopt | 2.18.0, 2026-02-01 | Source for multilingual month names (date regexes), country names, demonyms and currency symbols used in locale inference. Replaces pycountry. |
+| pycountry | LGPL-2.1-only | caution | avoid | 26.2.16, 2026-02-17 | LGPL; Babel/CLDR covers the same need. |
+| dateparser | BSD-3-Clause | ok | optional | 1.4.3, 2026-09-03 | search_dates is heavy; use it to normalize candidates, not to scan. |
+| Recognizers-Text (Python) | MIT | ok | avoid | 1.0.2a2, 2019 | Abandoned Python port; alpha release only. |
+| pyahocorasick | BSD-3-Clause and Public-Domain | ok | adopt | 2.3.1 | One pass over all context keywords and secret-rule keywords; drives locale evidence and the regex prefilter. |
+| Vectorscan + python 'hyperscan' | BSD-3-Clause / MIT | ok | optional | hyperscan py 0.9.1; Windows wheels unclear | Use only if regexes become the bottleneck. Intel Hyperscan 5.5+ is proprietary (IPL), so use only the Vectorscan fork. |
+| openpyxl | MIT | ok | adopt | 3.1.5, 2024-06-28, slow release cadence | Gives typed cell values and number formats, needed for header-as-context, column classification and serial-date or precision recovery in the Excel path. |
+
+### Identifiers
+- **INTL IBAN** (IBAN (ISO 13616); ; FP low)
+  - format: 2-letter CC + 2 check digits + country-specific BBAN; total length 15 (NO) to 33 (RU), maximum 34; printed in groups of 4
+  - regex: `(?i)\b[A-Z]{2}[0-9]{2}(?:[ \-]?[A-Z0-9]){11,30}\b`
+  - checksum: ISO 7064 MOD 97-10: move the first 4 characters to the end, map A=10..Z=35, the result mod 97 must equal 1; then check the per-country length/BBAN pattern from the SWIFT registry
+  - edge: Registry release 103 (Sep 2026): Brazilian bank code now alphanumeric. Aspirational, unregistered codes (DZ 26, MA 28, SN 28, CI 28, CM 27): accept mod 97 at a lower score. Masked forms (FR76 **** 1234) need context. Handle lowercase input and Excel cells.
+  - ctx: IBAN, RIB, compte, account, Konto, cuenta, conto, rekening
+  - impls: python-stdnum iban (LGPL-2.1+); Presidio IbanRecognizer (MIT)
+  - src: https://www.swift.com/sites/default/files/files/iban_registry.pdf ; https://github.com/AleksejDix/ibantools/issues/9 ; https://en.wikipedia.org/wiki/International_Bank_Account_Number
+- **INTL BIC** (BIC/SWIFT (ISO 9362); ; FP high)
+  - format: 4 bank characters + 2-letter ISO country + 2 location characters + optional 3 branch characters (8 or 11 total)
+  - regex: `\b[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}(?:[A-Z0-9]{3})?\b`
+  - checksum: none; validate positions 5-6 against ISO 3166 codes
+  - edge: Identifies a bank, not a person: use it mostly as a context signal for IBAN or country, and run only with context. All-caps 8-letter words match the pattern.
+  - ctx: BIC, SWIFT, code banque
+  - impls: python-stdnum bic (LGPL-2.1+)
+  - src: https://pypi.org/project/python-stdnum/
+- **INTL CREDIT_CARD** (PAN (ISO/IEC 7812); ; FP low)
+  - format: 12-19 digits (Visa 4; MC 51-55 and 2221-2720; Amex 34/37 with 15 digits; Discover 6011/644-649/65; JCB 3528-3589; UnionPay 62; Mir 2200-2204), separated by spaces or dashes
+  - regex: `\b(?:\d[ \-]?){11,18}\d\b`
+  - checksum: Luhn mod 10 + IIN range table + length per network
+  - edge: Masked forms: '**** **** **** 1234', 'XXXX-XXXX-XXXX-1234', '497010******1234'. Excel truncates 16+ digit numbers to 15 significant digits, so the trailing 0 fails Luhn. Some UnionPay numbers are not Luhn. 8-digit IIN since ISO 7812 (2017).
+  - ctx: carte, card, CB, Visa, Mastercard, Kreditkarte, tarjeta, carta
+  - impls: Presidio CreditCardRecognizer (MIT); python-stdnum luhn (LGPL)
+  - src: https://en.wikipedia.org/wiki/Payment_card_number ; https://support.microsoft.com/topic/1bf7b935-36e1-4985-842f-5dfa51f85fe7
+- **INTL IMEI** (IMEI / IMEISV; ; FP medium)
+  - format: IMEI: 8-digit TAC + 6-digit serial + 1 check digit (15). IMEISV: 16 digits, ending in a 2-digit software version instead of a check digit
+  - regex: `\b\d{2}[ \-/]?\d{6}[ \-/]?\d{6}[ \-/]?\d{1,2}\b`
+  - checksum: Luhn on the 15-digit IMEI; IMEISV has none
+  - edge: Collides with other 15-digit numbers (FR NIR, Amex, invoice IDs), about 10% of which pass Luhn by chance. Require context; IMEISV only with context.
+  - ctx: IMEI, IMEISV, *#06#, numéro de série, Seriennummer
+  - impls: python-stdnum imei (LGPL-2.1+)
+  - src: https://arthurdejong.org/python-stdnum/doc/2.2/stdnum.imei ; https://www.3gpp.org/DynaReport/23003.htm
+- **INTL IP_ADDRESS** (IPv4/IPv6; ; FP medium)
+  - format: Dotted-quad IPv4. IPv6 per RFC 4291/5952: hex groups, '::' compression, embedded IPv4, %zone
+  - regex: `\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b|(?i)\b(?:[0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4}\b`
+  - checksum: none; validate with stdlib ipaddress (PSF)
+  - edge: Software versions (1.2.3.4), OIDs, times (12:30:45) and MAC fragments look like addresses. Policy choice: keep private, loopback and documentation ranges (10/8, 127/8, 192.0.2/24, 2001:db8::/32) or replace them.
+  - ctx: IP, adresse IP, IP address, IP-Adresse, dirección IP
+  - impls: Presidio IpRecognizer (MIT); Python ipaddress
+  - src: https://www.rfc-editor.org/rfc/rfc5952 ; https://curia.europa.eu/juris/liste.jsf?num=C-582/14
+- **INTL MAC_ADDRESS** (EUI-48 MAC; ; FP low)
+  - format: 6 hex pairs separated by ':' or '-', or Cisco xxxx.xxxx.xxxx
+  - regex: `(?i)\b[0-9a-f]{2}([:\-])[0-9a-f]{2}(?:\1[0-9a-f]{2}){4}\b|(?i)\b[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}\b`
+  - checksum: none
+  - edge: Unseparated 12-hex form: context only (it collides with hashes). Locally administered or randomized MACs are still identifiers.
+  - ctx: MAC, adresse MAC, hardware address, BSSID
+  - impls: Presidio MAC recognizer (MIT); python-stdnum mac (LGPL)
+  - src: https://presidio.dataprivacystack.org/supported_entities/
+- **INTL EMAIL_ADDRESS** (e-mail; ; FP low)
+  - format: local@domain.tld (RFC 5322 is too permissive for text, so use a practical subset); obfuscated forms: 'jean [at] mail [dot] com', 'jean(at)mail(dot)com', 'jean arobase mail point com'
+  - regex: `(?i)[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,63}|(?i)[\w.+\-]+\s*(?:[\[({<]\s*(?:at|arobase|chez|ät)\s*[\])}>]|\s(?:at|arobase)\s)\s*[\w\-]+(?:\s*(?:[\[({<]\s*(?:dot|point|punkt)\s*[\])}>]|\s(?:dot|point)\s)\s*[\w\-]+)+`
+  - checksum: none; validate the TLD against the IANA TLD list
+  - edge: Spaced 'at'/'dot' variants are high-FP in English prose, so require a known TLD. Also handle IDN/Unicode local parts, plus-addressing, trailing punctuation, mailto: and Markdown links.
+  - ctx: mail, e-mail, courriel, E-Mail, correo
+  - impls: Presidio EmailRecognizer (MIT)
+  - src: https://www.rfc-editor.org/rfc/rfc5322 ; https://data.iana.org/TLD/tlds-alpha-by-domain.txt
+- **INTL URL_PII** (URL with personal data; ; FP medium)
+  - format: Query parameters (email=, user=, name=, phone=, token=, session=), profile paths (linkedin.com/in/<slug>, facebook.com/<user>, x.com/<handle>), signed URLs
+  - regex: `(?i)\bhttps?://[^\s<>"')\]]+`
+  - checksum: none; parse with urllib, percent-decode, run the other detectors on each component
+  - edge: Replace only the PII component so the URL stays useful. Signed or secret URLs (presigned S3, OAuth codes) should be replaced whole. Markdown link targets must be handled too.
+  - ctx: lien, link, profil, profile
+  - impls: Presidio UrlRecognizer (MIT)
+  - src: https://presidio.dataprivacystack.org/supported_entities/
+- **INTL PHONE_NUMBER** (phone (E.164); ; FP medium)
+  - format: +CC or 00CC international form, or national form with a trunk prefix
+  - regex: `(?:\+|\b00)\d[\d  ().\-/]{6,20}\d`
+  - checksum: libphonenumber validity metadata (length + number ranges per region)
+  - edge: Leniency VALID by default, STRICT/EXACT_GROUPING lose coverage outside +1. National-format numbers need the right region; with no region only +CC numbers parse. Excel drops leading zeros. DE/AT simplified ranges cause false valid matches.
+  - ctx: tél, tel, phone, mobile, portable, Handy, Telefon, teléfono, cellulare
+  - impls: phonenumbers 9.0.41 (Apache-2.0); Presidio PhoneRecognizer (MIT)
+  - src: https://pypi.org/project/phonenumbers/ ; https://github.com/daviddrysdale/python-phonenumbers/blob/dev/python/phonenumbers/phonenumbermatcher.py ; https://github.com/google/libphonenumber/blob/master/FAQ.md
+- **INTL CRYPTO_BTC** (Bitcoin address; ; FP low)
+  - format: P2PKH '1...' and P2SH '3...' in base58 (25-34 chars); segwit 'bc1q...' (bech32, v0) and 'bc1p...' (bech32m, v1+); maximum 90 characters
+  - regex: `(?i)\bbc1[ac-hj-np-z02-9]{11,71}\b|\b[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b`
+  - checksum: Base58Check: double-SHA256, first 4 bytes. Bech32 polymod constant 1; bech32m constant 0x2bc830a3
+  - edge: Bech32 rejects mixed case. Testnet 'tb1'. The python-stdnum bitcoin module rejects bech32m (Taproot); Presidio handles it. LTC (L/M/ltc1) and TRON (T, base58check) use the same primitives.
+  - ctx: bitcoin, BTC, wallet, portefeuille, adresse
+  - impls: Presidio CryptoRecognizer (MIT); python-stdnum bitcoin (LGPL, no bech32m)
+  - src: https://github.com/bitcoin/bips/blob/master/bip-0350.mediawiki ; https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki ; https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/bitcoin.py
+- **INTL CRYPTO_ETH** (Ethereum/EVM address; ; FP low)
+  - format: 0x + 40 hex characters
+  - regex: `\b0x[a-fA-F0-9]{40}\b`
+  - checksum: EIP-55: keccak256 of the lowercase hex; a letter is uppercase where the hash nibble is >= 8. All-lowercase or all-uppercase addresses carry no checksum
+  - edge: Lowercase addresses collide with tx hashes (64 hex) and other hex IDs, so check the length strictly. Solana (base58, 32 bytes, no checksum) needs context only (high FP).
+  - ctx: ETH, ethereum, wallet, 0x, USDT, ERC20
+  - impls: none in Presidio (Bitcoin only); reimplement (keccak via pycryptodome, BSD/public domain)
+  - src: https://eips.ethereum.org/EIPS/eip-55
+- **INTL VIN** (VIN (ISO 3779); ; FP medium)
+  - format: 17 characters from [A-HJ-NPR-Z0-9] (no I, O, Q): WMI 3 + VDS 6 (position 9 is the check digit in North America and China) + VIS 8
+  - regex: `(?i)\b[A-HJ-NPR-Z0-9]{17}\b`
+  - checksum: North America (49 CFR 565.15): transliterate letters, weights 8,7,6,5,4,3,2,10,0,9,8,7,6,5,4,3,2; sum mod 11; 10 is written 'X'. Optional in Europe
+  - edge: Many EU VINs fail the check digit, so use a valid check digit as a score boost, not as a filter. Also pre-1981 VINs and 17-character product codes or hashes.
+  - ctx: VIN, numéro de série, châssis, FIN, Fahrgestellnummer, bastidor, telaio, E.
+  - impls: none in stdnum/Presidio; reimplement
+  - src: https://www.ecfr.gov/current/title-49/subtitle-B/chapter-V/part-565/subpart-B/section-565.15 ; https://www.law.cornell.edu/cfr/text/49/565.15 ; https://en.wikipedia.org/wiki/Vehicle_identification_number
+- **INTL MRZ** (ICAO 9303 MRZ; ; FP low)
+  - format: TD1 3x30 (ID cards), TD2 2x36, TD3 2x44 (passports); alphabet [A-Z0-9<]
+  - regex: `(?m)^(?:[A-Z0-9<]{30}[ \t]*\r?\n){2}[A-Z0-9<]{30}$|^[A-Z0-9<]{36}[ \t]*\r?\n[A-Z0-9<]{36}$|^[A-Z0-9<]{44}[ \t]*\r?\n[A-Z0-9<]{44}$`
+  - checksum: Weights 7,3,1 repeating; digit value as is, A=10..Z=35, '<'=0; sum mod 10. Per-field check digits (document number, birth date, expiry) plus a composite check digit
+  - edge: Replace the whole block: it holds name, document number, nationality, birth date, sex and expiry. Tolerate OCR noise (O/0, K/<, «). Covers MA/DZ/TN/SN/CI/CM biometric cards.
+  - ctx: P<, I<, ID, passport, passeport
+  - impls: Mrz.Net (.NET, reference only); reimplement
+  - src: https://store.icao.int/en/machine-readable-travel-documents-part-3-specifications-common-to-all-mrtds-doc-9303-3 ; https://microblink.com/es/?p=41727
+- **INTL GPS_COORDINATES** (coordinates; ; FP medium)
+  - format: Decimal 'lat, lon' (48.8566, 2.3522); DMS 48°51'24"N 2°21'07"E; geo: URI (RFC 5870); map URLs '@48.85,2.35,15z'
+  - regex: `[-+]?(?:[1-8]?\d\.\d{3,}|90\.0+)\s*[,;]\s*[-+]?(?:180\.0+|(?:1[0-7]\d|[1-9]?\d)\.\d{3,})|\d{1,3}\s*°\s*\d{1,2}\s*['′]\s*\d{1,2}(?:[.,]\d+)?\s*(?:"|″|'')?\s*[NSEWO]`
+  - checksum: range check: lat ±90, lon ±180
+  - edge: Require 3+ decimals (about 100 m precision). Decimal pairs in tables or prices cause FPs. Option: generalize to 2 decimals instead of removing.
+  - ctx: GPS, coordonnées, coordinates, lat, lon, position, Koordinaten
+  - impls: none; reimplement
+  - src: https://www.rfc-editor.org/rfc/rfc5870
+- **INTL DATE_OF_BIRTH** (date / date de naissance; ; FP medium)
+  - format: Numeric dd/mm/yyyy, mm/dd/yyyy, yyyy-mm-dd, dd.mm.yyyy; textual month names per locale ('3 mars 1985', '1er janvier', 'March 3rd, 1985')
+  - regex: `\b(?:\d{1,2}[./\-]\d{1,2}[./\-](?:\d{4}|\d{2})|\d{4}-\d{2}-\d{2})\b`
+  - checksum: calendar validity; DOB = date plus a birth context word or a plausible age range
+  - edge: Build month-name alternations from CLDR (Babel) instead of running dateparser on every token. Ambiguous dd/mm vs mm/dd. Excel stores dates as serial numbers. Policy: keep business dates, replace or generalize DOB (year only).
+  - ctx: né le, née le, date de naissance, DOB, born, geb., Geburtsdatum, fecha de nacimiento, nato il, data di nascita
+  - impls: Babel CLDR (BSD-3 + Unicode); dateparser 1.4.3 (BSD-3); Presidio DateRecognizer (MIT)
+  - src: https://pypi.org/project/dateparser/ ; https://pypi.org/project/babel/
+- **INTL AGE** (âge; ; FP high)
+  - format: '42 ans', 'âgé de 42 ans', '42-year-old', 'aged 42', '42 Jahre alt', '42 años'
+  - regex: `(?i)\b(?:1[01]\d|[1-9]?\d)\s?(?:ans|an|years?(?:[ \-]old)?|y/?o|Jahre(?:\s+alt)?|años|anni|jaar|lat)\b`
+  - checksum: none; range 0-120
+  - edge: Durations ('10 ans d'expérience', '5-year plan') look like ages. Ages above about 89 are re-identifying. Option: bucket into ranges rather than removing.
+  - ctx: âgé, age, âge, Alter, edad, età
+  - impls: none; reimplement
+  - src: https://presidio.dataprivacystack.org/supported_entities/
+- **INTL USERNAME** (pseudo / handle; ; FP high)
+  - format: @handle (social), 'login: x', 'utilisateur: x', profile URLs
+  - regex: `(?<![\w.@/])@[A-Za-z0-9_](?:[A-Za-z0-9_.]{0,28}[A-Za-z0-9_])?\b`
+  - checksum: none
+  - edge: Code decorators (@Override), CSS @media, npm scopes (@types/node) and e-mail local parts match the pattern. In code blocks, run only with context.
+  - ctx: login, identifiant, username, pseudo, utilisateur, Benutzername, usuario
+  - impls: none
+  - src: https://presidio.dataprivacystack.org/supported_entities/
+- **INTL SECRET** (API keys / tokens / private keys; ; FP low)
+  - format: Provider prefixes: AKIA/ASIA (AWS), ghp_/github_pat_, glpat-, xox[abpors]-, sk_live_/rk_live_, sk-ant-api03-/admin01-, OpenAI keys containing 'T3BlbkFJ', AIza (GCP), JWT eyJ.., PEM 'BEGIN ... PRIVATE KEY'; generic key=value with high entropy
+  - regex: `\b(?:AKIA|ASIA)[A-Z0-9]{16}\b|\bgh[pousr]_[A-Za-z0-9]{36,255}\b|\bglpat-[\w\-]{20,}\b|\bxox[abposr]-[A-Za-z0-9\-]{10,}\b|\b[sr]k_(?:live|test)_[A-Za-z0-9]{10,99}\b|\bsk-ant-(?:api|admin)\d{2}-[\w\-]{80,}|\bAIza[\w\-]{35}\b|\beyJ[\w\-]{10,}\.eyJ[\w\-]{10,}\.[\w\-]{10,}|-----BEGIN (?:[A-Z]+ )?PRIVATE KEY-----`
+  - checksum: Some tokens embed a CRC (e.g. GitHub). Otherwise Shannon entropy >= 3.5 for generic rules
+  - edge: Generic entropy rules are noisy on hashes and UUIDs, so use stopword allowlists as gitleaks does. Go RE2 syntax must be ported to Python re (inline flags). Multi-line keys need special handling.
+  - ctx: api_key, token, secret, password, mot de passe, Passwort, bearer, Authorization
+  - impls: gitleaks config (MIT); Betterleaks (MIT); Kingfisher (Apache-2.0); detect-secrets (Apache-2.0); TruffleHog (AGPL-3.0, avoid)
+  - src: https://raw.githubusercontent.com/gitleaks/gitleaks/master/config/gitleaks.toml ; https://github.com/gitleaks/gitleaks ; https://github.com/betterleaks/betterleaks ; https://github.com/Yelp/detect-secrets
+- **US US_SSN** (Social Security Number; ; FP high)
+  - format: AAA-GG-SSSS (9 digits)
+  - regex: `\b(?!000|666|9\d\d)\d{3}([- .]?)(?!00)\d{2}\1(?!0000)\d{4}\b`
+  - checksum: none. Invalid: area 000, 666 or 900-999; group 00; serial 0000. Reject repeated digits and advertising numbers (987-65-4320..4329, 078-05-1120)
+  - edge: Formatted with dashes: medium risk. Bare 9 digits: context only. Randomization since 25 Jun 2011 removed geographic meaning. Presidio does not reject 9xx.
+  - ctx: SSN, social security, SS#, sécurité sociale américaine
+  - impls: python-stdnum us.ssn (LGPL); Presidio UsSsnRecognizer (MIT)
+  - src: https://www.ssa.gov/employer/randomizationfaqs.html ; https://raw.githubusercontent.com/data-privacy-stack/presidio/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/country_specific/us/us_ssn_recognizer.py
+- **US US_ITIN** (ITIN; ; FP medium)
+  - format: 9XX-XX-XXXX with digits 4-5 in 50-65, 70-88, 90-92 or 94-99
+  - regex: `\b9\d{2}([- ]?)(?:5\d|6[0-5]|7\d|8[0-8]|9[0-24-9])\1\d{4}\b`
+  - checksum: none (range rules only)
+  - edge: ATIN uses group 93. Expired ITINs are still PII.
+  - ctx: ITIN, taxpayer identification, W-7
+  - impls: python-stdnum us.itin (LGPL); Presidio UsItinRecognizer (MIT)
+  - src: https://www.eitc.irs.gov/pub/irs-pdf/p4757.pdf
+- **US US_EIN** (Employer Identification Number; ; FP medium)
+  - format: XX-XXXXXXX; 2-digit prefix from the IRS list (e.g. 01-06, 10-16, 20-27, 30-48, 50-68, 71-77, 80-88, 90-95, 98, 99)
+  - regex: `\b\d{2}-\d{7}\b`
+  - checksum: none; prefix whitelist
+  - edge: Company identifier, but personal data for sole proprietors. Unformatted 9 digits: context only.
+  - ctx: EIN, FEIN, employer identification, tax ID
+  - impls: python-stdnum us.ein (LGPL)
+  - src: https://www.irs.gov/businesses/small-businesses-self-employed/how-eins-are-assigned-and-valid-ein-prefixes
+- **US US_PASSPORT_DL** (US passport / driver licence; ; FP high)
+  - format: Passport: 9 characters (9 digits, or 1 letter + 8 digits on next-generation books). Driver licences: about 50 state-specific formats
+  - regex: `\b(?:[A-Z]\d{8}|\d{9})\b`
+  - checksum: none, except the MRZ
+  - edge: Context-gated only. Prefer MRZ detection. Next-generation passport format not verified from a primary source in this pass.
+  - ctx: passport, passport no, driver's license, DL#, permis de conduire
+  - impls: Presidio UsPassportRecognizer / UsLicenseRecognizer (MIT)
+  - src: https://presidio.dataprivacystack.org/supported_entities/
+- **CA CA_SIN** (Social Insurance Number / NAS; ; FP medium)
+  - format: 9 digits as NNN-NNN-NNN; first digit 9 = temporary residents
+  - regex: `\b\d{3}([- ]?)\d{3}\1\d{3}\b`
+  - checksum: Luhn
+  - edge: Luhn alone gives about 10% random pass; stdnum rejects some leading digits (e.g. 8). Same shape as US SSN and AU TFN.
+  - ctx: SIN, NAS, numéro d'assurance sociale, social insurance
+  - impls: python-stdnum ca.sin (LGPL); Presidio CaSinRecognizer (MIT)
+  - src: https://arthurdejong.org/python-stdnum/doc/2.2/stdnum.ca.sin ; https://www.canada.ca/en/employment-social-development/services/sin.html
+- **BR BR_CPF** (CPF; ; FP low)
+  - format: NNN.NNN.NNN-DD (11 digits)
+  - regex: `\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b`
+  - checksum: Two mod-11 check digits (weights 10..2, then 11..2). Reject all-same digits
+  - edge: Bare 11 digits: medium risk, and collides with TR TCKN. The 9th digit encodes the fiscal region.
+  - ctx: CPF, cadastro de pessoas físicas, contribuinte
+  - impls: python-stdnum br.cpf (LGPL)
+  - src: https://pypi.org/project/python-stdnum/
+- **BR BR_CNPJ** (CNPJ (numeric + alfanumérico); ; FP low)
+  - format: 14 characters: 8 root + 4 establishment + 2 check digits, written NN.NNN.NNN/NNNN-DD. Since 31 Jul 2026 the first 12 may be [0-9A-Z]
+  - regex: `(?i)\b[0-9A-Z]{2}\.?[0-9A-Z]{3}\.?[0-9A-Z]{3}/?[0-9A-Z]{4}-?\d{2}\b`
+  - checksum: Mod 11 with weights 5,4,3,2,9,8,7,6,5,4,3,2 then 6,5,4,3,2,9,...; character value = ASCII - 48 (A=17); check digits stay numeric
+  - edge: First alphanumeric CNPJ issued: 00.000.000/E08G-12. Numeric CNPJs stay valid. Personal data for sole proprietors (MEI).
+  - ctx: CNPJ, empresa, razão social
+  - impls: python-stdnum 2.2 br.cnpj (LGPL; alphanumeric supported)
+  - src: https://agenciagov.ebc.com.br/noticias/202607/receita-federal-gera-o-primeiro-cnpj-em-formato-alfanumerico ; https://agenciagov.ebc.com.br/noticias/202607/implantacao-do-cnpj-alfanumerico-ocorrera-a-partir-de-31-de-julho ; https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/br/cnpj.py
+- **MX MX_CURP** (CURP; ; FP low)
+  - format: 18 characters: 4 name letters + YYMMDD + sex (H/M) + 2-letter state + 3 consonants + century character (digit for 19xx, letter for 20xx) + check digit
+  - regex: `(?i)\b[A-Z]{4}\d{6}[HMX][A-Z]{2}[A-Z]{3}[0-9A-Z]\d\b`
+  - checksum: Alphabet '0123456789ABCDEFGHIJKLMN&OPQRSTUVWXYZ' (index = value); weights 18..2; check = (10 - sum mod 10) mod 10
+  - edge: Whether 'X' is now issued as a sex marker is unverified (stdnum accepts H/M only). Name-blacklist substitutions. State 'NE' = born abroad.
+  - ctx: CURP, clave única, registro de población
+  - impls: python-stdnum mx.curp (LGPL)
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/mx/curp.py ; https://www.gob.mx/curp/
+- **MX MX_RFC** (RFC; ; FP low)
+  - format: Persons: 4 letters + YYMMDD + 3-character homoclave (13). Companies: 3 letters + YYMMDD + 3 (12)
+  - regex: `(?i)\b[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{2}[0-9A]\b`
+  - checksum: The last homoclave character is a mod-11 check digit
+  - edge: Generic RFCs XAXX010101000 / XEXX010101000 are placeholders and should be kept.
+  - ctx: RFC, SAT, registro federal de contribuyentes
+  - impls: python-stdnum mx.rfc (LGPL)
+  - src: https://pypi.org/project/python-stdnum/
+- **IN IN_AADHAAR** (Aadhaar; ; FP medium)
+  - format: 12 digits printed as 4-4-4; first digit 2-9; not a palindrome
+  - regex: `\b[2-9]\d{3}([ \-]?)\d{4}\1\d{4}\b`
+  - checksum: Verhoeff (last digit)
+  - edge: Masked form 'XXXX XXXX 1234'. The 16-digit Virtual ID (VID) is not covered by this rule. A random 12-digit number passes Verhoeff about 10% of the time. Same length as JP My Number.
+  - ctx: Aadhaar, आधार, UIDAI, UID
+  - impls: python-stdnum in_.aadhaar (LGPL); Presidio InAadhaarRecognizer (MIT)
+  - src: https://arthurdejong.org/python-stdnum/doc/2.2/stdnum.in_.aadhaar ; https://web.archive.org/web/20140611025606/http://uidai.gov.in/UID_PDF/Working_Papers/A_UID_Numbering_Scheme.pdf
+- **IN IN_PAN** (Permanent Account Number; ; FP low)
+  - format: AAAAA9999A: 4th letter = holder type (P individual, C, H, F, A, T, B, L, J, G); 5th letter = surname initial
+  - regex: `\b[A-Z]{3}[ABCFGHJLPT][A-Z]\d{4}[A-Z]\b`
+  - checksum: Last letter is a check character from an undocumented algorithm; validate structure only
+  - edge: The distinctive pattern makes global use acceptable. Also GSTIN (15 characters, embeds the PAN).
+  - ctx: PAN, permanent account number, income tax
+  - impls: python-stdnum in_.pan (LGPL); Presidio InPanRecognizer (MIT)
+  - src: https://arthurdejong.org/python-stdnum/doc/2.2/stdnum.in_.pan
+- **CN CN_RIC** (居民身份证号码; ; FP low)
+  - format: 18 characters: 6-digit region + YYYYMMDD + 3-digit order (odd = male) + check character (0-9 or X)
+  - regex: `\b[1-9]\d{5}(?:18|19|20)\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])\d{3}[\dXx]\b`
+  - checksum: ISO 7064 MOD 11-2 (GB 11643-1999): weights 2^(17-i) mod 11; 10 is written 'X'
+  - edge: Old 15-digit IDs have no check digit. The birth date is embedded (quasi-identifier).
+  - ctx: 身份证, 身份证号, 公民身份号码, ID card
+  - impls: python-stdnum cn.ric (LGPL)
+  - src: https://arthurdejong.org/python-stdnum/doc/2.2/stdnum.cn.ric ; https://en.wikipedia.org/wiki/National_identification_number
+- **JP JP_MY_NUMBER** (個人番号 (マイナンバー); ; FP medium)
+  - format: 12 digits, printed 4-4-4; encodes no personal attributes
+  - regex: `\b\d{4}([ \-]?)\d{4}\1\d{4}\b`
+  - checksum: Weights 6,5,4,3,2,7,6,5,4,3,2 on the first 11 digits; check = (-S mod 11) mod 10
+  - edge: Single mod-11 check digit, so gate on locale or context. Corporate Number (法人番号) has 13 digits.
+  - ctx: マイナンバー, 個人番号, My Number
+  - impls: python-stdnum jp.in_ (LGPL)
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/jp/in_.py ; https://digitalforensic.jp/2016/03/14/column404/
+- **AU AU_TFN** (Tax File Number; ; FP medium)
+  - format: 9 digits (older numbers have 8), printed NNN NNN NNN
+  - regex: `\b\d{3}([ \-]?)\d{3}\1\d{2,3}\b`
+  - checksum: Weights 1,4,3,7,5,8,6,9,10; sum mod 11 == 0
+  - edge: Same shape as SSN and SIN. Context gate.
+  - ctx: TFN, tax file number
+  - impls: python-stdnum au.tfn (LGPL); Presidio AuTfnRecognizer (MIT)
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/au/tfn.py ; https://www.ato.gov.au/Individuals/Tax-file-number/
+- **AU AU_MEDICARE** (Medicare card number; ; FP medium)
+  - format: 10 digits (first digit 2-6), printed NNNN NNNNN N, plus an optional 1-digit IRN
+  - regex: `\b[2-6]\d{3}([ \-]?)\d{5}\1\d(?:[ \-]?\d)?\b`
+  - checksum: Weights 1,3,7,9,1,3,7,9 on the first 8 digits; sum mod 10 == digit 9
+  - edge: Presidio scores 0.1/0.01 without context, so require context.
+  - ctx: medicare
+  - impls: Presidio AuMedicareRecognizer (MIT)
+  - src: https://raw.githubusercontent.com/data-privacy-stack/presidio/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/country_specific/australia/au_medicare_recognizer.py
+- **TR TR_TCKN** (T.C. Kimlik No; ; FP medium)
+  - format: 11 digits, first digit not 0
+  - regex: `\b[1-9]\d{10}\b`
+  - checksum: d10 = (7*(d1+d3+d5+d7+d9) - (d2+d4+d6+d8)) mod 10; d11 = sum(d1..d10) mod 10
+  - edge: Two check digits (about 1/100 random pass), but it collides with 11-digit phone numbers and BR CPF.
+  - ctx: TC Kimlik, T.C. Kimlik No, TCKN, kimlik numarası
+  - impls: python-stdnum tr.tckimlik (LGPL); Presidio TR_NATIONAL_ID (MIT)
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/tr/tckimlik.py ; https://tckimlik.nvi.gov.tr/
+- **IL IL_ID** (מספר זהות (Teudat Zehut); ; FP high)
+  - format: Up to 9 digits, left-padded with zeros to 9; often written NNNNNNNN-C
+  - regex: `\b\d{7,8}-?\d\b`
+  - checksum: Luhn on the 9-digit padded form
+  - edge: Luhn on short numbers makes FPs common. Use only with locale (Hebrew script) or context. Excel drops the leading zeros.
+  - ctx: תעודת זהות, ת.ז., מספר זהות, Teudat Zehut, Israeli ID
+  - impls: python-stdnum il.idnr (LGPL)
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/il/idnr.py
+- **UA UA_RNOKPP** (РНОКПП / ІПН; ; FP high)
+  - format: 10 digits: first 5 = days since 31-12-1899 (birth date); digit 9 odd = male; digit 10 = check
+  - regex: `\b\d{10}\b`
+  - checksum: Weights -1,5,7,9,4,6,10,5,7; (sum mod 11) mod 10
+  - edge: Bare 10 digits: needs locale (Cyrillic) or context. UNZR 'YYYYMMDD-NNNNC' uses the MRZ 7-3-1 check digit and has low FP.
+  - ctx: РНОКПП, ІПН, ідентифікаційний код, податковий номер
+  - impls: python-stdnum ua.rntrc (LGPL)
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/ua/rntrc.py ; https://en.wikipedia.org/wiki/National_identification_number
+- **MA MA_CIN** (CIN / CNIE (رقم البطاقة الوطنية); ; FP high)
+  - format: 1-2 letters (issuing region) + up to 6 digits, e.g. 'BK123456' (unverified); ICE company tax ID has 15 digits
+  - regex: `\b[A-Z]{1,2}\d{4,6}\b`
+  - checksum: none known for CIN; ICE has a check (stdnum ma.ice)
+  - edge: Context only. The CNIE carries a TD1 MRZ, so prefer MRZ detection. Format to verify against PRADO.
+  - ctx: CIN, CNIE, carte nationale, البطاقة الوطنية, ICE
+  - impls: python-stdnum ma.ice (LGPL)
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/NEWS
+- **DZ DZ_NIN** (Numéro d'Identification National (NIN); ; FP high)
+  - format: 18 digits on the biometric CNI (unverified); NIF tax ID per stdnum dz.nif
+  - regex: `\b\d{18}\b`
+  - checksum: none public for NIN; NIF validated by stdnum
+  - edge: Context or MRZ only. Format unverified.
+  - ctx: NIN, numéro d'identification national, CNI, الرقم الوطني, NIF
+  - impls: python-stdnum dz.nif (LGPL)
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/NEWS
+- **TN TN_CIN** (Carte d'identité nationale; ; FP high)
+  - format: 8 digits (unverified); Matricule Fiscal per stdnum tn.mf
+  - regex: `\b\d{8}\b`
+  - checksum: none for CIN; MF has a check letter
+  - edge: Context only.
+  - ctx: CIN, carte d'identité, بطاقة التعريف, matricule fiscal
+  - impls: python-stdnum tn.mf (LGPL)
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/NEWS
+- **SN SN_NINEA_CNI** (NINEA / CNI CEDEAO; ; FP high)
+  - format: NINEA tax number (stdnum 2.2 sn.ninea). The ECOWAS biometric CNI has a TD1 MRZ and a NIN (length unverified)
+  - regex: `(?i)\bNINEA\s*:?\s*[0-9A-Z ]{7,12}`
+  - checksum: NINEA: check per stdnum; CNI: MRZ 7-3-1
+  - edge: Formats for CI (NNI) and CM (CNI, NIU) are undocumented here: use MRZ + context only.
+  - ctx: NINEA, CNI, carte CEDEAO, NIN
+  - impls: python-stdnum sn.ninea (LGPL)
+  - src: https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/NEWS
+

@@ -1,0 +1,144 @@
+{
+  "corpus": "parlamint_fr",
+  "title": "ParlaMint-FR 5.0, Assemblée nationale debates 2017-2022 (sample)",
+  "language": "fr",
+  "licence": "CC BY 4.0",
+  "source": "http://hdl.handle.net/11356/2004",
+  "revision": "ParlaMint-FR.tgz (handle 11356/2004, version 5.0)",
+  "real_text": "yes",
+  "gold": "speaker labels rendered from the TEI 'who' metadata (exact); in-text mentions = exact matches of the full name, or civility + surname, of the 1,000+ persons of the corpus person list",
+  "gold_complete": false,
+  "negative_control": false,
+  "measures": "recall of politicians' names in real modern French prose (speaker labels and in-text mentions)",
+  "cannot_measure": "precision (people outside the person list are not annotated); private-person identifiers",
+  "build": {
+    "documents": 300,
+    "mentions": 3006,
+    "chars": 1029684,
+    "source": "http://hdl.handle.net/11356/2004",
+    "revision": "ParlaMint-FR.tgz (handle 11356/2004, version 5.0)",
+    "licence": "CC BY 4.0",
+    "fetched": "2026-10-25"
+  },
+  "gold_labels": {
+    "PERSON": 3006
+  },
+  "run": {
+    "date": "2026-10-26",
+    "countries": "FR",
+    "profile": "standard",
+    "engine": {
+      "package": "gdprguardian",
+      "version": "1.0.0",
+      "native_core": true,
+      "python": "3.12.11",
+      "platform": "Windows 11",
+      "machine": "AMD64"
+    },
+    "tag": "rules3",
+    "review": null,
+    "split": "all",
+    "split_rule": null
+  },
+  "documents": 300,
+  "evaluated": 300,
+  "errors": {},
+  "chars": 1029684,
+  "seconds": 0.201,
+  "chars_per_second": 5116694,
+  "families": [
+    "PERSON"
+  ],
+  "totals": {
+    "m_total": 3006,
+    "m_full": 2956,
+    "m_cov80": 2959,
+    "m_literal_checked": 3006,
+    "m_literal": 10,
+    "c_gold": 40029,
+    "c_gold_masked": 39670,
+    "c_pred": 41692,
+    "c_pred_tp": 39670,
+    "c_neutral": 785848,
+    "c_neutral_masked": 2022,
+    "d_has_gold": 299,
+    "d_leak": 26,
+    "d_leak_literal": 9,
+    "k_total": 0,
+    "k_touched": 0,
+    "chars": 1029684,
+    "detections": 3168,
+    "d_detection": 299,
+    "g_PERSON": 3006,
+    "f_PERSON": 2956
+  },
+  "metrics": {
+    "mention_recall": 0.9833666001330672,
+    "mention_recall_at80": 0.9843646041250832,
+    "char_recall": 0.9910315021609333,
+    "precision": null,
+    "over_masking": null,
+    "doc_leak_rate": 0.08695652173913043,
+    "doc_literal_leak_rate": 0.030100334448160536,
+    "mention_literal_leak_rate": 0.00332667997338656,
+    "kept_touched_rate": null,
+    "detections_per_10k_chars": 30.766720663815306,
+    "docs_with_detection": 0.9966666666666667,
+    "recall_PERSON": 0.9833666001330672
+  },
+  "intervals_95": {
+    "mention_recall": [
+      0.9757,
+      0.9901
+    ],
+    "mention_recall_at80": [
+      0.9771,
+      0.991
+    ],
+    "char_recall": [
+      0.9869,
+      0.9945
+    ],
+    "doc_leak_rate": [
+      0.0569,
+      0.1212
+    ],
+    "doc_literal_leak_rate": [
+      0.0133,
+      0.0533
+    ],
+    "mention_literal_leak_rate": [
+      0.0013,
+      0.0058
+    ],
+    "detections_per_10k_chars": [
+      28.6872,
+      32.9065
+    ],
+    "docs_with_detection": [
+      0.99,
+      1.0
+    ],
+    "recall_PERSON": [
+      0.9757,
+      0.9901
+    ]
+  },
+  "kept_families": {},
+  "by_origin": {
+    "PERSON:mention": {
+      "mentions": 995,
+      "masked": 972,
+      "recall": 0.9768844221105528
+    },
+    "PERSON:speaker": {
+      "mentions": 2011,
+      "masked": 1984,
+      "recall": 0.9865738438587768
+    }
+  },
+  "detected_labels": {
+    "PERSON": 3167,
+    "ORG": 1
+  }
+}

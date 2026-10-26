@@ -1,0 +1,171 @@
+{
+ "documents": 127,
+ "errors": 90,
+ "error_examples": [
+  "fr-00000: AttributeError: 'NoneType' object has no attribute 'end'",
+  "fr-00001: AttributeError: 'NoneType' object has no attribute 'end'",
+  "fr-00002: AttributeError: 'NoneType' object has no attribute 'end'",
+  "fr-00004: AttributeError: 'NoneType' object has no attribute 'end'",
+  "fr-00005: AttributeError: 'NoneType' object has no attribute 'end'",
+  "fr-00007: AttributeError: 'NoneType' object has no attribute 'end'",
+  "fr-00008: AttributeError: 'NoneType' object has no attribute 'end'",
+  "fr-00020: AttributeError: 'NoneType' object has no attribute 'end'",
+  "fr-00021: AttributeError: 'NoneType' object has no attribute 'end'",
+  "fr-00023: AttributeError: 'NoneType' object has no attribute 'end'",
+  "fr-00024: AttributeError: 'NoneType' object has no attribute 'end'",
+  "fr-00025: AttributeError: 'NoneType' object has no attribute 'end'",
+  "fr-00026: AttributeError: 'NoneType' object has no attribute 'end'",
+  "fr-00041: AttributeError: 'NoneType' object has no attribute 'end'",
+  "fr-00044: AttributeError: 'NoneType' object has no attribute 'end'",
+  "fr-00045: AttributeError: 'NoneType' object has no attribute 'end'",
+  "fr-00046: AttributeError: 'NoneType' object has no attribute 'end'",
+  "fr-00047: AttributeError: 'NoneType' object has no attribute 'end'",
+  "fr-00048: AttributeError: 'NoneType' object has no attribute 'end'",
+  "fr-00049: AttributeError: 'NoneType' object has no attribute 'end'"
+ ],
+ "characters": 71982,
+ "profile": "standard",
+ "countries": "FR",
+ "native": false,
+ "values": [
+  {
+   "type": "address",
+   "n": 75,
+   "leaks": 0,
+   "recall": 1.0,
+   "leak_rate_upper95": 0.04873
+  },
+  {
+   "type": "birth_date",
+   "n": 77,
+   "leaks": 8,
+   "recall": 0.8961,
+   "leak_rate_upper95": 0.19185
+  },
+  {
+   "type": "card",
+   "n": 16,
+   "leaks": 0,
+   "recall": 1.0,
+   "leak_rate_upper95": 0.19361
+  },
+  {
+   "type": "company_siret_sole_trader",
+   "n": 8,
+   "leaks": 0,
+   "recall": 1.0,
+   "leak_rate_upper95": 0.32442
+  },
+  {
+   "type": "company_tva_sole_trader",
+   "n": 8,
+   "leaks": 0,
+   "recall": 1.0,
+   "leak_rate_upper95": 0.32442
+  },
+  {
+   "type": "email",
+   "n": 77,
+   "leaks": 0,
+   "recall": 1.0,
+   "leak_rate_upper95": 0.04752
+  },
+  {
+   "type": "iban",
+   "n": 38,
+   "leaks": 0,
+   "recall": 1.0,
+   "leak_rate_upper95": 0.09181
+  },
+  {
+   "type": "nir",
+   "n": 77,
+   "leaks": 0,
+   "recall": 1.0,
+   "leak_rate_upper95": 0.04752
+  },
+  {
+   "type": "passport",
+   "n": 8,
+   "leaks": 0,
+   "recall": 1.0,
+   "leak_rate_upper95": 0.32442
+  },
+  {
+   "type": "phone",
+   "n": 77,
+   "leaks": 0,
+   "recall": 1.0,
+   "leak_rate_upper95": 0.04752
+  },
+  {
+   "type": "plate",
+   "n": 18,
+   "leaks": 0,
+   "recall": 1.0,
+   "leak_rate_upper95": 0.17588
+  }
+ ],
+ "names": [
+  {
+   "type": "name_token",
+   "n": 161,
+   "leaks": 0,
+   "recall": 1.0,
+   "leak_rate_upper95": 0.0233
+  }
+ ],
+ "decoys": [
+  {
+   "type": "decoy_altered",
+   "n": 208,
+   "leaks": 1,
+   "recall": 0.99519,
+   "leak_rate_upper95": 0.02673
+  }
+ ],
+ "policy_company_ids": [
+  {
+   "type": "company_siret_kept",
+   "n": 29,
+   "leaks": 14,
+   "recall": 0.51724,
+   "leak_rate_upper95": 0.65569
+  },
+  {
+   "type": "company_tva_kept",
+   "n": 29,
+   "leaks": 0,
+   "recall": 1.0,
+   "leak_rate_upper95": 0.11697
+  }
+ ],
+ "consistency": {
+  "persons": 77,
+  "consistent": 67,
+  "split": 10
+ },
+ "mutations": {},
+ "throughput_mb_s": 0.492,
+ "latency_ms": {
+  "p50": 3.836,
+  "p95": 5.426
+ },
+ "leak_examples": {
+  "birth_date": [
+   "fr-00043: 15 juin 1941",
+   "fr-00086: 15 mars 1986",
+   "fr-00183: 15 août 1990",
+   "fr-00184: 6 février 1990",
+   "fr-00225: 25 octobre 1944",
+   "fr-00244: 11 novembre 1956",
+   "fr-00263: 25 septembre 1992",
+   "fr-00266: 10 avril 1942"
+  ]
+ },
+ "decoy_examples": {
+  "decoy_altered": [
+   "fr-00022: facture FAC-2025-19220"
+  ]
+ }
+}

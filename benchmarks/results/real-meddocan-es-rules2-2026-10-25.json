@@ -1,0 +1,247 @@
+{
+  "corpus": "meddocan_es",
+  "title": "MEDDOCAN, Spanish clinical case reports (de-identification task)",
+  "language": "es",
+  "licence": "CC BY 4.0",
+  "source": "https://zenodo.org/records/4279323",
+  "revision": "Zenodo 10.5281/zenodo.4279323 (meddocan.zip)",
+  "real_text": "yes (real published case reports) with SURROGATE identifiers added by the corpus authors",
+  "gold": "manual gold (29 PHI types), inter-annotator agreement reported at 98%",
+  "gold_complete": true,
+  "negative_control": false,
+  "measures": "recall of names, street addresses, e-mails, phones and IDs in Spanish clinical text",
+  "cannot_measure": "real identifiers (the personal data are fictitious surrogates in a header block)",
+  "build": {
+    "documents": 1000,
+    "mentions": 22795,
+    "chars": 2887969,
+    "source": "https://zenodo.org/records/4279323",
+    "revision": "Zenodo 10.5281/zenodo.4279323 (meddocan.zip)",
+    "licence": "CC BY 4.0",
+    "fetched": "2026-10-25"
+  },
+  "gold_labels": {
+    "ADDRESS": 1709,
+    "DATE": 2566,
+    "EMAIL": 959,
+    "ID": 2222,
+    "LOCATION": 5241,
+    "NATIONAL_ID": 783,
+    "ORG": 776,
+    "OTHER": 4390,
+    "PERSON": 4012,
+    "PHONE": 137
+  },
+  "run": {
+    "date": "2026-10-25",
+    "countries": "ES",
+    "profile": "standard",
+    "engine": {
+      "package": "gdprguardian",
+      "version": "1.0.0",
+      "native_core": true,
+      "python": "3.12.11",
+      "platform": "Windows 11",
+      "machine": "AMD64"
+    },
+    "tag": "rules2",
+    "review": null,
+    "split": "all",
+    "split_rule": null
+  },
+  "documents": 1000,
+  "evaluated": 1000,
+  "errors": {},
+  "chars": 2887969,
+  "seconds": 0.474,
+  "chars_per_second": 6097613,
+  "families": [
+    "PERSON",
+    "ADDRESS",
+    "EMAIL",
+    "PHONE",
+    "NATIONAL_ID",
+    "ID"
+  ],
+  "totals": {
+    "m_total": 9822,
+    "m_full": 1067,
+    "m_cov80": 1069,
+    "m_literal_checked": 9822,
+    "m_literal": 8749,
+    "c_gold": 138281,
+    "c_gold_masked": 19968,
+    "c_pred": 32666,
+    "c_pred_tp": 19968,
+    "c_neutral": 2120243,
+    "c_neutral_masked": 79,
+    "d_has_gold": 1000,
+    "d_leak": 1000,
+    "d_leak_literal": 1000,
+    "k_total": 12973,
+    "k_touched": 1578,
+    "chars": 2887969,
+    "detections": 2654,
+    "d_detection": 1000,
+    "g_PERSON": 4012,
+    "f_PERSON": 0,
+    "g_ADDRESS": 1709,
+    "f_ADDRESS": 2,
+    "g_EMAIL": 959,
+    "f_EMAIL": 952,
+    "g_PHONE": 137,
+    "f_PHONE": 113,
+    "g_NATIONAL_ID": 783,
+    "f_NATIONAL_ID": 0,
+    "g_ID": 2222,
+    "f_ID": 0
+  },
+  "metrics": {
+    "mention_recall": 0.1086336794950112,
+    "mention_recall_at80": 0.10883730401140297,
+    "char_recall": 0.14440161699727366,
+    "precision": 0.6112777811792077,
+    "over_masking": 3.7259880117514835e-05,
+    "doc_leak_rate": 1.0,
+    "doc_literal_leak_rate": 1.0,
+    "mention_literal_leak_rate": 0.8907554469558134,
+    "kept_touched_rate": 0.1216372465890696,
+    "detections_per_10k_chars": 9.189849337025432,
+    "docs_with_detection": 1.0,
+    "recall_PERSON": 0.0,
+    "recall_ADDRESS": 0.0011702750146284377,
+    "recall_EMAIL": 0.9927007299270073,
+    "recall_PHONE": 0.8248175182481752,
+    "recall_NATIONAL_ID": 0.0,
+    "recall_ID": 0.0
+  },
+  "intervals_95": {
+    "mention_recall": [
+      0.106,
+      0.1114
+    ],
+    "mention_recall_at80": [
+      0.1062,
+      0.1116
+    ],
+    "char_recall": [
+      0.1411,
+      0.1478
+    ],
+    "precision": [
+      0.6034,
+      0.6193
+    ],
+    "over_masking": [
+      0.0,
+      0.0001
+    ],
+    "doc_leak_rate": [
+      1.0,
+      1.0
+    ],
+    "doc_literal_leak_rate": [
+      1.0,
+      1.0
+    ],
+    "mention_literal_leak_rate": [
+      0.888,
+      0.8935
+    ],
+    "kept_touched_rate": [
+      0.1184,
+      0.1249
+    ],
+    "detections_per_10k_chars": [
+      8.9216,
+      9.4619
+    ],
+    "docs_with_detection": [
+      1.0,
+      1.0
+    ],
+    "recall_PERSON": [
+      0.0,
+      0.0
+    ],
+    "recall_ADDRESS": [
+      0.0,
+      0.0035
+    ],
+    "recall_EMAIL": [
+      0.9874,
+      0.9979
+    ],
+    "recall_PHONE": [
+      0.7447,
+      0.8963
+    ],
+    "recall_NATIONAL_ID": [
+      0.0,
+      0.0
+    ],
+    "recall_ID": [
+      0.0,
+      0.0
+    ]
+  },
+  "kept_families": {
+    "DATE": {
+      "mentions": 2566,
+      "touched": 1576,
+      "touched_rate": 0.6141855027279813
+    },
+    "LOCATION": {
+      "mentions": 5241,
+      "touched": 2,
+      "touched_rate": 0.00038160656363289447
+    },
+    "ORG": {
+      "mentions": 776,
+      "touched": 0,
+      "touched_rate": 0.0
+    },
+    "OTHER": {
+      "mentions": 4390,
+      "touched": 0,
+      "touched_rate": 0.0
+    }
+  },
+  "by_origin": {
+    "ADDRESS:manual": {
+      "mentions": 1709,
+      "masked": 2,
+      "recall": 0.0011702750146284377
+    },
+    "EMAIL:manual": {
+      "mentions": 959,
+      "masked": 952,
+      "recall": 0.9927007299270073
+    },
+    "ID:manual": {
+      "mentions": 2222,
+      "masked": 0,
+      "recall": 0.0
+    },
+    "NATIONAL_ID:manual": {
+      "mentions": 783,
+      "masked": 0,
+      "recall": 0.0
+    },
+    "PERSON:manual": {
+      "mentions": 4012,
+      "masked": 0,
+      "recall": 0.0
+    },
+    "PHONE:manual": {
+      "mentions": 137,
+      "masked": 113,
+      "recall": 0.8248175182481752
+    }
+  },
+  "detected_labels": {
+    "BIRTH_DATE": 1579,
+    "EMAIL": 958,
+    "PHONE": 117
+  }
+}

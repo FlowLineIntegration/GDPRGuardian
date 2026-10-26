@@ -1,0 +1,104 @@
+# Corpus d'évaluation NER français / French NER evaluation corpus. Licence MIT (rédigé pour ce projet).
+# Toutes les personnes sont fictives / every person is fictional. Une ligne = un document court ;
+# "\n" dans une ligne = saut de ligne. Balises : [[PER:...]], [[ORG:...]], [[LOC:...]].
+# Les civilités restent hors balise / honorifics stay outside the markup.
+
+# --- Courriers et courriels / letters and e-mails
+Bonjour [[PER:Claire Vasseur]],\nJe vous confirme notre rendez-vous de mardi.\nCordialement,\n[[PER:Thomas Lemoine]]
+Madame [[PER:Lebrun]], suite à notre échange téléphonique, je vous adresse le devis demandé.
+Cher [[PER:Antoine]], merci pour ton message, je transmets à [[PER:Nadia Haddad]] dès demain.
+Objet : relance facture\nMonsieur [[PER:Girardot]], sauf erreur de notre part, la facture reste impayée.
+Veuillez agréer, Madame [[PER:Fontanel]], l'expression de nos salutations distinguées.
+[[PER:Julien Marchetti]] a écrit : « Je serai à [[LOC:Grenoble]] lundi, on se voit à la gare ? »
+Bien à vous,\n[[PER:Marie-Hélène Dubreuil]]\nDirectrice administrative\n[[ORG:Transports Rivière]]
+Salut [[PER:Kevin]], tu peux rappeler Mme [[PER:Pereira]] avant midi ?
+En copie : [[PER:Laurent Bouchard]], [[PER:Isabelle Tessier]] et [[PER:Yannick Le Goff]].
+Je vous transfère le message de [[PER:Sébastien Royer]] concernant le chantier de [[LOC:Villeurbanne]].
+
+# --- Ressources humaines / HR
+Le salarié [[PER:Mathieu Carpentier]] a été embauché le 2 mai en qualité de technicien.
+[[PER:Sandrine Collet]], responsable RH, a validé la demande de congés de [[PER:Hugo Barbier]].
+L'entretien annuel de [[PER:Amandine Roche]] aura lieu avec son manager, [[PER:Olivier Perrin]].
+[[PER:Martin]] rejoint l'équipe comptable à compter du 1er septembre.
+Suite à l'avertissement adressé à M. [[PER:Benoît Lacroix]], une réunion est prévue au siège de [[ORG:Valmont Industries]].
+La période d'essai de [[PER:Inès Belkacem]] est renouvelée pour deux mois.
+[[PER:Camille Fournier]] remplace [[PER:Damien Garnier]] pendant son congé parental.
+Le comité a retenu la candidature de [[PER:Fatou Diallo]] pour le poste basé à [[LOC:Rennes]].
+Arrêt de travail transmis par [[PER:Éric Masson]] le 14 février.
+[[PER:LEROY Pascale]], matricule 4521, service logistique.
+
+# --- Santé / health
+Le patient [[PER:Gérard Lamotte]] a été admis aux urgences du [[ORG:CHU de Bordeaux]].
+Compte rendu rédigé par le Dr [[PER:Sophie Aubert]], service de cardiologie.
+Mme [[PER:Odile Ferrand]], 72 ans, présente une fracture du col du fémur.
+Le docteur [[PER:Rachid Mansouri]] adresse sa patiente au professeur [[PER:Hélène Brunet]].
+Ordonnance de [[PER:Lucas Petitjean]] renouvelée par son médecin traitant à [[LOC:Quimper]].
+Consultation de suivi à la clinique [[ORG:Saint-Augustin]] avec le Dr [[PER:Moreau]].
+Mme [[PER:Nguyen]] signale une allergie à la pénicilline.
+[[PER:Paul Vidal]] est suivi par l'hôpital [[ORG:Pasteur]] de [[LOC:Nice]] depuis 2019.
+
+# --- Juridique / legal
+Entre les soussignés : [[PER:Jacques Delorme]], demeurant à [[LOC:Limoges]], ci-après le bailleur.
+Maître [[PER:Florence Chevalier]], avocate au barreau de [[LOC:Lyon]], représente la société [[ORG:Altéa Conseil]].
+Le tribunal judiciaire de [[LOC:Nanterre]] a condamné [[PER:Steeve Morin]] à une amende.
+La société [[ORG:Bati-Ouest]] est représentée par son gérant, [[PER:Franck Guillou]].
+Fait à [[LOC:Strasbourg]], le 12 mars, en deux exemplaires.
+Le notaire, Me [[PER:Arnaud Besson]], a reçu l'acte de vente.
+L'acquéreur, Mme [[PER:Chloé Renaud]], déclare avoir visité le bien.
+Monsieur [[PER:Patrick Dumas]] et Madame [[PER:Sylvie Dumas]], mariés sous le régime de la communauté.
+Le témoin, [[PER:Abdelkader Ziani]], confirme la présence du véhicule.
+
+# --- Commerce / business
+La commande a été passée par [[PER:Aurélie Brun]] pour le compte de [[ORG:Groupe Delmas]].
+Notre partenaire [[ORG:Crédit Agricole]] financera le projet porté par [[PER:Nicolas Faure]].
+Livraison prévue à l'entrepôt de [[LOC:Roissy]] pour [[ORG:Carrefour]].
+[[ORG:Airbus]] a annoncé un contrat avec [[ORG:Air France]] la semaine dernière.
+Le dossier est suivi par [[PER:Bruno Clément]], chargé d'affaires chez [[ORG:BNP Paribas]].
+Contactez [[PER:Élise Martineau]] au service client pour toute réclamation.
+Le fournisseur [[ORG:Mecanor]] a livré les pièces à notre usine de [[LOC:Valenciennes]].
+Rendez-vous chez [[ORG:Orange]] avec [[PER:Thierry Lambert]], puis déjeuner à [[LOC:Marseille]].
+[[ORG:La Poste]] a égaré le colis envoyé par [[PER:Gaëlle Riou]].
+
+# --- Administration / public sector
+Le maire de [[LOC:Saint-Malo]], [[PER:Jean-Luc Prigent]], a signé l'arrêté.
+La [[ORG:Caisse d'allocations familiales]] a versé l'aide à [[PER:Samia Bouzid]].
+[[PER:Rémi Charpentier]] est inscrit à [[ORG:France Travail]] depuis janvier.
+Courrier de la préfecture de la [[LOC:Gironde]] adressé à [[PER:Ahmed Benali]].
+L'[[ORG:Université Paris-Saclay]] accueille [[PER:Lina Kowalski]] en doctorat.
+Le conseil départemental du [[LOC:Finistère]] a attribué la subvention.
+Réunion à la mairie de [[LOC:Montpellier]] avec [[PER:Véronique Henry]].
+
+# --- Conversations informelles / chat
+[[PER:Léa]] m'a dit que [[PER:Maxime]] partait à [[LOC:Bordeaux]] ce week-end.
+Tu as vu [[PER:Romain]] hier soir ?
+Je bosse avec [[PER:Kader]] et [[PER:Jessica]] chez [[ORG:Decathlon]] à [[LOC:Lille]].
+On fête l'anniversaire de [[PER:Zoé]] samedi chez Mamie [[PER:Jeanne]].
+[[PER:Baptiste]] et moi on a croisé M. [[PER:Kervella]] au marché de [[LOC:Brest]].
+
+# --- Noms difficiles / hard names
+[[PER:Charles-Édouard de La Rochefoucauld]] a présidé la séance.
+[[PER:Aïcha N'Diaye]] et [[PER:Seán O'Connor]] ont rejoint le projet.
+[[PER:J. Martin]] et [[PER:A. Petit]] signent pour la direction.
+Le rapport de [[PER:María García López]] a été transmis à [[PER:Piotr Nowak]].
+[[PER:Van Thanh Nguyen]] habite à [[LOC:Ivry-sur-Seine]].
+Mme [[PER:DUBOIS-MARTIN]] a contesté la décision.
+[[PER:Hervé Le Bihan]] et [[PER:Gwenaëlle Le Roux]] sont originaires de [[LOC:Lorient]].
+[[PER:Grégoire Blanc]] et [[PER:Léon Petit]] ont été reçus par [[PER:Simone Lebon]].
+
+# --- Lieux / places
+Il a déménagé de [[LOC:Toulouse]] à [[LOC:Clermont-Ferrand]] en 2021.
+Le séminaire aura lieu en [[LOC:Bretagne]], près de [[LOC:Vannes]].
+Elle travaille désormais en [[LOC:Belgique]], à [[LOC:Liège]].
+Les vacances en [[LOC:Corse]] sont prévues du 3 au 17 août.
+
+# --- Phrases sans entité / sentences without entity (faux positifs / false positives)
+Le contrat est conclu pour une durée indéterminée.
+Merci de bien vouloir nous retourner le formulaire complété.
+Article 3 : le loyer est payable mensuellement et d'avance.
+Conformément à la réglementation, les données sont conservées cinq ans.
+Le patient est sorti le lendemain sans complication.
+Cordialement,\nLe service client
+Nous vous remercions de votre confiance.
+La réunion est reportée à une date ultérieure.
+Total TTC : 1 250,00 €
+Pièces jointes : devis signé, attestation d'assurance.

@@ -1,0 +1,242 @@
+{
+  "corpus": "bodacc_fr",
+  "title": "BODACC, commercial announcements naming natural persons",
+  "language": "fr",
+  "licence": "Licence Ouverte / Open Licence (Etalab), DILA",
+  "source": "https://www.data.gouv.fr/datasets/bodacc",
+  "revision": "Opendatasoft API, publications of 2026-09-01..2026-09-30, fetched 2026-10-25",
+  "real_text": "yes (record values and free text are real; line layout rendered by us after bodacc.fr)",
+  "gold": "exact by construction: values of the structured fields (surname, given names, address, RCS/RM number) are rendered at known positions; exact repeats of a person's name elsewhere in the notice are added; owner addresses in the fixed 'Adresse de l'ancien/du nouveau propriétaire :' phrase are added",
+  "gold_complete": true,
+  "negative_control": false,
+  "measures": "recall of real French names, street addresses and individual-entrepreneur SIREN; precision on the rendered fields",
+  "cannot_measure": "names of court officers and other people in the free-text judgment complement (left out of precision)",
+  "build": {
+    "documents": 2689,
+    "mentions": 23207,
+    "chars": 2102929,
+    "source": "DILA BODACC annonces commerciales (API Opendatasoft)",
+    "licence": "Licence Ouverte / Open Licence",
+    "window": [
+      "2026-08-01",
+      "2026-08-31"
+    ],
+    "per_family": 500,
+    "families": [
+      "Procédures collectives",
+      "Créations",
+      "Immatriculations",
+      "Ventes et cessions",
+      "Modifications diverses",
+      "Radiations"
+    ]
+  },
+  "gold_labels": {
+    "ADDRESS": 2830,
+    "DATE": 3023,
+    "ID": 2632,
+    "LOCATION": 2611,
+    "ORG": 2778,
+    "ORG_ID": 89,
+    "OTHER": 511,
+    "PERSON": 8733
+  },
+  "run": {
+    "date": "2026-10-25",
+    "countries": "FR",
+    "profile": "standard",
+    "engine": {
+      "package": "gdprguardian",
+      "version": "1.0.0",
+      "native_core": true,
+      "python": "3.12.11",
+      "platform": "Windows 11",
+      "machine": "AMD64"
+    },
+    "tag": "unseen-2026-08-base",
+    "review": null,
+    "split": "all",
+    "split_rule": null
+  },
+  "documents": 2689,
+  "evaluated": 2689,
+  "errors": {},
+  "chars": 2102929,
+  "seconds": 1.072,
+  "chars_per_second": 1961639,
+  "families": [
+    "PERSON",
+    "ADDRESS",
+    "ID"
+  ],
+  "totals": {
+    "m_total": 14195,
+    "m_full": 11250,
+    "m_cov80": 11356,
+    "m_literal_checked": 14161,
+    "m_literal": 2625,
+    "c_gold": 185531,
+    "c_gold_masked": 158920,
+    "c_pred": 165143,
+    "c_pred_tp": 148751,
+    "c_neutral": 1082351,
+    "c_neutral_masked": 15987,
+    "d_has_gold": 2689,
+    "d_leak": 2470,
+    "d_leak_literal": 2418,
+    "k_total": 9012,
+    "k_touched": 51,
+    "chars": 2102929,
+    "detections": 15068,
+    "d_detection": 2689,
+    "g_PERSON": 8733,
+    "f_PERSON": 8561,
+    "g_ADDRESS": 2830,
+    "f_ADDRESS": 2551,
+    "g_ID": 2632,
+    "f_ID": 138
+  },
+  "metrics": {
+    "mention_recall": 0.7925325818950335,
+    "mention_recall_at80": 0.8,
+    "char_recall": 0.856568444087511,
+    "precision": 0.9007405702936243,
+    "over_masking": 0.014770624316880568,
+    "doc_leak_rate": 0.9185570844179992,
+    "doc_literal_leak_rate": 0.899219040535515,
+    "mention_literal_leak_rate": 0.18536826495304004,
+    "kept_touched_rate": 0.005659121171770972,
+    "detections_per_10k_chars": 71.65244285470408,
+    "docs_with_detection": 1.0,
+    "recall_PERSON": 0.9803045917783122,
+    "recall_ADDRESS": 0.9014134275618375,
+    "recall_ID": 0.05243161094224924
+  },
+  "intervals_95": {
+    "mention_recall": [
+      0.7884,
+      0.7965
+    ],
+    "mention_recall_at80": [
+      0.7962,
+      0.8037
+    ],
+    "char_recall": [
+      0.8533,
+      0.8599
+    ],
+    "precision": [
+      0.896,
+      0.9052
+    ],
+    "over_masking": [
+      0.014,
+      0.0156
+    ],
+    "doc_leak_rate": [
+      0.9085,
+      0.929
+    ],
+    "doc_literal_leak_rate": [
+      0.8881,
+      0.9108
+    ],
+    "mention_literal_leak_rate": [
+      0.182,
+      0.1886
+    ],
+    "kept_touched_rate": [
+      0.0037,
+      0.0078
+    ],
+    "detections_per_10k_chars": [
+      70.5553,
+      72.8394
+    ],
+    "docs_with_detection": [
+      1.0,
+      1.0
+    ],
+    "recall_PERSON": [
+      0.9765,
+      0.984
+    ],
+    "recall_ADDRESS": [
+      0.8894,
+      0.9124
+    ],
+    "recall_ID": [
+      0.0439,
+      0.0609
+    ]
+  },
+  "kept_families": {
+    "DATE": {
+      "mentions": 3023,
+      "touched": 0,
+      "touched_rate": 0.0
+    },
+    "LOCATION": {
+      "mentions": 2611,
+      "touched": 23,
+      "touched_rate": 0.008808885484488702
+    },
+    "ORG": {
+      "mentions": 2778,
+      "touched": 27,
+      "touched_rate": 0.009719222462203024
+    },
+    "ORG_ID": {
+      "mentions": 89,
+      "touched": 1,
+      "touched_rate": 0.011235955056179775
+    },
+    "OTHER": {
+      "mentions": 511,
+      "touched": 0,
+      "touched_rate": 0.0
+    }
+  },
+  "by_origin": {
+    "ADDRESS:field": {
+      "mentions": 2553,
+      "masked": 2313,
+      "recall": 0.9059929494712103
+    },
+    "ADDRESS:phrase": {
+      "mentions": 277,
+      "masked": 238,
+      "recall": 0.8592057761732852
+    },
+    "ID:field": {
+      "mentions": 2632,
+      "masked": 138,
+      "recall": 0.05243161094224924
+    },
+    "PERSON:field": {
+      "mentions": 8371,
+      "masked": 8216,
+      "recall": 0.9814836937044559
+    },
+    "PERSON:repeat": {
+      "mentions": 164,
+      "masked": 157,
+      "recall": 0.9573170731707317
+    },
+    "PERSON:trade_name": {
+      "mentions": 198,
+      "masked": 188,
+      "recall": 0.9494949494949495
+    }
+  },
+  "detected_labels": {
+    "PERSON": 11315,
+    "ADDRESS": 3532,
+    "SIREN": 141,
+    "ORG": 59,
+    "ID": 18,
+    "SIRET": 1,
+    "BIRTH_DATE": 1,
+    "PHONE": 1
+  }
+}

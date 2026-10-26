@@ -1,0 +1,79 @@
+{
+  "dataset": "mapa_fr",
+  "records": 12,
+  "evaluated": 12,
+  "errors": {},
+  "error_samples": [],
+  "chars": 474640,
+  "seconds": 0.662,
+  "chars_per_second": 716621,
+  "docs_per_second": 18.12,
+  "over_masking": {
+    "detected_spans": 152,
+    "false_mask_spans": 15,
+    "chars_outside_gold": 92,
+    "non_gold_chars": 457711,
+    "char_rate": 0.0002
+  },
+  "direct_identifiers": {
+    "gold": 282,
+    "masked": 59,
+    "leaked": 216,
+    "masked_rate": 0.2092,
+    "leak_rate": 0.766
+  },
+  "families": {
+    "PERSON": {
+      "gold": 280,
+      "masked": 59,
+      "leaked": 215,
+      "masked_rate": 0.2107,
+      "leak_rate": 0.7679,
+      "expected_masked_by_policy": true
+    },
+    "ADDRESS": {
+      "gold": 2,
+      "masked": 0,
+      "leaked": 1,
+      "masked_rate": 0.0,
+      "leak_rate": 0.5,
+      "expected_masked_by_policy": true
+    },
+    "DATE": {
+      "gold": 491,
+      "masked": 1,
+      "leaked": 489,
+      "masked_rate": 0.002,
+      "leak_rate": 0.9959,
+      "expected_masked_by_policy": false
+    },
+    "LOCATION": {
+      "gold": 201,
+      "masked": 0,
+      "leaked": 201,
+      "masked_rate": 0.0,
+      "leak_rate": 1.0,
+      "expected_masked_by_policy": false
+    },
+    "ORG": {
+      "gold": 343,
+      "masked": 17,
+      "leaked": 325,
+      "masked_rate": 0.0496,
+      "leak_rate": 0.9475,
+      "expected_masked_by_policy": false
+    },
+    "OTHER": {
+      "gold": 126,
+      "masked": 1,
+      "leaked": 95,
+      "masked_rate": 0.0079,
+      "leak_rate": 0.754,
+      "expected_masked_by_policy": false
+    }
+  },
+  "meta": {
+    "countries": "FR",
+    "revision": "joelniklaus/mapa@bbb2a0157b760465002fd12a61af81b475cd387a (CC-BY-4.0)"
+  }
+}

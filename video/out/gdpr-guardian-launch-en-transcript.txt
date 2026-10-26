@@ -1,0 +1,84 @@
+GDPR Guardian · launch video · all on-screen text, in order
+Silent video (no voice, no music): this file lists every on-screen text at the moment it appears.
+160.5 s · 1920 x 1080 · 30 fps
+
+[00:00] GDPR Guardian
+[00:00] Mr Jean Dupont, 06 12 34 56 78
+[00:02] Mr [PERSON_1], [PHONE_1]
+[00:03] Anonymise your documents, irreversibly, before they reach an AI.
+[00:06] The best open-source tool for GDPR and AI!
+[00:07] You be the judge.
+[00:07] gdprguardian.com · gardienrgpd.fr
+[00:12] Every day, real documents end up in AI assistants.
+[00:12] Contract — Jean Dupont
+[00:12] HR file — FR76 3000 6000
+[00:13] Medical record — Type 2 diabetes
+[00:13] E-mail — c.martin@example.com
+[00:15] AI assistant
+[00:17] Personal data ends up with a third party.
+[00:21] Today’s answers fall short.
+[00:22] Manual redaction — Slow, and names slip through.
+[00:24] Reversible pseudonymisation — The mapping table is still personal data.
+[00:27] [REDACTED] everywhere — The AI loses the meaning.
+[00:29] Black boxes — Nothing explains the masking.
+[00:33] Remove the names, keep the meaning.
+[00:33] Mr Jean Dupont · jean.dupont@example.com · 06 12 34 56 78 / IBAN FR76 3000 6000 0112 3456 7890 189 / Mr Dupont will call Ms Claire Martin back. / DUPONT Jean will pay invoice no. 2026-0042.
+[00:34] real output, version 1.0.0
+[00:34] Random 256-bit key, for this document only
+[00:39] Mr [PERSON_1] · [EMAIL_1] · [PHONE_1] / IBAN [IBAN_1] / Mr [PERSON_1] will call Ms [PERSON_2] back. / [PERSON_1] will pay invoice no. 2026-0042.
+[00:39] Key destroyed: no way back.
+[00:40] Same person, same tag.
+[00:43] Guillaume annoys Nadège. Nadège hits Guillaume.
+[00:45] Naive masking — [NAME] annoys [NAME]. [NAME] hits [NAME].
+[00:46] Who hit whom?
+[00:49] GDPR Guardian — [PERSON_1] annoys [PERSON_2]. [PERSON_2] hits [PERSON_1].
+[00:50] The roles survive, the identities do not.
+[00:55] Six principles
+[00:55] Irreversible — 256-bit key destroyed, no table.
+[00:57] Consistent — One person, one tag.
+[00:59] Verified — Official check digits.
+[01:00] Explainable — A rule per tag, no LLM.
+[01:03] Fast — 2 KB in 0.5 ms, on CPU.
+[01:05] Nothing kept — All in memory.
+[01:09] Three ways in, one engine
+[01:09] Website — Drop or paste, then download.
+[01:09] MCP — Claude and other agents, no key.
+[01:10] REST API — /v1/anonymize/text /v1/anonymize/file
+[01:15] GDPR Guardian — One fresh process per request, nothing kept.
+[01:18] Anonymised Markdown
+[01:18] Your AI
+[01:20] Over MCP, send the file: it never goes through the model. Pasted text has already left.
+[01:26] 100% local: Claude plugin, Python package, Docker without network.
+[01:30] Copy the repository, make your own version.
+[01:30] $ git clone https://github.com/FlowLineIntegration/GDPRGuardian
+[01:32] Code published when the public repository opens.
+[01:32] MIT licence — Use it, change it, share it.
+[01:37] Your rules — In the call, never stored. — CLT-204518 → [CLIENT_ID_1]
+[01:40] Your server — docker compose deploy/README.md
+[01:42] Contribute — Improve, propose: /issues
+[01:45] Tested, measured, published
+[01:45] 3,700+ — automated tests, Windows and Linux
+[01:47] 51 — ways to disguise an identifier
+[01:50] 99.2% — of the text to mask is masked (540 synthetic documents: the best case)
+[01:55] 15 — real-text datasets, 8,478 documents
+[01:57] 35–93% — of mentions masked in real French texts, by corpus (1.0.0)
+[02:01] 79 → 98% — of mentions masked in BODACC notices (unseen data): 1.0.0, then the 25 October rules
+[02:07] How we grade ourselves
+[02:07] Confidence index
+[02:07] Being measured
+[02:08] Share of documents with no readable direct identifier.
+[02:09] Protocol written before measuring: 1,019,385 documents, 8,478 of them real, through the real service.
+[02:16] Known limits
+[02:16] German, Spanish, Italian, Dutch, Portuguese names: not detected.
+[02:19] Old newspapers, EU legal texts (names as initials): weak.
+[02:23] A first barrier, not a GDPR certification.
+[02:25] The protocol: gdprguardian.com/#protocol
+[02:29] GDPR Guardian
+[02:29] The best open-source tool for GDPR and AI!
+[02:32] You be the judge.
+[02:34] gdprguardian.com · gardienrgpd.fr
+[02:34] github.com/FlowLineIntegration/GDPRGuardian
+[02:35] Offered by Flow Line Intégration
+[02:35] Guillaume CLEMENT, CTO Data & AI
+[02:36] Design: Claude Design
+[02:36] MIT licence · version 1.0.0

@@ -1,0 +1,4 @@
+# Render tool for the launch video (video/render.py). Then: python -m playwright install chromium
+playwright>=1.40
+imageio-ffmpeg>=0.5
+pillow>=10.1

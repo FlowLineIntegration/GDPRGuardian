@@ -1,0 +1,628 @@
+{
+ "documents": 1000,
+ "errors": 0,
+ "error_examples": [],
+ "characters": 1866385,
+ "profile": "standard",
+ "countries": "FR",
+ "native": true,
+ "values": [
+  {
+   "type": "address",
+   "n": 2463,
+   "leaks": 0,
+   "recall": 1.0,
+   "leak_rate_upper95": 0.00156
+  },
+  {
+   "type": "birth_date",
+   "n": 2463,
+   "leaks": 4,
+   "recall": 0.99838,
+   "leak_rate_upper95": 0.00417
+  },
+  {
+   "type": "card",
+   "n": 376,
+   "leaks": 0,
+   "recall": 1.0,
+   "leak_rate_upper95": 0.01011
+  },
+  {
+   "type": "company_siret_sole_trader",
+   "n": 283,
+   "leaks": 0,
+   "recall": 1.0,
+   "leak_rate_upper95": 0.01339
+  },
+  {
+   "type": "company_tva_sole_trader",
+   "n": 283,
+   "leaks": 0,
+   "recall": 1.0,
+   "leak_rate_upper95": 0.01339
+  },
+  {
+   "type": "email",
+   "n": 2463,
+   "leaks": 0,
+   "recall": 1.0,
+   "leak_rate_upper95": 0.00156
+  },
+  {
+   "type": "iban",
+   "n": 1215,
+   "leaks": 0,
+   "recall": 1.0,
+   "leak_rate_upper95": 0.00315
+  },
+  {
+   "type": "nir",
+   "n": 2463,
+   "leaks": 0,
+   "recall": 1.0,
+   "leak_rate_upper95": 0.00156
+  },
+  {
+   "type": "passport",
+   "n": 369,
+   "leaks": 0,
+   "recall": 1.0,
+   "leak_rate_upper95": 0.0103
+  },
+  {
+   "type": "phone",
+   "n": 2463,
+   "leaks": 0,
+   "recall": 1.0,
+   "leak_rate_upper95": 0.00156
+  },
+  {
+   "type": "plate",
+   "n": 450,
+   "leaks": 0,
+   "recall": 1.0,
+   "leak_rate_upper95": 0.00846
+  }
+ ],
+ "names": [
+  {
+   "type": "name_token",
+   "n": 5090,
+   "leaks": 49,
+   "recall": 0.99037,
+   "leak_rate_upper95": 0.0127
+  }
+ ],
+ "decoys": [
+  {
+   "type": "decoy_altered",
+   "n": 5942,
+   "leaks": 0,
+   "recall": 1.0,
+   "leak_rate_upper95": 0.00065
+  }
+ ],
+ "policy_company_ids": [
+  {
+   "type": "company_siret_kept",
+   "n": 717,
+   "leaks": 1,
+   "recall": 0.99861,
+   "leak_rate_upper95": 0.00786
+  },
+  {
+   "type": "company_tva_kept",
+   "n": 717,
+   "leaks": 1,
+   "recall": 0.99861,
+   "leak_rate_upper95": 0.00786
+  }
+ ],
+ "consistency": {
+  "persons": 2463,
+  "consistent": 2269,
+  "merged_with_other_person": 44,
+  "split": 194
+ },
+ "mutations": {
+  "nbsp": [
+   {
+    "type": "address",
+    "n": 744,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.00514
+   },
+   {
+    "type": "birth_date",
+    "n": 744,
+    "leaks": 2,
+    "recall": 0.99731,
+    "leak_rate_upper95": 0.00975
+   },
+   {
+    "type": "card",
+    "n": 110,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.03375
+   },
+   {
+    "type": "company_siret_sole_trader",
+    "n": 88,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.04183
+   },
+   {
+    "type": "company_tva_sole_trader",
+    "n": 88,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.04183
+   },
+   {
+    "type": "email",
+    "n": 744,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.00514
+   },
+   {
+    "type": "iban",
+    "n": 373,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.01019
+   },
+   {
+    "type": "nir",
+    "n": 744,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.00514
+   },
+   {
+    "type": "passport",
+    "n": 125,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.02982
+   },
+   {
+    "type": "phone",
+    "n": 744,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.00514
+   },
+   {
+    "type": "plate",
+    "n": 144,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.02598
+   }
+  ],
+  "narrow_nbsp": [
+   {
+    "type": "address",
+    "n": 735,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.0052
+   },
+   {
+    "type": "birth_date",
+    "n": 735,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.0052
+   },
+   {
+    "type": "card",
+    "n": 110,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.03375
+   },
+   {
+    "type": "company_siret_sole_trader",
+    "n": 72,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.05065
+   },
+   {
+    "type": "company_tva_sole_trader",
+    "n": 72,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.05065
+   },
+   {
+    "type": "email",
+    "n": 735,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.0052
+   },
+   {
+    "type": "iban",
+    "n": 352,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.0108
+   },
+   {
+    "type": "nir",
+    "n": 735,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.0052
+   },
+   {
+    "type": "passport",
+    "n": 114,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.0326
+   },
+   {
+    "type": "phone",
+    "n": 735,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.0052
+   },
+   {
+    "type": "plate",
+    "n": 148,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.0253
+   }
+  ],
+  "zero_width": [
+   {
+    "type": "address",
+    "n": 719,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.00531
+   },
+   {
+    "type": "birth_date",
+    "n": 719,
+    "leaks": 1,
+    "recall": 0.99861,
+    "leak_rate_upper95": 0.00784
+   },
+   {
+    "type": "card",
+    "n": 113,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.03288
+   },
+   {
+    "type": "company_siret_sole_trader",
+    "n": 83,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.04424
+   },
+   {
+    "type": "company_tva_sole_trader",
+    "n": 83,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.04424
+   },
+   {
+    "type": "email",
+    "n": 718,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.00532
+   },
+   {
+    "type": "iban",
+    "n": 351,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.01083
+   },
+   {
+    "type": "nir",
+    "n": 719,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.00531
+   },
+   {
+    "type": "passport",
+    "n": 107,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.03466
+   },
+   {
+    "type": "phone",
+    "n": 719,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.00531
+   },
+   {
+    "type": "plate",
+    "n": 132,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.02828
+   }
+  ],
+  "fullwidth": [
+   {
+    "type": "address",
+    "n": 694,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.0055
+   },
+   {
+    "type": "birth_date",
+    "n": 694,
+    "leaks": 1,
+    "recall": 0.99856,
+    "leak_rate_upper95": 0.00812
+   },
+   {
+    "type": "card",
+    "n": 96,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.03848
+   },
+   {
+    "type": "company_siret_sole_trader",
+    "n": 84,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.04373
+   },
+   {
+    "type": "company_tva_sole_trader",
+    "n": 84,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.04373
+   },
+   {
+    "type": "email",
+    "n": 694,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.0055
+   },
+   {
+    "type": "iban",
+    "n": 334,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.01137
+   },
+   {
+    "type": "nir",
+    "n": 694,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.0055
+   },
+   {
+    "type": "passport",
+    "n": 103,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.03596
+   },
+   {
+    "type": "phone",
+    "n": 694,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.0055
+   },
+   {
+    "type": "plate",
+    "n": 121,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.03077
+   }
+  ],
+  "homoglyph_email": [
+   {
+    "type": "address",
+    "n": 732,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.00522
+   },
+   {
+    "type": "birth_date",
+    "n": 732,
+    "leaks": 1,
+    "recall": 0.99863,
+    "leak_rate_upper95": 0.0077
+   },
+   {
+    "type": "card",
+    "n": 101,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.03664
+   },
+   {
+    "type": "company_siret_sole_trader",
+    "n": 78,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.04694
+   },
+   {
+    "type": "company_tva_sole_trader",
+    "n": 78,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.04694
+   },
+   {
+    "type": "email",
+    "n": 730,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.00523
+   },
+   {
+    "type": "iban",
+    "n": 364,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.01044
+   },
+   {
+    "type": "nir",
+    "n": 732,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.00522
+   },
+   {
+    "type": "passport",
+    "n": 92,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.04008
+   },
+   {
+    "type": "phone",
+    "n": 732,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.00522
+   },
+   {
+    "type": "plate",
+    "n": 134,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.02787
+   }
+  ],
+  "typo": [
+   {
+    "type": "address",
+    "n": 718,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.00532
+   },
+   {
+    "type": "birth_date",
+    "n": 718,
+    "leaks": 6,
+    "recall": 0.99164,
+    "leak_rate_upper95": 0.01811
+   },
+   {
+    "type": "card",
+    "n": 112,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.03316
+   },
+   {
+    "type": "company_siret_sole_trader",
+    "n": 96,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.03848
+   },
+   {
+    "type": "company_tva_sole_trader",
+    "n": 96,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.03848
+   },
+   {
+    "type": "email",
+    "n": 718,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.00532
+   },
+   {
+    "type": "iban",
+    "n": 348,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.01092
+   },
+   {
+    "type": "nir",
+    "n": 718,
+    "leaks": 50,
+    "recall": 0.93036,
+    "leak_rate_upper95": 0.09064
+   },
+   {
+    "type": "passport",
+    "n": 106,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.03497
+   },
+   {
+    "type": "phone",
+    "n": 718,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.00532
+   },
+   {
+    "type": "plate",
+    "n": 141,
+    "leaks": 0,
+    "recall": 1.0,
+    "leak_rate_upper95": 0.02652
+   }
+  ]
+ },
+ "throughput_mb_s": 2.235,
+ "latency_ms": {
+  "p50": 0.765,
+  "p95": 1.353
+ },
+ "leak_examples": {
+  "birth_date": [
+   "fr-00471: 27/04/1941",
+   "fr-00628: 26/01/1969",
+   "fr-00760: 16 juillet 1956",
+   "fr-00950: 14/08/1987"
+  ],
+  "name_token": [
+   "fr-00015: Berg",
+   "fr-00038: Berg",
+   "fr-00039: Fontaine",
+   "fr-00066: Berg",
+   "fr-00104: Berg",
+   "fr-00161: Berg",
+   "fr-00192: Berg",
+   "fr-00194: Mohamed"
+  ]
+ },
+ "decoy_examples": {}
+}

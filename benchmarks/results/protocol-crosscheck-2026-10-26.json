@@ -1,0 +1,185 @@
+{
+ "date": "2026-10-26",
+ "engine": "frozen copy of the engine sources taken at 00:04 UTC on 26 October 2026 (tree digest a992428d25533cc6), pure-Python engine (the installed native core did not run these sources; same outputs by the parity contract), version 1.0.0, packs 0e6be79d84cd, engine probe digest eeb38986e44c (the probe_sha256 a campaign records for an engine with the same outputs); the engine sources were still being tuned, so this check is repeated on the frozen engine before registration",
+ "what": "The synthetic development evaluation (540 documents, seed 20261024, and their mutations by the 51 red-team operators) sent through a local GDPR Guardian service (public mode, local token, Unix socket) by tools/protocol, masked zones rebuilt from the output alone, scored with tools.eval (score_document, summarize) and compared leaf by leaf with the in-process evaluation of the same engine and with the repository's reference file.",
+ "explanations": {
+  "boundary": "per system label (confusion, per-label precision, F2, IoU>=90%, typed rate, strict recall, strict entity rate, characters per system label): the boundary between two placeholders separated only by spaces cannot be recovered from the output (leftmost placement used); nothing that is masked depends on it",
+  "engine": "the service and the in-process evaluation agree with each other and differ from the reference file: the engine changed since the reference file was written",
+  "random_draws": "interval bounds only, the service and the in-process evaluation agree: bootstrap draws differ between the reference environment and this one (numpy or the pure-Python fallback), or the engine changed"
+ },
+ "runs": {
+  "auto": {
+   "corpus": {
+    "seed": 20261024,
+    "base_docs": 540,
+    "mutated_docs": 6192,
+    "countries": "auto"
+   },
+   "service_docs_per_second": 200.9,
+   "service_errors": {
+    "base": {},
+    "mutated": {}
+   },
+   "headline": {
+    "service": {
+     "recall_direct": 0.992252897909443,
+     "recall_structured": 0.9883266244968373,
+     "recall": 0.935143577729129,
+     "precision": 0.9882029844284806,
+     "f2": 0.9452946855402072,
+     "entity_recall_direct": 0.9880332986472424,
+     "doc_leak_rate": 0.08333333333333333,
+     "doc_leak_rate_structured": 0.046296296296296294,
+     "over_masking": 0.0008179290037624734,
+     "decoy_false_mask_rate": 0.034560143626570915
+    },
+    "inprocess": {
+     "recall_direct": 0.992252897909443,
+     "recall_structured": 0.9883266244968373,
+     "recall": 0.935143577729129,
+     "precision": 0.9882029844284806,
+     "f2": 0.9452946855402072,
+     "entity_recall_direct": 0.9880332986472424,
+     "doc_leak_rate": 0.08333333333333333,
+     "doc_leak_rate_structured": 0.046296296296296294,
+     "over_masking": 0.0008179290037624734,
+     "decoy_false_mask_rate": 0.034560143626570915
+    },
+    "reference": {
+     "recall_direct": 0.9918466828185524,
+     "recall_structured": 0.9883266244968373,
+     "recall": 0.9347851134923378,
+     "precision": 0.988198513987197,
+     "f2": 0.9450008153587708,
+     "entity_recall_direct": 0.9869927159209158,
+     "doc_leak_rate": 0.09074074074074075,
+     "doc_leak_rate_structured": 0.046296296296296294,
+     "over_masking": 0.0008179290037624734,
+     "decoy_false_mask_rate": 0.034560143626570915
+    }
+   },
+   "headline_service_equals_inprocess": true,
+   "headline_service_equals_reference": false,
+   "base": {
+    "service_vs_inprocess": {
+     "leaves": 773,
+     "different": 12,
+     "boundary": 12,
+     "unexplained": []
+    },
+    "service_vs_reference": {
+     "leaves": 773,
+     "different": 70,
+     "engine": 42,
+     "random_draws": 17,
+     "boundary": 11,
+     "unexplained": []
+    }
+   },
+   "mutated": {
+    "service_vs_inprocess": {
+     "leaves": 8535,
+     "different": 31,
+     "boundary": 31,
+     "unexplained": []
+    },
+    "service_vs_reference": {
+     "leaves": 8535,
+     "different": 551,
+     "engine": 392,
+     "random_draws": 128,
+     "boundary": 31,
+     "unexplained": []
+    }
+   },
+   "tool_validated": true
+  },
+  "FR": {
+   "corpus": {
+    "seed": 20261024,
+    "base_docs": 540,
+    "mutated_docs": 6192,
+    "countries": "FR"
+   },
+   "service_docs_per_second": 196.2,
+   "service_errors": {
+    "base": {},
+    "mutated": {}
+   },
+   "headline": {
+    "service": {
+     "recall_direct": 0.992252897909443,
+     "recall_structured": 0.9883266244968373,
+     "recall": 0.935143577729129,
+     "precision": 0.9882029844284806,
+     "f2": 0.9452946855402072,
+     "entity_recall_direct": 0.9880332986472424,
+     "doc_leak_rate": 0.08333333333333333,
+     "doc_leak_rate_structured": 0.046296296296296294,
+     "over_masking": 0.0008179290037624734,
+     "decoy_false_mask_rate": 0.034560143626570915
+    },
+    "inprocess": {
+     "recall_direct": 0.992252897909443,
+     "recall_structured": 0.9883266244968373,
+     "recall": 0.935143577729129,
+     "precision": 0.9882029844284806,
+     "f2": 0.9452946855402072,
+     "entity_recall_direct": 0.9880332986472424,
+     "doc_leak_rate": 0.08333333333333333,
+     "doc_leak_rate_structured": 0.046296296296296294,
+     "over_masking": 0.0008179290037624734,
+     "decoy_false_mask_rate": 0.034560143626570915
+    },
+    "reference": {
+     "recall_direct": 0.992252897909443,
+     "recall_structured": 0.9883266244968373,
+     "recall": 0.935143577729129,
+     "precision": 0.9882029844284806,
+     "f2": 0.9452946855402072,
+     "entity_recall_direct": 0.9880332986472424,
+     "doc_leak_rate": 0.08333333333333333,
+     "doc_leak_rate_structured": 0.046296296296296294,
+     "over_masking": 0.0008179290037624734,
+     "decoy_false_mask_rate": 0.034560143626570915
+    }
+   },
+   "headline_service_equals_inprocess": true,
+   "headline_service_equals_reference": true,
+   "base": {
+    "service_vs_inprocess": {
+     "leaves": 773,
+     "different": 12,
+     "boundary": 12,
+     "unexplained": []
+    },
+    "service_vs_reference": {
+     "leaves": 773,
+     "different": 21,
+     "engine": 0,
+     "random_draws": 9,
+     "boundary": 12,
+     "unexplained": []
+    }
+   },
+   "mutated": {
+    "service_vs_inprocess": {
+     "leaves": 8535,
+     "different": 31,
+     "boundary": 31,
+     "unexplained": []
+    },
+    "service_vs_reference": {
+     "leaves": 8535,
+     "different": 41,
+     "engine": 10,
+     "random_draws": 0,
+     "boundary": 31,
+     "unexplained": []
+    }
+   },
+   "tool_validated": true
+  }
+ },
+ "tool_validated": true
+}

@@ -1,0 +1,51 @@
+Gardien RGPD · vidéo de lancement · tout le texte à l’écran, dans l’ordre
+Vidéo muette (aucune voix, aucune musique) : ce fichier reprend chaque texte au moment où il apparaît.
+75.0 s · 1080 x 1350 · 30 fps
+
+[00:00] Gardien RGPD
+[00:00] M. Jean Dupont, 06 12 34 56 78
+[00:02] M. [PERSONNE_1], [TEL_1]
+[00:03] Anonymisez vos documents, irréversiblement, avant l’IA.
+[00:04] gardienrgpd.fr · gdprguardian.com
+[00:07] Chaque jour, des documents partent vers l’IA.
+[00:08] Contrat — Jean Dupont
+[00:08] Dossier RH — FR76 3000 6000
+[00:08] Dossier médical — Diabète de type 2
+[00:08] E-mail — c.martin@exemple.fr
+[00:11] Assistant d’IA
+[00:13] Leurs données personnelles aussi.
+[00:16] Guillaume embête Nadège. Nadège frappe Guillaume.
+[00:18] Masquage naïf — [Personne] embête [Personne]. [Personne] frappe [Personne].
+[00:19] Qui frappe qui ?
+[00:22] Gardien RGPD — [PERSONNE_1] embête [PERSONNE_2]. [PERSONNE_2] frappe [PERSONNE_1].
+[00:22] Les rôles survivent, les identités non.
+[00:27] Trois accès, un moteur
+[00:27] Site web
+[00:28] MCP
+[00:28] API REST
+[00:29] Gardien RGPD — Rien n’est conservé.
+[00:31] Markdown anonymisé
+[00:31] Votre IA
+[00:32] Par MCP, envoyez le fichier, pas un texte collé.
+[00:36] 100 % local : plugin Claude, Python, Docker sans réseau.
+[00:39] Copiez le dépôt, faites votre version.
+[00:40] $ git clone https://github.com/FlowLineIntegration/GDPRGuardian
+[00:42] Code publié à l’ouverture du dépôt public.
+[00:42] Licence MIT — utilisez, modifiez, redistribuez
+[00:46] Votre serveur — docker compose
+[00:49] Mesuré, publié
+[00:49] 99,2 % — masqué, données synthétiques : le meilleur cas
+[00:52] 35 à 93 % — masqué, textes réels français, selon le corpus
+[00:55] Indice de confiance
+[00:55] Mesure en cours
+[00:57] Noms allemands, espagnols, italiens, néerlandais, portugais : non détectés.
+[01:00] Une première barrière, pas une certification RGPD.
+[01:03] Gardien RGPD
+[01:03] Le meilleur outil open source pour le RGPD et l’IA !
+[01:07] À vous de juger.
+[01:09] gardienrgpd.fr · gdprguardian.com
+[01:09] github.com/FlowLineIntegration/GDPRGuardian
+[01:10] Offert par Flow Line Intégration
+[01:10] Guillaume CLEMENT, CTO Data & IA
+[01:11] Conception : Claude Design
+[01:11] Licence MIT · version 1.0.0

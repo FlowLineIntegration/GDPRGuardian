@@ -1,0 +1,51 @@
+# GDPR Guardian on real corpus `mapa_es` (2026-10-25)
+
+- Corpus: MAPA EUR-Lex legal NER (es). Language `es`. Licence: CC BY 4.0. Source: https://huggingface.co/datasets/joelniklaus/mapa (joelniklaus/mapa@bbb2a0157b760465002fd12a61af81b475cd387a).
+- Real text: yes (EU legal texts and judgments, tokenised).
+- Gold: manual, single annotator.
+- Engine: gdprguardian 1.0.0 (native core: True), `Anonymizer(countries="ES", profile="standard")`.
+- Documents: 9/9 evaluated, engine errors: 0; 343,692 characters; throughput 16547441 chars/s (one thread, shared machine).
+- Personal gold mentions: 271; kept-by-policy mentions: 787.
+
+## Headline (95% bootstrap intervals over documents)
+
+| indicator | value [95% CI] |
+|---|---|
+| mention recall, strict (no character left) | 0.0% [0.0%–0.0%] |
+| mention recall@80 (>= 80% of characters masked) | 0.0% [0.0%–0.0%] |
+| character recall | 0.0% [0.0%–0.0%] |
+| precision (characters, scored zone) | n/a |
+| over-masking of non-gold text | 0.0% [0.0%–0.0%] |
+| documents leaking a personal mention (strict) | 100.0% [100.0%–100.0%] |
+| documents leaking a mention verbatim (literal) | 100.0% [100.0%–100.0%] |
+| mentions found verbatim in the output | 100.0% [100.0%–100.0%] |
+
+## Per family (strict mention recall)
+
+| family | mentions | recall [95% CI] |
+|---|---:|---|
+| PERSON | 271 | 0.0% [0.0%–0.0%] |
+
+## Per gold origin
+
+| family:origin | mentions | strict recall |
+|---|---:|---:|
+| PERSON:manual | 271 | 0.0% |
+
+## Kept by policy (share of mentions touched by a mask, for information)
+
+| family | mentions | touched |
+|---|---:|---:|
+| DATE | 460 | 0.0% |
+| LOCATION | 113 | 0.0% |
+| ORG | 156 | 0.0% |
+| OTHER | 58 | 0.0% |
+
+## Reproduce
+
+```
+python tools/corpus/fetch_real.py --cache DIR --only mapa_es
+python tools/corpus/evaluate_real.py --cache DIR --corpora mapa_es --tag rules2
+```
+
+No document text or gold value is stored in this report; the corpus stays in the local cache.

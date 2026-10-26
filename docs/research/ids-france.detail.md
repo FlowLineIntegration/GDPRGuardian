@@ -1,0 +1,265 @@
+# ids-france details
+
+### Items
+| name | license | verdict | reco | status | notes |
+|---|---|---|---|---|---|
+| Presidio (presidio-analyzer) | MIT | ok | optional | 2.2.364, 2026-07-22; repo moved to data-privacy-stack/presidio (2026) | No France recognizers on main. FR_NIR PR #2314, SIREN/SIRET #2320/#2321 and RPPS/FINESS #2342 are open and unmerged. Reuse their entity names (FR_NIR, FR_SIREN, FR_SIRET, FR_RPPS, FR_FINESS) and the country_specific/france layout so GDPR Guardian can upstream or interoperate later. |
+| python-stdnum | LGPL-2.1-or-later | caution | borrow-ideas | 2.2, 2026-01-04; active | fr.nir, nif, siren, siret, tva, rcs, accise, plus iban. Importing it unmodified is LGPL-compatible with MIT, but anyone who redistributes it (e.g., Docker images) must keep LGPL notices and allow replacement. Algorithms are facts: reimplement them in MIT code without copying source, and use stdnum as a dev/test oracle. |
+| django-localflavor | BSD-3-Clause | ok | borrow-ideas | 5.1, 2026-08-01 | FR NIR (sex 1/2/7/8 only, Corsica/DOM/99 checks), SIREN, SIRET (La Poste rule), RNA (^W\d{9}$), zip code, department and region lists. Pulls in Django, so do not depend on it; port the ideas and keep BSD attribution if any code is copied. The Corsica year check looks buggy. |
+| Faker | MIT | ok | adopt | 40.43.0 (PyPI) | Use for tests only. fr_FR: ssn (valid key, 2A/2B, DOM, no 99/3/4/7/8), siren/siret (Luhn-valid), rcs_number, vat_id (invalid keys), license_plate (SIV + FNI), phone (metropolitan only), bank (random RIB key), address. Add custom generators for the missing edge cases. |
+| schwifty | MIT | ok | optional | 2026.10.0, 2026-10-19 | Validates IBAN mod 97 plus national checksums; checksum/france.py implements the RIB key (89/15/3 weights) for FR and MC. Could also be reimplemented in about 20 lines. |
+| phonenumbers | Apache-2.0 | ok | adopt | 9.0.41, 2026-10-08 | Covers FR and all overseas codes (+262/590/594/596/508/681/687/689). Run it as a validator after a cheap regex prefilter for CPU throughput. |
+| Base Adresse Nationale (BAN) | Licence Ouverte / Open Licence 2.0 | ok | optional | data.gouv.fr, continuously updated | Could provide street-name and commune gazetteers, but it is large, so ship an optional download rather than a bundle. |
+| bohwaz INE/BEA check gist | Public domain or WTFPL (file header) | caution | borrow-ideas | 2018 plus later comments | The only accessible description of the INE check keys (BEA mod 23, RNIE mod 97 to letters, higher-ed base-36). WTFPL is not OSI-approved, so reimplement it and validate against real samples. |
+| PresidioGo (YoLaub) | unknown (not verified) | unknown | avoid | not verified | Has an NIR recognizer with the key-97 check. Wrong language and unknown license; reference only. |
+
+### Identifiers
+- **FR FR_NIR** (NIR / numéro de sécurité sociale / numéro INSEE; social security; FP low)
+  - format: 15 chars: sex(1) YY MM dept(2|2A|2B) commune(3) order(3) key(2). DOM: dept 3 digits (97x) + commune 2. Abroad: 99 + INSEE country code. Sex 1/2; 3/4/7/8 for persons being registered or temporary. Month 01-12, 20-42 and 50-99 (incomplete civil status).
+  - regex: `(?<![0-9A-Za-z])[1-478](?:[ .\-  ]?\d){4}[ .\-  ]?(?:\d[ .\-  ]?\d|2[ .\-  ]?[ABab])(?:[ .\-  ]?\d){8}(?![0-9A-Za-z])`
+  - checksum: key = 97 - (int(first 13 chars) mod 97), result 01-97; for the calculation 2A->19, 2B->18 (equivalently A/B->0 then subtract 1,000,000 or 2,000,000).
+  - edge: Key often written separately or omitted (13 digits: context-only). Corsica pre-1976 = dept 20. Historic dept codes (e.g., 96) exist, so do not hard-validate the dept. A child's documents may carry the parent's (ouvrant droit) NIR. Excel: 15 digits fit the precision limit but may render as 1.85E+14; key sometimes in its own column. Protected under GDPR Art. 87.
+  - ctx: numéro de sécurité sociale, n° SS, NSS, n° sécu, sécurité sociale, NIR, numéro INSEE, n° d'immatriculation, carte Vitale, assuré, ouvrant droit, matricule INS, clé
+  - impls: python-stdnum fr.nir (LGPL-2.1+; no sex/month checks); django-localflavor FRNationalIdentificationNumber (BSD-3; sex 1/2/7/8 only, Corsica/DOM/99 checks); Faker fr_FR ssn (MIT; valid keys, 2A/2B, DOM, never 99); Presidio: none merged (PR #2314 open).
+  - src: https://www.insee.fr/fr/metadonnees/definition/c1409 ; https://fr.wikipedia.org/wiki/Numéro_de_sécurité_sociale_en_France ; https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/fr/nir.py ; https://github.com/django/django-localflavor/blob/master/localflavor/fr/forms.py ; https://github.com/joke2k/faker/blob/master/faker/providers/ssn/fr_FR/__init__.py ; https://github.com/data-privacy-stack/presidio/pull/2314 ; https://eur-lex.europa.eu/eli/reg/2016/679/oj
+- **FR FR_INS** (INS (Identité Nationale de Santé): matricule INS = INS-NIR or INS-NIA; numéro provisoire; health; FP low)
+  - format: Matricule INS = the person's NIR, or the NIA (numéro d'identification d'attente, assigned by CNAV/SANDIA to people born abroad pending a NIR); same 15-char layout. CPAM temporary numbers start with 7/8. In CDA/FHIR, OIDs: INS-NIR 1.2.250.1.213.1.4.8, INS-NIA .4.9, test .4.10, demo .4.11.
+  - regex: `(?<![0-9A-Za-z])[1-478](?:[ .\-  ]?\d){4}[ .\-  ]?(?:\d[ .\-  ]?\d|2[ .\-  ]?[ABab])(?:[ .\-  ]?\d){8}(?![0-9A-Za-z])|1\.2\.250\.1\.213\.1\.4\.(?:8|9|10|11)\b`
+  - checksum: Same mod-97 key as the NIR (assumed for the NIA and temporary numbers: unverified). The OID is a strong context signal.
+  - edge: Health exports (HL7 v2 PID-3, CDA, FHIR Identifier.system) put the OID next to the number, so redact the number but the OID can stay. The deprecated INS-C (calculated hash) may appear in legacy data. NIA is unknown to INSEE and absent from the RNIPP.
+  - ctx: INS, matricule INS, identité nationale de santé, INS qualifiée, traits INS, NIA, numéro provisoire, NIR d'attente, SANDIA, IPP
+  - impls: None in Presidio, stdnum, localflavor or Faker (reuse the NIR validator).
+  - src: https://industriels.esante.gouv.fr/sites/default/files/media/document/asip_referentiel_identifiant_national_sante-liste-des-oid-des-autorites-d-affectation-des-ins_v0.1.pdf ; https://esante.gouv.fr/securite/identite-nationale-de-sante ; https://www.senat.fr/rap/r18-545/r18-5451.pdf ; https://www.gisti.org/IMG/pdf/np_54.pdf
+- **FR FR_SPI** (Numéro fiscal / SPI / numéro fiscal de référence / NIF; tax; FP low)
+  - format: 13 digits, first digit 0-3; displayed as 2-2-3-3-3 (e.g., 12 34 567 890 123), top left of the avis d'imposition.
+  - regex: `(?<![0-9])[0-3]\d(?:[ .  ]?\d){11}(?![0-9])`
+  - checksum: last 3 digits == int(first 10 digits) mod 511, zero-padded.
+  - edge: Excel drops the leading 0 (12 digits remain). The 'référence de l'avis' and 'numéro d'accès en ligne' are different identifiers: detect them from context only. The revenu fiscal de référence is a quasi-identifier.
+  - ctx: numéro fiscal, n° fiscal, SPI, NIF, identifiant fiscal, numéro fiscal de référence, avis d'imposition, déclarant, impots.gouv
+  - impls: python-stdnum fr.nif (LGPL); not in Presidio, localflavor or Faker.
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/fr/nif.py ; https://www.clickworker.com/wp-content/uploads/2023/12/TIN_-_country_sheet_FR_en.pdf
+- **FR FR_CNI_OLD** (Numéro de carte nationale d'identité (modèle 1988-2021); national id; FP high)
+  - format: 12 chars: issue YY(2) + MM(2) + office/department code(3) + sequence(5), e.g., 880692310285. Cards issued until 2 Aug 2021 can be valid up to 15 years, so they remain in circulation.
+  - regex: `(?<![0-9A-Za-z])\d{2}(?:0[1-9]|1[0-2])[0-9A-Z]{3}\d{5}(?![0-9A-Za-z])`
+  - checksum: None in the number. The MRZ line 2 position 13 carries an ICAO 7-3-1 check digit for it.
+  - edge: Context only. Do not confuse with the NEPH (also 12 digits).
+  - ctx: carte d'identité, carte nationale d'identité, CNI, pièce d'identité, n° de la carte, délivrée le, préfecture, titulaire
+  - impls: None in Presidio, stdnum, localflavor or Faker.
+  - src: https://fr.wikipedia.org/wiki/Carte_nationale_d'identité_en_France ; https://www.dcode.fr/carte-identite-francaise
+- **FR FR_CNI** (Numéro de carte nationale d'identité électronique (CNIe, since 2 Aug 2021); national id; FP high)
+  - format: 9 alphanumeric chars (e.g., X4RTBPFW4), at positions 6-14 of TD1 MRZ line 1; check digit at position 15.
+  - regex: `(?<![0-9A-Za-z])(?=[0-9A-Z]*\d)(?=[0-9A-Z]*[A-Z])[0-9A-Z]{9}(?![0-9A-Za-z])`
+  - checksum: None standalone; ICAO 9303 7-3-1 mod 10 inside the MRZ.
+  - edge: The 9-char alphanumeric pattern collides with references and codes, so require context. Exact charset rules (excluded letters) are unverified.
+  - ctx: carte d'identité, CNI, CNIe, numéro du document, n° de carte, pièce d'identité, document n°
+  - impls: None.
+  - src: https://fr.wikipedia.org/wiki/Carte_nationale_d'identité_en_France ; https://www.dcode.fr/carte-identite-francaise
+- **FR FR_MRZ** (Bande MRZ (CNI, CNIe, passeport, titre de séjour); travel doc; FP low)
+  - format: Old CNI 2x36 (IDFRA + name; line 2 = doc no 12 + key + first names + DOB + sex); CNIe TD1 3x30; passport TD3 2x44 (P<FRA); titre de séjour TD1 card.
+  - regex: `(?m)^(?:I[A-Z<]FRA|P[A-Z<]FRA|IDFRA)[0-9A-Z<]{25,39}[ \t]*\r?\n(?:[0-9A-Z<]{30,44}[ \t]*(?:\r?\n|$)){1,2}`
+  - checksum: ICAO 9303: values 0-9, A=10..Z=35, '<'=0; weights 7,3,1 repeating; sum mod 10. Applies to doc number, DOB, expiry and composite.
+  - edge: OCR swaps O/0, «/<, and adds spaces, so allow fuzzy matching when check digits fail. Redact the whole block because it encodes name, DOB, sex and doc number.
+  - ctx: MRZ, zone de lecture automatique
+  - impls: None in Presidio, stdnum or localflavor.
+  - src: https://www.dcode.fr/carte-identite-francaise ; https://www.icao.int/publications/pages/publication.aspx?docnum=9303
+- **FR FR_PASSPORT** (Numéro de passeport; travel doc; FP medium)
+  - format: 9 chars: 2 digits + 2 letters + 5 digits (e.g., 12AB34567). From secondary sources only.
+  - regex: `(?<![0-9A-Za-z])\d{2}[ ]?[A-Z]{2}[ ]?\d{5}(?![0-9A-Za-z])`
+  - checksum: None standalone (MRZ check digit only).
+  - edge: Format not confirmed by ANTS (search budget exhausted).
+  - ctx: passeport, n° de passeport, numéro de passeport, passport no, délivré le, date d'expiration
+  - impls: None.
+  - src: https://pvtistes.net/forum/la-demande-de-pvt-canada/103109-recensement-des-refus-de-pvt-canada-2014-a-a-post849094.html ; https://www.tourmag.com/ESTA-les-recommandations-de-l-Ambassade-des-Etats-Unis_a40655.html
+- **FR FR_DRIVER_LICENSE** (Numéro de permis de conduire / NEPH; national id; FP high)
+  - format: NEPH, 12 digits, commonly described as YY + MM (request) + dept(2) + préfecture code(2) + order(4); printed on the back of the card (since 16 Sep 2013) on 2 lines of 6; pink paper licence: box 5. Pre-1975 licences: 1-15 alphanumeric chars + 2x2 digits.
+  - regex: `(?<![0-9])\d{6}[ . ]?\d{6}(?![0-9])`
+  - checksum: None.
+  - edge: Context only. The 12-digit form collides with the old CNI number. The front of the card carries a separate document number (format unverified). ANTS reportedly allows variable-length alphanumeric values.
+  - ctx: permis de conduire, n° de permis, numéro de permis, NEPH, catégorie B, délivré le, ANTS, préfecture
+  - impls: None.
+  - src: https://www.permis-conduire.fr/d/neph-quest-ce-que-cest ; https://www.tomsguide.fr/ou-se-trouve-le-numero-de-permis-sur-le-nouveau-permis/ ; https://www.ornikar.com/code/cours/administratif/numero-enregistrement-prefectoral-harmonise/trouver-numero
+- **FR FR_AGDREF** (Numéro étranger / numéro AGDREF (titre de séjour); national id; FP high)
+  - format: 10 digits on current titres de séjour (right edge of credit-card titres). Older model reported as F + 9 digits. Distinct from the 19-digit ANEF request number.
+  - regex: `(?<![0-9A-Za-z])F?\d{9,10}(?![0-9A-Za-z])`
+  - checksum: None known.
+  - edge: Context only. The residence-permit card also has a document number and a TD1 MRZ.
+  - ctx: numéro étranger, n° étranger, AGDREF, titre de séjour, carte de séjour, récépissé, ANEF, OFII, préfecture
+  - impls: None.
+  - src: https://hautes-alpes.gouv.fr/contenu/telechargement/19389/167210/file/Affiche synthèse étranger suivi par l'ASE.pdf ; https://www.gironde.gouv.fr/contenu/telechargement/58413/391094/file/732-DMI-ASILE-DEMANDE TIV-122021.pdf
+- **FR FR_SIREN** (Numéro SIREN; company; FP medium)
+  - format: 9 digits (8 + Luhn key), usually written 123 456 789.
+  - regex: `(?<![0-9])\d{3}[ .  ]?\d{3}[ .  ]?\d{3}(?![0-9])`
+  - checksum: Luhn mod 10 over the 9 digits.
+  - edge: Personal data only for EI and micro-entrepreneurs. 10% of random 9-digit numbers pass Luhn. The SIREN is embedded in SIRET, TVA, RCS and EORI: deduplicate overlapping spans.
+  - ctx: SIREN, n° SIREN, RCS, immatriculée, siège social, entrepreneur individuel, EI, micro-entrepreneur, auto-entrepreneur, SAS, SARL
+  - impls: python-stdnum fr.siren (LGPL); localflavor FRSIRENField (BSD); Faker siren (MIT, valid); Presidio PR #2321 (open).
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/fr/siren.py ; https://en.wikipedia.org/wiki/SIREN_code ; https://github.com/data-privacy-stack/presidio/issues/2320
+- **FR FR_SIRET** (Numéro SIRET; company; FP medium)
+  - format: 14 digits = SIREN(9) + NIC(5); written 123 456 789 00012.
+  - regex: `(?<![0-9])\d{3}[ .  ]?\d{3}[ .  ]?\d{3}[ .  ]?\d{5}(?![0-9])`
+  - checksum: Luhn over the 14 digits, plus SIREN Luhn. La Poste: if the number starts with 356000000 (except head office 35600000000048), the digit sum must be divisible by 5 instead of passing Luhn.
+  - edge: Excel stores it as a number (14 digits, safe). Personal data for EI.
+  - ctx: SIRET, n° SIRET, établissement, code APE, NAF, siège
+  - impls: python-stdnum fr.siret (LGPL, La Poste rule); localflavor FRSIRETField (BSD, La Poste rule); Faker siret (MIT); Presidio PR #2321 open.
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/fr/siret.py ; https://bugs.tryton.org/issue11296 ; https://en.wikipedia.org/wiki/SIRET_code
+- **FR FR_VAT** (Numéro de TVA intracommunautaire; vat; FP low)
+  - format: FR + 2-char key + SIREN (13 chars). The key is either 2 digits or alphanumeric (alphabet excludes I and O). Monaco numbers have 000 at positions 3-5: valid TVA but not a SIREN.
+  - regex: `(?i)(?<![0-9A-Z])FR[ .\- ]?[0-9A-HJ-NP-Z]{2}[ .\- ]?\d{3}[ .\- ]?\d{3}[ .\- ]?\d{3}(?![0-9A-Z])`
+  - checksum: Numeric key = int(SIREN + '12') mod 97 = (12 + 3 x (SIREN mod 97)) mod 97. Alphanumeric key: python-stdnum mod-11 scheme (check = idx1*24+idx2-10 if the first char is a digit, else idx1*34+idx2-100; valid if (body + 1 + check//11) % 11 == check % 11).
+  - edge: Personal data for EI. Faker vat_id produces random, invalid keys.
+  - ctx: TVA intracommunautaire, n° TVA, numéro de TVA, identifiant TVA, VAT, VAT number
+  - impls: python-stdnum fr.tva (LGPL); Faker vat_id (format only).
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/fr/tva.py ; https://copeps.fr/actualites/modulo-97-tva-intracommunautaire/
+- **FR FR_RCS** (Numéro RCS; company; FP low)
+  - format: 'RCS' + city + A (individual trader) or B (company) + SIREN, e.g., RCS Nancy B 323 159 715.
+  - regex: `(?i)\bR\.?C\.?S\.?[  ]+[A-ZÀ-ÿ][A-Za-zÀ-ÿ'\- ]{1,40}?[  ]+[AB][  ]*\d{3}[ . ]?\d{3}[ . ]?\d{3}\b`
+  - checksum: SIREN Luhn.
+  - edge: Letter A = commerçant (natural person): personal data.
+  - ctx: RCS, greffe, immatriculée au RCS de
+  - impls: python-stdnum fr.rcs (LGPL); Faker rcs_number (MIT).
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/fr/rcs.py
+- **FR FR_RNA** (Numéro RNA (association); company; FP low)
+  - format: W + 9 digits (e.g., W751234567); RNA replaced Waldec on 1 Jan 2010.
+  - regex: `(?<![0-9A-Za-z])W[ .\-]?\d{3}[ .\-]?\d{3}[ .\-]?\d{3}(?![0-9A-Za-z])`
+  - checksum: None.
+  - edge: Quasi-personal at most (identifies a legal entity). Older Waldec dossier numbers differ. Corsica, DOM and Alsace-Moselle variants are unverified.
+  - ctx: RNA, n° RNA, association, loi 1901, préfecture, Journal officiel
+  - impls: django-localflavor FRRNAField (BSD, ^W\d{9}$).
+  - src: https://fr.wikipedia.org/wiki/Répertoire_national_des_associations ; https://github.com/django/django-localflavor/blob/master/localflavor/fr/forms.py
+- **FR FR_EORI** (Numéro EORI; company; FP low)
+  - format: EU: country code + up to 15 alphanumeric chars. France: normally FR + SIRET (14 digits); the FR+SIRET rule is unverified in an official FR source.
+  - regex: `(?<![0-9A-Za-z])FR[ ]?\d{3}[ ]?\d{3}[ ]?\d{3}[ ]?\d{5}(?![0-9A-Za-z])`
+  - checksum: Embedded SIRET Luhn when SIRET-based.
+  - edge: Personal data for EI.
+  - ctx: EORI, n° EORI, douane, dédouanement
+  - impls: None (python-stdnum has no EORI module).
+  - src: https://taxation-customs.ec.europa.eu/customs-4/customs-procedures-import-and-export/customs-procedures/economic-operators-registration-and-identification-number-eori_en
+- **FR FR_ACCISE** (Numéro d'accise; tax; FP low)
+  - format: 13 chars: FR0 + YY + customs office (3 digits) + type letter (E/N/C/B) + 4-digit order.
+  - regex: `(?<![0-9A-Za-z])FR0\d{5}[ENCB]\d{4}(?![0-9A-Za-z])`
+  - checksum: None (the stdnum code only checks 3 of the last 4 chars: a bug).
+  - edge: Rarely personal.
+  - ctx: accise, n° d'accise, entrepositaire agréé
+  - impls: python-stdnum fr.accise (LGPL).
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/fr/accise.py
+- **FR FR_IBAN** (IBAN FR / RIB; financial; FP low)
+  - format: IBAN 27 chars: FR + 2 check digits + banque(5) + guichet(5) + compte(11, alphanumeric) + clé RIB(2), printed in groups of 4. A standalone RIB is 23 chars (5/5/11/2). Monaco (MC) uses the same BBAN.
+  - regex: `(?i)(?<![0-9A-Z])FR\d{2}(?:[ \- ]?[0-9A-Z]{4}){5}[ \- ]?[0-9A-Z]{3}(?![0-9A-Z])|(?<![0-9])\d{5}[ \-]?\d{5}[ \-]?[0-9A-Z]{11}[ \-]?\d{2}(?![0-9])`
+  - checksum: IBAN: ISO 13616 mod 97 == 1. Clé RIB = 97 - ((89 x banque + 15 x guichet + 3 x compte) mod 97); letters A-I->1-9, J-R->1-9, S-Z->2-9.
+  - edge: DOM/COM accounts use the FR prefix (per the SWIFT registry; not re-verified). Faker fr_FR BBAN = 23 random digits, so its RIB keys are invalid.
+  - ctx: IBAN, RIB, BIC, coordonnées bancaires, titulaire du compte, domiciliation, code banque, code guichet, clé RIB
+  - impls: schwifty (MIT; checksum/france.py implements the RIB key); python-stdnum iban (LGPL); Presidio IBAN_CODE (MIT, generic).
+  - src: https://fr.wikipedia.org/wiki/Relevé_d'identité_bancaire ; https://github.com/mdomke/schwifty/blob/main/schwifty/checksum/france.py ; https://pypi.org/project/schwifty/
+- **FR FR_RPPS** (Numéro RPPS (professionnel de santé); health; FP medium)
+  - format: 11 non-meaningful digits with a Luhn key (e.g., 10000812437); assigned for life; public in annuaire.sante.fr; printed on the CPS card. An '8' prefix in identifiant national PS is reported but unverified.
+  - regex: `(?<![0-9])8?\d{11}(?![0-9])`
+  - checksum: Luhn mod 10 over the 11 digits.
+  - edge: It identifies the professional, not the patient: make it a policy choice. Public directory data is still personal data.
+  - ctx: RPPS, n° RPPS, Dr, docteur, médecin, prescripteur, ordonnance, CPS, pharmacien, infirmier, kinésithérapeute
+  - impls: None merged (Presidio issue #2342 open).
+  - src: https://esante.gouv.fr/sites/default/files/media/document/Comprendre_les_differences_entre_les_identifiants_RPPS_ADELI_AM_et_FINESS.pdf ; https://github.com/data-privacy-stack/presidio/issues/2342
+- **FR FR_ADELI** (Numéro ADELI / numéro AM (praticien); health; FP high)
+  - format: ADELI: 9 alphanumeric chars, dept(2, incl. 2A/2B) + profession(2) + sequence + key; changes when the professional moves department; replaced by RPPS (no longer used since Oct 2024 per ANS). AM: 9 digits, usually the same as ADELI, used for billing.
+  - regex: `(?<![0-9A-Za-z])(?:\d{2}|2[AB])\d{7}(?![0-9A-Za-z])`
+  - checksum: Final key, reportedly Luhn (unverified officially).
+  - edge: Context only. Legacy documents.
+  - ctx: ADELI, n° ADELI, n° AM, numéro assurance maladie du praticien, identifiant de facturation, feuille de soins
+  - impls: None.
+  - src: https://esante.gouv.fr/sites/default/files/media/document/Comprendre_les_differences_entre_les_identifiants_RPPS_ADELI_AM_et_FINESS.pdf ; https://esante.gouv.fr/faq-des-industriels/differences-rpps-adeli-am
+- **FR FR_FINESS** (Numéro FINESS (juridique / géographique); health; FP medium)
+  - format: 9 chars: dept(2; 2A/2B Corsica; 97 + territory in 4th char for DOM; 98 Mayotte) + 0 + 5-digit sequence + key.
+  - regex: `(?<![0-9A-Za-z])(?:\d{2}|2[AB])[ ]?\d{3}[ ]?\d{3}[ ]?\d(?![0-9A-Za-z])`
+  - checksum: Luhn mod 10 over the first 8 digits. Corsica: SNDS gives a digit substitution for 2A/2B before computing.
+  - edge: Identifies a facility, not a person, but becomes a quasi-identifier when combined with a patient stay. SNDS uses an 8-digit keyless form.
+  - ctx: FINESS, n° FINESS, établissement, hôpital, clinique, EHPAD, PMSI
+  - impls: None merged (Presidio issue #2342).
+  - src: https://documentation-snds.health-data-hub.fr/snds/fiches/ref_etab ; https://esante.gouv.fr/sites/default/files/media/document/Comprendre_les_differences_entre_les_identifiants_RPPS_ADELI_AM_et_FINESS.pdf
+- **FR FR_INE** (INE (identifiant national élève/étudiant), numéro BEA, RNIE; other; FP medium)
+  - format: 11 chars. Variants: new RNIE INE = 9 digits + 2-letter key; INE-BEA = académie(2) + year(2) + 6 alphanumeric ('D' prefix = provisional) + letter key; higher-education (Apogée/Scolarix) = 10 base-36 chars + 1 digit; SIFA and Base 100 variants undocumented.
+  - regex: `(?<![0-9A-Za-z])(?:\d{9}[A-HJ-NP-Z]{2}|\d{4}[0-9A-Z]{6}[A-HJ-NP-Z]|[0-9A-Z]{10}\d)(?![0-9A-Za-z])`
+  - checksum: Community-sourced: RNIE = 9 digits mod 97 mapped to 2 letters; BEA = mod 23 over académie+year+number (letters excl. I, O, Q); higher-ed = base-36 value mod 10 (disputed). No official spec found.
+  - edge: Mostly concerns minors (sensitive). Validate several variants in parallel.
+  - ctx: INE, identifiant national élève, identifiant national étudiant, numéro BEA, n° INE, Parcoursup, relevé de notes, baccalauréat, SIECLE, ONDE
+  - impls: bohwaz gist (PHP, public domain/WTFPL); none in Presidio, stdnum, localflavor or Faker.
+  - src: https://fr.wikipedia.org/wiki/Numéro_d'identification_nationale_des_étudiants ; https://gist.github.com/bohwaz/e14df1e88e9e06aa3857e8b6f1181bf9 ; https://www.legifrance.gouv.fr/affichTexte.do?cidTexte=JORFTEXT000025554438
+- **FR FR_NUMEN** (NUMEN (numéro d'identification Éducation nationale); other; FP medium)
+  - format: 13 chars: académie(2) + system letter (G, E, P, A...) + year of entry(2) + 8 random chars (5 digits + 3 letters), e.g., 01E9501234ABC.
+  - regex: `(?<![0-9A-Za-z])\d{2}[ ]?[A-Z][ ]?\d{2}[ ]?[0-9A-Z]{8}(?![0-9A-Za-z])`
+  - checksum: None known.
+  - edge: Treated as confidential (it acts as a credential for teacher portals).
+  - ctx: NUMEN, n° NUMEN, I-Prof, enseignant, rectorat, académie, Éducation nationale
+  - impls: None.
+  - src: https://fr.wikipedia.org/wiki/NUMEN
+- **FR FR_CAF_ALLOCATAIRE** (Numéro allocataire CAF / MSA; social security; FP high)
+  - format: Short numeric ID, commonly 7 digits (unverified).
+  - regex: `(?<![0-9])\d{7}(?![0-9])`
+  - checksum: None.
+  - edge: Context only (match within a few tokens of a keyword).
+  - ctx: numéro allocataire, n° allocataire, n° d'allocataire, CAF, MSA, APL, RSA, prime d'activité, prestations familiales
+  - impls: None.
+  - src: unverified: WebSearch budget exhausted; check caf.fr
+- **FR FR_FRANCE_TRAVAIL_ID** (Identifiant France Travail (ex-Pôle emploi); social security; FP medium)
+  - format: Commonly 7 digits + 1 letter (8 chars) (unverified).
+  - regex: `(?<![0-9A-Za-z])\d{7}[A-Z](?![0-9A-Za-z])`
+  - checksum: None known.
+  - edge: Context only.
+  - ctx: identifiant France Travail, identifiant Pôle emploi, n° d'identifiant, demandeur d'emploi, ARE, inscription, conseiller
+  - impls: None.
+  - src: unverified: WebSearch budget exhausted; check francetravail.fr
+- **FR FR_CARTE_VITALE** (Carte Vitale; health; FP low)
+  - format: The card carries the holder's NIR (for children, possibly the ouvrant droit's NIR); the card serial number has no public standard format.
+  - regex: `(see FR_NIR)`
+  - checksum: NIR mod-97 key.
+  - edge: Detect as FR_NIR; use 'carte Vitale' only as a context booster.
+  - ctx: carte Vitale, n° de carte Vitale, attestation de droits, ameli
+  - impls: Via the NIR validators.
+  - src: https://www.insee.fr/fr/metadonnees/definition/c1409
+- **FR FR_LICENSE_PLATE** (Immatriculation SIV (AA-123-AA) et FNI (123 ABC 75); vehicle; FP medium)
+  - format: SIV (since 2009): 2 letters-3 digits-2 letters; letters exclude I, O, U; SS/WW banned in the 1st block, SS in the 2nd; 000 invalid; WW = temporary, W = garage. FNI (pre-2009): 1-4 digits + 1-3 letters + dept (2 digits, 2A/2B, 971-976).
+  - regex: `(?i)(?<![0-9A-Z])(?!SS|WW)[A-HJ-NP-TV-Z]{2}[ \-]?(?!000)\d{3}[ \-]?(?!SS(?![0-9A-Z]))[A-HJ-NP-TV-Z]{2}(?![0-9A-Z])|(?<![0-9A-Za-z])\d{1,4}[ \-]?[A-HJ-NP-TV-Z]{1,3}[ \-]?(?:0[1-9]|[1-8]\d|9[0-5]|2[AB]|97[1-6])(?![0-9A-Za-z])`
+  - checksum: None.
+  - edge: SIV is fairly specific; FNI is high-FP, so require context. Diplomatic (CD/CMD), TT and military formats exist. The VIN (17 chars) is international.
+  - ctx: immatriculation, plaque, véhicule, carte grise, certificat d'immatriculation, SIV, ANTAI, avis de contravention
+  - impls: Faker fr_FR license_plate (MIT; SIV + FNI); none in stdnum or Presidio.
+  - src: https://fr.wikipedia.org/wiki/Plaque_d'immatriculation_française ; https://github.com/joke2k/faker/blob/master/faker/providers/automotive/fr_FR/__init__.py
+- **FR FR_PHONE** (Numéro de téléphone; contact; FP medium)
+  - format: National 0 + 9 digits: 01-05 geographic, 06/07 mobile, 08 services, 09 VoIP; +33 drops the 0 ('+33 (0)6' variant). DOM national: 0590/0690-91 Guadeloupe, St-Martin, St-Barth; 0594/0694 Guyane; 0596/0696-97 Martinique; 0262-63/0692-93 Réunion; 0269/0639 Mayotte; 0508 SPM. International: +590/+594/+596/+262 + 9 digits; +508/+681/+687 + 6; +689 + 8.
+  - regex: `(?<![\d+])(?:(?:\+|00)[ ]?(?:33|262|590|594|596)[ .\- ]?(?:\(0\)[ .\- ]?)?|0)[1-9](?:[ .\-  ]?\d{2}){4}(?!\d)|(?<![\d+])(?:\+|00)[ ]?(?:508|681|687)(?:[ .\- ]?\d{2}){3}(?!\d)|(?<![\d+])(?:\+|00)[ ]?689(?:[ .\- ]?\d{2}){4}(?!\d)`
+  - checksum: None (use libphonenumber range metadata).
+  - edge: Excel drops the leading 0 (9 digits remain). 0700 M2M numbers have 14 digits; 3xxx short codes and 15/17/18/112 are not personal.
+  - ctx: tél, tel, téléphone, portable, mobile, fixe, fax, joignable au, appelez, contact
+  - impls: phonenumbers (Apache-2.0); Presidio PhoneRecognizer (MIT, via phonenumbers); Faker fr_FR (metropolitan only).
+  - src: https://fr.wikipedia.org/wiki/Plan_de_numérotation_téléphonique_en_France ; https://pypi.org/project/phonenumbers/ ; https://github.com/joke2k/faker/blob/master/faker/providers/phone_number/fr_FR/__init__.py
+- **FR FR_POSTAL_CODE** (Code postal; contact; FP high)
+  - format: 5 digits; prefix = dept 01-95; Corsica 20xxx (3rd digit 1 = 2A, 2 = 2B; Ajaccio 20000); DOM 971-976xx; St-Barth 97133, St-Martin 97150; Monaco 980xx; Wallis 986, PF 987, NC 988; CEDEX codes; 99999 La Poste.
+  - regex: `(?<![0-9])(?:0[1-9]|[1-8]\d|9[0-8])\d{3}(?![0-9])(?=[  ]+(?:[A-ZÀ-Ÿ][A-Za-zÀ-ÿ'\-]+|CEDEX))`
+  - checksum: None.
+  - edge: A quasi-identifier: prefer generalizing to the dept over deleting. Excel 01xxx-09xxx becomes 4 digits. Postal code is not the INSEE commune code.
+  - ctx: code postal, CP, CEDEX, BP, adresse, domicilié, demeurant
+  - impls: django-localflavor FRZipCodeField (^\d{5}$); Faker fr_FR address.
+  - src: https://fr.wikipedia.org/wiki/Code_postal_en_France ; https://github.com/django/django-localflavor/blob/master/localflavor/fr/forms.py
+- **FR FR_ADDRESS** (Adresse postale; contact; FP medium)
+  - format: [number][bis|ter|quater] [voie type] [name], [BP/CS/TSA], [CP] [COMMUNE] [CEDEX nn].
+  - regex: `(?i)\b\d{1,4}(?:[ ]?(?:bis|ter|quater|[a-d]))?[ ,]+(?:rue|avenue|av\.?|boulevard|bd|place|pl\.?|all[ée]e|impasse|chemin|route|rte|quai|cours|square|passage|sentier|voie|r[ée]sidence|lotissement|lieu[- ]dit|hameau|faubourg|fbg|mont[ée]e|esplanade|parvis|rond[- ]point|villa|cit[ée]|traverse|venelle|ruelle|clos|domaine|za|zi|zac)\b[^\n,;]{2,80}`
+  - checksum: None.
+  - edge: Mayotte and Guyane addresses often lack numbers ('village', 'quartier', PK). NC/PF use BP heavily. Combine with NER and an optional BAN gazetteer.
+  - ctx: adresse, domicilié, demeurant, résidant, habite, domicile, lieu de résidence
+  - impls: BAN dataset (Licence Ouverte 2.0); Faker fr_FR address (MIT).
+  - src: https://www.data.gouv.fr/fr/datasets/base-adresse-nationale/ ; https://fr.wikipedia.org/wiki/Code_postal_en_France
+- **FR FR_DATE_OF_BIRTH** (Date de naissance; other; FP medium)
+  - format: 'né(e) le 1er/12 mars 1985', DD/MM/YYYY, DD.MM.YYYY, DD-MM-YY; French day-month order.
+  - regex: `(?i)\bn[ée]e?s?[  ]+le[  ]+(?:1er|0?[1-9]|[12]\d|3[01])[  ]+(?:janvier|f[ée]vrier|mars|avril|mai|juin|juillet|ao[uû]t|septembre|octobre|novembre|d[ée]cembre)[  ]+(?:18|19|20)\d{2}\b|\b(?:0?[1-9]|[12]\d|3[01])[\/.\-](?:0?[1-9]|1[0-2])[\/.\-](?:19|20)\d{2}\b`
+  - checksum: None (calendar validity only).
+  - edge: Context separates a DOB from other dates. Excel stores dates as serial numbers. The NIR also encodes year and month of birth.
+  - ctx: né le, née le, date de naissance, DDN, date naiss., né à, âgé de, naissance
+  - impls: Presidio DATE_TIME (generic, MIT; French date issue #1431).
+  - src: https://github.com/microsoft/presidio/issues/1431
+- **FR FR_CONTEXTUAL_ID** (N° patient (IPP/NDA), client, contrat, dossier, adhérent, police, sinistre, PDL/PRM, PCE; other; FP low)
+  - format: Free alphanumeric 4-25 chars after an explicit label. PDL/PRM electricity meters are 14 digits (a household quasi-identifier).
+  - regex: `(?i)\b(?:n[°ºo]\.?|num[ée]ro|r[ée]f(?:[ée]rence)?\.?|id(?:entifiant)?)[  ]*(?:de[  ]+|d['’][  ]*)?(?:client|contrat|dossier|patient|IPP|NDA|s[ée]jour|adh[ée]rent|police|sinistre|facture|abonn[ée]|PDL|PRM|PCE|compteur|b[ée]n[ée]ficiaire)[  ]*[:#°]?[  ]*([A-Z0-9][A-Z0-9\-\/.]{3,24})`
+  - checksum: None.
+  - edge: Redact only capture group 1. Allow configurable customer label lists. In Excel, the column header plays the role of the label.
+  - ctx: n° client, n° de contrat, n° de dossier, IPP, NDA, n° de séjour, n° adhérent, n° de police, n° de sinistre, PDL, PRM, PCE
+  - impls: None.
+  - src: https://github.com/data-privacy-stack/presidio
+

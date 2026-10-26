@@ -1,0 +1,15 @@
+# Contexte de construction minimal (BuildKit lit ce fichier pour deploy/Dockerfile).
+# Minimal build context (BuildKit reads this file for deploy/Dockerfile).
+# tools/pgo.py et le corpus fictif ne servent qu'à l'étape `core-1` (profil PGO), jamais à l'image finale.
+# tools/pgo.py and the fictitious corpus only serve the `core-1` stage (PGO profile), never the final image.
+**
+!pyproject.toml
+!README.md
+!LICENSE
+!src/
+!rust/
+!tools/pgo.py
+!datasets/fr/docs/
+rust/target/
+**/__pycache__/
+**/*.py[cod]

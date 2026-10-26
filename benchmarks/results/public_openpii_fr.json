@@ -1,0 +1,119 @@
+{
+  "dataset": "openpii_fr",
+  "records": 3000,
+  "evaluated": 3000,
+  "errors": {},
+  "error_samples": [],
+  "chars": 1329406,
+  "seconds": 4.397,
+  "chars_per_second": 302321,
+  "docs_per_second": 682.23,
+  "over_masking": {
+    "detected_spans": 6255,
+    "false_mask_spans": 101,
+    "chars_outside_gold": 1740,
+    "non_gold_chars": 1048319,
+    "char_rate": 0.0017
+  },
+  "direct_identifiers": {
+    "gold": 12366,
+    "masked": 5736,
+    "leaked": 6381,
+    "masked_rate": 0.4639,
+    "leak_rate": 0.516
+  },
+  "families": {
+    "PERSON": {
+      "gold": 3299,
+      "masked": 2119,
+      "leaked": 982,
+      "masked_rate": 0.6423,
+      "leak_rate": 0.2977,
+      "expected_masked_by_policy": true
+    },
+    "ADDRESS": {
+      "gold": 2133,
+      "masked": 646,
+      "leaked": 1457,
+      "masked_rate": 0.3029,
+      "leak_rate": 0.6831,
+      "expected_masked_by_policy": true
+    },
+    "EMAIL": {
+      "gold": 1716,
+      "masked": 1698,
+      "leaked": 2,
+      "masked_rate": 0.9895,
+      "leak_rate": 0.0012,
+      "expected_masked_by_policy": true
+    },
+    "PHONE": {
+      "gold": 1299,
+      "masked": 299,
+      "leaked": 1000,
+      "masked_rate": 0.2302,
+      "leak_rate": 0.7698,
+      "expected_masked_by_policy": true
+    },
+    "NATIONAL_ID": {
+      "gold": 1905,
+      "masked": 780,
+      "leaked": 1125,
+      "masked_rate": 0.4094,
+      "leak_rate": 0.5906,
+      "expected_masked_by_policy": true
+    },
+    "TAX_ID": {
+      "gold": 594,
+      "masked": 105,
+      "leaked": 489,
+      "masked_rate": 0.1768,
+      "leak_rate": 0.8232,
+      "expected_masked_by_policy": true
+    },
+    "CARD": {
+      "gold": 757,
+      "masked": 87,
+      "leaked": 670,
+      "masked_rate": 0.1149,
+      "leak_rate": 0.8851,
+      "expected_masked_by_policy": true
+    },
+    "ID": {
+      "gold": 663,
+      "masked": 2,
+      "leaked": 656,
+      "masked_rate": 0.003,
+      "leak_rate": 0.9894,
+      "expected_masked_by_policy": true
+    },
+    "DATE": {
+      "gold": 2991,
+      "masked": 215,
+      "leaked": 2776,
+      "masked_rate": 0.0719,
+      "leak_rate": 0.9281,
+      "expected_masked_by_policy": false
+    },
+    "LOCATION": {
+      "gold": 1722,
+      "masked": 225,
+      "leaked": 1398,
+      "masked_rate": 0.1307,
+      "leak_rate": 0.8118,
+      "expected_masked_by_policy": false
+    },
+    "OTHER": {
+      "gold": 3991,
+      "masked": 248,
+      "leaked": 3743,
+      "masked_rate": 0.0621,
+      "leak_rate": 0.9379,
+      "expected_masked_by_policy": false
+    }
+  },
+  "meta": {
+    "countries": "FR",
+    "revision": "ai4privacy/pii-masking-openpii-1m@ecfdc547f4a0955600cfe6ab98ba2a162207fcc0 (CC-BY-4.0)"
+  }
+}

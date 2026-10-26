@@ -1,0 +1,12 @@
+# Gardien RGPD · GDPR Guardian : sonde de santé toutes les 2 minutes, /etc/systemd/system/gdprguardian-watchdog.timer.
+# Health probe every 2 minutes.
+[Unit]
+Description=Gardien RGPD - GDPR Guardian health probe every 2 minutes
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=2min
+AccuracySec=10s
+
+[Install]
+WantedBy=timers.target

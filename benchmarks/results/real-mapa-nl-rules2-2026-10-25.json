@@ -1,0 +1,175 @@
+{
+  "corpus": "mapa_nl",
+  "title": "MAPA EUR-Lex legal NER (nl)",
+  "language": "nl",
+  "licence": "CC BY 4.0",
+  "source": "https://huggingface.co/datasets/joelniklaus/mapa",
+  "revision": "joelniklaus/mapa@bbb2a0157b760465002fd12a61af81b475cd387a",
+  "real_text": "yes (EU legal texts and judgments, tokenised)",
+  "gold": "manual, single annotator",
+  "gold_complete": true,
+  "negative_control": false,
+  "measures": "names, addresses, dates in real legal prose of each language",
+  "cannot_measure": "contact or ID numbers (none annotated)",
+  "build": {
+    "documents": 12,
+    "mentions": 1168,
+    "chars": 451012,
+    "source": "https://huggingface.co/datasets/joelniklaus/mapa",
+    "revision": "joelniklaus/mapa@bbb2a0157b760465002fd12a61af81b475cd387a",
+    "licence": "CC BY 4.0",
+    "fetched": "2026-10-25"
+  },
+  "gold_labels": {
+    "DATE": 484,
+    "LOCATION": 84,
+    "ORG": 222,
+    "OTHER": 15,
+    "PERSON": 363
+  },
+  "run": {
+    "date": "2026-10-25",
+    "countries": "NL",
+    "profile": "standard",
+    "engine": {
+      "package": "gdprguardian",
+      "version": "1.0.0",
+      "native_core": true,
+      "python": "3.12.11",
+      "platform": "Windows 11",
+      "machine": "AMD64"
+    },
+    "tag": "rules2",
+    "review": null,
+    "split": "all",
+    "split_rule": null
+  },
+  "documents": 12,
+  "evaluated": 12,
+  "errors": {},
+  "chars": 451012,
+  "seconds": 0.021,
+  "chars_per_second": 21000940,
+  "families": [
+    "PERSON"
+  ],
+  "totals": {
+    "m_total": 363,
+    "m_full": 0,
+    "m_cov80": 0,
+    "m_literal_checked": 283,
+    "m_literal": 283,
+    "c_gold": 2680,
+    "c_gold_masked": 0,
+    "c_pred": 15,
+    "c_pred_tp": 0,
+    "c_neutral": 356122,
+    "c_neutral_masked": 0,
+    "d_has_gold": 9,
+    "d_leak": 9,
+    "d_leak_literal": 8,
+    "k_total": 805,
+    "k_touched": 1,
+    "chars": 451012,
+    "detections": 1,
+    "d_detection": 1,
+    "g_PERSON": 363,
+    "f_PERSON": 0
+  },
+  "metrics": {
+    "mention_recall": 0.0,
+    "mention_recall_at80": 0.0,
+    "char_recall": 0.0,
+    "precision": 0.0,
+    "over_masking": 0.0,
+    "doc_leak_rate": 1.0,
+    "doc_literal_leak_rate": 0.8888888888888888,
+    "mention_literal_leak_rate": 1.0,
+    "kept_touched_rate": 0.0012422360248447205,
+    "detections_per_10k_chars": 0.022172359050313516,
+    "docs_with_detection": 0.08333333333333333,
+    "recall_PERSON": 0.0
+  },
+  "intervals_95": {
+    "mention_recall": [
+      0.0,
+      0.0
+    ],
+    "mention_recall_at80": [
+      0.0,
+      0.0
+    ],
+    "char_recall": [
+      0.0,
+      0.0
+    ],
+    "precision": [
+      0.0,
+      0.0
+    ],
+    "over_masking": [
+      0.0,
+      0.0
+    ],
+    "doc_leak_rate": [
+      1.0,
+      1.0
+    ],
+    "doc_literal_leak_rate": [
+      0.6667,
+      1.0
+    ],
+    "mention_literal_leak_rate": [
+      1.0,
+      1.0
+    ],
+    "kept_touched_rate": [
+      0.0,
+      0.0033
+    ],
+    "detections_per_10k_chars": [
+      0.0,
+      0.0618
+    ],
+    "docs_with_detection": [
+      0.0,
+      0.25
+    ],
+    "recall_PERSON": [
+      0.0,
+      0.0
+    ]
+  },
+  "kept_families": {
+    "DATE": {
+      "mentions": 484,
+      "touched": 1,
+      "touched_rate": 0.002066115702479339
+    },
+    "LOCATION": {
+      "mentions": 84,
+      "touched": 0,
+      "touched_rate": 0.0
+    },
+    "ORG": {
+      "mentions": 222,
+      "touched": 0,
+      "touched_rate": 0.0
+    },
+    "OTHER": {
+      "mentions": 15,
+      "touched": 0,
+      "touched_rate": 0.0
+    }
+  },
+  "by_origin": {
+    "PERSON:manual": {
+      "mentions": 363,
+      "masked": 0,
+      "recall": 0.0
+    }
+  },
+  "detected_labels": {
+    "BIRTH_DATE": 1
+  }
+}

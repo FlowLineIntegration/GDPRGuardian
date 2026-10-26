@@ -1,0 +1,169 @@
+# Pack Luxembourg : matricule national, TVA, RCS, téléphones, codes postaux L-xxxx / Luxembourg pack.
+# Niveaux / tiers : A clé forte / strong key ; B clé faible + contexte / weak key + context ; C contexte seul.
+# Mots de contexte = preuves du mode auto, donc propres au Luxembourg : ni « matricule » (RH en France) ni
+# « Luxembourg » seuls (jardin du Luxembourg) / context words are auto-mode evidence, hence Luxembourg-only.
+# Motifs terminés par (?![^\W_]) : la regex revient elle-même sur une forme valide / self-delimiting patterns.
+
+[pack]
+id = "LU"
+name = "Luxembourg / Lëtzebuerg / Luxemburg"
+version = "2026.10.0"
+country = "LU"
+languages = ["fr", "de", "lb"]
+detectors = []
+
+[locale]
+phone_codes = ["352"]
+tlds = ["lu"]
+iban_countries = ["LU"]
+languages = ["fr", "de", "lb"]
+
+[context.matricule]
+fr = ["matricule national", "matricule luxembourgeois", "matricule cns", "matricule ccss",
+      "numéro d'identification national", "n° d'identification national", "ccss",
+      "centre commun de la sécurité sociale", "caisse nationale de santé"]
+de = ["nationale identifikationsnummer", "gemeinsames sozialversicherungszentrum"]
+
+# « Registre de commerce et des sociétés » seul est une coquille courante du RCS français : on exige Luxembourg.
+# The bare long form is a common misspelling of the French register: Luxembourg is required.
+[context.rcs]
+fr = ["r.c.s. luxembourg", "r.c.s luxembourg", "rcs luxembourg", "rcs de luxembourg",
+      "registre de commerce et des sociétés de luxembourg", "registre de commerce et des sociétés luxembourg",
+      "luxembourg business registers"]
+de = ["handels- und gesellschaftsregister"]
+
+# « Großherzogtum » seul est exclu (Bade, Hesse) / bare "Großherzogtum" is excluded (Baden, Hesse).
+[context.country]
+fr = ["grand-duché de luxembourg", "grand-duché", "grand-ducal", "grand-ducale", "ville de luxembourg",
+      "administration des contributions directes", "chambre des salariés"]
+de = ["großherzogtum luxemburg", "großherzogliche verordnung"]
+lb = ["lëtzebuerg", "groussherzogtum"]
+
+# Indices de commerçant personne physique ; ne comptent pas comme preuve / sole-trader cues, not evidence.
+[context.ei]
+fr = ["commerçant personne physique", "commerçants personnes physiques", "personne physique commerçante"]
+de = ["einzelunternehmen", "einzelunternehmer", "einzelkaufmann"]
+
+# En-têtes de colonnes (tableurs). En mode auto, le premier pack qui liste un en-tête impose son libellé : ni
+# « matricule » (salarié en France) ni « Sozialversicherungsnummer » (Allemagne). Column headers: in auto mode the
+# first pack listing a header sets its label, hence no generic word.
+[headers]
+LU_MATRICULE = ["matricule national", "matricule luxembourgeois", "matricule cns", "matricule ccss",
+                "numéro d'identification national", "n° d'identification national"]
+VAT = ["tva", "n° tva", "numéro tva", "numéro de tva", "mwst", "ust-idnr"]
+RCS = ["rcs", "n° rcs", "numéro rcs", "registre de commerce"]
+PHONE = ["gsm", "téléphone", "tél", "telefon", "telefonnummer", "handy"]
+PERSON = ["name", "vorname", "nachname", "numm", "virnumm"]
+ADDRESS = ["adresse", "strasse", "straße"]
+BIRTH_DATE = ["date de naissance", "geburtsdatum"]
+POSTAL_CODE = ["code postal", "postleitzahl", "plz"]
+
+[labels.LU_MATRICULE]
+fr = "MATRICULE_LU"
+en = "LU_NATIONAL_ID"
+neutral = "NATIONAL_ID"
+aliases = ["MATRICULE_NATIONAL", "MATRICULE_LUXEMBOURG"]
+
+# --- Personnes / persons ---
+
+# Matricule : AAAAMMJJ + rang + Luhn + Verhoeff (1 chance sur 100 au hasard, date filtrée en plus).
+# Matricule: YYYYMMDD + serial + Luhn + Verhoeff (random pass rate 1/100, date also filtered).
+[[recognizer]]
+id = "LU_MATRICULE"
+entity = "NATIONAL_ID"
+label = "LU_MATRICULE"
+tier = "A"
+score = 0.97
+prefilter = "digit"
+pattern = '(?:18|19|20)[0-9]{2}{S}[0-9]{2}{S}[0-9]{2}{S}[0-9]{3}{S}[0-9]{2}(?![^\W_])'
+validator = "lu.matricule"
+boundary = "alnum"
+context = "matricule"
+
+# Ancien matricule à 11 chiffres (avant juillet 2014), sans clé : ancré sur « matricule », qui ne peut
+# pas servir de preuve (matricule d'un salarié en France). Legacy 11-digit matricule, no check digit:
+# anchored on "matricule", which cannot be evidence (French employee numbers).
+[[recognizer]]
+id = "LU_MATRICULE_LEGACY"
+entity = "NATIONAL_ID"
+label = "LU_MATRICULE"
+tier = "A"
+prefilter = "matricule"
+pattern = '(?:[Mm]atricule|MATRICULE)(?:\s{1,3}(?:national|nationale|CNS|CCSS))?\s{0,3}(?:[Nn][°º]\.?\s{0,3})?:?\s{0,3}(?P<v>(?:18|19|20)[0-9]{2}{S}[0-9]{2}{S}[0-9]{2}{S}[0-9]{3})(?![ .\-]?[0-9])(?![^\W_])'
+group = "v"
+validator = "lu.matricule_legacy"
+boundary = "alnum"
+
+[[recognizer]]
+id = "LU_PHONE_MOBILE"
+entity = "PHONE"
+label = "PHONE"
+tier = "B"
+prefilter = "digit"
+pattern = '6[0-9]{2}(?:{S}[0-9]{3}{S}[0-9]{3}|{S}[0-9]{2}{S}[0-9]{2}{S}[0-9]{2})(?![^\W_])'
+validator = "lu.phone"
+boundary = "phone"
+context = ["FR:phone", "INTL:phone"]
+
+# Fixe : 6 ou 8 chiffres par paires, sans préfixe ; ambigu sans contexte.
+# Landline: 6 or 8 digits in pairs, no trunk prefix; ambiguous without context.
+[[recognizer]]
+id = "LU_PHONE_FIXED"
+entity = "PHONE"
+label = "PHONE"
+tier = "B"
+prefilter = "digit"
+pattern = '[2-578][0-9](?:{S}[0-9]{2}){2,3}(?![^\W_])'
+validator = "lu.phone"
+boundary = "phone"
+context = ["FR:phone", "INTL:phone"]
+
+[[recognizer]]
+id = "LU_POSTCODE"
+entity = "POSTAL_CODE"
+label = "POSTAL_CODE"
+tier = "A"
+prefilter = "l-"
+pattern = 'L-[1-9][0-9]{3}(?=\s{1,3}[A-ZÀ-Ý])'
+boundary = "alnum"
+
+# Section A du RCS : commerçant personne physique, donc toujours masqué. Sections d'après LBR, via
+# https://docs.topograph.co/essentials/luxembourg (A personnes physiques, B sociétés commerciales…).
+# Un groupe de 3 chiffres qui suit (SIREN français « B 732 829 320 ») interdit la coupe : rien ne reste visible.
+# RCS section A: natural-person trader, always masked. A following 3-digit group forbids a cut (French SIREN).
+[[recognizer]]
+id = "LU_RCS_PERSON"
+entity = "COMPANY_ID"
+label = "RCS"
+tier = "A"
+prefilter = ["r.c.s", "r. c. s", "rcs", "registre de commerce"]
+pattern = '''(?:R\.?\s?C\.?\s?S\.?|[Rr]egistre\s{1,3}de\s{1,3}[Cc]ommerce\s{1,3}et\s{1,3}des\s{1,3}[Ss]oci[ée]t[ée]s)(?:\s{1,3}(?:de\s{1,3})?Luxembourg)?[\s,:]{0,4}(?:sous\s{1,3}le\s{1,3})?(?:(?:[Nn][°º]|[Nn]o\.?|[Nn]um[ée]ro)\s{0,3}:?\s{0,3})?(?:[Ss]ection\s{1,3})?(?P<v>A{S}[0-9]{1,3}(?:[ .]?[0-9]{3})?)(?![^\W_])(?![ .]?[0-9]{3}(?![0-9]))'''
+group = "v"
+validator = "lu.rcs"
+boundary = "alnum"
+
+# --- Entreprises (masquées si personne physique ou profil strict) / companies (masked for sole traders) ---
+
+[[recognizer]]
+id = "LU_RCS"
+entity = "COMPANY_ID"
+label = "RCS"
+tier = "A"
+policy = "company"
+prefilter = ["r.c.s", "r. c. s", "rcs", "registre de commerce"]
+pattern = '''(?:R\.?\s?C\.?\s?S\.?|[Rr]egistre\s{1,3}de\s{1,3}[Cc]ommerce\s{1,3}et\s{1,3}des\s{1,3}[Ss]oci[ée]t[ée]s)(?:\s{1,3}(?:de\s{1,3})?Luxembourg)?[\s,:]{0,4}(?:sous\s{1,3}le\s{1,3})?(?:(?:[Nn][°º]|[Nn]o\.?|[Nn]um[ée]ro)\s{0,3}:?\s{0,3})?(?:[Ss]ection\s{1,3})?(?P<v>[B-O]{S}[0-9]{1,3}(?:[ .]?[0-9]{3})?)(?![^\W_])(?![ .]?[0-9]{3}(?![0-9]))'''
+group = "v"
+validator = "lu.rcs"
+boundary = "alnum"
+
+[[recognizer]]
+id = "LU_TVA"
+entity = "VAT"
+label = "VAT"
+tier = "A"
+policy = "company"
+prefilter = "digit"
+pattern = 'LU{S}(?:[0-9]{S}){7}[0-9](?![^\W_])'
+flags = "i"
+validator = "lu.tva"
+boundary = "alnum"

@@ -1,0 +1,5 @@
+# Gardien RGPD · GDPR Guardian : dossier en mémoire du socket d'usage, /etc/tmpfiles.d/gdprguardian-site.conf.
+# Le démon du site y crée usage.sock (0660, groupe gdprguardian = 10001) ; le conteneur du service (10001:10001)
+# y envoie ses comptes. In-memory folder of the usage socket: the site daemon creates usage.sock there, the service
+# container (10001:10001) sends its counts to it.
+d /run/gdprguardian-stats 0750 gdprguardian-site gdprguardian -

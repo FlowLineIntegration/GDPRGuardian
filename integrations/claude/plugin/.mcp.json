@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "gdprguardian": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "--from",
+        "gdprguardian[local]==1.0.0",
+        "gdprguardian",
+        "mcp",
+        "--stdio",
+        "--allow-dir",
+        "${user_config.allowed_dir}"
+      ]
+    }
+  }
+}

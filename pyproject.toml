@@ -1,0 +1,113 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "gdprguardian"
+# Version de référence de toute la publication : `python tools/release.py set X.Y.Z` la recopie partout
+# (noyau Rust, paquet MCP, server.json, plugin, bundle) et `check` refuse tout écart.
+# The release's reference version: `tools/release.py set X.Y.Z` copies it everywhere, `check` refuses any drift.
+version = "1.0.0"
+description = "Gardien RGPD : anonymisation irréversible des documents avant l'IA / GDPR Guardian: irreversible anonymisation before AI"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+authors = [{ name = "Guillaume CLEMENT - Flow Line Intégration" }]
+keywords = ["gdpr", "rgpd", "pii", "pseudonymization", "anonymization", "mcp", "llm"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Operating System :: OS Independent",
+    "Topic :: Security",
+    "Topic :: Text Processing",
+]
+dependencies = [
+    "ahocorasick-rs>=0.22",
+    # Noyau Rust de la même version là où la publication fournit une roue abi3 : Windows x64, macOS Intel et
+    # Apple Silicon, Linux x86_64 et aarch64 (glibc et musl). Ailleurs, le moteur Python, aux résultats identiques.
+    # Same-version Rust core where the release ships an abi3 wheel; elsewhere the Python engine, same results.
+    # `==` seulement : `in` teste une sous-chaîne / `==` only: `in` is a substring test. Windows x64 : « AMD64 »
+    # pour CPython, « x86_64 » pour la résolution croisée d'uv (--python-platform) / "x86_64" for uv cross-resolution.
+    "gdprguardian-core==1.0.0; platform_python_implementation == 'CPython' and ((sys_platform == 'win32' and (platform_machine == 'AMD64' or platform_machine == 'x86_64')) or (sys_platform == 'darwin' and (platform_machine == 'x86_64' or platform_machine == 'arm64')) or (sys_platform == 'linux' and (platform_machine == 'x86_64' or platform_machine == 'aarch64')))",
+]
+
+[project.optional-dependencies]
+phone = ["phonenumberslite>=8.13"]
+office = [
+    "pypdfium2>=4.30",
+    "pypdf>=5.0",
+    "mammoth>=1.8",
+    "python-docx>=1.1",
+    "python-pptx>=1.0",
+    "markdownify>=0.13",
+    "beautifulsoup4>=4.12",
+    "python-calamine>=0.3",
+    "charset-normalizer>=3.3",
+    "defusedxml>=0.7",
+    "olefile>=0.47",
+    "python-oxmsg>=0.0.2",
+]
+ner = ["onnxruntime>=1.20", "tokenizers>=0.20", "numpy>=1.26"]
+api = ["fastapi>=0.115", "uvicorn>=0.30", "python-multipart>=0.0.18"]   # 0.0.18 : CVE-2024-53981
+mcp = ["fastmcp>=4.1,<5"]
+proxy = ["httpx>=0.27", "fastapi>=0.115", "uvicorn>=0.30"]
+# Poste local : serveur MCP stdio, convertisseurs et téléphones ; rien d'autre (ni API ni NER).
+# Local workstation: stdio MCP server, converters and phones; nothing else (no API, no NER).
+local = ["gdprguardian[mcp,office,phone]"]
+all = ["gdprguardian[phone,office,ner,api,mcp,proxy]"]
+
+[project.scripts]
+gdprguardian = "gdprguardian.cli:main"
+
+[project.urls]
+# FlowLineIntegration : remplacé par `python tools/release.py set-owner <compte>` / replaced by set-owner.
+Homepage = "https://github.com/FlowLineIntegration/GDPRGuardian"
+Source = "https://github.com/FlowLineIntegration/GDPRGuardian"
+Issues = "https://github.com/FlowLineIntegration/GDPRGuardian/issues"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "hypothesis>=6.100",
+    "faker>=30.0",
+    "ruff>=0.6",
+    "openpyxl>=3.1",
+    "xlsxwriter>=3.2",
+    "pip-licenses>=5.0",
+    "python-stdnum>=2.2",
+]
+
+# Développement avec uv : le noyau est construit depuis rust/ (même arbre, même contrat), jamais pris sur PyPI.
+# Absent des métadonnées publiées. Development with uv: the core is built from rust/ (same tree, same contract),
+# never taken from PyPI. Not part of the published metadata.
+[tool.uv.sources]
+gdprguardian-core = { path = "rust" }
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/gdprguardian"]
+exclude = ["__pycache__", "*.py[cod]"]
+
+# Archive source minimale : le paquet Python seul (le noyau a la sienne, construite par maturin).
+# Minimal source archive: the Python package only (the core has its own, built by maturin).
+[tool.hatch.build.targets.sdist]
+include = ["/src/gdprguardian", "/README.md", "/LICENSE"]
+exclude = ["__pycache__", "*.py[cod]"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = [
+    "slow: tests lents / slow tests",
+    "ner: nécessite un modèle NER téléchargé / requires a downloaded NER model",
+    "network: nécessite le réseau / requires network access",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "PERF", "RUF"]
+ignore = ["RUF001", "RUF002", "RUF003"]

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gardien RGPD (jeu d'essai du démon)</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/site.css">
+<script src="/assets/js/live.js" defer></script>
+</head>
+<body>
+<main>
+<h1>Gardien RGPD</h1>
+<p>Jeu d'essai du démon : la vraie page est dans site/templates.</p>
+<dl>
+<dt>Usages sur l'heure écoulée</dt><dd data-live="uses_hour">{{live.uses_hour}}</dd>
+<dt>Dont essais du protocole, sur l'heure</dt><dd data-live="uses_hour_protocol">{{live.uses_hour_protocol}}</dd>
+<dt>Volume sur l'heure</dt><dd data-live="bytes_hour">{{live.bytes_hour}}</dd>
+<dt>Documents depuis le lancement</dt><dd data-live="docs_total">{{live.docs_total}}</dd>
+<dt>Dont essais du protocole public</dt><dd data-live="docs_protocol">{{live.docs_protocol}}</dd>
+<dt>Volume depuis le lancement</dt><dd data-live="bytes_total">{{live.bytes_total}}</dd>
+<dt>Visiteurs depuis le lancement</dt><dd data-live="visitors_total">{{live.visitors_total}}</dd>
+<dt>Visiteurs aujourd'hui</dt><dd data-live="visitors_today">{{live.visitors_today}}</dd>
+<dt>Processeur</dt><dd><span data-live="cpu_percent">{{live.cpu_percent}}</span> %</dd>
+<dt>Mémoire</dt><dd><span data-live="ram_used">{{live.ram_used}}</span> / <span data-live="ram_total">{{live.ram_total}}</span> (<span data-live="ram_percent">{{live.ram_percent}}</span> %)</dd>
+<dt>En ligne depuis le</dt><dd>{{live.since}}</dd>
+</dl>
+<p>{{q.tests_linux}} tests, {{q.ms_per_doc}} ms par document de 2 Ko, mesuré le {{q.measured_on}}.</p>
+<p><a href="https://gdprguardian.com/" hreflang="en" lang="en">English</a></p>
+</main>
+</body>
+</html>

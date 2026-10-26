@@ -1,0 +1,46 @@
+#!/bin/sh
+# Gardien RGPD · GDPR Guardian : sonde de santé côté hôte, /usr/local/sbin/gdprguardian-watchdog, lancée toutes les
+# 2 minutes par gdprguardian-watchdog.timer. Host-side health probe, run every 2 minutes by the timer.
+#
+# Interroge /health/deep par le socket Unix du service : un travail minuscule dans un vrai travailleur, hors file et
+# hors compteur d'usage (zygote, travailleurs, moteur ; /health seul ne teste que la boucle d'événements). Sans
+# en-tête d'adresse et avec le jeton local (X-GG-Local, fichier réservé à root) : requête du serveur lui-même, hors
+# des limites par client. Trois échecs de suite sur un conteneur en marche depuis plus de 3 minutes : redémarrage. Un
+# conteneur arrêté volontairement n'est jamais relancé. Rien n'est lancé dans le conteneur.
+# Queries /health/deep through the service's Unix socket: a tiny job in a real worker, outside the queue and the
+# usage counter (zygote, workers, engine; /health alone only tests the event loop). No address header and the local
+# token (root-only file): a request from the server itself, outside the per-client limits. Three failures in a row on
+# a container up for more than 3 minutes: restart. A container stopped on purpose is never started again. Nothing is
+# run inside the container.
+set -u
+container=gdprguardian-gdprguardian-1
+socket=/run/gdprguardian/app.sock
+# Le jeton est lu par curl dans le fichier, jamais passé en argument (visible de tous dans /proc).
+# curl reads the token from the file, never as an argument (readable by anyone in /proc).
+header=/etc/gdprguardian/local-header
+grace=180
+
+running=$(docker inspect -f '{{.State.Running}}' "$container" 2>/dev/null) || exit 0
+[ "$running" = true ] || exit 0
+started=$(docker inspect -f '{{.State.StartedAt}}' "$container" 2>/dev/null) || exit 0
+started_s=$(date -d "$started" +%s 2>/dev/null) || exit 0
+[ $(( $(date +%s) - started_s )) -ge "$grace" ] || exit 0
+
+probe() {
+  if [ -r "$header" ]; then
+    curl -fsS -o /dev/null --max-time 30 --unix-socket "$socket" -H "@$header" http://localhost/health/deep 2>/dev/null
+  else
+    curl -fsS -o /dev/null --max-time 30 --unix-socket "$socket" http://localhost/health/deep 2>/dev/null
+  fi
+}
+
+attempt=1
+while [ "$attempt" -le 3 ]; do
+  if probe; then
+    exit 0
+  fi
+  [ "$attempt" -lt 3 ] && sleep 10
+  attempt=$((attempt + 1))
+done
+logger -t gdprguardian-watchdog "service sans réponse : redémarrage du conteneur / service unresponsive: restarting the container"
+docker restart -t 15 "$container" >/dev/null

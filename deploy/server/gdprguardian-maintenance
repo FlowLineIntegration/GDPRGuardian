@@ -1,0 +1,56 @@
+#!/bin/sh
+# Gardien RGPD · GDPR Guardian : maintenance planifiée, /usr/local/sbin/gdprguardian-maintenance.
+#   upgrade   samedi 2 h : sécurité + correctifs stables (unattended-upgrade, redémarrage aussitôt s'il le faut)
+#   reboot    lundi 2 h : redémarrage, une fois toute mise à jour en cours terminée
+# Scheduled maintenance: "upgrade" (Saturday, security + stable updates, reboot right after when required) and
+# "reboot" (Monday, once any running update is over).
+set -eu
+
+# Une mise à jour est-elle en cours ? Les unités d'apt données en argument (is-active réussit si l'une est active),
+# le script unattended-upgrade, dpkg ou apt-get. Le script est reconnu à son chemin complet : le démon permanent
+# unattended-upgrade-shutdown porte le même nom tronqué (« unattended-upgr »).
+# Is an update running? The apt units given as arguments, the unattended-upgrade script, dpkg or apt-get. The script
+# is matched on its full path: the always-running unattended-upgrade-shutdown daemon has the same truncated name.
+apt_busy() {
+  systemctl is-active -q "$@" \
+    || pgrep -f 'bin/unattended-upgrade( |$)' >/dev/null 2>&1 \
+    || pgrep -x dpkg >/dev/null 2>&1 || pgrep -x apt-get >/dev/null 2>&1
+}
+
+# Attend la fin des passages d'apt en cours (1 h au plus) : jamais de redémarrage au milieu de dpkg.
+# Waits for running apt jobs (1 h at most): never a reboot in the middle of dpkg.
+wait_for_apt() {
+  i=0
+  while apt_busy "$@"; do
+    i=$((i + 1))
+    [ "$i" -le 360 ] || { echo "apt toujours occupé après 1 h / apt still busy after 1 h" >&2; return 1; }
+    sleep 10
+  done
+}
+
+case "${1:-}" in
+  upgrade)
+    wait_for_apt apt-daily.service apt-daily-upgrade.service
+    apt-get -q update -o DPkg::Lock::Timeout=1800
+    # Origines de chaque nuit plus -updates (apt-weekly.conf) ; Automatic-Reboot-Time "now" redémarre aussitôt
+    # si un paquet l'exige. Nightly origins plus -updates; reboots right away when a package requires it.
+    APT_CONFIG=/etc/gdprguardian/apt-weekly.conf unattended-upgrade -v
+    ;;
+  reboot)
+    wait_for_apt apt-daily.service apt-daily-upgrade.service gdprguardian-weekly-upgrade.service
+    echo "redémarrage hebdomadaire / weekly reboot"
+    systemctl reboot
+    ;;
+  check)
+    # Pour verify : la détection ne voit rien quand rien ne tourne / for verify: idle means not busy.
+    if apt_busy apt-daily.service apt-daily-upgrade.service gdprguardian-weekly-upgrade.service; then
+      echo "occupé / busy"
+    else
+      echo "libre / idle"
+    fi
+    ;;
+  *)
+    echo "usage: gdprguardian-maintenance upgrade|reboot|check" >&2
+    exit 2
+    ;;
+esac

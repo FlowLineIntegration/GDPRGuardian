@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GDPR Guardian · anonymise before the AI, keep the meaning</title>
+<meta name="description" content="A workspace for irreversible anonymisation: drop your documents, take them back anonymised before you hand them to an AI, with the logic of the text intact. Free, no key, no cookie; MIT licence, open code on GitHub.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="GDPR Guardian · remove the names, keep the meaning">
+<meta property="og:description" content="Irreversible anonymisation of documents before they reach an AI, open to everyone, no key. MIT licence.">
+<meta property="og:url" content="https://gdprguardian.com/">
+<meta property="og:locale" content="en_GB">
+<link rel="canonical" href="https://gdprguardian.com/">
+<link rel="alternate" hreflang="en" href="https://gdprguardian.com/">
+<link rel="alternate" hreflang="fr" href="https://gardienrgpd.fr/">
+<link rel="alternate" hreflang="x-default" href="https://gdprguardian.com/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/gr-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/gr-mono.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/live.js" defer></script>
+<script src="/assets/cockpit.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#ck-t">Skip to the input</a>
+<div class="app" id="workspace">
+<header class="bar">
+<h1 class="brand"><a href="#workspace"><svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path class="mk" d="M7 4H4v16h3M17 4h3v16h-3"/><rect class="mb" x="7.5" y="10" width="9" height="4"/></svg>GDPR Guardian</a><span><span class="vh">, </span>irreversible anonymisation before the AI</span></h1>
+<a class="keep" href="#privacy"><i aria-hidden="true"></i><span>No document kept<span>, neither here nor on the server</span></span></a>
+<nav class="more" aria-label="Learn more"><a href="#video">Video</a><a href="#challenge">The challenge</a><a href="#story">The story</a><a href="#architecture">Architecture</a><a href="#protocol">Protocol and scores</a><a href="#use">Use it</a><a href="#call">Open call</a><a href="#thanks">Thanks</a></nav>
+<a class="lang" href="https://gardienrgpd.fr" hreflang="fr" lang="fr">FR</a>
+</header>
+<main class="ws" id="main">
+<div class="col cin">
+<form class="in" id="ck" aria-labelledby="t-in" novalidate>
+<div class="hd"><h2 id="t-in">Input</h2><button type="button" class="lk" data-ex="Mr Jean Dupont (jean.dupont@example.com, 06 12 34 56 78), NIR 1 85 05 78 006 084 91, IBAN FR76 3000 6000 0112 3456 7890 189. Mr Dupont will call Ms Claire Martin back. DUPONT Jean will pay invoice no. 2026-0042 for EUR 1,234.56.">Example</button></div>
+<label class="vh" for="ck-t">Text to anonymise</label>
+<textarea id="ck-t" name="text" spellcheck="false" autocomplete="off" placeholder="Paste or type a text. Documents? Drop them anywhere on the page, several at once."></textarea>
+<fieldset class="opts"><legend class="vh">Settings</legend>
+<label class="sel"><span>Country</span><select name="countries"><option value="FR" selected>France</option><option value="FR,BE">France + Belgium</option><option value="FR,CH">France + Switzerland</option><option value="FR,DE">France + Germany</option><option value="FR,ES">France + Spain</option><option value="FR,IT">France + Italy</option><option value="FR,LU">France + Luxembourg</option><option value="FR,MC">France + Monaco</option><option value="FR,NL">France + Netherlands</option><option value="FR,PT">France + Portugal</option><option value="all">All countries</option></select></label>
+<fieldset class="seg"><legend>Profile</legend><label><input type="radio" name="profile" value="standard" checked><span>standard</span></label><label><input type="radio" name="profile" value="strict"><span>strict</span></label></fieldset>
+<label class="chk"><input type="checkbox" name="explain" checked><span>Explanations</span></label>
+</fieldset>
+<p class="hint" data-r="hint" hidden>Outside France, only the country’s identifiers are verified: names go through the French lexicons (on real texts, 23 to 41% of names found in legal documents, 95% in Spanish clinical cases).</p>
+<p class="hint">Strict: masks more, with more false positives.</p>
+<div class="go"><button class="btn" type="submit" data-r="go" disabled>Anonymise</button><input class="vh" type="file" id="ck-f" multiple accept=".pdf,.docx,.docm,.dotx,.dotm,.xlsx,.xlsm,.xlsb,.xls,.pptx,.pptm,.ppsx,.potx,.odt,.ott,.fodt,.ods,.odp,.otp,.fodp,.odg,.rtf,.eml,.mht,.mhtml,.msg,.html,.htm,.xhtml,.csv,.tsv,.txt,.text,.md,.markdown"><label class="btn2" for="ck-f">Add documents</label></div>
+<p class="keys" data-r="keys">Ctrl + Enter anonymise · Ctrl + Shift + C copy · Ctrl + S download · Esc clear the input</p>
+<p class="fmts">PDF, Word, Excel, PowerPoint, OpenDocument, RTF, e-mail, HTML, CSV, text · 50&nbsp;MB per document · only the file name’s extension travels with the file</p>
+<p class="fmts">Sent encrypted to our server in France, processed in memory, nothing of it remains after the response; we are still a third party, with no processing agreement. To send nothing: the <a href="#use">local version</a>.</p>
+<p class="st" data-r="st" role="status"></p>
+<noscript><p class="nojs">The workspace needs JavaScript. Without it: the API or the MCP server, see <a href="#use">Use it</a>.</p></noscript>
+</form>
+<section class="qu" aria-labelledby="t-q">
+<div class="hd"><h2 id="t-q">Session queue <span class="n0" data-r="qn"></span></h2><div class="acts"><button type="button" class="lk" data-r="zip" disabled>Download all (.zip)</button><button type="button" class="lk" data-r="clear">Clear everything</button><button type="button" class="lk" data-r="stop" disabled>Cancel the upload</button></div></div>
+<p class="sep">Each document is anonymised separately: [PERSON_1] in one document is not necessarily [PERSON_1] in another.</p>
+<div class="hold" data-r="hold" hidden><p></p><button type="button" class="btn2 sm" data-r="resume">Resume</button></div>
+<ol class="ql" data-r="ql" aria-label="Documents of the session"></ol>
+<p class="qe" data-r="qe">Empty. Documents go one at a time, in order; nothing remains once the tab is closed.</p>
+</section>
+</div>
+
+<section class="col cout" aria-labelledby="t-out">
+<div class="hd"><h2 id="t-out">Result</h2><p class="what" data-r="what"></p><div class="acts"><button type="button" class="lk" data-r="redo" hidden>Run again</button><button type="button" class="lk" data-r="orig" hidden>Edit the text</button><button type="button" class="lk" data-r="rm" hidden>Remove</button><button type="button" class="lk" data-r="copy" disabled>Copy</button><button type="button" class="btn2 sm" data-r="dl" disabled>Download the .md</button></div></div>
+<div class="ban" data-r="ban" hidden><p><b></b> <span></span></p><code></code></div>
+<div class="res" data-r="res" tabindex="0" role="region" aria-label="Anonymised text">
+<div class="empty"><label class="drop" for="ck-f"><b>Drop your documents here</b>or anywhere on the page, several at once; or click to choose them. Each one becomes a row of the queue.</label><div class="demo"><p>The anonymised text shows here, with consistent placeholders:</p><p class="s1"><mark class="p1">[PERSON_1]</mark> annoys <mark class="p2">[PERSON_2]</mark>. <mark class="p2">[PERSON_2]</mark> hits <mark class="p1">[PERSON_1]</mark>.</p><p>The roles survive, the identities do not. <a href="#story">The story</a></p></div></div>
+</div>
+<div class="rep" data-r="rep" hidden>
+<p class="insp" data-r="insp"></p>
+<p class="ledger" data-r="ledger"></p>
+<div class="xw" data-r="xpl" hidden tabindex="0" role="region" aria-label="Explanations"><table class="xp"><thead><tr><th scope="col">Placeholder</th><th scope="col">Rule</th><th scope="col">Reason</th><th scope="col">Count</th></tr></thead><tbody data-r="xrows"></tbody></table></div>
+<ul class="warn" data-r="warn" hidden></ul>
+<p class="notice" data-r="notice"></p>
+</div>
+</section>
+
+<aside class="col rail" aria-label="Instruments">
+<section class="g gs" aria-labelledby="t-ses"><h2 id="t-ses">Your session</h2>
+<dl class="tl">
+<div class="t"><dt>Documents</dt><dd class="v" data-s="docs">0</dd><dd class="u" data-s="docs2">nothing queued</dd></div>
+<div class="t"><dt>Mentions masked</dt><dd class="v" data-s="men">0</dd><dd class="u" data-s="men2">no placeholder</dd></div>
+<div class="t"><dt>Volume sent</dt><dd class="v" data-s="vol">0 B</dd><dd class="u">none of it is kept</dd></div>
+<div class="t"><dt>Time</dt><dd class="v" data-s="time">0 s</dd><dd class="u" data-s="time2">round trips added up</dd></div>
+</dl></section>
+<section class="g gc q" data-v="{{q.confidence_index}}" aria-labelledby="t-ci"><h2 id="t-ci">Confidence index</h2>
+<div class="t ci"><p class="ci-v"><span class="n">{{q.confidence_index}}<small>%</small></span><span class="pd">not measured yet</span></p>
+<p class="ci-ic n">95% CI: {{q.confidence_ci_low}}–{{q.confidence_ci_high}}%</p>
+<p class="ci-d">Share of documents returned with no direct identifier left readable.<span class="pd"> First run: not started yet.</span></p>
+<a class="ci-a" href="#protocol">The protocol</a></div></section>
+<section class="g gm" aria-labelledby="t-m"><div class="gh"><h2 id="t-m">Today’s measurements</h2><p class="live-st">{{q.measured_on}}</p></div>
+<table class="sheet mt"><tbody>
+<tr class="rl"><th scope="row">Real French texts, 6 annotated corpora: documents keeping a mention readable</th><td>30–97%</td></tr>
+<tr><th scope="row">Synthetic corpus, {{q.eval_docs}} documents: documents keeping a direct identifier readable</th><td>{{q.docs_leak_direct_pct}}%</td></tr>
+<tr><th scope="row">Same measure, structured identifiers only</th><td>{{q.docs_leak_structured_pct}}%</td></tr>
+<tr><th scope="row">Recall, direct identifiers, names and addresses included</th><td>{{q.recall_direct_pct}}%</td></tr>
+<tr><th scope="row">Recall · precision, structured identifiers</th><td>{{q.recall_structured_pct}}% · {{q.precision_structured_pct}}%</td></tr>
+</tbody></table>
+<p class="note">Per corpus, method and limits: <a href="#protocol">Protocol and scores</a>.</p>
+</section>
+<section class="g gl" aria-labelledby="t-live" data-live-root>
+<div class="gh"><h2 id="t-live"><i class="dot" aria-hidden="true"></i>Live service</h2><p class="live-st" data-live-status data-on="every 2 s" data-off="stream cut, retrying…">snapshot at page load</p></div>
+<dl class="tl">
+<div class="t w"><dt>Last hour</dt><dd class="v" data-live="uses_hour">{{live.uses_hour}}</dd><dd class="u">documents, protocol runs among them: <span data-live="uses_hour_protocol">{{live.uses_hour_protocol}}</span> · <span data-live="bytes_hour">{{live.bytes_hour}}</span></dd></div>
+<div class="t w"><dt>Since launch</dt><dd class="v" data-live="docs_total">{{live.docs_total}}</dd><dd class="u">protocol runs among them: <span data-live="docs_protocol">{{live.docs_protocol}}</span> · <span data-live="bytes_total">{{live.bytes_total}}</span> since {{live.since}}</dd></div>
+<div class="t"><dt>Visitors, approx.</dt><dd class="v" data-live="visitors_total">{{live.visitors_total}}</dd><dd class="u"><span data-live="visitors_today">{{live.visitors_today}}</span> today</dd></div>
+<div class="t"><dt>CPU</dt><dd class="v"><span data-live="cpu_percent">{{live.cpu_percent}}</span><small>%</small></dd><dd class="u">all cores, 2 s<span class="meter" data-meter="cpu_percent" aria-hidden="true"><i></i></span></dd></div>
+<div class="t"><dt>Memory</dt><dd class="v"><span data-live="ram_percent">{{live.ram_percent}}</span><small>%</small></dd><dd class="u"><span data-live="ram_used">{{live.ram_used}}</span> of <span data-live="ram_total">{{live.ram_total}}</span><span class="meter" data-meter="ram_percent" aria-hidden="true"><i></i></span></dd></div>
+<div class="t"><dt>Your request</dt><dd class="v"><span data-r="lat">—</span><small data-r="latu"></small></dd><dd class="u" data-r="lats">none yet, measured here</dd></div>
+</dl>
+<p class="vh" aria-live="polite" data-live-say data-tpl="{u} documents processed in the last hour, {v} visitors in total."></p>
+<p class="note">Production server, real figures. Never the content, the file name or the IP address.</p>
+</section>
+</aside>
+
+<section class="pn" id="video" aria-labelledby="h-vi"><div class="ph"><p>Video</p><a class="x" href="#workspace">Close</a></div>
+<h2 id="h-vi" tabindex="-1">The launch video</h2>
+<video class="vid" controls preload="none" playsinline poster="/media/gdpr-guardian-launch-en-poster.png?v=c4ea8640" src="/media/gdpr-guardian-launch-en.mp4?v=3e09ba5f" aria-labelledby="h-vi"></video>
+<p>Silent video: all its text is in the <a href="/media/gdpr-guardian-launch-en-transcript.txt?v=d817085f" target="_blank" rel="noopener">transcript</a>. Short 4:5 cut for social feeds: <a href="/media/gdpr-guardian-launch-en-social.mp4?v=b3edfe56" download>MP4, 4.5 MB</a>.</p>
+<p class="fine">The confidence index in the video is the one measured on the day it was rendered; the current figure: <a href="#protocol">Protocol and scores</a>.</p>
+</section>
+
+<section class="pn" id="challenge" aria-labelledby="h-defi"><div class="ph"><p>The challenge</p><a class="x" href="#workspace">Close</a></div>
+<h2 id="h-defi" tabindex="-1">Every day, real documents end up in AI assistants</h2>
+<p class="lead">Contracts, HR files, medical reports, bank statements: they are pasted into AI assistants to be summarised, translated or analysed.</p>
+<p>Usually in good faith, and without knowing the rules. Personal data then lands with a third party, often with no legal basis or processing agreement, sometimes outside the European Union: exactly what the GDPR regulates. Once sent, it does not come back.</p>
+<p>The challenge comes down to three demands that pull against each other: <b>keep the logic</b> of the text, so the AI stays useful; make any <b>way back impossible</b>; stay <b>fast and frugal</b> enough never to be bypassed. Hence a workspace, not a page: drop, take back, move on, all day long.</p>
+</section>
+
+<section class="pn" id="story" aria-labelledby="h-st"><div class="ph"><p>The story</p><a class="x" href="#workspace">Close</a></div>
+<h2 id="h-st" tabindex="-1">Guillaume annoys Nadège</h2>
+<p class="lead">Hiding the names is not enough: the AI must still understand who does what.</p>
+<div class="spec">
+<p class="lab">Original</p><p class="txt"><mark class="p1">Guillaume</mark> annoys <mark class="p2">Nadège</mark>. <mark class="p2">Nadège</mark> hits <mark class="p1">Guillaume</mark>.</p>
+<p class="lab">Naive masking</p><p class="txt"><mark class="p0">[NAME]</mark> annoys <mark class="p0">[NAME]</mark>. <mark class="p0">[NAME]</mark> hits <mark class="p0">[NAME]</mark>. <span class="why">Who hit whom? An AI can only guess.</span></p>
+<p class="lab">GDPR Guardian</p><p class="txt"><mark class="p1">[PERSON_1]</mark> annoys <mark class="p2">[PERSON_2]</mark>. <mark class="p2">[PERSON_2]</mark> hits <mark class="p1">[PERSON_1]</mark>. <span class="why">The roles survive, the identities do not.</span></p>
+</div>
+<p>On the workspace’s example, version 1.0.0 turns “Jean Dupont”, “Mr Dupont” and “DUPONT Jean” into one placeholder, <code>[PERSON_1]</code>; “Ms Claire Martin” becomes <code>Ms [PERSON_2]</code>. The title stays, as it helps to follow the text. The invoice number and the amount stay too: they are not personal data.</p>
+<p>Not always, though: of the 2,463 people in the synthetic corpus, 92.1% get a single placeholder; 194 are split across several and 44 share another person’s.</p>
+<p>Each document is anonymised separately, with its own key, destroyed afterwards: <code>[PERSON_1]</code> in one document is not necessarily the same person in another. Later, on the roadmap: processing a set of documents under one code, to keep the same placeholders from one document to the next, still with no way back (the set’s key destroyed at the end).</p>
+</section>
+
+<section class="pn" id="architecture" aria-labelledby="h-ar"><div class="ph"><p>Architecture</p><a class="x" href="#workspace">Close</a></div>
+<h2 id="h-ar" tabindex="-1">Online or on your machine: same software</h2>
+<p class="lead">Same package, same version: online to start without installing anything, on your own computer so that GDPR Guardian sends nothing. Open to everyone without a key, the service guards against abuse with a rate limiter that lives in memory only.</p>
+<div class="two">
+<div><h3>Online</h3>
+<ol class="flow">
+<li><b>Browser, AI agent, script</b>REST or MCP over HTTPS, no key; this workspace calls the same API.</li>
+<li><b>TLS 1.2/1.3 · nginx</b>OVH, in France: firewall, automatic updates, no core dumps, no access log.</li>
+<li><b>Unix socket</b>in a memory-backed folder: no port open between nginx and the service.</li>
+<li class="in"><b>Container with no network at all</b>read-only, no privileges.</li>
+<li class="in"><b>Front door and rate limiter</b>the IP address immediately becomes a keyed pseudonym (key renewed every 24 hours), held in memory, never written, forgotten after 10 idle minutes.</li>
+<li class="in hl"><b>A fresh process per request</b>isolated, memory capped, killed at its deadline; it cannot start anything.</li>
+<li class="in"><b>Result</b>in the response, the same way back, nowhere else. Agents’ deferred uploads: readable with a random 256-bit identifier given to the requester alone, deleted once read or after 10 minutes.</li>
+<li><b>Site daemon</b>a datagram without content (kind, format, size, duration, success, origin) feeds the live figures.</li>
+</ol></div>
+<div><h3>On your computer</h3>
+<ol class="flow">
+<li><b>Original document</b>in a folder you allowed; it does not move.</li>
+<li class="hl"><b>GDPR Guardian, local</b>same Rust engine, no connection during processing; fully local option: a Docker container with no network.</li>
+<li><b>AI client, over MCP stdio</b>Claude Code, Claude Desktop, Cowork, VS Code or Cursor: it passes the path and receives the anonymised Markdown.</li>
+<li><b>AI model</b>receives the anonymised text. GDPR Guardian sends nothing and asks the assistant never to open the original.</li>
+</ol>
+<h3>Irreversible by construction</h3>
+<ul class="list">
+<li><b>One key per document, then destroyed.</b> 256 random bits; mentions of one person are matched through keyed BLAKE2b digests, never through their value. The key is never written; online, it disappears with the request’s process.</li>
+<li><b>No mapping table.</b> Nothing ties a placeholder to a name, neither on your side nor on the server: nothing to steal, nothing to restore, not even for us.</li>
+<li><b>Explainable.</b> No LLM: every placeholder comes from a named rule (check digits, keyword, form label, your organisation’s own rule).</li>
+</ul></div>
+</div>
+<h3>One CPU core is enough</h3>
+<table class="sheet">
+<caption>{{q.ms_per_doc}} ms for a 2 KB document, on one core (median). First two rows: Ryzen 7 5800H, shared laptop, Windows 11, on {{q.measured_on}}; the others: Linux, earlier measurements, the service on 16 cores. A Rust core called from Python, with results identical to the reference engine (differential tests); no GPU.</caption>
+<tbody>
+<tr><th scope="row">Throughput per core, 2 KB documents, the cost of each call included</th><td>{{q.mb_per_s}} MB/s</td></tr>
+<tr><th scope="row">A 10 MB text, one core</th><td>{{q.text_10mb_s}} s</td></tr>
+<tr><th scope="row">Service, 2 KB text, median measured on the server, without the Internet trip</th><td>{{q.service_p50_ms}} ms</td></tr>
+<tr><th scope="row">Same test, 99% of requests under</th><td>{{q.service_p99_ms}} ms</td></tr>
+<tr><th scope="row">Internal benchmark, no rate limiter: 100 PDFs of 10 MB sent at once</th><td>{{q.pdf100_s}} s</td></tr>
+<tr><th scope="row">Service Docker image · Rust core</th><td>{{q.image_mb}} MB · {{q.core_mb}} MB</td></tr>
+</tbody>
+</table>
+</section>
+
+<section class="pn" id="protocol" aria-labelledby="h-pr"><div class="ph"><p>Protocol and scores</p><a class="x" href="#workspace">Close</a></div>
+<h2 id="h-pr" tabindex="-1">How we grade ourselves</h2>
+<p class="lead">An index is only worth something if anyone can recompute it. Its definition is fixed before the first measurement; the protocol will go through the real service and publish everything: corpora, commands, dated raw results, weaknesses included.</p>
+<div class="two">
+<dl class="defs">
+<dt>Confidence index</dt><dd>Share of documents in which no direct identifier stays readable: a single character of an annotated mention left visible, and the document counts as failed. Computed per corpus family, then averaged with equal weight; 95% interval by stratified resampling of documents (2,000 draws, fixed seed).</dd>
+<dt>French scope</dt><dd>Seven families: French synthetic (multi-seed generator, with decoys), red-team mutations, BODACC, BOAMP, ParlaMint-FR, old press (Europeana and HIPE NewsEye, one family), MAPA FR. Volume buys no weight: a million synthetic documents count as one family.</dd>
+<dt>Published separately, prominently</dt><dd>Other languages (MAPA DE, ES, IT, NL, PT; MEDDOCAN; German LER; English TAB) and the Judilibre negative control, for precision only.</dd>
+<dt>On the production server</dt><dd>Through its local socket, at low priority: without TLS, nginx or the rate limiter. Every run counts in the usage figures and shows apart in the instruments.</dd>
+</dl>
+<table class="sheet">
+<caption class="q" data-v="{{q.confidence_index}}"><span class="pd">First run: not started yet; each cell waits for its publication.</span><span class="n">Run of {{q.protocol_date}}, engine {{q.protocol_engine}}.</span></caption>
+<tbody>
+<tr><th scope="row">Confidence index</th><td class="q" data-v="{{q.confidence_index}}"><span class="n">{{q.confidence_index}}%</span><span class="pd">not measured yet</span></td></tr>
+<tr><th scope="row">95% interval</th><td class="q" data-v="{{q.confidence_ci_low}}"><span class="n">{{q.confidence_ci_low}}–{{q.confidence_ci_high}}%</span><span class="pd">not measured yet</span></td></tr>
+<tr><th scope="row">Direct mentions fully masked</th><td class="q" data-v="{{q.mention_recall_pct}}"><span class="n">{{q.mention_recall_pct}}%</span><span class="pd">not measured yet</span></td></tr>
+<tr><th scope="row">Documents assessed</th><td class="q" data-v="{{q.protocol_docs}}"><span class="n">{{q.protocol_docs}}</span><span class="pd">not measured yet</span></td></tr>
+<tr><th scope="row">Families</th><td class="q" data-v="{{q.protocol_families}}"><span class="n">{{q.protocol_families}}</span><span class="pd">not measured yet</span></td></tr>
+<tr><th scope="row">Real corpora · real annotated documents</th><td class="q" data-v="{{q.real_docs}}"><span class="n">{{q.real_corpora}} · {{q.real_docs}}</span><span class="pd">not measured yet</span></td></tr>
+</tbody>
+</table>
+</div>
+<h3>Real French texts, 25 October 2026</h3>
+<p class="meta">6 annotated public corpora, 6,660 documents; engine 1.0.0, country FR, standard profile. A mention counts as readable as soon as a single one of its characters stays visible.</p>
+<div class="figs f2">
+<div><p class="fig">30–97%</p><p>of documents keep at least one mention readable, depending on the corpus.</p></div>
+<div><p class="fig">35–93%</p><p>of mentions are fully masked, depending on the corpus.</p></div>
+</div>
+<div class="xs" tabindex="0" role="region" aria-labelledby="c-rc"><table class="sheet rc">
+<caption id="c-rc">Per corpus. Partial annotations for ParlaMint (in its favour), titles included in HIPE’s names (against it); MAPA has only 12 documents.</caption>
+<thead><tr><th scope="col">Corpus</th><th scope="col">Documents</th><th scope="col">Mentions masked</th><th scope="col">Documents with a mention readable</th></tr></thead>
+<tbody>
+<tr><th scope="row">ParlaMint-FR, French National Assembly debates</th><td>300</td><td>93.2%</td><td>30.1%</td></tr>
+<tr><th scope="row">BOAMP, French public procurement notices</th><td>3,000</td><td>84.5%</td><td>53.8%</td></tr>
+<tr><th scope="row">BODACC, French company notices</th><td>2,693</td><td>78.9%</td><td>92.6%</td></tr>
+<tr><th scope="row">Europeana, old digitised newspapers</th><td>515</td><td>71.4%</td><td>75.1%</td></tr>
+<tr><th scope="row">HIPE NewsEye, old digitised newspapers</th><td>140</td><td>45.6%</td><td>96.7%</td></tr>
+<tr><th scope="row">MAPA, EU legal texts in French</th><td>12</td><td>34.8%</td><td>88.9%</td></tr>
+<tr><th scope="row">Out of scope: TAB, ECHR judgments, in English</th><td>127</td><td>83.3%</td><td>37.8%</td></tr>
+</tbody>
+</table></div>
+<h3>Today’s measurements, synthetic corpus</h3>
+<p class="meta">{{q.eval_docs}} documents, {{q.eval_mentions}} annotated mentions, {{q.eval_decoys}} decoys, measured on {{q.measured_on}}. The best case: the real texts above do much worse.</p>
+<div class="figs">
+<div><p class="fig">{{q.docs_leak_direct_pct}}%</p><p>of documents keep at least one direct identifier readable, names and addresses included; structured ones only: {{q.docs_leak_structured_pct}}%.</p></div>
+<div><p class="fig">{{q.recall_direct_pct}}%</p><p>of the text to mask is masked, direct identifiers, names and addresses included.</p></div>
+<div><p class="fig">{{q.recall_structured_pct}}%</p><p>recall on structured identifiers: national IDs, IBANs, phones…</p></div>
+<div><p class="fig">{{q.precision_structured_pct}}%</p><p>precision on structured identifiers: share of the masked text that had to be masked; neutral text masked by mistake, all kinds: {{q.overmask_pct}}%.</p></div>
+</div>
+<div class="two">
+<div class="limits"><h3>Known limits, measured</h3>
+<ul>
+<li>The barrier lowers the risk, it does not remove it, and it does much worse on real texts (table above); in BODACC company notices, only 5% of the RCS numbers are masked.</li>
+<li>All these measurements are on text: the conversion of PDF, Word and Excel files is not measured, and a scanned page (an image, with no text) is dropped, with no character recognition.</li>
+<li>Through the API, a country chosen without France masks neither names nor addresses: 0% on real German, Spanish, Italian, Dutch and Portuguese texts; with France added, 22 to 50% of mentions (of names: 23 to 41% in legal documents, 95% in Spanish clinical cases).</li>
+<li>Capitalised common words pass for names (the French title word “Avenant” became a person placeholder): on court decisions, 32% of the masks drawn at random were mistakes.</li>
+<li>French bank details (RIB) written as separate fields are never recognised; a number broken by a tab or a line break almost always gets through (0% and 4.5% masked), and so does an <span class="nw">e-mail</span> written “&amp;#64;”, “%40”, “[dot]” or “(point)” (0%).</li>
+<li>27.3% of the company identifiers that get masked are masked by mistake.</li>
+<li>Context (job title, place, date, a rare event) can allow indirect re-identification: no automated detection prevents that.</li>
+</ul></div>
+<table class="sheet">
+<caption>What every release is tested on</caption>
+<tbody>
+<tr><th scope="row">Automated tests, Windows · Linux</th><td>{{q.tests_windows}} · {{q.tests_linux}}</td></tr>
+<tr><th scope="row">Tests in the offline image</th><td>{{q.tests_offline_image}}</td></tr>
+<tr><th scope="row">Rust and Python parity documents, identical outputs</th><td>{{q.parity_docs}}</td></tr>
+<tr><th scope="row">Red team: adversarial documents</th><td>{{q.redteam_docs}}</td></tr>
+<tr><th scope="row">Red team: ways of disguising an identifier</th><td>{{q.redteam_operators}}</td></tr>
+<tr><th scope="row">Documents processed by the day’s measurements</th><td>{{q.docs_tested}}</td></tr>
+</tbody>
+</table>
+</div>
+<p class="fine">The full protocol and the commands to replay everything are published in the <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian">public repository</a>.</p>
+</section>
+
+<section class="pn" id="use" aria-labelledby="h-us"><div class="ph"><p>Use it</p><a class="x" href="#workspace">Close</a></div>
+<h2 id="h-us" tabindex="-1">Beyond this page</h2>
+<p class="lead">The same service, free and without a key, from your AI assistant or your own programs; for very sensitive documents, on your own computer.</p>
+<div class="use">
+<div><h3>In Claude, over public MCP, no key</h3>
+<p>Address: <code>https://api.gdprguardian.com/mcp</code> (or <code>api.gardienrgpd.fr/mcp</code>). Claude Code:</p>
+<pre tabindex="0"><code>claude mcp add --transport http gdprguardian https://api.gdprguardian.com/mcp</code></pre>
+<p>claude.ai: add this address as a custom connector. For a file, <code>create_upload</code> gives a command that you run yourself on your computer: the file goes straight to the service, without passing through the model; <code>get_anonymized</code> then reads the result, deleted once read or, unread, after 10 minutes. A text already pasted into the chat has already left: <code>anonymize_text</code> cannot bring it back.</p></div>
+<div><h3>Through the REST API</h3>
+<pre tabindex="0"><code>curl https://api.gdprguardian.com/v1/anonymize/text \
+  -H 'Content-Type: application/json' \
+  -d '{"text": "Mr Jean Dupont, 06 12 34 56 78",
+       "label_language": "en", "explain": true}'
+
+curl https://api.gdprguardian.com/v1/anonymize/file \
+  -F file=@contract.pdf -F label_language=en -F profile=strict</code></pre>
+<p>Response: the anonymised text (or Markdown) and the report. Options: <code>countries</code> (FR by default, <code>FR,BE</code>, <code>all</code>), <code>profile</code>, <code>label_language</code>, <code>explain</code>.</p></div>
+<div><h3>On your computer</h3>
+<p>For very sensitive documents: the same software, as a local MCP server or in a container with no network; nothing leaves through GDPR Guardian. Installation: <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/docs/LOCAL.md">local version guide</a>; questions: <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>.</p>
+<h3>Limits of the public service</h3>
+<p>Per client: one request processed at a time and two waiting, about 20 seconds of compute in advance, refilled at 0.5 s per second. Your network (/24 in IPv4, /48 in IPv6) shares a budget twice as large and 12 requests in flight. Beyond that: a 429 and a delay to honour (<code>Retry-After</code>), which this workspace applies by itself while sending one document at a time; a saturated server (estimated wait over 10 s): 503; an upload too slow (15 s, plus 128 KiB per second of body): 408.</p>
+<p>Size: 50 MB per file, one million characters per text; per document, 12.5 million characters of result, 10,000 pages or slides, one million HTML tags (opening and closing), 100,000 Word paragraphs (table cells included). Very dense plain text, CSV or spreadsheets reach that ceiling before 50 MB (around 13 MB of text, 16 MB of CSV, 4 MB of spreadsheet): 413, naming the limit. An illustrated 50 MB document takes a few seconds; each may take 60 s plus 1 s per 250 KB (4 min 30 s at 50 MB).</p></div>
+</div>
+</section>
+
+<section class="pn" id="call" aria-labelledby="h-ap"><div class="ph"><p>Open call</p><a class="x" href="#workspace">Close</a></div>
+<h2 id="h-ap" tabindex="-1">To French public institutions</h2>
+<blockquote><p>“We, in the private sector, need a solution that is cheap to run and that we can trust completely.”</p><p class="by">Guillaume CLEMENT, Flow Line Intégration</p></blockquote>
+<p>AI use is not going away. A tool that protects data before it leaves should be a common good: audited, hosted and maintained over time, serving everyone, public bodies and companies alike. GDPR Guardian is ready to be taken over: MIT licence, open code, documented architecture, published measurements. A public institution could:</p>
+<ul class="list">
+<li>audit the code and the method;</li>
+<li>take over, host and run the service on public infrastructure;</li>
+<li>build the corpus of real, annotated documents that is missing today to measure the tool.</li>
+</ul>
+<p class="cta">To answer: <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>. No partnership exists to date: this is an open call.</p>
+</section>
+
+<section class="pn" id="thanks" aria-labelledby="h-me"><div class="ph"><p>Thanks</p><a class="x" href="#workspace">Close</a></div>
+<h2 id="h-me" tabindex="-1">A tool given away, free to take further</h2>
+<p class="lead">GDPR Guardian is offered to the world: anyone can use it, draw inspiration from it and build on it, with nothing imposed. We show our scores as they are, weaknesses included.</p>
+<p>Thanks to <a target="_blank" rel="noopener" href="https://www.flowlineintegration.com/">Flow Line Intégration</a>, which offers and hosts the online service free of charge. Created by <a target="_blank" rel="noopener" href="https://www.linkedin.com/in/guillaume-clement-erp-cloud/">Guillaume CLEMENT</a>, CTO Data &amp; AI. Interface design: Claude Design.</p>
+<p class="cta">A feature request, a performance problem, an identifier that gets through: <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/issues/new/choose">open an issue</a>. Describe the shape with made-up data only, never real data: “an IBAN broken by a line break”. Security vulnerability: <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/security/advisories/new">private report</a>.</p>
+</section>
+
+<section class="pn" id="legal" aria-labelledby="h-le"><div class="ph"><p>Legal notice</p><a class="x" href="#workspace">Close</a></div>
+<h2 id="h-le" tabindex="-1">Legal notice</h2>
+<p>Under French law (LCEN). Publisher: <a target="_blank" rel="noopener" href="https://www.flowlineintegration.com/">Flow Line Intégration</a>. Publication director: Guillaume CLEMENT, CTO Data &amp; AI. Contact: <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>.</p>
+<p>Host: OVH SAS, 2 rue Kellermann, 59100 Roubaix, France, phone 1007 (from France).</p>
+<p>GDPR Guardian 1.0.0, MIT licence, code in the <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian">public repository</a>. Software provided as is, without warranty. It is a first automated barrier, explainable and measured: neither a GDPR compliance certification nor legal advice; each controller remains responsible for its own compliance.</p>
+</section>
+
+<section class="pn" id="privacy" aria-labelledby="h-co"><div class="ph"><p>Privacy</p><a class="x" href="#workspace">Close</a></div>
+<h2 id="h-co" tabindex="-1">No document kept, neither here nor on the server</h2>
+<ul class="list">
+<li><b>Here.</b> No cookie, no browser storage (neither local nor session storage, nor IndexedDB), no tracker, no third-party resource. Your texts and results live only in this tab’s memory: “Clear everything” empties it, and so does closing the tab.</li>
+<li><b>On the server.</b> Each document is processed in memory in an isolated process, and nothing of it remains once the response has left; only the result comes back, to you alone. The file name does not travel: only its extension.</li>
+<li><b>We are still a third party.</b> You hand us the text, with no processing agreement. To send nothing: the <a href="#use">local version</a>.</li>
+<li><b>IP address</b>, in memory only, never written to disk, no access log. The web server keeps it as is (IPv4, or its /64 in IPv6) in its anti-abuse counters, which it recycles as traffic flows. The service replaces it at once with a keyed pseudonym, forgotten after 10 idle minutes (key renewed every 24 hours). To count visitors once a day: a keyed digest of the truncated address (/24, or /48 in IPv6) and of the browser’s user agent, key and digests forgotten every day.</li>
+<li><b>Usage statistics</b>: kind of operation, format, size, duration, success, origin; never the content, the file name or the IP address.</li>
+<li><b>Legal basis</b>: legitimate interest in providing, protecting and securing the service (GDPR, Art. 6(1)(f) and 32). Questions: <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>; complaints: the CNIL, France’s data protection authority.</li>
+</ul>
+</section>
+</main>
+<footer class="foot">
+<p>GDPR Guardian 1.0.0 · MIT licence<span>, open code on GitHub</span></p>
+<p>Offered by <a target="_blank" rel="noopener" href="https://www.flowlineintegration.com/">Flow Line Intégration</a> · <a target="_blank" rel="noopener" href="https://www.linkedin.com/in/guillaume-clement-erp-cloud/">Guillaume CLEMENT</a>, CTO Data &amp; AI · <span class="cd">Design: Claude Design</span></p>
+<p><a href="#legal">Legal notice</a><a href="#privacy">Privacy</a><a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/issues/new/choose">Report a problem</a></p>
+</footer>
+</div>
+<ul id="i18n" hidden>
+<li data-k="file">{n}-{k}-anonymised-{d}.md</li>
+<li data-k="zip">gdpr-guardian-{d}.zip</li>
+<li data-k="text">text</li>
+<li data-k="tname">Text {n}</li>
+<li data-k="add1">Added to the queue: {l}.</li>
+<li data-k="add">{n} documents added to the queue.</li>
+<li data-k="empty">Nothing to send: paste or type a text, or drop documents.</li>
+<li data-k="esc">Input cleared (Ctrl + Z brings it back).</li>
+<li data-k="cleared">Tab emptied: no text or result left in this page.</li>
+<li data-k="copied">Anonymised text copied.</li>
+<li data-k="nocopy">Copying failed: select the text by hand.</li>
+<li data-k="nores">No result to copy or download yet.</li>
+<li data-k="wait">waiting</li>
+<li data-k="run">running</li>
+<li data-k="up">uploading {p}%</li>
+<li data-k="retry">next try in {s}</li>
+<li data-k="retryIn">Next try in {s}.</li>
+<li data-k="stop">cancelled</li>
+<li data-k="men">{n} mentions</li>
+<li data-k="men1">{n} mention</li>
+<li data-k="tag">{n} placeholders</li>
+<li data-k="tag1">{n} placeholder</li>
+<li data-k="none">no identifier detected</li>
+<li data-k="sayDone">{l} done: {m}.</li>
+<li data-k="sayErr">{l} refused: {c}</li>
+<li data-k="before">Waiting: {n} ahead of this one.</li>
+<li data-k="busy">Anonymising…</li>
+<li data-k="retryLong">The service asks to wait; the queue resumes by itself.</li>
+<li data-k="hold503">Queue paused: the service is still saturated after three tries.</li>
+<li data-k="hold429">Queue paused: the limit of your address or network is still reached after three tries. Resume in a moment.</li>
+<li data-k="pasted">Text pasted into the input: Ctrl + Enter to anonymise it.</li>
+<li data-k="dropHint">Drop: each document is anonymised separately.</li>
+<li data-k="qd">{n} done</li>
+<li data-k="qd1">{n} done</li>
+<li data-k="qr">{n} refused</li>
+<li data-k="qr1">{n} refused</li>
+<li data-k="qw">{n} queued</li>
+<li data-k="qw1">{n} queued</li>
+<li data-k="fin">End of the queue: {s}.</li>
+<li data-k="addErr">{n} refused before sending, see the queue.</li>
+<li data-k="addErr1">{n} refused before sending, see the queue.</li>
+<li data-k="busyIn">The input already holds a text: send it or clear it first (Esc).</li>
+<li data-k="docs0">nothing queued</li>
+<li data-k="men2">{n} distinct placeholders</li>
+<li data-k="men21">{n} distinct placeholder</li>
+<li data-k="men20">no placeholder</li>
+<li data-k="time2">average {t}</li>
+<li data-k="sub">{k}, {s}</li>
+<li data-k="subErr">response {c}</li>
+<li data-k="pages">{n} pages</li>
+<li data-k="pages1">1 page</li>
+<li data-k="insp">Hover over or tap a placeholder: all its mentions light up.</li>
+<li data-k="dropped">Not carried over: {l}</li>
+<li data-k="kept">kept as is: {l}</li>
+<li data-k="e403">Request refused|The service only accepts uploads from this page: reload it from gdprguardian.com.</li>
+<li data-k="e408">Upload too slow|The document did not arrive in time (15 s, plus 128 KiB per second): try again on a better connection, or split the document.</li>
+<li data-k="e413">Too large|50 MB per document, one million characters per text, 12.5 million characters of result: split it.</li>
+<li data-k="e415">Unsupported format|Accepted formats: PDF, Word, Excel, PowerPoint, OpenDocument, RTF, e-mail (.eml, .msg), HTML, CSV, text and Markdown.</li>
+<li data-k="e422">Document refused</li>
+<li data-k="cut">Preview limited to the first {n} characters; the downloaded file is complete.</li>
+<li data-k="too_many_unread_results">Too many unread results for your network: read them or let them expire (10 minutes).</li>
+<li data-k="e501">Conversion unavailable|This format cannot be converted on the server for now.</li>
+<li data-k="e502">Service unavailable|The service is not answering: resume the queue in a moment.</li>
+<li data-k="eTime">Took too long|No answer in time: split the document.</li>
+<li data-k="eTimeS">Took too long|No answer in time: the service may be overloaded, try again in a moment.</li>
+<li data-k="eNet">Cannot connect|Check your connection, then resume the queue.</li>
+<li data-k="eGen">Service error|Try again in a moment.</li>
+<li data-k="encrypted_document">Encrypted or password-protected document: remove the protection, then try again.</li>
+<li data-k="malicious_document">Document rejected by the safety checks.</li>
+<li data-k="conversion_timeout">Conversion took too long: split the document.</li>
+<li data-k="processing_timeout">Processing took too long: split the text.</li>
+<li data-k="document_error">Unreadable or rejected document.</li>
+<li data-k="invalid_text">Invalid text: a lone character that cannot be encoded.</li>
+<li data-k="invalid_request">Request refused: check the text and the settings.</li>
+<li data-k="r">validated=check digits or official rules verified|validated_and_keyword=check digits verified, and a keyword present|keyword=known format near a keyword|format=structural format|keyword_despite_invalid_key=wrong check digits, but an explicit keyword|printed_layout=wrong check digits, but a typical printed layout|iban_layout_despite_invalid_key=IBAN with wrong check digits, written in blocks or near a keyword|phone_numbering_plan=numbering plan verified|name_lexicon=first or last name from the INSEE files, with a clue|postcode_and_town=postcode and town verified together|legal_form=legal form|matches_nir=birth date consistent with a NIR|propagation=another occurrence of a value already detected|custom_rule=organisation rule|deny_list=term imposed by the organisation|company_policy=organisation or company identifier, kept by policy|keep_rule=the organisation’s keep rule</li>
+<li data-k="d">attachments=attachments|comments=comments|metadata=metadata|scanned_pages=scanned pages|links=links|hidden_text=hidden text|hidden_content=hidden content|hidden_slides=hidden slides|speaker_notes=speaker notes|tracked_deletions=tracked deletions|email_headers=e-mail headers|embedded_objects=embedded objects</li>
+</ul>
+<div class="dz" data-r="dz" aria-hidden="true"><p></p></div>
+</body>
+</html>

@@ -1,0 +1,40 @@
+# Paquet du registre MCP : le registre ne sait pas demander un extra (`gdprguardian[local]`), ce paquet le fait.
+# MCP Registry package: the registry cannot ask for an extra (`gdprguardian[local]`), this package does.
+# Aucun code : une dépendance épinglée et une commande. No code: one pinned dependency and one command.
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "gdprguardian-mcp"
+version = "1.0.0"
+description = "Serveur MCP local de Gardien RGPD : anonymisation irréversible sur le poste, sans réseau / GDPR Guardian local MCP server"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+authors = [{ name = "Guillaume CLEMENT - Flow Line Intégration" }]
+keywords = ["mcp", "gdpr", "rgpd", "anonymization", "pseudonymization", "claude"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Operating System :: OS Independent",
+    "Topic :: Security",
+]
+# Même version, toujours : `tools/release.py set` réécrit les deux / always the same version.
+dependencies = ["gdprguardian[local]==1.0.0"]
+
+[project.scripts]
+gdprguardian-mcp = "gdprguardian.cli:mcp_main"
+
+[project.urls]
+Homepage = "https://github.com/FlowLineIntegration/GDPRGuardian"
+Source = "https://github.com/FlowLineIntegration/GDPRGuardian"
+
+# Roue de métadonnées seules : la commande vient du paquet gdprguardian / metadata-only wheel.
+[tool.hatch.build.targets.wheel]
+bypass-selection = true
+
+[tool.hatch.build.targets.sdist]
+include = ["/README.md", "/LICENSE"]

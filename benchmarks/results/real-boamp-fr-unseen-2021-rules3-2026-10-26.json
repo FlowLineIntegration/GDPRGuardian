@@ -1,0 +1,242 @@
+{
+  "corpus": "boamp_fr",
+  "title": "BOAMP, public procurement notices 2022-2023 (IDENTITE schema)",
+  "language": "fr",
+  "licence": "Licence Ouverte / Open Licence (Etalab), DILA",
+  "source": "https://www.data.gouv.fr/datasets/boamp",
+  "revision": "Opendatasoft API, publications of 2022-01..2023-12 (125 per month), fetched 2026-10-25",
+  "real_text": "yes (values and free text are real; 'Label : value' layout rendered by us)",
+  "gold": "exact by construction: e-mail, phone, fax and street address fields of every party block; contact person names extracted from the CONTACT/CORRESPONDANT fields by a rule (civility and role removed)",
+  "gold_complete": true,
+  "negative_control": false,
+  "measures": "recall of real e-mails, phone formats ('(+33) 1-23-45-67-89'), street addresses; contact names",
+  "cannot_measure": "contact details written only in free text (left out of precision); most e-mails and addresses belong to public bodies, not to private persons",
+  "build": {
+    "documents": 1500,
+    "mentions": 34419,
+    "chars": 9919139,
+    "source": "DILA BOAMP (API Opendatasoft), IDENTITE schema",
+    "licence": "Licence Ouverte / Open Licence",
+    "window": [
+      "2021-01",
+      "2021-12"
+    ],
+    "per_month": 125
+  },
+  "gold_labels": {
+    "ADDRESS": 6223,
+    "DATE": 7727,
+    "EMAIL": 3834,
+    "LOCATION": 2630,
+    "ORG": 8610,
+    "ORG_ID": 430,
+    "PERSON": 390,
+    "PHONE": 4575
+  },
+  "run": {
+    "date": "2026-10-26",
+    "countries": "FR",
+    "profile": "standard",
+    "engine": {
+      "package": "gdprguardian",
+      "version": "1.0.0",
+      "native_core": true,
+      "python": "3.12.11",
+      "platform": "Windows 11",
+      "machine": "AMD64"
+    },
+    "tag": "unseen-2021-rules3",
+    "review": null,
+    "split": "all",
+    "split_rule": null
+  },
+  "documents": 1500,
+  "evaluated": 1500,
+  "errors": {},
+  "chars": 9919139,
+  "seconds": 1.803,
+  "chars_per_second": 5502108,
+  "families": [
+    "PERSON",
+    "ADDRESS",
+    "EMAIL",
+    "PHONE"
+  ],
+  "totals": {
+    "m_total": 15022,
+    "m_full": 13542,
+    "m_cov80": 13844,
+    "m_literal_checked": 15022,
+    "m_literal": 381,
+    "c_gold": 402144,
+    "c_gold_masked": 361953,
+    "c_pred": 410890,
+    "c_pred_tp": 361038,
+    "c_neutral": 2999825,
+    "c_neutral_masked": 10107,
+    "d_has_gold": 1500,
+    "d_leak": 719,
+    "d_leak_literal": 168,
+    "k_total": 19397,
+    "k_touched": 3716,
+    "chars": 9919139,
+    "detections": 21864,
+    "d_detection": 1500,
+    "g_PERSON": 390,
+    "f_PERSON": 336,
+    "g_ADDRESS": 6223,
+    "f_ADDRESS": 5231,
+    "g_EMAIL": 3834,
+    "f_EMAIL": 3833,
+    "g_PHONE": 4575,
+    "f_PHONE": 4142
+  },
+  "metrics": {
+    "mention_recall": 0.9014778325123153,
+    "mention_recall_at80": 0.9215816802023699,
+    "char_recall": 0.9000581881117212,
+    "precision": 0.8786731241938232,
+    "over_masking": 0.003369196536464627,
+    "doc_leak_rate": 0.47933333333333333,
+    "doc_literal_leak_rate": 0.112,
+    "mention_literal_leak_rate": 0.02536280122487019,
+    "kept_touched_rate": 0.19157601690983142,
+    "detections_per_10k_chars": 22.04223572227388,
+    "docs_with_detection": 1.0,
+    "recall_PERSON": 0.8615384615384616,
+    "recall_ADDRESS": 0.8405913546520971,
+    "recall_EMAIL": 0.9997391757955139,
+    "recall_PHONE": 0.9053551912568306
+  },
+  "intervals_95": {
+    "mention_recall": [
+      0.8931,
+      0.9102
+    ],
+    "mention_recall_at80": [
+      0.9145,
+      0.9291
+    ],
+    "char_recall": [
+      0.8901,
+      0.9104
+    ],
+    "precision": [
+      0.8595,
+      0.8971
+    ],
+    "over_masking": [
+      0.0024,
+      0.0045
+    ],
+    "doc_leak_rate": [
+      0.454,
+      0.5033
+    ],
+    "doc_literal_leak_rate": [
+      0.0967,
+      0.1287
+    ],
+    "mention_literal_leak_rate": [
+      0.0209,
+      0.03
+    ],
+    "kept_touched_rate": [
+      0.1736,
+      0.2096
+    ],
+    "detections_per_10k_chars": [
+      21.1294,
+      22.9909
+    ],
+    "docs_with_detection": [
+      1.0,
+      1.0
+    ],
+    "recall_PERSON": [
+      0.8149,
+      0.9028
+    ],
+    "recall_ADDRESS": [
+      0.8236,
+      0.8576
+    ],
+    "recall_EMAIL": [
+      0.9992,
+      1.0
+    ],
+    "recall_PHONE": [
+      0.8871,
+      0.9226
+    ]
+  },
+  "kept_families": {
+    "DATE": {
+      "mentions": 7727,
+      "touched": 0,
+      "touched_rate": 0.0
+    },
+    "LOCATION": {
+      "mentions": 2630,
+      "touched": 402,
+      "touched_rate": 0.15285171102661596
+    },
+    "ORG": {
+      "mentions": 8610,
+      "touched": 3314,
+      "touched_rate": 0.3849012775842044
+    },
+    "ORG_ID": {
+      "mentions": 430,
+      "touched": 0,
+      "touched_rate": 0.0
+    }
+  },
+  "by_origin": {
+    "ADDRESS:field": {
+      "mentions": 6223,
+      "masked": 5231,
+      "recall": 0.8405913546520971
+    },
+    "EMAIL:field": {
+      "mentions": 3786,
+      "masked": 3786,
+      "recall": 1.0
+    },
+    "EMAIL:repeat": {
+      "mentions": 48,
+      "masked": 47,
+      "recall": 0.9791666666666666
+    },
+    "PERSON:field": {
+      "mentions": 372,
+      "masked": 330,
+      "recall": 0.8870967741935484
+    },
+    "PERSON:repeat": {
+      "mentions": 18,
+      "masked": 6,
+      "recall": 0.3333333333333333
+    },
+    "PHONE:field": {
+      "mentions": 4570,
+      "masked": 4137,
+      "recall": 0.9052516411378556
+    },
+    "PHONE:repeat": {
+      "mentions": 5,
+      "masked": 5,
+      "recall": 1.0
+    }
+  },
+  "detected_labels": {
+    "ADDRESS": 7315,
+    "PERSON": 5992,
+    "PHONE": 4449,
+    "EMAIL": 3934,
+    "ORG": 149,
+    "BIRTH_DATE": 14,
+    "MAC": 7,
+    "ID": 4
+  }
+}

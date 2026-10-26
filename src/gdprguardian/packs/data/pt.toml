@@ -1,0 +1,288 @@
+# Pack Portugal / Portugal pack.
+# Niveaux : A = clé forte, masquage sans contexte ; B = clé faible, contexte requis ; C = sans clé, contexte requis.
+# Tiers: A strong checksum, no context needed; B weak checksum + context; C no checksum, context only.
+# En mode auto, tout mot de contexte active le pack : seuls des termes propres au portugais d'Europe y
+# figurent. « NIF », « NISS », « BI », « CC », « Tel. » existent aussi en français ou en belge : ils sont
+# ancrés dans les motifs « _LABELED ». In auto mode any context word activates the pack, so only European
+# Portuguese terms are listed; "NIF", "NISS", "BI", "CC", "Tel." are anchored inside "_LABELED" patterns.
+# Bornes « (?<![0-9A-Za-z]{2}) » après le premier caractère et « (?![0-9A-Za-z]) » en fin de motif : sre écarte
+# en C les fenêtres prises dans un nombre plus long (voir de.toml). In-pattern boundaries after the first
+# character and at the end: sre rejects in C the windows inside a longer number (see de.toml).
+
+[pack]
+id = "PT"
+name = "Portugal"
+version = "2026.10.0"
+country = "PT"
+languages = ["pt"]
+detectors = []
+
+[locale]
+phone_codes = ["351"]
+tlds = ["pt"]
+iban_countries = ["PT"]
+languages = ["pt"]
+
+[context.nif]
+pt = ["contribuinte", "número de contribuinte", "n.º de contribuinte", "número de identificação fiscal",
+      "identificação fiscal", "nif/nipc"]
+[context.nipc]
+pt = ["nipc", "pessoa coletiva", "pessoa colectiva", "número de pessoa coletiva"]
+[context.niss]
+pt = ["segurança social", "número de segurança social", "n.º de segurança social",
+      "identificação da segurança social"]
+[context.cc]
+pt = ["cartão de cidadão", "cartão do cidadão", "bilhete de identidade", "identificação civil",
+      "número de identificação civil"]
+[context.sns]
+pt = ["número de utente", "n.º de utente", "nº de utente", "cartão de utente", "utente do sns",
+      "serviço nacional de saúde"]
+[context.passport]
+pt = ["passaporte", "número do passaporte", "n.º de passaporte"]
+[context.address]
+pt = ["morada", "localidade", "freguesia", "concelho", "rua", "travessa"]
+[context.phone]
+pt = ["telemóvel", "contacto telefónico", "telefone fixo"]
+# Indices d'entrepreneur individuel / sole-trader cues.
+[context.ei]
+pt = ["empresário em nome individual", "empresária em nome individual", "trabalhador independente",
+      "trabalhadora independente", "recibos verdes"]
+
+# Lexique partagé par tous les packs en mode auto : pas de « CC » seul (copie carbone, centre de coûts) ;
+# « utente » seul désigne la personne (patient, usager). Lexicon shared by every pack in auto mode: no bare
+# "CC" (carbon copy, cost centre); a bare "utente" names the person (patient, user).
+[headers]
+PT_NIF = ["nif", "contribuinte", "número de contribuinte", "n.º contribuinte"]
+PT_NIPC = ["nipc"]
+PT_NISS = ["niss", "segurança social", "número de segurança social"]
+PT_NIC = ["bi", "n.º bi", "número de identificação civil"]
+ID_CARD = ["cartão de cidadão", "n.º cc", "número do documento"]
+PT_SNS = ["número de utente", "n.º utente", "sns"]
+PASSPORT = ["passaporte"]
+PHONE = ["telefone", "telemóvel", "tel.", "tlm", "contacto"]
+EMAIL = ["email", "e-mail", "correio eletrónico"]
+PERSON = ["nome", "apelido", "nome completo", "funcionário", "cliente", "utente", "titular"]
+ADDRESS = ["morada", "endereço", "rua", "residência"]
+BIRTH_DATE = ["data de nascimento", "nascido em", "nascida em"]
+POSTAL_CODE = ["código postal", "cód. postal", "cp"]
+IBAN = ["iban", "nib", "conta bancária"]
+
+[labels.PT_NIF]
+fr = "NIF"
+en = "NIF"
+pt = "NIF"
+neutral = "TAX_ID"
+
+[labels.PT_NIPC]
+fr = "NIPC"
+en = "NIPC"
+pt = "NIPC"
+neutral = "COMPANY_ID"
+
+[labels.PT_NISS]
+fr = "NISS"
+en = "NISS"
+pt = "NISS"
+neutral = "SOCIAL_ID"
+
+[labels.PT_NIC]
+fr = "NIC"
+en = "NIC"
+pt = "NIC"
+neutral = "NATIONAL_ID"
+aliases = ["BI"]
+
+[labels.PT_SNS]
+fr = "UTENTE_SNS"
+en = "UTENTE_SNS"
+pt = "UTENTE_SNS"
+neutral = "HEALTH_ID"
+
+# NIF : clé mod 11 (1 nombre sur 11) ; NIPC (préfixes 5, 6) : personnes morales, politique « entreprise ».
+# Le premier chiffre de chaque motif est celui qu'accepte son validateur. NIF: mod-11 check digit (1 number
+# in 11); NIPC (prefixes 5, 6): legal persons, "company" policy. Each pattern's first digit is the one its
+# validator accepts.
+[[recognizer]]
+id = "PT_NIF_LABELED"
+entity = "TAX_ID"
+label = "PT_NIF"
+tier = "A"
+prefilter = ["nif", "n.i.f", "nipc"]
+pattern = 'N(?:IF|\.I\.F|IPC)\.?\s{0,3}(?:n\.?\s?[ºo°]\.?\s{0,3})?[:.]?\s{0,3}(?P<v>[1-47-9][0-9]{2}{S}[0-9]{3}{S}[0-9]{3})(?![0-9A-Za-z])'
+group = "v"
+validator = "pt.nif_person"
+boundary = "alnum"
+
+[[recognizer]]
+id = "PT_NIPC_LABELED"
+entity = "COMPANY_ID"
+label = "PT_NIPC"
+tier = "A"
+policy = "company"
+prefilter = ["nif", "n.i.f", "nipc"]
+pattern = 'N(?:IF|\.I\.F|IPC)\.?\s{0,3}(?:n\.?\s?[ºo°]\.?\s{0,3})?[:.]?\s{0,3}(?P<v>[56][0-9]{2}{S}[0-9]{3}{S}[0-9]{3})(?![0-9A-Za-z])'
+group = "v"
+validator = "pt.nipc"
+boundary = "alnum"
+
+[[recognizer]]
+id = "PT_NIF"
+entity = "TAX_ID"
+label = "PT_NIF"
+tier = "B"
+prefilter = "digit"
+pattern = '[1-47-9](?<![0-9A-Za-z]{2})[0-9]{2}{S}[0-9]{3}{S}[0-9]{3}(?![0-9A-Za-z])'
+validator = "pt.nif_person"
+boundary = "alnum"
+context = "nif"
+
+[[recognizer]]
+id = "PT_NIPC"
+entity = "COMPANY_ID"
+label = "PT_NIPC"
+tier = "B"
+policy = "company"
+prefilter = "digit"
+pattern = '[56](?<![0-9A-Za-z]{2})[0-9]{2}{S}[0-9]{3}{S}[0-9]{3}(?![0-9A-Za-z])'
+validator = "pt.nipc"
+boundary = "alnum"
+context = ["nif", "nipc"]
+
+# TVA : un entrepreneur individuel facture sous son propre NIF (donnée personnelle) ; NIPC = personne morale.
+# VAT: a sole trader invoices under his own NIF (personal data); NIPC = legal person (company policy).
+[[recognizer]]
+id = "PT_VAT_PERSON"
+entity = "VAT"
+label = "VAT"
+tier = "A"
+prefilter = "digit"
+pattern = 'PT{S}[1-47-9][0-9]{2}{S}[0-9]{3}{S}[0-9]{3}'
+validator = "pt.vat_person"
+boundary = "alnum"
+
+[[recognizer]]
+id = "PT_VAT"
+entity = "VAT"
+label = "VAT"
+tier = "A"
+policy = "company"
+prefilter = "digit"
+pattern = 'PT{S}[56][0-9]{2}{S}[0-9]{3}{S}[0-9]{3}'
+validator = "pt.vat_company"
+boundary = "alnum"
+
+[[recognizer]]
+id = "PT_NISS_LABELED"
+entity = "SOCIAL_ID"
+label = "PT_NISS"
+tier = "A"
+prefilter = ["niss", "n.i.s.s"]
+pattern = 'N\.?I\.?S\.?S\.?\s{0,3}(?:n\.?\s?[ºo°]\.?\s{0,3})?[:.]?\s{0,3}(?P<v>[12][0-9]{10})'
+group = "v"
+validator = "pt.niss"
+boundary = "alnum"
+
+[[recognizer]]
+id = "PT_NISS"
+entity = "SOCIAL_ID"
+label = "PT_NISS"
+tier = "B"
+prefilter = "digit"
+pattern = '[12](?<![0-9A-Za-z]{2})[0-9]{10}(?![0-9A-Za-z])'
+validator = "pt.niss"
+boundary = "alnum"
+context = "niss"
+
+# Cartão de Cidadão : NIC + clé + version (au moins une lettre) + clé finale, Luhn en base 36.
+# Citizen card: NIC + check digit + version (at least one letter) + final check digit, base-36 Luhn.
+[[recognizer]]
+id = "PT_CC"
+entity = "ID_CARD"
+label = "ID_CARD"
+tier = "A"
+prefilter = "digit"
+pattern = '[0-9](?<![0-9A-Za-z]{2})[0-9]{7}{S}[0-9]{S}(?:[A-Z][A-Z0-9]|[0-9][A-Z]){S}[0-9](?![0-9A-Za-z])'
+validator = "pt.cc"
+boundary = "alnum"
+context = "cc"
+
+[[recognizer]]
+id = "PT_NIC_LABELED"
+entity = "NATIONAL_ID"
+label = "PT_NIC"
+tier = "A"
+prefilter = ["bi", "b.i", "cc", "c.c", "nic"]
+pattern = '(?:B\.?I|C\.?C|NIC)\.?\s{0,3}(?:n\.?\s?[ºo°]\.?\s{0,3})?[:.]?\s{0,3}(?P<v>[0-9]{7,8}(?:{S}[0-9])?)'
+group = "v"
+validator = "pt.nic"
+boundary = "alnum"
+
+[[recognizer]]
+id = "PT_NIC"
+entity = "NATIONAL_ID"
+label = "PT_NIC"
+tier = "C"
+prefilter = "digit"
+pattern = '[0-9](?<![0-9A-Za-z]{2})[0-9]{6,7}(?:{S}[0-9])?(?![0-9A-Za-z])'
+validator = "pt.nic"
+boundary = "alnum"
+context = "cc"
+
+[[recognizer]]
+id = "PT_SNS"
+entity = "HEALTH_ID"
+label = "PT_SNS"
+tier = "C"
+prefilter = "digit"
+pattern = '[0-9](?<![0-9A-Za-z]{2})[0-9]{2}{S}[0-9]{3}{S}[0-9]{3}(?![0-9A-Za-z])'
+validator = "pt.sns"
+boundary = "alnum"
+context = "sns"
+
+[[recognizer]]
+id = "PT_PASSPORT"
+entity = "PASSPORT"
+label = "PASSPORT"
+tier = "C"
+prefilter = "digit"
+pattern = '[A-Z](?<![0-9A-Za-z]{2})[A-Z]?[0-9]{6}(?![0-9A-Za-z])'
+boundary = "alnum"
+context = "passport"
+
+# Código postal NNNN-NNN : désigne une rue ou une portion de rue, contexte d'adresse requis.
+# Postcode NNNN-NNN: designates a street or part of one, address context required.
+[[recognizer]]
+id = "PT_POSTAL_CODE"
+entity = "POSTAL_CODE"
+label = "POSTAL_CODE"
+tier = "C"
+prefilter = "digit"
+pattern = '[1-9](?<![0-9A-Za-z]{2})[0-9]{3}-[0-9]{3}(?![0-9A-Za-z])'
+boundary = "alnum"
+context = "address"
+
+# Téléphones nationaux (9 chiffres, sans 0) ; les numéros +351 relèvent du pack INTL. Seuls des espaces
+# séparent les chiffres (« 26-12-2024 1… » n'est pas un numéro). Libellés : une branche par casse de
+# l'initiale. National phone numbers (9 digits, no trunk 0); +351 numbers belong to the INTL pack. Only
+# spaces split the digits ("26-12-2024 1…" is no number). Labels: one branch per initial-letter case.
+[[recognizer]]
+id = "PT_PHONE_LABELED"
+entity = "PHONE"
+label = "PHONE"
+tier = "A"
+prefilter = ["tel", "tlm", "tlf", "fax", "movel", "contacto"]
+pattern = '(?:T(?i:el(?:efone|em[oó]vel)?|lm|lf)|t(?i:el(?:efone|em[oó]vel)?|lm|lf)|F(?i:ax)|f(?i:ax)|M(?i:[oó]vel)|m(?i:[oó]vel)|C(?i:ontacto(?:\s{1,3}telef[oó]nico)?)|c(?i:ontacto(?:\s{1,3}telef[oó]nico)?))\.?(?:\s{0,3}\([^()\n0-9]{1,20}\))?\s{0,3}(?:n\.?\s?[ºo°]\.?\s{0,3})?:?\s{0,3}(?P<v>[23789][0-9](?: ?[0-9]){7})'
+group = "v"
+validator = "pt.phone"
+boundary = "alnum"
+
+[[recognizer]]
+id = "PT_PHONE"
+entity = "PHONE"
+label = "PHONE"
+tier = "B"
+prefilter = "digit"
+pattern = '[23789](?<![0-9A-Za-z\+][0-9])[0-9](?: ?[0-9]){7}(?![0-9A-Za-z])'
+validator = "pt.phone"
+boundary = "phone"
+context = "phone"

@@ -1,0 +1,245 @@
+# Pack Allemagne / Germany pack.
+# Niveaux : A = clé forte, masquage sans contexte ; B = clé faible, contexte requis ; C = sans clé, contexte requis.
+# Tiers: A strong checksum, no context needed; B weak checksum + context; C no checksum, context only.
+# En mode auto, tout mot de contexte active le pack : seuls des termes propres à l'allemand y figurent. Les
+# libellés courts et ambigus (« Tel. », « Fax », « Mobil ») sont ancrés dans les motifs « _LABELED ».
+# In auto mode any context word activates the pack, so only German-specific terms are listed; short,
+# ambiguous labels ("Tel.", "Fax", "Mobil") are anchored inside the "_LABELED" patterns instead.
+# Bornes dans les motifs : « (?<![0-9A-Za-z]{2}) » juste après le premier caractère (alphanumérique ASCII)
+# écarte en C les débuts pris dans un mot ou un nombre, sans perdre le balayage rapide du premier caractère ;
+# c'est un pur préfiltre, le moteur vérifiant toujours la borne Unicode (test de propriété dans test_de.py).
+# « (?![0-9A-Za-z]) » en fin de motif fait en plus reculer la regex vers le plus long candidat qui finit sur
+# une frontière : un nombre voisin ne fait plus rejeter l'identifiant. Mesuré sur les cinq packs UE : 3 fois
+# plus rapide sur un CSV numérique, 20 % sur de la prose. In-pattern boundaries: "(?<![0-9A-Za-z]{2})" right
+# after the first (ASCII alphanumeric) character rejects in C the starts inside a word or number while keeping
+# the fast first-character scan; it is a pure prefilter, as the engine still checks the Unicode boundary
+# (property test in test_de.py). "(?![0-9A-Za-z])" at the end also makes the regex back off to the longest
+# candidate ending on a boundary, so a neighbouring number no longer voids the identifier. Measured on the five
+# EU packs: 3 times faster on a numeric CSV, 20 % on prose.
+
+[pack]
+id = "DE"
+name = "Deutschland"
+version = "2026.10.0"
+country = "DE"
+languages = ["de"]
+detectors = []
+
+[locale]
+phone_codes = ["49"]
+tlds = ["de"]
+iban_countries = ["DE"]
+languages = ["de"]
+
+[context.steuer_id]
+de = ["steuer-id", "steuerid", "steuer-idnr", "steueridentifikationsnummer", "steuerliche identifikationsnummer",
+      "steuer-identifikationsnummer", "identifikationsnummer", "idnr", "id-nr", "bzst", "lohnsteuer"]
+[context.steuernummer]
+de = ["steuernummer", "steuer-nr", "st.-nr", "stnr", "finanzamt"]
+[context.sv]
+de = ["sozialversicherungsnummer", "rentenversicherungsnummer", "versicherungsnummer", "sv-nummer", "sv-nr",
+      "rvnr", "sozialversicherungsausweis", "rentenversicherung", "sozialversicherung"]
+[context.kvnr]
+de = ["krankenversichertennummer", "versichertennummer", "versicherten-nr", "kvnr", "krankenkasse",
+      "krankenversicherung", "gesundheitskarte", "egk", "versichertenkarte"]
+[context.id_card]
+de = ["personalausweis", "personalausweisnummer", "ausweisnummer", "ausweis-nr", "ausweis", "dokumentennummer"]
+[context.passport]
+de = ["reisepass", "reisepassnummer", "passnummer", "pass-nr"]
+[context.driver_license]
+de = ["führerschein", "fuehrerschein", "führerscheinnummer", "führerschein-nr", "fahrerlaubnis"]
+[context.vat]
+de = ["ust-idnr", "ust-id", "ust-id-nr", "ustidnr", "umsatzsteuer-identifikationsnummer", "umsatzsteuer-id",
+      "umsatzsteuer"]
+[context.phone]
+de = ["handynummer", "rufnummer", "festnetz", "festnetznummer", "mobilfunknummer", "durchwahl",
+      "erreichbar unter"]
+# Indices d'entreprise individuelle (n° d'entreprise = donnée personnelle) / sole-trader cues.
+[context.ei]
+de = ["einzelunternehmen", "einzelunternehmer", "einzelunternehmerin", "eingetragener kaufmann",
+      "eingetragene kauffrau", "e.k.", "freiberufler", "freiberuflerin", "kleinunternehmer", "selbstständig",
+      "selbständig"]
+
+# Lexique d'en-têtes de colonnes (tableurs) / column-header lexicon (spreadsheets).
+[headers]
+DE_STEUER_ID = ["steuer-id", "steuerid", "steueridentifikationsnummer", "steuerliche identifikationsnummer",
+                "identifikationsnummer", "idnr"]
+DE_STEUERNUMMER = ["steuernummer", "st.-nr.", "stnr"]
+DE_SV_NUMMER = ["sozialversicherungsnummer", "rentenversicherungsnummer", "sv-nummer", "rvnr",
+                "versicherungsnummer"]
+DE_KVNR = ["krankenversichertennummer", "versichertennummer", "kvnr"]
+VAT = ["ust-idnr", "ust-id", "umsatzsteuer-id"]
+ID_CARD = ["personalausweis", "personalausweisnummer", "ausweisnummer"]
+PASSPORT = ["reisepass", "reisepassnummer", "passnummer"]
+DRIVER_LICENSE = ["führerschein", "führerscheinnummer"]
+PHONE = ["telefon", "tel.", "telefonnummer", "handy", "handynummer", "mobil", "mobilnummer", "festnetz"]
+EMAIL = ["e-mail", "email", "e-mail-adresse"]
+PERSON = ["name", "vorname", "nachname", "familienname", "geburtsname", "mitarbeiter", "kunde",
+          "ansprechpartner", "patient"]
+ADDRESS = ["adresse", "anschrift", "straße", "strasse", "wohnort", "wohnanschrift"]
+BIRTH_DATE = ["geburtsdatum", "geb.", "geboren am"]
+POSTAL_CODE = ["plz", "postleitzahl"]
+IBAN = ["iban", "bankverbindung"]
+
+[labels.DE_STEUER_ID]
+fr = "STEUER_ID"
+en = "STEUER_ID"
+de = "STEUER_ID"
+neutral = "TAX_ID"
+aliases = ["IDNR"]
+
+[labels.DE_STEUERNUMMER]
+fr = "STEUERNUMMER"
+en = "STEUERNUMMER"
+de = "STEUERNUMMER"
+neutral = "TAX_ID"
+aliases = ["STNR"]
+
+[labels.DE_SV_NUMMER]
+fr = "SV_NUMMER"
+en = "SV_NUMMER"
+de = "SV_NUMMER"
+neutral = "SOCIAL_ID"
+aliases = ["RVNR"]
+
+[labels.DE_KVNR]
+fr = "KVNR"
+en = "KVNR"
+de = "KVNR"
+neutral = "HEALTH_ID"
+
+# Steuer-ID : MOD 11,10 et règle de répétition des chiffres (1 nombre aléatoire sur 270), donc niveau A.
+# Groupements « 12 345 678 901 » (BZSt) et « 123 456 789 01 ». Steuer-ID: MOD 11,10 plus the digit-repetition
+# rule (1 random number in 270), hence tier A; groupings "12 345 678 901" (BZSt) and "123 456 789 01".
+[[recognizer]]
+id = "DE_STEUER_ID"
+entity = "TAX_ID"
+label = "DE_STEUER_ID"
+tier = "A"
+prefilter = "digit"
+pattern = '[1-9](?<![0-9A-Za-z]{2})[0-9](?:(?:{S}[0-9]{3}){3}|[0-9](?:{S}[0-9]{3}){2}{S}[0-9]{2})(?![0-9A-Za-z])'
+validator = "de.steuer_id"
+boundary = "alnum"
+context = "steuer_id"
+
+# Steuernummer : formes des Länder (FF/BBB/UUUUP, FFF/BBB/UUUUP, FFF/BBBB/UUUP, anciennes FFBBB/UUUUP et
+# FF/BBB/UUUU/P) ou 10 à 13 chiffres (formes fédérales). Steuernummer: Land forms (including the older
+# FFBBB/UUUUP and FF/BBB/UUUU/P) or 10 to 13 bare digits (federal forms).
+[[recognizer]]
+id = "DE_STEUERNUMMER"
+entity = "TAX_ID"
+label = "DE_STEUERNUMMER"
+tier = "C"
+prefilter = "digit"
+pattern = '[0-9](?<![0-9A-Za-z]{2})[0-9](?:[0-9]?[/ ][0-9]{3}[/ ][0-9]{4}[/ ]?[0-9]|[0-9][/ ][0-9]{4}[/ ][0-9]{4}|[0-9]{3}/[0-9]{5}|[0-9]{8,11})(?![0-9A-Za-z])'
+validator = "de.steuernummer"
+boundary = "alnum"
+context = "steuernummer"
+
+# Sozialversicherungsnummer : date de naissance et sexe intégrés, clé VKVV, structure distinctive.
+# Social insurance number: embeds birth date and sex, VKVV check digit, distinctive structure.
+[[recognizer]]
+id = "DE_SV_NUMMER"
+entity = "SOCIAL_ID"
+label = "DE_SV_NUMMER"
+tier = "A"
+prefilter = "digit"
+pattern = '[0-9](?<![0-9A-Za-z]{2})[0-9]{S}[0-9]{6}{S}[A-Za-z]{S}[0-9]{2}{S}[0-9](?![0-9A-Za-z])'
+validator = "de.rvnr"
+boundary = "alnum"
+context = "sv"
+
+[[recognizer]]
+id = "DE_KVNR"
+entity = "HEALTH_ID"
+label = "DE_KVNR"
+tier = "B"
+prefilter = "digit"
+pattern = '[A-Z](?<![0-9A-Za-z]{2}){S}[0-9]{9}(?![0-9A-Za-z])'
+validator = "de.kvnr"
+boundary = "alnum"
+context = "kvnr"
+
+[[recognizer]]
+id = "DE_ID_CARD"
+entity = "ID_CARD"
+label = "ID_CARD"
+tier = "C"
+pattern = '[0-9CFGHJKLMNPRTVWXYZ](?<![0-9A-Za-z]{2})[0-9CFGHJKLMNPRTVWXYZ]{8}[0-9]?(?![0-9A-Za-z])'
+validator = "de.id_document"
+boundary = "alnum"
+context = "id_card"
+
+[[recognizer]]
+id = "DE_PASSPORT"
+entity = "PASSPORT"
+label = "PASSPORT"
+tier = "C"
+pattern = '[0-9CFGHJKLMNPRTVWXYZ](?<![0-9A-Za-z]{2})[0-9CFGHJKLMNPRTVWXYZ]{8}[0-9]?(?![0-9A-Za-z])'
+validator = "de.id_document"
+boundary = "alnum"
+context = "passport"
+
+[[recognizer]]
+id = "DE_DRIVER_LICENSE"
+entity = "DRIVER_LICENSE"
+label = "DRIVER_LICENSE"
+tier = "B"
+pattern = '[A-Z0-9](?<![0-9A-Za-z]{2})[A-Z0-9]{8}[0-9X][0-9A-Z](?![0-9A-Za-z])'
+validator = "de.fuehrerschein"
+boundary = "alnum"
+context = "driver_license"
+
+[[recognizer]]
+id = "DE_VAT"
+entity = "VAT"
+label = "VAT"
+tier = "A"
+policy = "company"
+prefilter = "digit"
+pattern = 'DE{S}[1-9][0-9]{2}{S}[0-9]{3}{S}[0-9]{3}'
+validator = "de.ust_idnr"
+boundary = "alnum"
+context = "vat"
+
+# Téléphones nationaux (0 + indicatif) ; les numéros +49 relèvent du pack INTL. Chaque chiffre après les trois
+# premiers peut être précédé d'un séparateur ; le nombre de chiffres est borné (7 à 12, 11-12 pour un mobile)
+# et la borne finale fait reculer la regex : « 0171 1234567 10 Uhr » donne le numéro, pas 14 chiffres rejetés.
+# National phone numbers (trunk 0 + area code); +49 numbers belong to the INTL pack. Each digit after the first
+# three may follow a separator; the digit count is bounded (7 to 12, 11-12 for mobiles) and the final boundary
+# makes the regex backtrack, so "0171 1234567 10 Uhr" yields the number instead of 14 rejected digits.
+[[recognizer]]
+id = "DE_PHONE_MOBILE"
+entity = "PHONE"
+label = "PHONE"
+tier = "A"
+prefilter = "digit"
+pattern = '\(?0(?<![0-9A-Za-z\+]0)1[5-7][0-9](?:\)?(?: ?/ ?|[ \-]{1,3})?[0-9]){7,8}(?![0-9A-Za-z])'
+validator = "de.phone_mobile"
+boundary = "phone"
+context = "phone"
+
+# Libellés : une branche par casse de l'initiale, pour que sre balaie les initiales en C (8 fois plus rapide
+# que « (?i)\b… ») ; précision facultative entre parenthèses (« Telefon (privat): »). Labels: one branch per
+# initial-letter case, so that sre scans the initials in C; optional qualifier in brackets ("Telefon (privat):").
+[[recognizer]]
+id = "DE_PHONE_LABELED"
+entity = "PHONE"
+label = "PHONE"
+tier = "A"
+prefilter = ["tel", "fon", "fax", "mobil", "handy", "rufnummer", "festnetz"]
+pattern = '(?:T(?i:el(?:efon(?:nummer)?|efax)?)|t(?i:el(?:efon(?:nummer)?|efax)?)|F(?i:on|ax|estnetz)|f(?i:on|ax|estnetz)|M(?i:obil(?:telefon|nummer)?)|m(?i:obil(?:telefon|nummer)?)|H(?i:andy(?:nummer)?)|h(?i:andy(?:nummer)?)|R(?i:ufnummer)|r(?i:ufnummer))\.?(?:[ \-]?[Nn][Rr]\.?)?(?:\s{0,3}\([^()\n0-9]{1,20}\))?\s{0,3}:?\s{0,3}(?P<v>\(?0[1-9][0-9](?:\)?(?: ?/ ?|[ \-]{1,3})?[0-9]){4,9}(?![0-9A-Za-z]))'
+group = "v"
+validator = "de.phone"
+boundary = "alnum"
+
+[[recognizer]]
+id = "DE_PHONE"
+entity = "PHONE"
+label = "PHONE"
+tier = "B"
+prefilter = "digit"
+pattern = '\(?0(?<![0-9A-Za-z\+]0)[1-9][0-9](?:\)?(?: ?/ ?|[ \-]{1,3})?[0-9]){4,9}(?![0-9A-Za-z])'
+validator = "de.phone"
+boundary = "phone"
+context = "phone"

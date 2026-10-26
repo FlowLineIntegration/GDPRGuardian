@@ -1,0 +1,33 @@
+[build-system]
+requires = ["maturin>=1.9,<2"]
+build-backend = "maturin"
+
+[project]
+name = "gdprguardian-core"
+# Version lue dans Cargo.toml (une seule écriture, `tools/release.py set`) / version read from Cargo.toml.
+dynamic = ["version"]
+description = "Noyau Rust de Gardien RGPD, installé avec gdprguardian sur les plateformes courantes / Rust core of GDPR Guardian"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+authors = [{ name = "Guillaume CLEMENT - Flow Line Intégration" }]
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Security",
+    "Topic :: Text Processing",
+]
+
+[project.urls]
+Homepage = "https://github.com/FlowLineIntegration/GDPRGuardian"
+Source = "https://github.com/FlowLineIntegration/GDPRGuardian"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+module-name = "gdprguardian_core"
+
+# uv reconstruit le noyau quand une source Rust change (dépendance `path` du paquet racine).
+# uv rebuilds the core when a Rust source changes (`path` dependency of the root package).
+[tool.uv]
+cache-keys = [{ file = "pyproject.toml" }, { file = "Cargo.toml" }, { file = "Cargo.lock" }, { file = "src/**/*.rs" }]

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "gdprguardian": {
+      "type": "http",
+      "url": "https://api.gardienrgpd.fr/mcp"
+    }
+  }
+}

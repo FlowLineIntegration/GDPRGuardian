@@ -1,0 +1,214 @@
+# Pack Espagne / Spain pack.
+# Niveaux : A = clé forte, masquage sans contexte ; B = clé faible, contexte requis ; C = sans clé, contexte requis.
+# Tiers: A strong checksum, no context needed; B weak checksum + context; C no checksum, context only.
+# En mode auto, tout mot de contexte active le pack : seuls des termes propres à l'espagnol (d'Espagne) y
+# figurent. « NIF », « NSS », « CIF », « Tel. » existent aussi en français : ils sont ancrés dans les motifs.
+# In auto mode any context word activates the pack, so only Spain-specific terms are listed; "NIF", "NSS",
+# "CIF" and "Tel." also occur in French and are anchored inside the patterns instead.
+# Bornes « (?<![0-9A-Za-z]{2}) » après le premier caractère et « (?![0-9A-Za-z]) » en fin de motif : sre écarte
+# en C les fenêtres prises dans un nombre plus long (voir de.toml). In-pattern boundaries after the first
+# character and at the end: sre rejects in C the windows inside a longer number (see de.toml).
+
+[pack]
+id = "ES"
+name = "España"
+version = "2026.10.0"
+country = "ES"
+languages = ["es", "ca", "gl", "eu"]
+detectors = []
+
+[locale]
+phone_codes = ["34"]
+tlds = ["es"]
+iban_countries = ["ES"]
+languages = ["es", "ca", "gl", "eu"]
+
+[context.dni]
+es = ["dni", "d.n.i.", "documento nacional de identidad", "número de identificación fiscal"]
+[context.nie]
+es = ["número de identidad de extranjero", "numero de identidad de extranjero", "tarjeta de identidad de extranjero",
+      "n.i.e."]
+[context.cif]
+es = ["código de identificación fiscal", "razón social", "sociedad limitada", "sociedad anónima"]
+[context.nss]
+es = ["seguridad social", "número de afiliación", "afiliación", "número de la seguridad social"]
+[context.passport]
+es = ["pasaporte", "número de pasaporte"]
+[context.phone]
+es = ["móvil", "teléfono móvil", "teléfono fijo", "número de teléfono", "tfno", "tlfno"]
+# Indices d'entrepreneur individuel / sole-trader cues.
+[context.ei]
+es = ["autónomo", "autónoma", "trabajador autónomo", "trabajadora autónoma", "empresario individual",
+      "empresaria individual"]
+
+# Lexique partagé par tous les packs en mode auto : pas de « naf » (code d'activité APE en France).
+# Lexicon shared by every pack in auto mode: no "naf" (the French APE activity code).
+[headers]
+ES_DNI = ["dni", "nif", "d.n.i.", "documento nacional de identidad", "dni/nif"]
+ES_NIE = ["nie", "n.i.e."]
+ES_CIF = ["cif", "c.i.f."]
+ES_NSS = ["nss", "nuss", "número de la seguridad social", "número de afiliación", "n.º de afiliación",
+          "afiliación a la seguridad social"]
+VAT = ["nif-iva", "nif iva", "número de iva"]
+PASSPORT = ["pasaporte", "número de pasaporte"]
+PHONE = ["teléfono", "tel.", "tfno", "móvil", "teléfono móvil"]
+EMAIL = ["correo electrónico", "email", "e-mail", "correo"]
+PERSON = ["nombre", "apellidos", "apellido", "nombre y apellidos", "nombre completo", "empleado", "cliente",
+          "paciente", "titular"]
+ADDRESS = ["dirección", "domicilio", "calle", "dirección postal"]
+BIRTH_DATE = ["fecha de nacimiento", "f. nacimiento", "nacimiento"]
+POSTAL_CODE = ["código postal", "c.p.", "cp"]
+IBAN = ["iban", "cuenta bancaria"]
+
+[labels.ES_DNI]
+fr = "DNI"
+en = "DNI"
+es = "DNI"
+neutral = "NATIONAL_ID"
+
+[labels.ES_NIE]
+fr = "NIE"
+en = "NIE"
+es = "NIE"
+neutral = "NATIONAL_ID"
+
+[labels.ES_CIF]
+fr = "CIF"
+en = "CIF"
+es = "CIF"
+neutral = "COMPANY_ID"
+
+[labels.ES_NSS]
+fr = "NSS"
+en = "NSS"
+es = "NSS"
+neutral = "SOCIAL_ID"
+aliases = ["NUSS"]
+
+# DNI / NIF : lettre mod 23. Lettre minuscule seulement si collée (évite « 1 234 567 m »).
+# DNI / NIF: mod-23 letter. Lowercase letter only when attached (avoids "1 234 567 m").
+[[recognizer]]
+id = "ES_DNI"
+entity = "NATIONAL_ID"
+label = "ES_DNI"
+tier = "A"
+prefilter = "digit"
+pattern = '[0-9](?<![0-9A-Za-z]{2})[0-9]?[ .]?[0-9]{3}[ .]?[0-9]{3}(?:[ \-]?[A-Z]|[a-z])(?![0-9A-Za-z])'
+validator = "es.dni"
+boundary = "alnum"
+context = "dni"
+
+# NIF K (mineur), L (non-résident), M (étranger sans NIE) / NIF for minors, non-residents, foreigners.
+[[recognizer]]
+id = "ES_DNI_KLM"
+entity = "NATIONAL_ID"
+label = "ES_DNI"
+tier = "A"
+prefilter = "digit"
+pattern = '[KLM](?<![0-9A-Za-z]{2}){S}[0-9]{7}(?:[ \-]?[A-Z]|[a-z])(?![0-9A-Za-z])'
+validator = "es.dni"
+boundary = "alnum"
+context = "dni"
+
+[[recognizer]]
+id = "ES_NIE"
+entity = "NATIONAL_ID"
+label = "ES_NIE"
+tier = "A"
+prefilter = "digit"
+pattern = '[XYZ](?<![0-9A-Za-z]{2}){S}[0-9]{7,8}(?:[ \-]?[A-Z]|[a-z])(?![0-9A-Za-z])'
+validator = "es.nie"
+boundary = "alnum"
+context = ["nie", "dni"]
+
+[[recognizer]]
+id = "ES_CIF"
+entity = "COMPANY_ID"
+label = "ES_CIF"
+tier = "A"
+policy = "company"
+prefilter = "digit"
+pattern = '[ABCDEFGHJNPQRSUVW](?<![0-9A-Za-z]{2}){S}[0-9]{2}{S}[0-9]{3}{S}[0-9]{2}{S}[0-9A-J](?![0-9A-Za-z])'
+validator = "es.cif"
+boundary = "alnum"
+context = "cif"
+
+# NIF-IVA : celui d'un autónomo (DNI/NIE) est une donnée personnelle, celui d'une société non.
+# VAT number: a sole trader's (DNI/NIE-based) is personal data, a company's is not.
+[[recognizer]]
+id = "ES_VAT_PERSON"
+entity = "VAT"
+label = "VAT"
+tier = "A"
+prefilter = "digit"
+pattern = 'ES{S}(?:[0-9]{8}|[XYZKLM][0-9]{7})[A-Z]'
+validator = "es.vat_person"
+boundary = "alnum"
+
+[[recognizer]]
+id = "ES_VAT"
+entity = "VAT"
+label = "VAT"
+tier = "A"
+policy = "company"
+prefilter = "digit"
+pattern = 'ES{S}[ABCDEFGHJNPQRSUVW][0-9]{7}[0-9A-J]'
+validator = "es.vat_company"
+boundary = "alnum"
+
+[[recognizer]]
+id = "ES_NSS_LABELED"
+entity = "SOCIAL_ID"
+label = "ES_NSS"
+tier = "A"
+prefilter = ["nss", "nuss", "n.s.s", "n. s. s", "n.u.s.s", "n. u. s. s", "naf"]
+pattern = 'N(?:\.?\s?S\.?\s?S|\.?\s?U\.?\s?S\.?\s?S|AF)\.?\s{0,3}(?:n\.?\s?[ºo°]\.?\s{0,3})?:?\s{0,3}(?P<v>[0-9]{2}[ /\-]?[0-9]{8}[ /\-]?[0-9]{2})'
+group = "v"
+validator = "es.nss"
+boundary = "alnum"
+
+[[recognizer]]
+id = "ES_NSS"
+entity = "SOCIAL_ID"
+label = "ES_NSS"
+tier = "B"
+prefilter = "digit"
+pattern = '[0-9](?<![0-9A-Za-z]{2})[0-9][ /\-]?[0-9]{8}[ /\-]?[0-9]{2}(?![0-9A-Za-z])'
+validator = "es.nss"
+boundary = "alnum"
+context = "nss"
+
+[[recognizer]]
+id = "ES_PASSPORT"
+entity = "PASSPORT"
+label = "PASSPORT"
+tier = "C"
+prefilter = "digit"
+pattern = '[A-Z](?<![0-9A-Za-z]{2})[A-Z]{1,2}[0-9]{6}(?![0-9A-Za-z])'
+boundary = "alnum"
+context = "passport"
+
+# Téléphones nationaux (9 chiffres, sans 0) ; les numéros +34 relèvent du pack INTL. Libellés : une branche
+# par casse de l'initiale (balayage C des initiales par sre) / one branch per initial-letter case (C scan).
+# National phone numbers (9 digits, no trunk 0); +34 numbers are handled by the INTL pack.
+[[recognizer]]
+id = "ES_PHONE_LABELED"
+entity = "PHONE"
+label = "PHONE"
+tier = "A"
+prefilter = ["tel", "tfno", "tlf", "movil", "mobil", "fax"]
+pattern = '(?:T(?i:el(?:[eé]f(?:ono)?|f)?|fno|lfno|lf)|t(?i:el(?:[eé]f(?:ono)?|f)?|fno|lfno|lf)|M(?i:[oó][vb]il)|m(?i:[oó][vb]il)|F(?i:ax)|f(?i:ax))\.?\s{0,3}(?:[Mm][oó]vil\s{0,3})?(?:\([^()\n0-9]{1,20}\)\s{0,3})?(?:[Nn]\.?\s?[ºo°]\.?\s{0,3})?:?\s{0,3}(?P<v>[6-9][0-9](?:[ \-]?[0-9]){7})'
+group = "v"
+validator = "es.phone"
+boundary = "alnum"
+
+[[recognizer]]
+id = "ES_PHONE"
+entity = "PHONE"
+label = "PHONE"
+tier = "B"
+prefilter = "digit"
+pattern = '[6-9](?<![0-9A-Za-z\+][0-9])[0-9](?:[ \-]?[0-9]){7}(?![0-9A-Za-z])'
+validator = "es.phone"
+boundary = "phone"
+context = "phone"

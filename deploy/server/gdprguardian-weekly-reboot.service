@@ -1,0 +1,9 @@
+# Gardien RGPD · GDPR Guardian : redémarrage du lundi, /etc/systemd/system/gdprguardian-weekly-reboot.service,
+# lancé par gdprguardian-weekly-reboot.timer. Monday reboot, run by the timer.
+[Unit]
+Description=Gardien RGPD - GDPR Guardian weekly reboot (after any running update)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/gdprguardian-maintenance reboot
+TimeoutStartSec=75min

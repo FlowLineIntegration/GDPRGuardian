@@ -1,0 +1,607 @@
+{
+ "comment": "Roues tierces de la skill lourde, \u00e9pingl\u00e9es par empreinte ; `python tools/build_skills.py lock` r\u00e9\u00e9crit ce fichier / third-party wheels of the heavy skill, pinned by digest",
+ "pythons": [
+  "cp311",
+  "cp312",
+  "cp313",
+  "cp314"
+ ],
+ "pins": {
+  "ahocorasick-rs": "1.0.3",
+  "beautifulsoup4": "4.15.0",
+  "charset-normalizer": "3.5.2",
+  "click": "8.5.0",
+  "cobble": "0.1.4",
+  "colorama": "0.4.6",
+  "defusedxml": "0.7.1",
+  "mammoth": "1.13.0",
+  "markdownify": "1.2.3",
+  "olefile": "0.47",
+  "phonenumberslite": "9.0.41",
+  "pypdf": "6.21.2",
+  "pypdfium2": "5.14.0",
+  "python-calamine": "0.9.0",
+  "python-oxmsg": "0.0.2",
+  "six": "1.17.0",
+  "soupsieve": "3.0.4",
+  "typing-extensions": "4.16.0"
+ },
+ "wheels": [
+  {
+   "project": "ahocorasick-rs",
+   "version": "1.0.3",
+   "file": "ahocorasick_rs-1.0.3-cp311-cp311-macosx_10_12_x86_64.macosx_11_0_arm64.macosx_10_12_universal2.whl",
+   "sha256": "6d8ebb2b52a73feaf8be8e6d3b8badcd49986093bbb33945a42f053d4f8fe843",
+   "size": 704981,
+   "url": "https://files.pythonhosted.org/packages/d5/3b/98247440cf801d7c9092b00a7d58b6fea291be0d6fbb27e653a22c68e8c1/ahocorasick_rs-1.0.3-cp311-cp311-macosx_10_12_x86_64.macosx_11_0_arm64.macosx_10_12_universal2.whl",
+   "archives": [
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "ahocorasick-rs",
+   "version": "1.0.3",
+   "file": "ahocorasick_rs-1.0.3-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+   "sha256": "ab2ef82253f4c784ca3c06d401fec95e4635b1b6d38e502435a92f87e7f0bd5c",
+   "size": 359572,
+   "url": "https://files.pythonhosted.org/packages/44/65/b138951ec6677e72467507ba16661dedd123ed2d4c9430c6b4c0f3141b44/ahocorasick_rs-1.0.3-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+   "archives": [
+    "gdprguardian-local.zip"
+   ]
+  },
+  {
+   "project": "ahocorasick-rs",
+   "version": "1.0.3",
+   "file": "ahocorasick_rs-1.0.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+   "sha256": "3bb732943ee5b8d56fb1a46cde6a0a1ad0fb7bb09d9897d88df89007d1770779",
+   "size": 396427,
+   "url": "https://files.pythonhosted.org/packages/12/20/a49dd452c5a66245f138ac8c402f3604decff0ce51ea724a8752f99f3369/ahocorasick_rs-1.0.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+   "archives": [
+    "gdprguardian-local.zip"
+   ]
+  },
+  {
+   "project": "ahocorasick-rs",
+   "version": "1.0.3",
+   "file": "ahocorasick_rs-1.0.3-cp311-cp311-win_amd64.whl",
+   "sha256": "4fd2f2a8fd81eff649daaceaa879a378efc02f7d77e025b8478d7de5a2de82dd",
+   "size": 267968,
+   "url": "https://files.pythonhosted.org/packages/e8/63/276267abd16938d17b459c2eed21d464d1ffca45c4a5a14e360e32cfec8b/ahocorasick_rs-1.0.3-cp311-cp311-win_amd64.whl",
+   "archives": [
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "ahocorasick-rs",
+   "version": "1.0.3",
+   "file": "ahocorasick_rs-1.0.3-cp312-cp312-macosx_10_12_x86_64.macosx_11_0_arm64.macosx_10_12_universal2.whl",
+   "sha256": "42bc695d5a66aeede5ac03d659ec8c4a3a6316aa74ce06d436aec7ed73def328",
+   "size": 703694,
+   "url": "https://files.pythonhosted.org/packages/da/3e/1f16a7606326a1b00243d26d7b1c1481465497d9f73b4023662c7e483cb1/ahocorasick_rs-1.0.3-cp312-cp312-macosx_10_12_x86_64.macosx_11_0_arm64.macosx_10_12_universal2.whl",
+   "archives": [
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "ahocorasick-rs",
+   "version": "1.0.3",
+   "file": "ahocorasick_rs-1.0.3-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+   "sha256": "1afbc0464ba72d8fba070665421fab26567de6df46660da7e88afdd7ebed9927",
+   "size": 360254,
+   "url": "https://files.pythonhosted.org/packages/6a/3a/a19cb1582302dffaf5fd3bf582769a324bbffc090052e00a6b6cd4a2c962/ahocorasick_rs-1.0.3-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+   "archives": [
+    "gdprguardian-local.zip"
+   ]
+  },
+  {
+   "project": "ahocorasick-rs",
+   "version": "1.0.3",
+   "file": "ahocorasick_rs-1.0.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+   "sha256": "e9f1c56b595c50a9ebd4824995795f4c8627c4c8a5bc7c7d5489fe2cb80d5123",
+   "size": 396849,
+   "url": "https://files.pythonhosted.org/packages/93/b1/ce0d9a5bc698d6cfe1292c1d767946ec165ef528f5978e075063e049f76e/ahocorasick_rs-1.0.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+   "archives": [
+    "gdprguardian-local.zip"
+   ]
+  },
+  {
+   "project": "ahocorasick-rs",
+   "version": "1.0.3",
+   "file": "ahocorasick_rs-1.0.3-cp312-cp312-win_amd64.whl",
+   "sha256": "1322deee3651d2f00528c8c3b81f2797b8390c4f753ada4d909281a0895a2499",
+   "size": 269833,
+   "url": "https://files.pythonhosted.org/packages/36/fa/6508278a7788e73eba344c45021fd45c2c5711bd2c6c2f53428fc742a0c2/ahocorasick_rs-1.0.3-cp312-cp312-win_amd64.whl",
+   "archives": [
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "ahocorasick-rs",
+   "version": "1.0.3",
+   "file": "ahocorasick_rs-1.0.3-cp313-cp313-macosx_10_12_x86_64.macosx_11_0_arm64.macosx_10_12_universal2.whl",
+   "sha256": "9d57e2722df47694215274c8fd7116b22b21d374fb67ed61c87b5dfaecbd2a4d",
+   "size": 702897,
+   "url": "https://files.pythonhosted.org/packages/8a/a5/2b84148c9379800ffaffae8a447c9fef661cac3e04432ffee5b0c9d66a4d/ahocorasick_rs-1.0.3-cp313-cp313-macosx_10_12_x86_64.macosx_11_0_arm64.macosx_10_12_universal2.whl",
+   "archives": [
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "ahocorasick-rs",
+   "version": "1.0.3",
+   "file": "ahocorasick_rs-1.0.3-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+   "sha256": "09c4f94c2cc85f94cb4c75da24f3fb242cf382af4cb87022d1c3831580d5cb22",
+   "size": 359949,
+   "url": "https://files.pythonhosted.org/packages/f3/f1/c1504c23cd185bbbf76e48cad3183ac90ed5db30fa7dfbb7289c01306a47/ahocorasick_rs-1.0.3-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+   "archives": [
+    "gdprguardian-local.zip"
+   ]
+  },
+  {
+   "project": "ahocorasick-rs",
+   "version": "1.0.3",
+   "file": "ahocorasick_rs-1.0.3-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+   "sha256": "a034948a591749ae3dd8ba8d27cf13383a4c1831796c647e9bedcecda3d7e5dd",
+   "size": 396673,
+   "url": "https://files.pythonhosted.org/packages/b1/b3/73e5a9e9c17b519391447fa45ddb5da381d56b4a9bb35b87940b66d20b0a/ahocorasick_rs-1.0.3-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+   "archives": [
+    "gdprguardian-local.zip"
+   ]
+  },
+  {
+   "project": "ahocorasick-rs",
+   "version": "1.0.3",
+   "file": "ahocorasick_rs-1.0.3-cp313-cp313-win_amd64.whl",
+   "sha256": "29b980c1b4ff10027d8f8cccea2b3583ff3d96741c7a177dc55085a6e8bf1035",
+   "size": 269477,
+   "url": "https://files.pythonhosted.org/packages/57/8c/fcd6a8f7ae789b2be7d1f33049998c8e30ffd8cf87807dbaae8502ae5a9e/ahocorasick_rs-1.0.3-cp313-cp313-win_amd64.whl",
+   "archives": [
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "ahocorasick-rs",
+   "version": "1.0.3",
+   "file": "ahocorasick_rs-1.0.3-cp314-cp314-macosx_10_12_x86_64.macosx_11_0_arm64.macosx_10_12_universal2.whl",
+   "sha256": "06046d2aa4e0b15fb7aaefd7e26246d819c72ca7418ec3a6f98239f6a09ef462",
+   "size": 703263,
+   "url": "https://files.pythonhosted.org/packages/03/ce/2d1c577eef3b9b5c2829fa23cd60649b9141c6fe59f1e038df754073fa14/ahocorasick_rs-1.0.3-cp314-cp314-macosx_10_12_x86_64.macosx_11_0_arm64.macosx_10_12_universal2.whl",
+   "archives": [
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "ahocorasick-rs",
+   "version": "1.0.3",
+   "file": "ahocorasick_rs-1.0.3-cp314-cp314-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+   "sha256": "9ea87a5daef701586fcb20835a001659240f5bff637408209db5d9d09378b6f6",
+   "size": 359764,
+   "url": "https://files.pythonhosted.org/packages/67/1a/2dd77a49fdd0af17606a0746c77ad3bed6b62735d6334a18f17800b510e3/ahocorasick_rs-1.0.3-cp314-cp314-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+   "archives": [
+    "gdprguardian-local.zip"
+   ]
+  },
+  {
+   "project": "ahocorasick-rs",
+   "version": "1.0.3",
+   "file": "ahocorasick_rs-1.0.3-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+   "sha256": "9c7b53e81c875551ae491206ece0f11b8c1bc7a1f45975c9674e0e216d35e4cf",
+   "size": 396496,
+   "url": "https://files.pythonhosted.org/packages/f4/ae/7831249077e953e6daffb1c032281550d30de62e537b7e25db2e1645c181/ahocorasick_rs-1.0.3-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+   "archives": [
+    "gdprguardian-local.zip"
+   ]
+  },
+  {
+   "project": "ahocorasick-rs",
+   "version": "1.0.3",
+   "file": "ahocorasick_rs-1.0.3-cp314-cp314-win_amd64.whl",
+   "sha256": "8c5266fbc53efb9672e58ec5605faa1e13439a8d7f66333f92621b8a89739871",
+   "size": 269623,
+   "url": "https://files.pythonhosted.org/packages/55/54/de5c3ceffb9977550db263ee1058dde94efb09ba416db1b3c8294c2d0f04/ahocorasick_rs-1.0.3-cp314-cp314-win_amd64.whl",
+   "archives": [
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "beautifulsoup4",
+   "version": "4.15.0",
+   "file": "beautifulsoup4-4.15.0-py3-none-any.whl",
+   "sha256": "d6f88de62e1d4e38ecb1077eb9724cd0eff29d2a08ca16a401e9b9e93f117cf9",
+   "size": 109924,
+   "url": "https://files.pythonhosted.org/packages/88/c6/92fcd42f1ba33e1184263f25bfabf3d27c383410470f169e4b8163bf9c17/beautifulsoup4-4.15.0-py3-none-any.whl",
+   "archives": [
+    "gdprguardian-local.zip",
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "charset-normalizer",
+   "version": "3.5.2",
+   "file": "charset_normalizer-3.5.2-py3-none-any.whl",
+   "sha256": "b6b751274acb69d77b3323d6b7dbaa3c7fdfc1eb829b7eb61d262f32e1af9685",
+   "size": 68872,
+   "url": "https://files.pythonhosted.org/packages/fc/ad/d07d7862a62ffa6d79d68074d14823243dd235a77c45262acbf6adeb28bf/charset_normalizer-3.5.2-py3-none-any.whl",
+   "archives": [
+    "gdprguardian-local.zip",
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "click",
+   "version": "8.5.0",
+   "file": "click-8.5.0-py3-none-any.whl",
+   "sha256": "255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360",
+   "size": 125251,
+   "url": "https://files.pythonhosted.org/packages/58/50/6c0d534c5f134586a8e1ba4e330569e32f057e33372ae556463212fb4cd3/click-8.5.0-py3-none-any.whl",
+   "archives": [
+    "gdprguardian-local.zip",
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "cobble",
+   "version": "0.1.4",
+   "file": "cobble-0.1.4-py3-none-any.whl",
+   "sha256": "36c91b1655e599fd428e2b95fdd5f0da1ca2e9f1abb0bc871dec21a0e78a2b44",
+   "size": 3984,
+   "url": "https://files.pythonhosted.org/packages/d5/e1/3714a2f371985215c219c2a70953d38e3eed81ef165aed061d21de0e998b/cobble-0.1.4-py3-none-any.whl",
+   "archives": [
+    "gdprguardian-local.zip",
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "colorama",
+   "version": "0.4.6",
+   "file": "colorama-0.4.6-py2.py3-none-any.whl",
+   "sha256": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+   "size": 25335,
+   "url": "https://files.pythonhosted.org/packages/d1/d6/3965ed04c63042e047cb6a3e6ed1a63a35087b6a609aa3a15ed8ac56c221/colorama-0.4.6-py2.py3-none-any.whl",
+   "archives": [
+    "gdprguardian-local.zip",
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "defusedxml",
+   "version": "0.7.1",
+   "file": "defusedxml-0.7.1-py2.py3-none-any.whl",
+   "sha256": "a352e7e428770286cc899e2542b6cdaedb2b4953ff269a210103ec58f6198a61",
+   "size": 25604,
+   "url": "https://files.pythonhosted.org/packages/07/6c/aa3f2f849e01cb6a001cd8554a88d4c77c5c1a31c95bdf1cf9301e6d9ef4/defusedxml-0.7.1-py2.py3-none-any.whl",
+   "archives": [
+    "gdprguardian-local.zip",
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "mammoth",
+   "version": "1.13.0",
+   "file": "mammoth-1.13.0-py2.py3-none-any.whl",
+   "sha256": "dd7629fa9d0a5e82207b3f481a9dcb8308fb43f6206258e062f11121efba9991",
+   "size": 55228,
+   "url": "https://files.pythonhosted.org/packages/af/2a/47d72b27689f3c7cd1d270dd1d4699df2fe3b78b2f293b6b08f565548a45/mammoth-1.13.0-py2.py3-none-any.whl",
+   "archives": [
+    "gdprguardian-local.zip",
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "markdownify",
+   "version": "1.2.3",
+   "file": "markdownify-1.2.3-py3-none-any.whl",
+   "sha256": "a189a0bedfd14009030fde5f85bb6f77c56897cb839b5c25315dd7d4e3e290ba",
+   "size": 15732,
+   "url": "https://files.pythonhosted.org/packages/04/10/fa543d484e8b1199243fe20eedd02cc5af050edebce98a7293a5773df592/markdownify-1.2.3-py3-none-any.whl",
+   "archives": [
+    "gdprguardian-local.zip",
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "olefile",
+   "version": "0.47",
+   "file": "olefile-0.47-py2.py3-none-any.whl",
+   "sha256": "543c7da2a7adadf21214938bb79c83ea12b473a4b6ee4ad4bf854e7715e13d1f",
+   "size": 114565,
+   "url": "https://files.pythonhosted.org/packages/17/d3/b64c356a907242d719fc668b71befd73324e47ab46c8ebbbede252c154b2/olefile-0.47-py2.py3-none-any.whl",
+   "archives": [
+    "gdprguardian-local.zip",
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "phonenumberslite",
+   "version": "9.0.41",
+   "file": "phonenumberslite-9.0.41-py2.py3-none-any.whl",
+   "sha256": "33347389a9105f4f5bd002d60ad9e721e5233950aa6219fb35c20ea2acf8e68f",
+   "size": 473205,
+   "url": "https://files.pythonhosted.org/packages/eb/be/409bbf25e7d922d7480e71389b9e1707409afd69383825a6e5d03823426b/phonenumberslite-9.0.41-py2.py3-none-any.whl",
+   "archives": [
+    "gdprguardian-local.zip",
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "pypdf",
+   "version": "6.21.2",
+   "file": "pypdf-6.21.2-py3-none-any.whl",
+   "sha256": "1d44d1a3a200f25062adff0085b02040e4646431ac2ccac22e42679e91466084",
+   "size": 407766,
+   "url": "https://files.pythonhosted.org/packages/1b/4d/c9d2d67f204eff463237a1a8f5e25a6923b7b1043982b91fcaf104c8ef60/pypdf-6.21.2-py3-none-any.whl",
+   "archives": [
+    "gdprguardian-local.zip",
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "pypdfium2",
+   "version": "5.14.0",
+   "file": "pypdfium2-5.14.0-py3-none-macosx_13_0_arm64.whl",
+   "sha256": "2de384df66ba55fcaab0775f30f28ec1090af3dfa60276a07821efc96d993118",
+   "size": 3542294,
+   "url": "https://files.pythonhosted.org/packages/d1/ea/14673bc9d8b7beeaa1eb46e9951b22543edaf2a4676c586e3b1e032ff6ee/pypdfium2-5.14.0-py3-none-macosx_13_0_arm64.whl",
+   "archives": [
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "pypdfium2",
+   "version": "5.14.0",
+   "file": "pypdfium2-5.14.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+   "sha256": "f1b696e6901e16f114a2ec6332e5e3f8f5033a901614ead28499ab18ca6024f5",
+   "size": 3719672,
+   "url": "https://files.pythonhosted.org/packages/92/b4/0c31aa51887cd6cd032191dfe010a6d01ed43cf03204cfbd2184ebe4b715/pypdfium2-5.14.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+   "archives": [
+    "gdprguardian-local.zip"
+   ]
+  },
+  {
+   "project": "pypdfium2",
+   "version": "5.14.0",
+   "file": "pypdfium2-5.14.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+   "sha256": "11f281613fa22313d9c7ab89947665e84eccf8ebe40e1198a84a88352305648d",
+   "size": 3799581,
+   "url": "https://files.pythonhosted.org/packages/4f/a3/c9cc797fc8bdfb8f37b9b0f8b9d02a5fc196b2015f408d53624cab5b0519/pypdfium2-5.14.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+   "archives": [
+    "gdprguardian-local.zip"
+   ]
+  },
+  {
+   "project": "pypdfium2",
+   "version": "5.14.0",
+   "file": "pypdfium2-5.14.0-py3-none-win_amd64.whl",
+   "sha256": "149fd5c6397b8df8bf7911a93506eff0be874f877afe7ac936cf5d37d21a6a06",
+   "size": 3947280,
+   "url": "https://files.pythonhosted.org/packages/00/dc/ca7874924c9cfd701ad53f89529968523790e70473e0b71e834668316148/pypdfium2-5.14.0-py3-none-win_amd64.whl",
+   "archives": [
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "python-calamine",
+   "version": "0.9.0",
+   "file": "python_calamine-0.9.0-cp311-cp311-macosx_11_0_arm64.whl",
+   "sha256": "eb514fcd0857841b3e2cefad64d7217a086617f6138f2cce271b872063d22951",
+   "size": 859807,
+   "url": "https://files.pythonhosted.org/packages/1c/90/1d58a53c9eb31529dcfd99891aec7f7551990e9039a6640d7f1bcb6c88d5/python_calamine-0.9.0-cp311-cp311-macosx_11_0_arm64.whl",
+   "archives": [
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "python-calamine",
+   "version": "0.9.0",
+   "file": "python_calamine-0.9.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+   "sha256": "db5e615c651402a567f38bcc5885e96c3af48f0305ad118b8776a3cbf2d933f7",
+   "size": 935323,
+   "url": "https://files.pythonhosted.org/packages/f6/08/2344ff2466bb66567c4e939d49f0b5e3bd1c00ff61f4bb457dcfd4ad5ee9/python_calamine-0.9.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+   "archives": [
+    "gdprguardian-local.zip"
+   ]
+  },
+  {
+   "project": "python-calamine",
+   "version": "0.9.0",
+   "file": "python_calamine-0.9.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+   "sha256": "280dd7d0146877eb765f2d0e0d78db26682fc5a3860d6ee1fc188bdf80f75fe0",
+   "size": 939455,
+   "url": "https://files.pythonhosted.org/packages/bf/23/5357cec449c583e7fa309e47f57ea95274ad5eaaa76ce47b0c2c6cf579c7/python_calamine-0.9.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+   "archives": [
+    "gdprguardian-local.zip"
+   ]
+  },
+  {
+   "project": "python-calamine",
+   "version": "0.9.0",
+   "file": "python_calamine-0.9.0-cp311-cp311-win_amd64.whl",
+   "sha256": "c7f377d3e300700d320b9ee7b98463c279d67a357abe581956e14ff8a6a941ee",
+   "size": 786129,
+   "url": "https://files.pythonhosted.org/packages/e8/bd/c971f6b2b1b67caf55b6d1af83cf09cdfad9b43257c7262b430191aa603b/python_calamine-0.9.0-cp311-cp311-win_amd64.whl",
+   "archives": [
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "python-calamine",
+   "version": "0.9.0",
+   "file": "python_calamine-0.9.0-cp312-cp312-macosx_11_0_arm64.whl",
+   "sha256": "fea885bd944dbf013654ef97bea5d3a88f444c0ef5ce1b21246a093622d3c63e",
+   "size": 855629,
+   "url": "https://files.pythonhosted.org/packages/e3/c3/d033f3a5be96b326d7415c5bef8116c31f6b53e9036dbc1b90fdcc855f6f/python_calamine-0.9.0-cp312-cp312-macosx_11_0_arm64.whl",
+   "archives": [
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "python-calamine",
+   "version": "0.9.0",
+   "file": "python_calamine-0.9.0-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+   "sha256": "11d9889e79d1dbf9cdb453447126b026847697b9d840835cf3a40ed642e7c652",
+   "size": 929235,
+   "url": "https://files.pythonhosted.org/packages/3a/ae/57aee6361c6a599610bbb5a7d200db011a27341e6e2bf2bf0c90cb044bee/python_calamine-0.9.0-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+   "archives": [
+    "gdprguardian-local.zip"
+   ]
+  },
+  {
+   "project": "python-calamine",
+   "version": "0.9.0",
+   "file": "python_calamine-0.9.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+   "sha256": "0985f4df983781df9bb1364a79bdac17b13ea43f9fc9d90c111500e695e4c142",
+   "size": 936159,
+   "url": "https://files.pythonhosted.org/packages/08/31/34246eaf9c0ed4ed0255eaf4cd4447561fa9783a8b4554319979e71a6c92/python_calamine-0.9.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+   "archives": [
+    "gdprguardian-local.zip"
+   ]
+  },
+  {
+   "project": "python-calamine",
+   "version": "0.9.0",
+   "file": "python_calamine-0.9.0-cp312-cp312-win_amd64.whl",
+   "sha256": "a96342e0c7349f593113512894afa95232aaa419e2b6e0777426b83a0291f0e5",
+   "size": 782764,
+   "url": "https://files.pythonhosted.org/packages/ee/3e/c3e88f540b481da42dad055ac5de99a7f68839cb522202b887391ae5f2ac/python_calamine-0.9.0-cp312-cp312-win_amd64.whl",
+   "archives": [
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "python-calamine",
+   "version": "0.9.0",
+   "file": "python_calamine-0.9.0-cp313-cp313-macosx_11_0_arm64.whl",
+   "sha256": "93c28081959e2183cf1b3812a78e77e811a5d1b25ac5ac7dc532163aecb42e3a",
+   "size": 854509,
+   "url": "https://files.pythonhosted.org/packages/83/ef/371c68b05ed777464b17d7835df8ed253e24527d41d027584767d79e1aa3/python_calamine-0.9.0-cp313-cp313-macosx_11_0_arm64.whl",
+   "archives": [
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "python-calamine",
+   "version": "0.9.0",
+   "file": "python_calamine-0.9.0-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+   "sha256": "d6d29b283c3659626f471e1352e7dc45dad1bcb6996aa3995d17d8b974c8604e",
+   "size": 929285,
+   "url": "https://files.pythonhosted.org/packages/3c/ac/a95e02beff0e47ce44520ea57c758d2d28346302214a3c5614e39779f3e3/python_calamine-0.9.0-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+   "archives": [
+    "gdprguardian-local.zip"
+   ]
+  },
+  {
+   "project": "python-calamine",
+   "version": "0.9.0",
+   "file": "python_calamine-0.9.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+   "sha256": "f11cb0e34a9e640ef56f65171f39135105201fbb6c6164d465a1dea0d9708cb2",
+   "size": 934976,
+   "url": "https://files.pythonhosted.org/packages/26/6e/b4e490e3295d6208b9b034ae29565c563b60c07c6267f0a01616b27c537c/python_calamine-0.9.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+   "archives": [
+    "gdprguardian-local.zip"
+   ]
+  },
+  {
+   "project": "python-calamine",
+   "version": "0.9.0",
+   "file": "python_calamine-0.9.0-cp313-cp313-win_amd64.whl",
+   "sha256": "2eece55c58bb3e528274d9b405e4e572d1a2a77ba5772adbcd3548cc06737057",
+   "size": 782374,
+   "url": "https://files.pythonhosted.org/packages/55/74/6c4223f291eba31a960a997b9d7d5335632b86055cc7448ca8628406581a/python_calamine-0.9.0-cp313-cp313-win_amd64.whl",
+   "archives": [
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "python-calamine",
+   "version": "0.9.0",
+   "file": "python_calamine-0.9.0-cp314-cp314-macosx_11_0_arm64.whl",
+   "sha256": "49c5323749f4168637795814ce8fe811b82fd2d0a7e41749c8d0d5f8d1a4c573",
+   "size": 857399,
+   "url": "https://files.pythonhosted.org/packages/43/bd/ad856238d24f4e32ab335ac76199afdeea6fec462e7e0a1f821ed8cb0d46/python_calamine-0.9.0-cp314-cp314-macosx_11_0_arm64.whl",
+   "archives": [
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "python-calamine",
+   "version": "0.9.0",
+   "file": "python_calamine-0.9.0-cp314-cp314-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+   "sha256": "b08fce785b9895193d0b1ddfa56b5ec878d76fde03fb71e23234399f26b489bb",
+   "size": 931639,
+   "url": "https://files.pythonhosted.org/packages/a5/df/d5cde5e51fdd42889ec6b47ae11bb72168066ef174602fb2c150985cf969/python_calamine-0.9.0-cp314-cp314-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+   "archives": [
+    "gdprguardian-local.zip"
+   ]
+  },
+  {
+   "project": "python-calamine",
+   "version": "0.9.0",
+   "file": "python_calamine-0.9.0-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+   "sha256": "7a3da3c0c385e8fc2e30ab0e2f9e2cbfe59aec1e2283b5698b2803196e88d42f",
+   "size": 936270,
+   "url": "https://files.pythonhosted.org/packages/38/b0/72cc759cb5fbbb6c5125e439b1b714e9cd47b9f76d594dc29d1493df31cb/python_calamine-0.9.0-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+   "archives": [
+    "gdprguardian-local.zip"
+   ]
+  },
+  {
+   "project": "python-calamine",
+   "version": "0.9.0",
+   "file": "python_calamine-0.9.0-cp314-cp314-win_amd64.whl",
+   "sha256": "4204c34ef13729e15826405b696e88038aad6109521944fb673e68dc987e9633",
+   "size": 784028,
+   "url": "https://files.pythonhosted.org/packages/e2/37/d30a4c25c0a31f30e139b02f30b5fc793ad373ff0d007cf9c84ca1aa0601/python_calamine-0.9.0-cp314-cp314-win_amd64.whl",
+   "archives": [
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "python-oxmsg",
+   "version": "0.0.2",
+   "file": "python_oxmsg-0.0.2-py3-none-any.whl",
+   "sha256": "22be29b14c46016bcd05e34abddfd8e05ee82082f53b82753d115da3fc7d0355",
+   "size": 31455,
+   "url": "https://files.pythonhosted.org/packages/53/67/f56c69a98c7eb244025845506387d0f961681657c9fcd8b2d2edd148f9d2/python_oxmsg-0.0.2-py3-none-any.whl",
+   "archives": [
+    "gdprguardian-local.zip",
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "six",
+   "version": "1.17.0",
+   "file": "six-1.17.0-py2.py3-none-any.whl",
+   "sha256": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+   "size": 11050,
+   "url": "https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl",
+   "archives": [
+    "gdprguardian-local.zip",
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "soupsieve",
+   "version": "3.0.4",
+   "file": "soupsieve-3.0.4-py3-none-any.whl",
+   "sha256": "8412826614f9c632227067d0985aeb9f584bd15efc852955430e097a9fe7afbf",
+   "size": 42458,
+   "url": "https://files.pythonhosted.org/packages/07/66/473f7ca0be0b06e38ee8c85ee2db184e3981bd769fac2e7c19c8a8865211/soupsieve-3.0.4-py3-none-any.whl",
+   "archives": [
+    "gdprguardian-local.zip",
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  },
+  {
+   "project": "typing-extensions",
+   "version": "4.16.0",
+   "file": "typing_extensions-4.16.0-py3-none-any.whl",
+   "sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+   "size": 45571,
+   "url": "https://files.pythonhosted.org/packages/49/d3/b8441a820a491ddfc024b0b0cf0393375b75ea13866d9c66727e54c2fc80/typing_extensions-4.16.0-py3-none-any.whl",
+   "archives": [
+    "gdprguardian-local.zip",
+    "gdprguardian-local-windows-macos.zip"
+   ]
+  }
+ ]
+}

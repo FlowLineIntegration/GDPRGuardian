@@ -1,0 +1,202 @@
+# Pack Italie / Italy pack.
+# Niveaux : A = clé forte, masquage sans contexte ; B = clé faible, contexte requis ; C = sans clé, contexte requis.
+# Tiers: A strong checksum, no context needed; B weak checksum + context; C no checksum, context only.
+# En mode auto, tout mot de contexte active le pack : seuls des termes propres à l'italien y figurent
+# (« C.F. », « CAP », « CIE », « patente n° » existent aussi en français, au Maroc notamment ; « Tel. » est
+# ancré dans un motif). In auto mode any context word activates the pack, so only Italian-specific terms are
+# listed ("C.F.", "CAP", "CIE", "patente n°" also occur in French, e.g. in Morocco; "Tel." is anchored inside
+# a pattern instead).
+# Bornes « (?<![0-9A-Za-z]{2}) » après le premier caractère et « (?![0-9A-Za-z]) » en fin de motif : sre écarte
+# en C les fenêtres prises dans un nombre ou un mot plus long (voir de.toml). In-pattern boundaries after the
+# first character and at the end: sre rejects in C the windows inside a longer number or word (see de.toml).
+
+[pack]
+id = "IT"
+name = "Italia"
+version = "2026.10.0"
+country = "IT"
+languages = ["it"]
+detectors = []
+
+[locale]
+phone_codes = ["39"]
+tlds = ["it"]
+iban_countries = ["IT"]
+languages = ["it"]
+
+[context.cf]
+it = ["codice fiscale", "cod. fisc.", "cod.fisc.", "tessera sanitaria"]
+[context.piva]
+it = ["partita iva", "p.iva", "p. iva", "piva", "p.i.v.a."]
+[context.id_card]
+it = ["carta d'identità", "carta di identità", "documento d'identità", "documento di identità",
+      "documento di riconoscimento", "numero documento", "n. documento"]
+[context.passport]
+it = ["passaporto", "numero passaporto", "n. passaporto"]
+[context.driver_license]
+it = ["patente di guida", "numero patente", "n. patente", "numero della patente"]
+[context.phone]
+it = ["cellulare", "numero di telefono", "telefono fisso", "telefono cellulare", "recapito telefonico"]
+# Indices d'entreprise individuelle / sole-trader cues.
+[context.ei]
+it = ["ditta individuale", "impresa individuale", "libero professionista", "libera professionista",
+      "lavoratore autonomo", "lavoratrice autonoma"]
+
+# Lexique partagé par tous les packs en mode auto : pas de « CF » (cash-flow), ni de « via » (« Ship via »).
+# Lexicon shared by every pack in auto mode: no "CF" (cash flow), no "via" ("Ship via").
+[headers]
+IT_CODICE_FISCALE = ["codice fiscale", "cod. fisc."]
+IT_PARTITA_IVA = ["partita iva", "p.iva", "p. iva", "piva"]
+ID_CARD = ["carta d'identità", "carta di identità", "numero documento"]
+PASSPORT = ["passaporto", "numero passaporto"]
+DRIVER_LICENSE = ["patente", "patente di guida", "numero patente"]
+PHONE = ["telefono", "tel.", "cellulare", "cell.", "recapito telefonico"]
+EMAIL = ["email", "e-mail", "posta elettronica", "pec"]
+PERSON = ["nome", "cognome", "nome e cognome", "nominativo", "dipendente", "cliente", "paziente", "intestatario"]
+ADDRESS = ["indirizzo", "via/piazza", "residenza", "domicilio"]
+BIRTH_DATE = ["data di nascita", "nato il", "nata il"]
+POSTAL_CODE = ["cap", "c.a.p.", "codice postale"]
+IBAN = ["iban", "conto corrente"]
+
+[labels.IT_CODICE_FISCALE]
+fr = "CODICE_FISCALE"
+en = "CODICE_FISCALE"
+it = "CODICE_FISCALE"
+neutral = "TAX_ID"
+aliases = ["CF"]
+
+[labels.IT_PARTITA_IVA]
+fr = "PARTITA_IVA"
+en = "PARTITA_IVA"
+it = "PARTITA_IVA"
+neutral = "COMPANY_ID"
+aliases = ["PIVA"]
+
+# Codice fiscale : 16 caractères structurés (nom, date, commune) et lettre de contrôle mod 26.
+# Majuscules (omocodia comprise) ; minuscules, initiale éventuellement capitale (Word met une majuscule en
+# début de ligne), avec l'année en chiffres (l'omocodia ne l'atteint qu'au 6e homonyme). Sans « (?i) », 4 fois
+# plus rapide ; pas de borne gauche en minuscules, mesurée plus lente (une minuscule dans un mot échoue vite).
+# Uppercase (homocodes included); lowercase, possibly capitalised (Word capitalises a line start), with a
+# numeric year (homocody only reaches it at the 6th namesake). Without "(?i)", 4 times faster; no left
+# boundary on the lowercase form, measured slower (a lowercase letter inside a word fails fast anyway).
+[[recognizer]]
+id = "IT_CODICE_FISCALE"
+entity = "TAX_ID"
+label = "IT_CODICE_FISCALE"
+tier = "A"
+pattern = '[A-Z](?<![0-9A-Za-z]{2})[A-Z]{2}{S}[A-Z]{3}{S}[0-9LMNP-V]{2}[ABCDEHLMPRST][0-9LMNP-V]{2}{S}[A-Z][0-9LMNP-V]{3}{S}[A-Z](?![0-9A-Za-z])'
+validator = "it.codice_fiscale"
+boundary = "alnum"
+context = "cf"
+
+[[recognizer]]
+id = "IT_CODICE_FISCALE_LOWER"
+entity = "TAX_ID"
+label = "IT_CODICE_FISCALE"
+tier = "A"
+prefilter = "digit"
+pattern = '[A-Za-z][a-z]{5}[0-9]{2}[abcdehlmprst][0-9lmnp-v]{2}[a-z][0-9lmnp-v]{3}[a-z](?![0-9A-Za-z])'
+validator = "it.codice_fiscale"
+boundary = "alnum"
+context = "cf"
+
+[[recognizer]]
+id = "IT_VAT"
+entity = "VAT"
+label = "VAT"
+tier = "A"
+policy = "company"
+prefilter = "digit"
+pattern = 'IT{S}[0-9]{11}'
+validator = "it.vat"
+boundary = "alnum"
+context = "piva"
+
+# Partita IVA / codice fiscale numérique : Luhn (1 sur 10 environ avec le code bureau), contexte requis.
+# Partita IVA / numeric codice fiscale: Luhn (about 1 in 10 with the office code), context required.
+[[recognizer]]
+id = "IT_PARTITA_IVA"
+entity = "VAT"
+label = "IT_PARTITA_IVA"
+tier = "B"
+policy = "company"
+prefilter = "digit"
+pattern = '[0-9](?<![0-9A-Za-z]{2})[0-9]{10}(?![0-9A-Za-z])'
+validator = "it.partita_iva"
+boundary = "alnum"
+context = ["piva", "cf"]
+
+[[recognizer]]
+id = "IT_ID_CARD"
+entity = "ID_CARD"
+label = "ID_CARD"
+tier = "C"
+prefilter = "digit"
+pattern = '(?:[A-Z](?<![0-9A-Za-z]{2})[A-Z](?:[0-9]{5}[A-Z]{2}|{S}[0-9]{7})|[0-9](?<![0-9A-Za-z]{2})[0-9]{6}[A-Z]{2})(?![0-9A-Za-z])'
+boundary = "alnum"
+context = "id_card"
+
+[[recognizer]]
+id = "IT_PASSPORT"
+entity = "PASSPORT"
+label = "PASSPORT"
+tier = "C"
+prefilter = "digit"
+pattern = '[A-Z](?<![0-9A-Za-z]{2})[A-Z][0-9]{7}(?![0-9A-Za-z])'
+boundary = "alnum"
+context = "passport"
+
+[[recognizer]]
+id = "IT_DRIVER_LICENSE"
+entity = "DRIVER_LICENSE"
+label = "DRIVER_LICENSE"
+tier = "C"
+prefilter = "digit"
+pattern = '(?:[A-Z](?<![0-9A-Za-z]{2})[A-Z][0-9]{7}|U(?<![0-9A-Za-z]{2})1[A-Z0-9]{7})[A-Z](?![0-9A-Za-z])'
+boundary = "alnum"
+context = "driver_license"
+
+# Téléphones nationaux (fixes en 0, mobiles en 3) ; les numéros +39 relèvent du pack INTL.
+# Mobile sans libellé (niveau A) : seulement la forme à 10 chiffres groupée 3-3-4 ou 3-7, car « 350 000 000 »
+# (montant) ou un SIREN « 332 829 320 » ont la forme 3-3-3 d'un ancien mobile à 9 chiffres.
+# National phone numbers (landlines 0…, mobiles 3…); +39 numbers are handled by the INTL pack. Unlabelled
+# mobiles (tier A): only the 10-digit 3-3-4 or 3-7 shape, since "350 000 000" (an amount) or a French SIREN
+# "332 829 320" have the 3-3-3 shape of an old 9-digit mobile.
+[[recognizer]]
+id = "IT_PHONE_MOBILE"
+entity = "PHONE"
+label = "PHONE"
+tier = "A"
+prefilter = "digit"
+pattern = '3(?<![0-9A-Za-z\+]3)[0-9]{2}[ \-][0-9]{3}[ \-]?[0-9]{4}(?![0-9A-Za-z])'
+validator = "it.phone_mobile"
+boundary = "phone"
+context = "phone"
+
+# Fixes : indicatif de 2 à 4 chiffres, puis au moins 3 chiffres accolés (« 06-12-2024 » n'est pas un numéro) ;
+# une branche par longueur d'indicatif borne le total à 11 chiffres, et la borne finale fait reculer la regex
+# devant un nombre voisin. Libellés : une branche par casse de l'initiale (balayage C des initiales par sre).
+# Landlines: 2- to 4-digit area code, then at least 3 adjacent digits ("06-12-2024" is no number); one branch
+# per area-code length caps the total at 11 digits, and the final boundary makes the regex back off a
+# neighbouring number. Labels: one branch per initial-letter case (C scan of the initials by sre).
+[[recognizer]]
+id = "IT_PHONE_LABELED"
+entity = "PHONE"
+label = "PHONE"
+tier = "A"
+prefilter = ["tel", "cel", "mob", "fax", "recapito"]
+pattern = '(?:T(?i:el(?:efono)?)|t(?i:el(?:efono)?)|C(?i:ell?(?:ulare)?)|c(?i:ell?(?:ulare)?)|M(?i:ob(?:ile)?)|m(?i:ob(?:ile)?)|F(?i:ax)|f(?i:ax)|R(?i:ecapito(?:\s{1,3}telefonico)?)|r(?i:ecapito(?:\s{1,3}telefonico)?))\.?(?:\s{0,3}(?:/|e)\s{0,3}[Ff]ax\.?)?(?:\s{0,3}\([^()\n0-9]{1,20}\))?\s{0,3}:?\s{0,3}(?P<v>(?:0(?:[1-9](?: ?/ ?|[ \-]{1,3})?[0-9]{3}(?:[ \-]?[0-9]){1,6}|[1-9][0-9](?: ?/ ?|[ \-]{1,3})?[0-9]{3}(?:[ \-]?[0-9]){0,5}|[1-9][0-9]{2}(?: ?/ ?|[ \-]{1,3})?[0-9]{3}(?:[ \-]?[0-9]){0,4})|3[0-9]{2}(?:[ \-]?[0-9]){6,7})(?![0-9A-Za-z]))'
+group = "v"
+validator = "it.phone"
+boundary = "alnum"
+
+[[recognizer]]
+id = "IT_PHONE"
+entity = "PHONE"
+label = "PHONE"
+tier = "B"
+prefilter = "digit"
+pattern = '(?:0(?<![0-9A-Za-z\+]0)(?:[1-9](?: ?/ ?|[ \-]{1,3})?[0-9]{3}(?:[ \-]?[0-9]){1,6}|[1-9][0-9](?: ?/ ?|[ \-]{1,3})?[0-9]{3}(?:[ \-]?[0-9]){0,5}|[1-9][0-9]{2}(?: ?/ ?|[ \-]{1,3})?[0-9]{3}(?:[ \-]?[0-9]){0,4})|3(?<![0-9A-Za-z\+]3)[0-9]{2}(?:[ \-]?[0-9]){6,7})(?![0-9A-Za-z])'
+validator = "it.phone"
+boundary = "phone"
+context = "phone"

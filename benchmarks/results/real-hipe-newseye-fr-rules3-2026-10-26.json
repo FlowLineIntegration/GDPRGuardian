@@ -1,0 +1,175 @@
+{
+  "corpus": "hipe_newseye_fr",
+  "title": "HIPE-2022 NewsEye French, historical newspapers",
+  "language": "fr",
+  "licence": "CC BY 4.0",
+  "source": "https://github.com/hipe-eval/HIPE-2022-data",
+  "revision": "hipe-eval/HIPE-2022-data@147f5bc3c7fb7e5c6b024a9ffd6503cd019fb9ea (v2.1)",
+  "real_text": "yes (historical OCR)",
+  "gold": "manual (pers, loc, org, time, prod; coarse literal layer)",
+  "gold_complete": true,
+  "negative_control": false,
+  "measures": "person-name recall on historical French press",
+  "cannot_measure": "modern identifiers (none in the text)",
+  "build": {
+    "documents": 140,
+    "mentions": 15003,
+    "chars": 1574597,
+    "source": "https://github.com/hipe-eval/HIPE-2022-data",
+    "revision": "hipe-eval/HIPE-2022-data@147f5bc3c7fb7e5c6b024a9ffd6503cd019fb9ea (v2.1)",
+    "licence": "CC BY 4.0",
+    "fetched": "2026-10-25"
+  },
+  "gold_labels": {
+    "LOCATION": 6099,
+    "ORG": 1975,
+    "OTHER": 265,
+    "PERSON": 6664
+  },
+  "run": {
+    "date": "2026-10-26",
+    "countries": "FR",
+    "profile": "standard",
+    "engine": {
+      "package": "gdprguardian",
+      "version": "1.0.0",
+      "native_core": true,
+      "python": "3.12.11",
+      "platform": "Windows 11",
+      "machine": "AMD64"
+    },
+    "tag": "rules3",
+    "review": null,
+    "split": "all",
+    "split_rule": null
+  },
+  "documents": 140,
+  "evaluated": 140,
+  "errors": {},
+  "chars": 1574597,
+  "seconds": 0.261,
+  "chars_per_second": 6039585,
+  "families": [
+    "PERSON"
+  ],
+  "totals": {
+    "m_total": 6664,
+    "m_full": 3040,
+    "m_cov80": 3147,
+    "m_literal_checked": 6570,
+    "m_literal": 1667,
+    "c_gold": 76497,
+    "c_gold_masked": 37407,
+    "c_pred": 50370,
+    "c_pred_tp": 37407,
+    "c_neutral": 1074069,
+    "c_neutral_masked": 5544,
+    "d_has_gold": 122,
+    "d_leak": 118,
+    "d_leak_literal": 103,
+    "k_total": 8339,
+    "k_touched": 789,
+    "chars": 1574597,
+    "detections": 5680,
+    "d_detection": 131,
+    "g_PERSON": 6664,
+    "f_PERSON": 3040
+  },
+  "metrics": {
+    "mention_recall": 0.4561824729891957,
+    "mention_recall_at80": 0.4722388955582233,
+    "char_recall": 0.48899956861053373,
+    "precision": 0.742644431209053,
+    "over_masking": 0.0051616795568999755,
+    "doc_leak_rate": 0.9672131147540983,
+    "doc_literal_leak_rate": 0.8442622950819673,
+    "mention_literal_leak_rate": 0.25372907153729074,
+    "kept_touched_rate": 0.09461566135028181,
+    "detections_per_10k_chars": 36.07272209968646,
+    "docs_with_detection": 0.9357142857142857,
+    "recall_PERSON": 0.4561824729891957
+  },
+  "intervals_95": {
+    "mention_recall": [
+      0.4367,
+      0.4813
+    ],
+    "mention_recall_at80": [
+      0.4515,
+      0.4953
+    ],
+    "char_recall": [
+      0.4716,
+      0.5071
+    ],
+    "precision": [
+      0.6997,
+      0.7857
+    ],
+    "over_masking": [
+      0.004,
+      0.0061
+    ],
+    "doc_leak_rate": [
+      0.9339,
+      0.9921
+    ],
+    "doc_literal_leak_rate": [
+      0.7731,
+      0.9052
+    ],
+    "mention_literal_leak_rate": [
+      0.22,
+      0.282
+    ],
+    "kept_touched_rate": [
+      0.0739,
+      0.1152
+    ],
+    "detections_per_10k_chars": [
+      31.0694,
+      39.8656
+    ],
+    "docs_with_detection": [
+      0.8929,
+      0.9714
+    ],
+    "recall_PERSON": [
+      0.4367,
+      0.4813
+    ]
+  },
+  "kept_families": {
+    "LOCATION": {
+      "mentions": 6099,
+      "touched": 597,
+      "touched_rate": 0.09788489916379735
+    },
+    "ORG": {
+      "mentions": 1975,
+      "touched": 177,
+      "touched_rate": 0.08962025316455696
+    },
+    "OTHER": {
+      "mentions": 265,
+      "touched": 15,
+      "touched_rate": 0.05660377358490566
+    }
+  },
+  "by_origin": {
+    "PERSON:manual": {
+      "mentions": 6664,
+      "masked": 3040,
+      "recall": 0.4561824729891957
+    }
+  },
+  "detected_labels": {
+    "PERSON": 5372,
+    "ADDRESS": 285,
+    "ORG": 18,
+    "PHONE": 2,
+    "IP": 1,
+    "NIR": 1,
+    "BIRTH_DATE": 1
+  }
+}

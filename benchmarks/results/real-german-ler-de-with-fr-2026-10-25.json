@@ -1,0 +1,183 @@
+{
+  "corpus": "german_ler_de",
+  "title": "German LER, federal court decisions (test split)",
+  "language": "de",
+  "licence": "CC BY 4.0",
+  "source": "https://huggingface.co/datasets/elenanereiss/german-ler",
+  "revision": "elenanereiss/german-ler@405b6923dfd2299da3d76a68220ee15a95bc1eab",
+  "real_text": "yes (court decisions, tokenised)",
+  "gold": "manual (19 fine classes: person, judge, lawyer, street, city, country, organisation, court, law...)",
+  "gold_complete": true,
+  "negative_control": false,
+  "measures": "names of judges, lawyers and persons, street names in real German legal prose",
+  "cannot_measure": "parties' identities (already pseudonymised by the courts); contact or ID numbers",
+  "build": {
+    "documents": 334,
+    "mentions": 5322,
+    "chars": 1365559,
+    "source": "https://huggingface.co/datasets/elenanereiss/german-ler",
+    "revision": "elenanereiss/german-ler@405b6923dfd2299da3d76a68220ee15a95bc1eab",
+    "licence": "CC BY 4.0",
+    "fetched": "2026-10-25"
+  },
+  "gold_labels": {
+    "ADDRESS": 15,
+    "LOCATION": 235,
+    "ORG": 796,
+    "OTHER": 3952,
+    "PERSON": 324
+  },
+  "run": {
+    "date": "2026-10-25",
+    "countries": "DE,FR",
+    "profile": "standard",
+    "engine": {
+      "package": "gdprguardian",
+      "version": "1.0.0",
+      "native_core": true,
+      "python": "3.12.11",
+      "platform": "Windows 11",
+      "machine": "AMD64"
+    },
+    "tag": "with-fr",
+    "review": null
+  },
+  "documents": 334,
+  "evaluated": 334,
+  "errors": {},
+  "chars": 1365559,
+  "seconds": 0.186,
+  "chars_per_second": 7355746,
+  "families": [
+    "PERSON",
+    "ADDRESS"
+  ],
+  "totals": {
+    "m_total": 337,
+    "m_full": 75,
+    "m_cov80": 76,
+    "m_literal_checked": 195,
+    "m_literal": 127,
+    "c_gold": 1598,
+    "c_gold_masked": 510,
+    "c_pred": 9474,
+    "c_pred_tp": 510,
+    "c_neutral": 1002365,
+    "c_neutral_masked": 5931,
+    "d_has_gold": 199,
+    "d_leak": 171,
+    "d_leak_literal": 97,
+    "k_total": 4979,
+    "k_touched": 319,
+    "chars": 1365559,
+    "detections": 1080,
+    "d_detection": 310,
+    "g_PERSON": 322,
+    "f_PERSON": 75,
+    "g_ADDRESS": 15,
+    "f_ADDRESS": 0
+  },
+  "metrics": {
+    "mention_recall": 0.22255192878338279,
+    "mention_recall_at80": 0.22551928783382788,
+    "char_recall": 0.3191489361702128,
+    "precision": 0.05383153894870171,
+    "over_masking": 0.005917006280147451,
+    "doc_leak_rate": 0.8592964824120602,
+    "doc_literal_leak_rate": 0.48743718592964824,
+    "mention_literal_leak_rate": 0.6512820512820513,
+    "kept_touched_rate": 0.06406909017875076,
+    "detections_per_10k_chars": 7.908849050095968,
+    "docs_with_detection": 0.9281437125748503,
+    "recall_PERSON": 0.2329192546583851,
+    "recall_ADDRESS": 0.0
+  },
+  "intervals_95": {
+    "mention_recall": [
+      0.1759,
+      0.2667
+    ],
+    "mention_recall_at80": [
+      0.1789,
+      0.2708
+    ],
+    "char_recall": [
+      0.2492,
+      0.3877
+    ],
+    "precision": [
+      0.04,
+      0.0701
+    ],
+    "over_masking": [
+      0.0053,
+      0.0066
+    ],
+    "doc_leak_rate": [
+      0.8111,
+      0.9029
+    ],
+    "doc_literal_leak_rate": [
+      0.4145,
+      0.5561
+    ],
+    "mention_literal_leak_rate": [
+      0.5813,
+      0.7222
+    ],
+    "kept_touched_rate": [
+      0.0555,
+      0.0726
+    ],
+    "detections_per_10k_chars": [
+      7.3937,
+      8.4746
+    ],
+    "docs_with_detection": [
+      0.8981,
+      0.9551
+    ],
+    "recall_PERSON": [
+      0.1829,
+      0.2786
+    ],
+    "recall_ADDRESS": [
+      0.0,
+      0.0
+    ]
+  },
+  "kept_families": {
+    "LOCATION": {
+      "mentions": 233,
+      "touched": 10,
+      "touched_rate": 0.04291845493562232
+    },
+    "ORG": {
+      "mentions": 795,
+      "touched": 20,
+      "touched_rate": 0.025157232704402517
+    },
+    "OTHER": {
+      "mentions": 3951,
+      "touched": 289,
+      "touched_rate": 0.07314603897747406
+    }
+  },
+  "by_origin": {
+    "ADDRESS:manual": {
+      "mentions": 15,
+      "masked": 0,
+      "recall": 0.0
+    },
+    "PERSON:manual": {
+      "mentions": 322,
+      "masked": 75,
+      "recall": 0.2329192546583851
+    }
+  },
+  "detected_labels": {
+    "PERSON": 1077,
+    "ORG": 2,
+    "IP": 1
+  }
+}

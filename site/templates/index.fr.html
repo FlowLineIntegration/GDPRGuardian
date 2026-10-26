@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gardien RGPD · anonymiser avant l’IA, sans perdre le sens</title>
+<meta name="description" content="Poste de travail d’anonymisation irréversible : déposez vos documents, reprenez-les anonymisés avant de les confier à une IA, la logique du texte intacte. Gratuit, sans clé, sans cookie ; licence MIT, code ouvert sur GitHub.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Gardien RGPD · retirer les noms, garder le sens">
+<meta property="og:description" content="Anonymisation irréversible des documents avant l’IA, ouverte à tous, sans clé. Licence MIT.">
+<meta property="og:url" content="https://gardienrgpd.fr/">
+<meta property="og:locale" content="fr_FR">
+<link rel="canonical" href="https://gardienrgpd.fr/">
+<link rel="alternate" hreflang="fr" href="https://gardienrgpd.fr/">
+<link rel="alternate" hreflang="en" href="https://gdprguardian.com/">
+<link rel="alternate" hreflang="x-default" href="https://gdprguardian.com/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/gr-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/gr-mono.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/live.js" defer></script>
+<script src="/assets/cockpit.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#ck-t">Aller à la saisie</a>
+<div class="app" id="poste">
+<header class="bar">
+<h1 class="brand"><a href="#poste"><svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path class="mk" d="M7 4H4v16h3M17 4h3v16h-3"/><rect class="mb" x="7.5" y="10" width="9" height="4"/></svg>Gardien RGPD</a><span><span class="vh">, </span>anonymisation irréversible avant l’IA</span></h1>
+<a class="keep" href="#confidentialite"><i aria-hidden="true"></i><span>Aucun document conservé<span>, ni ici ni sur le serveur</span></span></a>
+<nav class="more" aria-label="En savoir plus"><a href="#video">Vidéo</a><a href="#defi">Le défi</a><a href="#histoire">L’histoire</a><a href="#architecture">Architecture</a><a href="#protocole">Protocole et scores</a><a href="#utiliser">Utiliser</a><a href="#appel">L’appel</a><a href="#merci">Merci</a></nav>
+<a class="lang" href="https://gdprguardian.com" hreflang="en" lang="en">EN</a>
+</header>
+<main class="ws" id="main">
+<div class="col cin">
+<form class="in" id="ck" aria-labelledby="t-in" novalidate>
+<div class="hd"><h2 id="t-in">Entrée</h2><button type="button" class="lk" data-ex="M. Jean Dupont (jean.dupont@exemple.fr, 06 12 34 56 78), NIR 1 85 05 78 006 084 91, IBAN FR76 3000 6000 0112 3456 7890 189. M. Dupont rappellera Mme Claire Martin. DUPONT Jean réglera la facture n° 2026-0042 de 1 234,56 euros.">Exemple</button></div>
+<label class="vh" for="ck-t">Texte à anonymiser</label>
+<textarea id="ck-t" name="text" spellcheck="false" autocomplete="off" placeholder="Collez ou tapez un texte. Des documents ? Déposez-les n’importe où dans la page, plusieurs à la fois."></textarea>
+<fieldset class="opts"><legend class="vh">Réglages</legend>
+<label class="sel"><span>Pays</span><select name="countries"><option value="FR" selected>France</option><option value="FR,BE">France + Belgique</option><option value="FR,CH">France + Suisse</option><option value="FR,DE">France + Allemagne</option><option value="FR,ES">France + Espagne</option><option value="FR,IT">France + Italie</option><option value="FR,LU">France + Luxembourg</option><option value="FR,MC">France + Monaco</option><option value="FR,NL">France + Pays-Bas</option><option value="FR,PT">France + Portugal</option><option value="all">Tous les pays</option></select></label>
+<fieldset class="seg"><legend>Profil</legend><label><input type="radio" name="profile" value="standard" checked><span>standard</span></label><label><input type="radio" name="profile" value="strict"><span>strict</span></label></fieldset>
+<label class="chk"><input type="checkbox" name="explain" checked><span>Explications</span></label>
+</fieldset>
+<p class="hint" data-r="hint" hidden>Hors de France, seuls les identifiants du pays sont vérifiés : les noms passent par les lexiques français (sur des textes réels, 23 à 41 % des noms retrouvés en droit, 95 % dans des cas cliniques espagnols).</p>
+<p class="hint">Strict : masque davantage, avec plus de faux positifs.</p>
+<div class="go"><button class="btn" type="submit" data-r="go" disabled>Anonymiser</button><input class="vh" type="file" id="ck-f" multiple accept=".pdf,.docx,.docm,.dotx,.dotm,.xlsx,.xlsm,.xlsb,.xls,.pptx,.pptm,.ppsx,.potx,.odt,.ott,.fodt,.ods,.odp,.otp,.fodp,.odg,.rtf,.eml,.mht,.mhtml,.msg,.html,.htm,.xhtml,.csv,.tsv,.txt,.text,.md,.markdown"><label class="btn2" for="ck-f">Ajouter des documents</label></div>
+<p class="keys" data-r="keys">Ctrl + Entrée anonymiser · Ctrl + Maj + C copier · Ctrl + S télécharger · Échap vider la saisie</p>
+<p class="fmts">PDF, Word, Excel, PowerPoint, OpenDocument, RTF, e-mail, HTML, CSV, texte · 50&nbsp;Mo par document · seule l’extension du nom part avec le fichier</p>
+<p class="fmts">Envoyé chiffré à notre serveur en France, traité en mémoire, rien n’en reste après la réponse ; nous restons un tiers, sans contrat de sous-traitance. Pour ne rien envoyer : la <a href="#utiliser">version locale</a>.</p>
+<p class="st" data-r="st" role="status"></p>
+<noscript><p class="nojs">Le poste de travail a besoin de JavaScript. Sans lui : l’API ou le serveur MCP, voir <a href="#utiliser">Utiliser</a>.</p></noscript>
+</form>
+<section class="qu" aria-labelledby="t-q">
+<div class="hd"><h2 id="t-q">File de la session <span class="n0" data-r="qn"></span></h2><div class="acts"><button type="button" class="lk" data-r="zip" disabled>Tout télécharger (.zip)</button><button type="button" class="lk" data-r="clear">Tout effacer</button><button type="button" class="lk" data-r="stop" disabled>Annuler l’envoi</button></div></div>
+<p class="sep">Chaque document est anonymisé séparément : [PERSONNE_1] d’un document n’est pas forcément celle d’un autre.</p>
+<div class="hold" data-r="hold" hidden><p></p><button type="button" class="btn2 sm" data-r="resume">Reprendre</button></div>
+<ol class="ql" data-r="ql" aria-label="Documents de la session"></ol>
+<p class="qe" data-r="qe">Vide. Les documents partent un par un, dans l’ordre ; rien ne reste après la fermeture de l’onglet.</p>
+</section>
+</div>
+
+<section class="col cout" aria-labelledby="t-out">
+<div class="hd"><h2 id="t-out">Résultat</h2><p class="what" data-r="what"></p><div class="acts"><button type="button" class="lk" data-r="redo" hidden>Relancer</button><button type="button" class="lk" data-r="orig" hidden>Reprendre le texte</button><button type="button" class="lk" data-r="rm" hidden>Retirer</button><button type="button" class="lk" data-r="copy" disabled>Copier</button><button type="button" class="btn2 sm" data-r="dl" disabled>Télécharger le .md</button></div></div>
+<div class="ban" data-r="ban" hidden><p><b></b> <span></span></p><code></code></div>
+<div class="res" data-r="res" tabindex="0" role="region" aria-label="Texte anonymisé">
+<div class="empty"><label class="drop" for="ck-f"><b>Déposez vos documents ici</b>ou n’importe où dans la page, plusieurs à la fois ; ou cliquez pour les choisir. Chacun devient une ligne de la file.</label><div class="demo"><p>Le texte anonymisé s’affiche ici, balises cohérentes :</p><p class="s1"><mark class="p1">[PERSONNE_1]</mark> embête <mark class="p2">[PERSONNE_2]</mark>. <mark class="p2">[PERSONNE_2]</mark> frappe <mark class="p1">[PERSONNE_1]</mark>.</p><p>Les rôles survivent, les identités non. <a href="#histoire">L’histoire</a></p></div></div>
+</div>
+<div class="rep" data-r="rep" hidden>
+<p class="insp" data-r="insp"></p>
+<p class="ledger" data-r="ledger"></p>
+<div class="xw" data-r="xpl" hidden tabindex="0" role="region" aria-label="Explications"><table class="xp"><thead><tr><th scope="col">Balise</th><th scope="col">Règle</th><th scope="col">Raison</th><th scope="col">Nombre</th></tr></thead><tbody data-r="xrows"></tbody></table></div>
+<ul class="warn" data-r="warn" hidden></ul>
+<p class="notice" data-r="notice"></p>
+</div>
+</section>
+
+<aside class="col rail" aria-label="Instruments">
+<section class="g gs" aria-labelledby="t-ses"><h2 id="t-ses">Votre session</h2>
+<dl class="tl">
+<div class="t"><dt>Documents</dt><dd class="v" data-s="docs">0</dd><dd class="u" data-s="docs2">rien en file</dd></div>
+<div class="t"><dt>Mentions masquées</dt><dd class="v" data-s="men">0</dd><dd class="u" data-s="men2">aucune balise</dd></div>
+<div class="t"><dt>Volume envoyé</dt><dd class="v" data-s="vol">0 o</dd><dd class="u">rien n’en est gardé</dd></div>
+<div class="t"><dt>Temps</dt><dd class="v" data-s="time">0 s</dd><dd class="u" data-s="time2">allers-retours cumulés</dd></div>
+</dl></section>
+<section class="g gc q" data-v="{{q.confidence_index}}" aria-labelledby="t-ci"><h2 id="t-ci">Indice de confiance</h2>
+<div class="t ci"><p class="ci-v"><span class="n">{{q.confidence_index}}<small>%</small></span><span class="pd">pas encore mesuré</span></p>
+<p class="ci-ic n">IC 95 % : {{q.confidence_ci_low}} – {{q.confidence_ci_high}} %</p>
+<p class="ci-d">Part des documents rendus sans aucun identifiant direct lisible.<span class="pd"> Première campagne : pas encore lancée.</span></p>
+<a class="ci-a" href="#protocole">Le protocole</a></div></section>
+<section class="g gm" aria-labelledby="t-m"><div class="gh"><h2 id="t-m">Mesures du jour</h2><p class="live-st">{{q.measured_on}}</p></div>
+<table class="sheet mt"><tbody>
+<tr class="rl"><th scope="row">Textes réels en français, 6 corpus annotés : documents gardant une mention lisible</th><td>30 à 97 %</td></tr>
+<tr><th scope="row">Corpus synthétique, {{q.eval_docs}} documents : documents gardant un identifiant direct lisible</th><td>{{q.docs_leak_direct_pct}} %</td></tr>
+<tr><th scope="row">Même mesure, identifiants structurés seuls</th><td>{{q.docs_leak_structured_pct}} %</td></tr>
+<tr><th scope="row">Rappel, identifiants directs, noms et adresses compris</th><td>{{q.recall_direct_pct}} %</td></tr>
+<tr><th scope="row">Rappel · précision, identifiants structurés</th><td>{{q.recall_structured_pct}} % · {{q.precision_structured_pct}} %</td></tr>
+</tbody></table>
+<p class="note">Détail par corpus, méthode et limites : <a href="#protocole">Protocole et scores</a>.</p>
+</section>
+<section class="g gl" aria-labelledby="t-live" data-live-root>
+<div class="gh"><h2 id="t-live"><i class="dot" aria-hidden="true"></i>Service en direct</h2><p class="live-st" data-live-status data-on="toutes les 2 s" data-off="flux coupé, nouvel essai…">relevé au chargement</p></div>
+<dl class="tl">
+<div class="t w"><dt>Dernière heure</dt><dd class="v" data-live="uses_hour">{{live.uses_hour}}</dd><dd class="u">documents, dont essais du protocole : <span data-live="uses_hour_protocol">{{live.uses_hour_protocol}}</span> · <span data-live="bytes_hour">{{live.bytes_hour}}</span></dd></div>
+<div class="t w"><dt>Depuis le lancement</dt><dd class="v" data-live="docs_total">{{live.docs_total}}</dd><dd class="u">dont essais du protocole : <span data-live="docs_protocol">{{live.docs_protocol}}</span> · <span data-live="bytes_total">{{live.bytes_total}}</span> depuis le {{live.since}}</dd></div>
+<div class="t"><dt>Visiteurs, approx.</dt><dd class="v" data-live="visitors_total">{{live.visitors_total}}</dd><dd class="u"><span data-live="visitors_today">{{live.visitors_today}}</span> aujourd’hui</dd></div>
+<div class="t"><dt>Processeur</dt><dd class="v"><span data-live="cpu_percent">{{live.cpu_percent}}</span><small>%</small></dd><dd class="u">tous cœurs, 2 s<span class="meter" data-meter="cpu_percent" aria-hidden="true"><i></i></span></dd></div>
+<div class="t"><dt>Mémoire</dt><dd class="v"><span data-live="ram_percent">{{live.ram_percent}}</span><small>%</small></dd><dd class="u"><span data-live="ram_used">{{live.ram_used}}</span> sur <span data-live="ram_total">{{live.ram_total}}</span><span class="meter" data-meter="ram_percent" aria-hidden="true"><i></i></span></dd></div>
+<div class="t"><dt>Votre requête</dt><dd class="v"><span data-r="lat">—</span><small data-r="latu"></small></dd><dd class="u" data-r="lats">aucune encore, mesurée ici</dd></div>
+</dl>
+<p class="vh" aria-live="polite" data-live-say data-tpl="{u} documents traités dans la dernière heure, {v} visiteurs au total."></p>
+<p class="note">Serveur de production, chiffres réels. Jamais le contenu, le nom du fichier ni l’adresse IP.</p>
+</section>
+</aside>
+
+<section class="pn" id="video" aria-labelledby="h-vi"><div class="ph"><p>Vidéo</p><a class="x" href="#poste">Fermer</a></div>
+<h2 id="h-vi" tabindex="-1">La vidéo de lancement</h2>
+<video class="vid" controls preload="none" playsinline poster="/media/gardien-rgpd-lancement-fr-poster.png?v=080b84ca" src="/media/gardien-rgpd-lancement-fr.mp4?v=fdfe4edf" aria-labelledby="h-vi"></video>
+<p>Vidéo muette : tout son texte est dans la <a href="/media/gardien-rgpd-lancement-fr-transcript.txt?v=fb8c0875" target="_blank" rel="noopener">transcription</a>. Montage court en 4:5, pour les réseaux : <a href="/media/gardien-rgpd-lancement-fr-social.mp4?v=ae04e889" download>MP4, 4,5 Mo</a>.</p>
+<p class="fine">L’indice de confiance de la vidéo est celui mesuré au jour de son rendu ; le chiffre à jour : <a href="#protocole">Protocole et scores</a>.</p>
+</section>
+
+<section class="pn" id="defi" aria-labelledby="h-defi"><div class="ph"><p>Le défi</p><a class="x" href="#poste">Fermer</a></div>
+<h2 id="h-defi" tabindex="-1">Chaque jour, de vrais documents partent vers l’IA</h2>
+<p class="lead">Contrats, dossiers RH, comptes rendus médicaux, relevés bancaires : on les colle dans un assistant d’IA pour les résumer, les traduire ou les analyser.</p>
+<p>Le plus souvent de bonne foi, et sans connaître les règles. Les données personnelles partent alors chez un tiers, souvent sans base légale ni contrat de sous-traitance, parfois hors de l’Union européenne : c’est précisément ce que le RGPD encadre. Une fois envoyées, elles ne reviennent pas.</p>
+<p>Le défi tient en trois exigences qui tirent en sens contraire : <b>garder la logique</b> du texte, pour que l’IA reste utile ; rendre tout <b>retour en arrière impossible</b> ; rester assez <b>rapide et sobre</b> pour ne jamais être contourné. D’où un poste de travail, pas une page : on dépose, on reprend, on enchaîne, toute la journée.</p>
+</section>
+
+<section class="pn" id="histoire" aria-labelledby="h-st"><div class="ph"><p>L’histoire</p><a class="x" href="#poste">Fermer</a></div>
+<h2 id="h-st" tabindex="-1">Guillaume embête Nadège</h2>
+<p class="lead">Masquer les noms ne suffit pas : il faut que l’IA comprenne encore qui fait quoi.</p>
+<div class="spec">
+<p class="lab">Original</p><p class="txt"><mark class="p1">Guillaume</mark> embête <mark class="p2">Nadège</mark>. <mark class="p2">Nadège</mark> frappe <mark class="p1">Guillaume</mark>.</p>
+<p class="lab">Masquage naïf</p><p class="txt"><mark class="p0">[Personne]</mark> embête <mark class="p0">[Personne]</mark>. <mark class="p0">[Personne]</mark> frappe <mark class="p0">[Personne]</mark>. <span class="why">Qui frappe qui ? Une IA ne peut que deviner.</span></p>
+<p class="lab">Gardien RGPD</p><p class="txt"><mark class="p1">[PERSONNE_1]</mark> embête <mark class="p2">[PERSONNE_2]</mark>. <mark class="p2">[PERSONNE_2]</mark> frappe <mark class="p1">[PERSONNE_1]</mark>. <span class="why">Les rôles survivent, les identités non.</span></p>
+</div>
+<p>Sur l’exemple du poste de travail, la version 1.0.0 rend « Jean Dupont », « M. Dupont » et « DUPONT Jean » par une seule balise, <code>[PERSONNE_1]</code> ; « Mme Claire Martin » devient <code>Mme [PERSONNE_2]</code>. La civilité reste, elle aide à suivre le texte. Le numéro de facture et le montant restent aussi : ce ne sont pas des données personnelles.</p>
+<p>Pas toujours, cependant : sur les 2 463 personnes du corpus synthétique, 92,1 % ont une seule balise ; 194 sont éclatées sur plusieurs, 44 partagent celle d’une autre.</p>
+<p>Chaque document est anonymisé séparément, avec sa propre clé détruite : <code>[PERSONNE_1]</code> d’un document n’est pas forcément celle d’un autre. Plus tard, sur la feuille de route : traiter un ensemble de documents avec un même code, pour garder les mêmes balises d’un document à l’autre, toujours sans retour possible (clé de l’ensemble détruite à la fin).</p>
+</section>
+
+<section class="pn" id="architecture" aria-labelledby="h-ar"><div class="ph"><p>Architecture</p><a class="x" href="#poste">Fermer</a></div>
+<h2 id="h-ar" tabindex="-1">En ligne ou sur votre poste : le même logiciel</h2>
+<p class="lead">Même paquet, même version : en ligne pour démarrer sans rien installer, sur votre poste pour que Gardien RGPD n’envoie rien. Ouvert à tous et sans clé, le service se protège des abus par un limiteur qui ne vit qu’en mémoire.</p>
+<div class="two">
+<div><h3>En ligne</h3>
+<ol class="flow">
+<li><b>Navigateur, agent IA, script</b>REST ou MCP sur HTTPS, sans clé ; ce poste de travail appelle la même API.</li>
+<li><b>TLS 1.2/1.3 · nginx</b>OVH, en France : pare-feu, mises à jour automatiques, aucun core dump, aucun journal d’accès.</li>
+<li><b>Socket Unix</b>dans un dossier en mémoire : aucun port ouvert entre nginx et le service.</li>
+<li class="in"><b>Conteneur sans aucun réseau</b>lecture seule, aucun privilège.</li>
+<li class="in"><b>Accueil et limiteur</b>l’adresse IP devient aussitôt un pseudonyme à clé (renouvelée toutes les 24 h), gardé en mémoire, jamais écrit, oublié après 10 minutes d’inactivité.</li>
+<li class="in hl"><b>Un processus neuf par requête</b>isolé, mémoire plafonnée, tué à l’échéance ; il ne peut rien lancer.</li>
+<li class="in"><b>Résultat</b>dans la réponse, par le même chemin, nulle part ailleurs. Envois différés des agents : lisibles avec un identifiant aléatoire de 256 bits remis au seul demandeur, effacés à la lecture ou après 10 minutes.</li>
+<li><b>Démon du site</b>un datagramme sans contenu (type, format, taille, durée, succès, origine) alimente les chiffres en direct.</li>
+</ol></div>
+<div><h3>Sur votre poste</h3>
+<ol class="flow">
+<li><b>Document d’origine</b>dans un dossier que vous avez autorisé ; il ne bouge pas.</li>
+<li class="hl"><b>Gardien RGPD, local</b>même moteur Rust, aucune connexion pendant le traitement ; variante 100 % locale : conteneur Docker sans réseau.</li>
+<li><b>Client IA, en MCP stdio</b>Claude Code, Claude Desktop, Cowork, VS Code ou Cursor : il passe le chemin et reçoit le Markdown anonymisé.</li>
+<li><b>Modèle d’IA</b>reçoit le texte anonymisé. Gardien RGPD n’envoie rien et demande à l’assistant de ne jamais ouvrir l’original.</li>
+</ol>
+<h3>Irréversible par construction</h3>
+<ul class="list">
+<li><b>Une clé par document, puis détruite.</b> 256 bits aléatoires ; les mentions d’une personne sont rapprochées par des empreintes BLAKE2b à clé, jamais par leur valeur. La clé n’est jamais écrite ; en ligne, elle disparaît avec le processus de la requête.</li>
+<li><b>Aucune table de correspondance.</b> Rien n’associe une balise à un nom, ni chez vous ni sur le serveur : rien à voler, rien à restituer, pas même pour nous.</li>
+<li><b>Explicable.</b> Aucun LLM : chaque balise vient d’une règle nommée (clé de contrôle, mot-clé, étiquette de formulaire, règle de votre organisation).</li>
+</ul></div>
+</div>
+<h3>Un cœur de processeur suffit</h3>
+<table class="sheet">
+<caption>{{q.ms_per_doc}} ms pour un document de 2 Ko, sur un cœur (médiane). Deux premières lignes : Ryzen 7 5800H, portable partagé, Windows 11, le {{q.measured_on}} ; les autres : Linux, mesures antérieures, service sur 16 cœurs. Noyau en Rust, appelé depuis Python, aux résultats identiques au moteur de référence (tests différentiels) ; pas de GPU.</caption>
+<tbody>
+<tr><th scope="row">Débit par cœur, documents de 2 Ko, coût de chaque appel compris</th><td>{{q.mb_per_s}} Mo/s</td></tr>
+<tr><th scope="row">Texte de 10 Mo, un cœur</th><td>{{q.text_10mb_s}} s</td></tr>
+<tr><th scope="row">Service, texte de 2 Ko, médiane côté serveur, sans le trajet Internet</th><td>{{q.service_p50_ms}} ms</td></tr>
+<tr><th scope="row">Même mesure, 99 % des requêtes sous</th><td>{{q.service_p99_ms}} ms</td></tr>
+<tr><th scope="row">Banc interne, sans limiteur : 100 PDF de 10 Mo envoyés ensemble</th><td>{{q.pdf100_s}} s</td></tr>
+<tr><th scope="row">Image Docker du service · noyau Rust</th><td>{{q.image_mb}} Mo · {{q.core_mb}} Mo</td></tr>
+</tbody>
+</table>
+</section>
+
+<section class="pn" id="protocole" aria-labelledby="h-pr"><div class="ph"><p>Protocole et scores</p><a class="x" href="#poste">Fermer</a></div>
+<h2 id="h-pr" tabindex="-1">Comment nous nous notons</h2>
+<p class="lead">Un indice ne vaut que si chacun peut le recalculer. Sa définition est fixée avant la première mesure ; le protocole passera par le vrai service et publiera tout : corpus, commandes, résultats bruts datés, faiblesses comprises.</p>
+<div class="two">
+<dl class="defs">
+<dt>Indice de confiance</dt><dd>Part des documents dans lesquels aucun identifiant direct ne reste lisible : un seul caractère d’une mention annotée resté visible, et le document compte comme raté. Calculé par famille de corpus, puis moyenné à poids égal ; intervalle à 95 % par rééchantillonnage stratifié des documents (2 000 tirages, graine fixe).</dd>
+<dt>Périmètre français</dt><dd>Sept familles : synthétique français (générateur à graines multiples, avec leurres), mutations de l’équipe rouge, BODACC, BOAMP, ParlaMint-FR, presse ancienne (Europeana et HIPE NewsEye, une seule famille), MAPA FR. Le volume n’achète aucun poids : un million de documents synthétiques comptent pour une famille.</dd>
+<dt>Publié à part, bien en vue</dt><dd>Les autres langues (MAPA DE, ES, IT, NL, PT ; MEDDOCAN ; LER allemand ; TAB anglais) et le contrôle négatif Judilibre, pour la précision seule.</dd>
+<dt>Sur le serveur de production</dt><dd>Par son socket local, à faible priorité : sans TLS, ni nginx, ni limiteur. Chaque essai compte dans les usages et apparaît à part dans les instruments.</dd>
+</dl>
+<table class="sheet">
+<caption class="q" data-v="{{q.confidence_index}}"><span class="pd">Première campagne : pas encore lancée ; chaque case attend sa publication.</span><span class="n">Campagne du {{q.protocol_date}}, moteur {{q.protocol_engine}}.</span></caption>
+<tbody>
+<tr><th scope="row">Indice de confiance</th><td class="q" data-v="{{q.confidence_index}}"><span class="n">{{q.confidence_index}} %</span><span class="pd">pas encore mesuré</span></td></tr>
+<tr><th scope="row">Intervalle à 95 %</th><td class="q" data-v="{{q.confidence_ci_low}}"><span class="n">{{q.confidence_ci_low}} – {{q.confidence_ci_high}} %</span><span class="pd">pas encore mesuré</span></td></tr>
+<tr><th scope="row">Mentions directes entièrement masquées</th><td class="q" data-v="{{q.mention_recall_pct}}"><span class="n">{{q.mention_recall_pct}} %</span><span class="pd">pas encore mesuré</span></td></tr>
+<tr><th scope="row">Documents évalués</th><td class="q" data-v="{{q.protocol_docs}}"><span class="n">{{q.protocol_docs}}</span><span class="pd">pas encore mesuré</span></td></tr>
+<tr><th scope="row">Familles</th><td class="q" data-v="{{q.protocol_families}}"><span class="n">{{q.protocol_families}}</span><span class="pd">pas encore mesuré</span></td></tr>
+<tr><th scope="row">Corpus réels · documents réels annotés</th><td class="q" data-v="{{q.real_docs}}"><span class="n">{{q.real_corpora}} · {{q.real_docs}}</span><span class="pd">pas encore mesuré</span></td></tr>
+</tbody>
+</table>
+</div>
+<h3>Textes réels en français, 25 octobre 2026</h3>
+<p class="meta">6 corpus publics annotés, 6 660 documents ; moteur 1.0.0, pays FR, profil standard. Une mention compte comme lisible dès qu’un seul de ses caractères reste visible.</p>
+<div class="figs f2">
+<div><p class="fig">30 à 97 %</p><p>des documents gardent au moins une mention lisible, selon le corpus.</p></div>
+<div><p class="fig">35 à 93 %</p><p>des mentions sont entièrement masquées, selon le corpus.</p></div>
+</div>
+<div class="xs" tabindex="0" role="region" aria-labelledby="c-rc"><table class="sheet rc">
+<caption id="c-rc">Par corpus. Annotations partielles pour ParlaMint (à son avantage), titres compris dans les noms de HIPE (à son désavantage) ; MAPA ne compte que 12 documents.</caption>
+<thead><tr><th scope="col">Corpus</th><th scope="col">Documents</th><th scope="col">Mentions masquées</th><th scope="col">Documents avec une mention lisible</th></tr></thead>
+<tbody>
+<tr><th scope="row">ParlaMint-FR, débats de l’Assemblée nationale</th><td>300</td><td>93,2 %</td><td>30,1 %</td></tr>
+<tr><th scope="row">BOAMP, avis de marchés publics</th><td>3 000</td><td>84,5 %</td><td>53,8 %</td></tr>
+<tr><th scope="row">BODACC, annonces commerciales</th><td>2 693</td><td>78,9 %</td><td>92,6 %</td></tr>
+<tr><th scope="row">Europeana, presse ancienne numérisée</th><td>515</td><td>71,4 %</td><td>75,1 %</td></tr>
+<tr><th scope="row">HIPE NewsEye, presse ancienne numérisée</th><td>140</td><td>45,6 %</td><td>96,7 %</td></tr>
+<tr><th scope="row">MAPA, textes juridiques de l’UE</th><td>12</td><td>34,8 %</td><td>88,9 %</td></tr>
+<tr><th scope="row">Hors périmètre : TAB, arrêts de la CEDH, en anglais</th><td>127</td><td>83,3 %</td><td>37,8 %</td></tr>
+</tbody>
+</table></div>
+<h3>Mesures du jour, corpus synthétique</h3>
+<p class="meta">{{q.eval_docs}} documents, {{q.eval_mentions}} mentions annotées, {{q.eval_decoys}} leurres, mesurés le {{q.measured_on}}. Le meilleur cas : les textes réels ci-dessus font nettement moins bien.</p>
+<div class="figs">
+<div><p class="fig">{{q.docs_leak_direct_pct}} %</p><p>des documents gardent au moins un identifiant direct lisible, nom ou adresse compris ; structurés seuls : {{q.docs_leak_structured_pct}} %.</p></div>
+<div><p class="fig">{{q.recall_direct_pct}} %</p><p>du texte à masquer l’est, identifiants directs, noms et adresses compris.</p></div>
+<div><p class="fig">{{q.recall_structured_pct}} %</p><p>de rappel sur les identifiants structurés : NIR, IBAN, téléphones…</p></div>
+<div><p class="fig">{{q.precision_structured_pct}} %</p><p>de précision sur les identifiants structurés : part du texte masqué qui devait l’être ; texte neutre masqué à tort, tous types : {{q.overmask_pct}} %.</p></div>
+</div>
+<div class="two">
+<div class="limits"><h3>Limites connues, mesurées</h3>
+<ul>
+<li>La barrière réduit le risque, elle ne l’annule pas, et c’est nettement moins bien sur des textes réels (tableau ci-dessus) ; dans les annonces du BODACC, 5 % seulement des numéros RCS sont masqués.</li>
+<li>Toutes ces mesures portent sur du texte : la conversion des PDF, Word et Excel n’est pas mesurée, et une page numérisée (une image, sans texte) est écartée, sans reconnaissance de caractères.</li>
+<li>Par l’API, un pays choisi sans la France ne masque ni noms ni adresses : 0 % sur des textes réels allemands, espagnols, italiens, néerlandais et portugais ; avec la France en plus, 22 à 50 % des mentions (des noms : 23 à 41 % en droit, 95 % dans des cas cliniques espagnols).</li>
+<li>Des mots courants à majuscule passent pour des noms (« Avenant » en titre devient <code>[PERSONNE_1]</code>) : sur des décisions de justice, 32 % des masques tirés au hasard étaient à tort.</li>
+<li>Un RIB écrit en champs séparés (banque, guichet, compte, clé) n’est jamais reconnu ; un numéro coupé par une tabulation ou un retour à la ligne passe presque toujours (0 % et 4,5 % masqués), un <span class="nw">e-mail</span> écrit « &amp;#64; », « %40 », « [dot] » ou « (point) » aussi (0 %).</li>
+<li>27,3 % des identifiants d’entreprise masqués le sont à tort.</li>
+<li>Le contexte (fonction, lieu, date, événement rare) peut permettre une ré-identification indirecte : aucune détection automatique ne l’empêche.</li>
+</ul></div>
+<table class="sheet">
+<caption>Ce qui est testé à chaque version</caption>
+<tbody>
+<tr><th scope="row">Tests automatisés, Windows · Linux</th><td>{{q.tests_windows}} · {{q.tests_linux}}</td></tr>
+<tr><th scope="row">Tests dans l’image hors réseau</th><td>{{q.tests_offline_image}}</td></tr>
+<tr><th scope="row">Documents de parité Rust et Python, sorties identiques</th><td>{{q.parity_docs}}</td></tr>
+<tr><th scope="row">Équipe rouge : documents piégés</th><td>{{q.redteam_docs}}</td></tr>
+<tr><th scope="row">Équipe rouge : façons de déguiser un identifiant</th><td>{{q.redteam_operators}}</td></tr>
+<tr><th scope="row">Documents traités par les mesures du jour</th><td>{{q.docs_tested}}</td></tr>
+</tbody>
+</table>
+</div>
+<p class="fine">Le protocole complet et les commandes pour tout rejouer sont publiés dans le <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian">dépôt public</a>.</p>
+</section>
+
+<section class="pn" id="utiliser" aria-labelledby="h-us"><div class="ph"><p>Utiliser</p><a class="x" href="#poste">Fermer</a></div>
+<h2 id="h-us" tabindex="-1">Ailleurs que sur cette page</h2>
+<p class="lead">Le même service, gratuit et sans clé, depuis votre assistant d’IA ou vos programmes ; pour les documents très sensibles, sur votre poste.</p>
+<div class="use">
+<div><h3>Dans Claude, par MCP public, sans clé</h3>
+<p>Adresse : <code>https://api.gdprguardian.com/mcp</code> (ou <code>api.gardienrgpd.fr/mcp</code>). Claude Code :</p>
+<pre tabindex="0"><code>claude mcp add --transport http gdprguardian https://api.gdprguardian.com/mcp</code></pre>
+<p>claude.ai : ajoutez cette adresse en connecteur personnalisé. Pour un fichier, <code>create_upload</code> donne une commande à lancer vous-même sur votre poste : le fichier part droit vers le service, sans passer par le modèle ; <code>get_anonymized</code> lit le résultat, effacé à la lecture ou, non lu, après 10 minutes. Un texte collé dans la conversation est déjà parti : <code>anonymize_text</code> ne le rattrape pas.</p></div>
+<div><h3>Par l’API REST</h3>
+<pre tabindex="0"><code>curl https://api.gdprguardian.com/v1/anonymize/text \
+  -H 'Content-Type: application/json' \
+  -d '{"text": "M. Jean Dupont, 06 12 34 56 78", "explain": true}'
+
+curl https://api.gdprguardian.com/v1/anonymize/file \
+  -F file=@contrat.pdf -F countries=FR -F profile=strict</code></pre>
+<p>Réponse : le texte (ou le Markdown) anonymisé et le rapport. Options : <code>countries</code> (FR par défaut, <code>FR,BE</code>, <code>all</code>), <code>profile</code>, <code>label_language</code>, <code>explain</code>.</p></div>
+<div><h3>Sur votre poste</h3>
+<p>Pour les documents très sensibles : le même logiciel, en serveur MCP local ou en conteneur sans réseau ; rien ne part par Gardien RGPD. Installation : <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/docs/LOCAL.md">guide de la version locale</a> ; questions : <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>.</p>
+<h3>Limites du service public</h3>
+<p>Par client : une requête traitée à la fois et deux en attente, environ 20 secondes de calcul d’avance, rechargées à 0,5 s par seconde. Votre réseau (/24 en IPv4, /48 en IPv6) partage un budget deux fois plus large et 12 requêtes en vol. Au-delà : 429 et un délai à respecter (<code>Retry-After</code>), que ce poste de travail applique seul en envoyant un document à la fois ; serveur saturé (attente estimée au-delà de 10 s) : 503 ; envoi trop lent (15 s, plus 128 Kio par seconde de corps) : 408.</p>
+<p>Taille : 50 Mo par fichier, un million de caractères par texte ; par document, 12,5 millions de caractères de résultat, 10 000 pages ou diapositives, un million de balises HTML (ouvrantes et fermantes), 100 000 paragraphes Word (cellules de tableau comprises). Un texte brut, un CSV ou un tableur très denses atteignent ce plafond avant 50 Mo (vers 13 Mo de texte, 16 Mo de CSV, 4 Mo de tableur) : 413, limite nommée. Un document de 50 Mo illustré se traite en quelques secondes ; chacun a droit à 60 s plus 1 s par 250 Ko (4 min 30 à 50 Mo).</p></div>
+</div>
+</section>
+
+<section class="pn" id="appel" aria-labelledby="h-ap"><div class="ph"><p>L’appel</p><a class="x" href="#poste">Fermer</a></div>
+<h2 id="h-ap" tabindex="-1">Aux établissements publics français</h2>
+<blockquote><p>« Nous, acteurs privés, avons besoin sur ce sujet d’une solution efficace en coût d’usage et digne d’une confiance totale. »</p><p class="by">Guillaume CLEMENT, Flow Line Intégration</p></blockquote>
+<p>L’usage de l’IA ne reculera pas. Un outil qui protège les données avant qu’elles ne partent devrait être un bien commun : audité, hébergé et maintenu dans la durée, au service de tous, administrations comme entreprises. Gardien RGPD est prêt à être repris : licence MIT, code ouvert, architecture documentée, mesures publiées. Un établissement public pourrait :</p>
+<ul class="list">
+<li>auditer le code et la méthode ;</li>
+<li>reprendre, héberger et exploiter le service sur une infrastructure publique ;</li>
+<li>constituer le corpus de documents réels annotés qui manque aujourd’hui pour mesurer l’outil.</li>
+</ul>
+<p class="cta">Pour répondre : <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>. Aucun partenariat n’existe à ce jour : cet appel est ouvert.</p>
+</section>
+
+<section class="pn" id="merci" aria-labelledby="h-me"><div class="ph"><p>Merci</p><a class="x" href="#poste">Fermer</a></div>
+<h2 id="h-me" tabindex="-1">Un outil offert, à reprendre librement</h2>
+<p class="lead">Gardien RGPD est offert au monde : chacun peut l’utiliser, s’en inspirer et le reprendre, sans que rien ne lui soit imposé. Nous montrons nos scores tels qu’ils sont, faiblesses comprises.</p>
+<p>Merci à <a target="_blank" rel="noopener" href="https://www.flowlineintegration.com/">Flow Line Intégration</a>, qui offre et héberge gratuitement le service en ligne. Conçu par <a target="_blank" rel="noopener" href="https://www.linkedin.com/in/guillaume-clement-erp-cloud/">Guillaume CLEMENT</a>, CTO Data &amp; IA. Conception de l’interface : Claude Design.</p>
+<p class="cta">Une évolution, un problème de performance, un identifiant qui passe : <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/issues/new/choose">ouvrir un ticket</a>. Décrivez la forme avec des données fictives seulement, jamais une donnée réelle : « un IBAN coupé par un retour à la ligne ». Faille de sécurité : <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/security/advisories/new">signalement privé</a>.</p>
+</section>
+
+<section class="pn" id="mentions" aria-labelledby="h-le"><div class="ph"><p>Mentions légales</p><a class="x" href="#poste">Fermer</a></div>
+<h2 id="h-le" tabindex="-1">Mentions légales</h2>
+<p>Éditeur : <a target="_blank" rel="noopener" href="https://www.flowlineintegration.com/">Flow Line Intégration</a>. Directeur de la publication : Guillaume CLEMENT, directeur technique Data &amp; IA. Contact : <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>.</p>
+<p>Hébergeur : OVH SAS, 2 rue Kellermann, 59100 Roubaix, France, tél. 1007.</p>
+<p>Gardien RGPD 1.0.0, licence MIT, code dans le <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian">dépôt public</a>. Logiciel fourni en l’état, sans garantie. C’est une première barrière automatique, explicable et mesurée : ni une certification de conformité au RGPD, ni un conseil juridique ; chaque responsable de traitement reste responsable de sa conformité.</p>
+</section>
+
+<section class="pn" id="confidentialite" aria-labelledby="h-co"><div class="ph"><p>Confidentialité</p><a class="x" href="#poste">Fermer</a></div>
+<h2 id="h-co" tabindex="-1">Aucun document conservé, ni ici ni sur le serveur</h2>
+<ul class="list">
+<li><b>Ici.</b> Aucun cookie, aucun stockage du navigateur (ni local, ni de session, ni base IndexedDB), aucun traceur, aucune ressource tierce. Vos textes et résultats ne vivent que dans la mémoire de cet onglet : « Tout effacer » la vide, fermer l’onglet aussi.</li>
+<li><b>Sur le serveur.</b> Chaque document est traité en mémoire dans un processus isolé et rien n’en reste une fois la réponse partie ; seul le résultat revient, à vous seul. Le nom du fichier ne part pas : seulement son extension.</li>
+<li><b>Nous restons un tiers.</b> Vous nous confiez le texte, sans contrat de sous-traitance. Pour ne rien envoyer : la <a href="#utiliser">version locale</a>.</li>
+<li><b>Adresse IP</b>, en mémoire seulement, jamais écrite sur disque, aucun journal d’accès. Le serveur web la garde telle quelle (IPv4, ou son /64 en IPv6) dans ses compteurs anti-abus, qu’il recycle au fil du trafic. Le service la remplace aussitôt par un pseudonyme à clé, oublié après 10 minutes d’inactivité (clé renouvelée toutes les 24 h). Pour compter les visiteurs une fois par jour : une empreinte à clé de l’adresse tronquée (/24, ou /48 en IPv6) et de l’agent utilisateur du navigateur, clé et empreintes oubliées chaque jour.</li>
+<li><b>Statistiques d’usage</b> : type d’opération, format, taille, durée, succès, origine ; jamais le contenu, le nom du fichier ni l’adresse IP.</li>
+<li><b>Base légale</b> : intérêt légitime à fournir, protéger et sécuriser le service (RGPD, art. 6.1.f et 32). Questions : <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a> ; réclamation : CNIL.</li>
+</ul>
+</section>
+</main>
+<footer class="foot">
+<p>Gardien RGPD 1.0.0 · licence MIT<span>, code ouvert sur GitHub</span></p>
+<p>Offert par <a target="_blank" rel="noopener" href="https://www.flowlineintegration.com/">Flow Line Intégration</a> · <a target="_blank" rel="noopener" href="https://www.linkedin.com/in/guillaume-clement-erp-cloud/">Guillaume CLEMENT</a>, CTO Data &amp; IA · <span class="cd">Conception : Claude Design</span></p>
+<p><a href="#mentions">Mentions légales</a><a href="#confidentialite">Confidentialité</a><a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/issues/new/choose">Signaler un problème</a></p>
+</footer>
+</div>
+<ul id="i18n" hidden>
+<li data-k="file">{n}-{k}-anonymise-{d}.md</li>
+<li data-k="zip">gardien-rgpd-{d}.zip</li>
+<li data-k="text">texte</li>
+<li data-k="tname">Texte {n}</li>
+<li data-k="add1">Ajouté à la file : {l}.</li>
+<li data-k="add">{n} documents ajoutés à la file.</li>
+<li data-k="empty">Rien à envoyer : collez ou tapez un texte, ou déposez des documents.</li>
+<li data-k="esc">Saisie vidée (Ctrl + Z pour la retrouver).</li>
+<li data-k="cleared">Onglet vidé : plus aucun texte ni résultat dans cette page.</li>
+<li data-k="copied">Texte anonymisé copié.</li>
+<li data-k="nocopy">Copie impossible : sélectionnez le texte à la main.</li>
+<li data-k="nores">Aucun résultat à copier ou télécharger pour l’instant.</li>
+<li data-k="wait">en attente</li>
+<li data-k="run">en cours</li>
+<li data-k="up">envoi {p} %</li>
+<li data-k="retry">nouvel essai dans {s}</li>
+<li data-k="retryIn">Nouvel essai dans {s}.</li>
+<li data-k="stop">annulé</li>
+<li data-k="men">{n} mentions</li>
+<li data-k="men1">{n} mention</li>
+<li data-k="tag">{n} balises</li>
+<li data-k="tag1">{n} balise</li>
+<li data-k="none">aucun identifiant détecté</li>
+<li data-k="sayDone">{l} terminé : {m}.</li>
+<li data-k="sayErr">{l} refusé : {c}</li>
+<li data-k="before">En attente : {n} avant celui-ci.</li>
+<li data-k="busy">Anonymisation en cours…</li>
+<li data-k="retryLong">Le service demande d’attendre ; la file reprend seule.</li>
+<li data-k="hold503">File en pause : le service reste saturé après trois essais.</li>
+<li data-k="hold429">File en pause : la limite de votre adresse ou de votre réseau est encore atteinte après trois essais. Reprenez dans un moment.</li>
+<li data-k="pasted">Texte collé dans la saisie : Ctrl + Entrée pour l’anonymiser.</li>
+<li data-k="dropHint">Déposez : chaque document est anonymisé séparément.</li>
+<li data-k="qd">{n} terminés</li>
+<li data-k="qd1">{n} terminé</li>
+<li data-k="qr">{n} refusés</li>
+<li data-k="qr1">{n} refusé</li>
+<li data-k="qw">{n} en file</li>
+<li data-k="qw1">{n} en file</li>
+<li data-k="fin">Fin de la file : {s}.</li>
+<li data-k="addErr">{n} refusés avant envoi, voir la file.</li>
+<li data-k="addErr1">{n} refusé avant envoi, voir la file.</li>
+<li data-k="busyIn">La saisie contient déjà un texte : envoyez-le ou videz-le d’abord (Échap).</li>
+<li data-k="docs0">rien en file</li>
+<li data-k="men2">{n} balises distinctes</li>
+<li data-k="men21">{n} balise distincte</li>
+<li data-k="men20">aucune balise</li>
+<li data-k="time2">moyenne {t}</li>
+<li data-k="sub">{k}, {s}</li>
+<li data-k="subErr">réponse {c}</li>
+<li data-k="pages">{n} pages</li>
+<li data-k="pages1">1 page</li>
+<li data-k="insp">Survolez ou touchez une balise : toutes ses mentions s’allument.</li>
+<li data-k="dropped">Non repris : {l}</li>
+<li data-k="kept">gardé en clair : {l}</li>
+<li data-k="e403">Requête refusée|Le service n’accepte que les envois de cette page : rechargez-la depuis gardienrgpd.fr.</li>
+<li data-k="e408">Envoi trop lent|Le document n’est pas arrivé à temps (15 s, plus 128 Kio par seconde) : réessayez avec une meilleure connexion, ou découpez le document.</li>
+<li data-k="e413">Trop volumineux|50 Mo par document, un million de caractères par texte, 12,5 millions de caractères de résultat : découpez-le.</li>
+<li data-k="e415">Format non pris en charge|Formats acceptés : PDF, Word, Excel, PowerPoint, OpenDocument, RTF, e-mail (.eml, .msg), HTML, CSV, texte et Markdown.</li>
+<li data-k="e422">Document refusé</li>
+<li data-k="cut">Aperçu limité aux {n} premiers caractères ; le fichier téléchargé est complet.</li>
+<li data-k="too_many_unread_results">Trop de résultats non lus pour votre réseau : lisez-les ou laissez-les expirer (10 minutes).</li>
+<li data-k="e501">Conversion indisponible|Ce format ne peut pas être converti sur le serveur pour l’instant.</li>
+<li data-k="e502">Service indisponible|Le service ne répond pas : reprenez la file dans un moment.</li>
+<li data-k="eTime">Délai dépassé|Pas de réponse à temps : découpez le document.</li>
+<li data-k="eTimeS">Délai dépassé|Pas de réponse à temps : le service est peut-être saturé, réessayez dans un moment.</li>
+<li data-k="eNet">Connexion impossible|Vérifiez votre connexion, puis reprenez la file.</li>
+<li data-k="eGen">Erreur du service|Réessayez dans un moment.</li>
+<li data-k="encrypted_document">Document chiffré ou protégé par mot de passe : retirez la protection, puis réessayez.</li>
+<li data-k="malicious_document">Document refusé par les contrôles de sécurité.</li>
+<li data-k="conversion_timeout">Conversion trop longue : découpez le document.</li>
+<li data-k="processing_timeout">Traitement trop long : découpez le texte.</li>
+<li data-k="document_error">Document illisible ou refusé.</li>
+<li data-k="invalid_text">Texte invalide : caractère isolé non représentable.</li>
+<li data-k="invalid_request">Requête refusée : vérifiez le texte et les réglages.</li>
+<li data-k="r">validated=clé de contrôle ou règles officielles vérifiées|validated_and_keyword=clé vérifiée, et mot-clé présent|keyword=format reconnu près d’un mot-clé|format=format structurel|keyword_despite_invalid_key=clé fausse, mais mot-clé explicite|printed_layout=clé fausse, mais présentation imprimée caractéristique|iban_layout_despite_invalid_key=IBAN à clé fausse, écrit par blocs ou près d’un mot-clé|phone_numbering_plan=plan de numérotation vérifié|name_lexicon=prénom ou nom des fichiers Insee, avec un indice|postcode_and_town=code postal et commune vérifiés ensemble|legal_form=forme juridique|matches_nir=date de naissance cohérente avec un NIR|propagation=autre occurrence d’une valeur déjà détectée|custom_rule=règle de l’organisation|deny_list=terme imposé par l’organisation|company_policy=organisation ou identifiant d’entreprise, conservés par politique|keep_rule=règle de conservation de l’organisation</li>
+<li data-k="d">attachments=pièces jointes|comments=commentaires|metadata=métadonnées|scanned_pages=pages numérisées|links=liens|hidden_text=texte masqué|hidden_content=contenu masqué|hidden_slides=diapositives masquées|speaker_notes=notes de l’orateur|tracked_deletions=suppressions suivies|email_headers=en-têtes d’e-mail|embedded_objects=objets incorporés</li>
+</ul>
+<div class="dz" data-r="dz" aria-hidden="true"><p></p></div>
+</body>
+</html>

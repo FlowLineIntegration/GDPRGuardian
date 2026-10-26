@@ -1,0 +1,98 @@
+{
+ "env": {
+  "date_utc": "2026-10-25T15:58:41+00:00",
+  "python": "3.12.11",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "processor": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+  "cpu_count": 16,
+  "gdprguardian": "1.0.0",
+  "gc_enabled": true,
+  "one_core": "appels sequentiels dans un seul processus / sequential calls, one process"
+ },
+ "corpus": {
+  "path": "datasets/fr/docs/*.md",
+  "docs": 1000,
+  "utf8_bytes": 1921367,
+  "chars": 1866385,
+  "mean_doc_bytes": 1921.367
+ },
+ "native_flag": true,
+ "python_flag": false,
+ "parity": {
+  "docs": 1000,
+  "identical_text": 1000,
+  "identical_spans": 1000,
+  "mismatch_examples": []
+ },
+ "native_fr": {
+  "passes": 9,
+  "pass_seconds": [
+   0.5597,
+   0.5014,
+   0.4902,
+   0.5716,
+   0.5128,
+   0.5239,
+   0.5731,
+   0.6029,
+   0.6421
+  ],
+  "ms_per_doc_median": 0.5596822999650612,
+  "ms_per_doc_best": 0.4901738000335172,
+  "mb_per_s_median": 3.432960092037828,
+  "mb_per_s_best": 3.9197668252946616,
+  "mchars_per_s_median": 3.3347222167227923,
+  "latency": {
+   "p50_ms": 0.5141,
+   "p95_ms": 0.7698,
+   "p99_ms": 0.8747,
+   "max_ms": 1.1032
+  }
+ },
+ "python_fr": {
+  "passes": 3,
+  "pass_seconds": [
+   5.1934,
+   5.114,
+   5.2034
+  ],
+  "ms_per_doc_median": 5.193363800062798,
+  "ms_per_doc_best": 5.114013000042178,
+  "mb_per_s_median": 0.3699658013514799,
+  "mb_per_s_best": 0.37570631908525726,
+  "mchars_per_s_median": 0.35937882880021454
+ },
+ "native_all": {
+  "passes": 5,
+  "pass_seconds": [
+   0.8339,
+   0.6982,
+   0.7626,
+   0.8429,
+   0.8298
+  ],
+  "ms_per_doc_median": 0.8297953000292182,
+  "ms_per_doc_best": 0.6982187000103295,
+  "mb_per_s_median": 2.3154710564549426,
+  "mb_per_s_best": 2.7518125767350186,
+  "mchars_per_s_median": 2.249211341561325
+ },
+ "text_10mb": {
+  "utf8_bytes": 10000000,
+  "chars": 9714203,
+  "seconds": [
+   2.088,
+   1.946,
+   2.124
+  ],
+  "best_s": 1.9457927999319509,
+  "median_s": 2.0884350000414997,
+  "native": true,
+  "personal_spans": 151909
+ },
+ "wall_seconds": 58.7,
+ "documents_processed_distinct": {
+  "corpus_1000": 1000,
+  "note": "memes 1 000 documents dans chaque mesure ; passes repetees non comptees"
+ }
+}

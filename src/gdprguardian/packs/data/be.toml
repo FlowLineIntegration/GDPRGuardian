@@ -1,0 +1,241 @@
+# Pack Belgique : NISS/BIS, BCE/KBO et TVA, carte eID, téléphones, plaques / Belgium pack.
+# Niveaux / tiers : A clé forte / strong key ; B clé faible + contexte / weak key + context ; C contexte seul.
+# Mots de contexte = preuves du mode auto, donc propres à la Belgique ; indices génériques pris aux groupes FR.
+# Context words are auto-mode evidence, hence Belgium-only; generic cues come from the INTL groups ("INTL:phone"), FR groups kept for compatibility.
+# Les libellés ambigus (« BCE », « numéro d'entreprise ») sont ancrés dans un motif / ambiguous labels are anchored.
+# Motifs terminés par (?![^\W_]) : la regex revient elle-même sur une forme valide / self-delimiting patterns.
+
+[pack]
+id = "BE"
+name = "Belgique / België / Belgien"
+version = "2026.10.0"
+country = "BE"
+languages = ["fr", "nl", "de"]
+detectors = []
+
+[locale]
+phone_codes = ["32"]
+tlds = ["be"]
+iban_countries = ["BE"]
+languages = ["fr", "nl", "de"]
+
+# « niss » est gardé malgré le NISS portugais : sans lui, un NISS belge isolé ne serait pas masqué (rappel d'abord).
+# « numéro national » et « n° national » sont exclus (numéro national d'écoute, n° national d'émetteur SEPA).
+# "niss" is kept despite the Portuguese NISS (recall first); "n° national" is excluded (French SEPA mandates).
+[context.niss]
+fr = ["niss", "numéro de registre national", "n° de registre national", "no de registre national", "numéro bis"]
+nl = ["insz", "rijksregisternummer", "rijksregisternr", "rijksregister", "bisnummer", "bis-nummer",
+      "identificatienummer van de sociale zekerheid"]
+de = ["nationalregisternummer", "nationalregister", "erkennungsnummer der sozialen sicherheit"]
+
+# Exclus, car ancrés dans BE_BCE_LABELLED : « BCE » (Banque centrale européenne), « KBO » (KBO-PCOB aux Pays-Bas,
+# cliniques kbo en Bavière), « numéro d'entreprise » (Québec, France), « Unternehmensnummer » (Allemagne).
+# Excluded, as BE_BCE_LABELLED anchors them: each also names something else in a neighbouring country.
+[context.bce]
+fr = ["numéro bce", "n° bce", "no bce", "banque-carrefour des entreprises", "banque carrefour des entreprises"]
+nl = ["ondernemingsnummer", "ondernemingsnr", "kbo-nummer", "kbo nummer", "kbo-nr",
+      "kruispuntbank van ondernemingen"]
+de = ["zentrale datenbank der unternehmen"]
+
+# « identiteitskaart » seul est exclu (aussi néerlandais des Pays-Bas) / excluded: also Netherlands Dutch.
+[context.eid]
+fr = ["carte eid", "numéro eid", "n° eid", "puce eid"]
+nl = ["eid-kaart", "eid kaart", "elektronische identiteitskaart"]
+de = ["eid-karte"]
+
+[context.country]
+fr = ["royaume de belgique", "moniteur belge", "inami", "onss", "spf finances", "spf justice", "spf intérieur",
+      "spf sécurité sociale", "service public fédéral", "banque-carrefour de la sécurité sociale",
+      "région de bruxelles-capitale", "fédération wallonie-bruxelles"]
+nl = ["koninkrijk belgië", "belgisch staatsblad", "riziv", "fod financiën", "federale overheidsdienst",
+      "kruispuntbank van de sociale zekerheid", "vlaamse overheid"]
+de = ["königreich belgien", "belgisches staatsblatt", "deutschsprachige gemeinschaft belgiens", "ostbelgien"]
+
+# Indices d'entreprise personne physique (numéro BCE = donnée personnelle) ; ne comptent pas comme preuve.
+# Sole-trader cues (enterprise number = personal data); never counted as evidence.
+[context.ei]
+fr = ["entreprise personne physique", "travailleur indépendant", "indépendant en personne physique"]
+nl = ["eenmanszaak", "natuurlijk persoon", "zelfstandige", "zelfstandig ondernemer"]
+de = ["einzelunternehmen", "einzelunternehmer"]
+
+# En-têtes de colonnes (tableurs). En mode auto, le premier pack qui liste un en-tête impose son libellé : pas de
+# mot générique (« EID », « Kaartnummer », « Kennzeichen »). Column headers: in auto mode the first pack listing a
+# header sets its label, hence no generic word.
+[headers]
+BE_NISS = ["niss", "insz", "numéro national", "n° national", "numéro de registre national", "registre national",
+           "rijksregisternummer", "rijksregister", "nationalregisternummer", "numéro bis", "bisnummer"]
+BE_BCE = ["bce", "n° bce", "numéro bce", "numéro d'entreprise", "kbo", "kbo-nummer", "ondernemingsnummer"]
+VAT = ["tva", "n° tva", "numéro de tva", "btw", "btw-nummer", "mwst"]
+ID_CARD = ["carte d'identité", "n° carte d'identité", "carte eid", "n° carte eid", "identiteitskaart", "eid-kaart"]
+PHONE = ["gsm", "téléphone", "tél", "telefoon", "telefoonnummer", "gsm-nummer", "telefon", "handy"]
+IBAN = ["iban", "numéro de compte", "compte bancaire", "rekeningnummer", "bankrekening", "kontonummer"]
+PERSON = ["naam", "voornaam", "achternaam", "familienaam", "name", "vorname", "nachname"]
+ADDRESS = ["adres", "straat", "adresse", "strasse", "straße"]
+BIRTH_DATE = ["geboortedatum", "geburtsdatum", "date de naissance"]
+POSTAL_CODE = ["code postal", "postcode", "postleitzahl"]
+PLATE = ["plaque", "nummerplaat"]
+
+[labels.BE_NISS]
+fr = "NISS"
+en = "NISS"
+nl = "INSZ"
+neutral = "NATIONAL_ID"
+aliases = ["INSZ", "RIJKSREGISTERNUMMER", "NUMERO_NATIONAL"]
+
+[labels.BE_BCE]
+fr = "BCE"
+en = "CBE"
+nl = "KBO"
+neutral = "COMPANY_ID"
+aliases = ["KBO", "NUMERO_ENTREPRISE", "ONDERNEMINGSNUMMER"]
+
+# --- Personnes / persons ---
+
+# NISS : registre national ou BIS ; 2 chances sur 97 au hasard, avant le filtre du mois et du jour.
+# NISS: national register or BIS; random pass rate 2/97 before the month and day filter.
+[[recognizer]]
+id = "BE_NISS"
+entity = "NATIONAL_ID"
+label = "BE_NISS"
+tier = "A"
+score = 0.97
+prefilter = "digit"
+pattern = '[0-9]{2}{S}[0-9]{2}{S}[0-9]{2}{S}[0-9]{3}{S}[0-9]{2}(?![^\W_])'
+validator = "be.niss"
+boundary = "alnum"
+context = "niss"
+
+# Tableurs : un NISS né en 2000-2009 perd ses zéros de tête / spreadsheets drop the leading zeros.
+[[recognizer]]
+id = "BE_NISS_UNPADDED"
+entity = "NATIONAL_ID"
+label = "BE_NISS"
+tier = "C"
+prefilter = "digit"
+pattern = '[1-9][0-9]{7,9}(?![^\W_])'
+validator = "be.niss_unpadded"
+boundary = "alnum"
+context = "niss"
+
+[[recognizer]]
+id = "BE_EID"
+entity = "ID_CARD"
+label = "ID_CARD"
+tier = "B"
+prefilter = "digit"
+pattern = '[0-9]{3}{S}[0-9]{7}{S}[0-9]{2}(?![^\W_])'
+validator = "be.eid"
+boundary = "alnum"
+context = ["eid", "FR:cni", "INTL:id_card"]
+veto = ["FR:rib", "INTL:iban"]
+
+# Ancien compte bancaire (avant l'IBAN), même forme et même clé que l'eID : le contexte tranche, et l'indice
+# le plus proche l'emporte (« IBAN … Carte d'identité n° 591-… » est une carte). Legacy bank account, same
+# shape and key as the eID: context decides, the nearest cue wins.
+[[recognizer]]
+id = "BE_BANK_ACCOUNT"
+entity = "BANK_ACCOUNT"
+label = "RIB"
+tier = "B"
+prefilter = "digit"
+pattern = '[0-9]{3}{S}[0-9]{7}{S}[0-9]{2}(?![^\W_])'
+validator = "be.bban"
+boundary = "alnum"
+context = ["FR:rib", "INTL:iban"]
+veto = ["eid", "FR:cni", "INTL:id_card"]
+
+[[recognizer]]
+id = "BE_PHONE_MOBILE"
+entity = "PHONE"
+label = "PHONE"
+tier = "A"
+prefilter = "digit"
+pattern = '04[5-9][0-9][ ./-](?:[0-9]{2}[ .-]?[0-9]{2}[ .-]?[0-9]{2}|[0-9]{3}[ .-]?[0-9]{3})(?![^\W_])'
+validator = "be.phone"
+boundary = "phone"
+context = ["FR:phone", "INTL:phone"]
+
+# Fixe : zone à 1 chiffre (02, 03, 04, 09) puis 3-2-2, ou à 2 chiffres puis 2-2-2 ; groupement belge.
+# Landline: 1-digit area (02, 03, 04, 09) then 3-2-2, or 2-digit area then 2-2-2; Belgian grouping.
+[[recognizer]]
+id = "BE_PHONE_FIXED"
+entity = "PHONE"
+label = "PHONE"
+tier = "A"
+prefilter = "digit"
+pattern = '(?:0[2349][ ./-][0-9]{3}[ .-]?[0-9]{2}[ .-]?[0-9]{2}|0(?:1[0-9]|[5-8][0-9])[ ./-][0-9]{2}[ .-]?[0-9]{2}[ .-]?[0-9]{2})(?![^\W_])'
+validator = "be.phone"
+boundary = "phone"
+context = ["FR:phone", "INTL:phone"]
+
+[[recognizer]]
+id = "BE_PHONE_COMPACT"
+entity = "PHONE"
+label = "PHONE"
+tier = "B"
+prefilter = "digit"
+pattern = '0[1-9][0-9]{7,8}(?![^\W_])'
+validator = "be.phone"
+boundary = "alnum"
+context = ["FR:phone", "INTL:phone"]
+
+# Plaque depuis 2010 : 1-ABC-123 / plate format since 2010.
+[[recognizer]]
+id = "BE_PLATE"
+entity = "PLATE"
+label = "PLATE"
+tier = "A"
+prefilter = "digit"
+pattern = '[1-9]-[A-Z]{3}-[0-9]{3}(?![^\W_])'
+boundary = "alnum"
+
+[[recognizer]]
+id = "BE_POSTCODE"
+entity = "POSTAL_CODE"
+label = "POSTAL_CODE"
+tier = "A"
+prefilter = "b-"
+pattern = 'B-[1-9][0-9]{3}(?=\s{1,3}[A-ZÀ-Ý])'
+boundary = "alnum"
+
+# --- Entreprises (masquées si personne physique ou profil strict) / companies (masked for sole traders) ---
+
+# TVA : BE + numéro d'entreprise ; même libellé et même valeur que la BCE, donc même balise.
+# VAT: BE + enterprise number; same label and value as the BCE form, hence the same placeholder.
+[[recognizer]]
+id = "BE_VAT"
+entity = "VAT"
+label = "BE_BCE"
+tier = "A"
+policy = "company"
+prefilter = "digit"
+pattern = 'BE{S}(?:\(0\){S})?[0-9]{3,4}{S}[0-9]{3}{S}[0-9]{3}(?![^\W_])'
+flags = "i"
+validator = "be.enterprise_number"
+boundary = "alnum"
+
+# Numéro annoncé par son libellé (« BCE », « KBO-nummer », « N° d'entreprise (BCE) : », « Unternehmensnummer »).
+# Number introduced by its label; these labels are too ambiguous to be context words (see [context.bce]).
+[[recognizer]]
+id = "BE_BCE_LABELLED"
+entity = "COMPANY_ID"
+label = "BE_BCE"
+tier = "A"
+policy = "company"
+prefilter = ["bce", "kbo", "d'entreprise", "unternehmensnummer"]
+pattern = '''(?:BCE|KBO|(?i:n(?:um[ée]ro|[°º]|o\.?)\s{0,3}d'\s{0,2}entreprise|unternehmensnummer))(?:[ -]?(?:nummer|nr\.?))?\s{0,3}(?:\((?:BCE|KBO)\)\s{0,3})?(?:[Nn][°º]\.?\s{0,3})?:?\s{0,3}(?P<v>[0-9]{3,4}{S}[0-9]{3}{S}[0-9]{3})(?![^\W_])'''
+group = "v"
+validator = "be.enterprise_number"
+boundary = "alnum"
+
+[[recognizer]]
+id = "BE_BCE"
+entity = "COMPANY_ID"
+label = "BE_BCE"
+tier = "B"
+policy = "company"
+prefilter = "digit"
+pattern = '[0-9]{3,4}{S}[0-9]{3}{S}[0-9]{3}(?![^\W_])'
+validator = "be.enterprise_number"
+boundary = "alnum"
+context = "bce"

@@ -1,0 +1,27 @@
+{
+  "description": "Gardien RGPD : bloque la lecture directe des documents bruts (PDF, Word, Excel, CSV, e-mails...) / GDPR Guardian: blocks direct reads of raw documents",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read|Grep|Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run --no-project --no-config --quiet \"${CLAUDE_PLUGIN_ROOT}/hooks/block_raw_documents.py\"; exit $LASTEXITCODE",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run --no-project --no-config --quiet \"${CLAUDE_PLUGIN_ROOT}/hooks/block_raw_documents.py\"; exit $LASTEXITCODE",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

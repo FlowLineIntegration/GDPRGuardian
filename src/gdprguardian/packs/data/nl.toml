@@ -1,0 +1,226 @@
+# Pack Pays-Bas / Netherlands pack.
+# Niveaux : A = clé forte, masquage sans contexte ; B = clé faible, contexte requis ; C = sans clé, contexte requis.
+# Tiers: A strong checksum, no context needed; B weak checksum + context; C no checksum, context only.
+# En mode auto, tout mot de contexte active le pack : seuls des termes propres au néerlandais y figurent
+# (« btw » et « postcode » sont aussi anglais, « adres » polonais ; « Tel. » est ancré dans un motif).
+# In auto mode any context word activates the pack, so only Dutch-specific terms are listed ("btw" and
+# "postcode" are also English, "adres" Polish; "Tel." is anchored inside a pattern instead).
+# Bornes « (?<![0-9A-Za-z]{2}) » après le premier caractère et « (?![0-9A-Za-z]) » en fin de motif : sre écarte
+# en C les fenêtres prises dans un nombre plus long (voir de.toml). In-pattern boundaries after the first
+# character and at the end: sre rejects in C the windows inside a longer number (see de.toml).
+
+[pack]
+id = "NL"
+name = "Nederland"
+version = "2026.10.0"
+country = "NL"
+languages = ["nl"]
+detectors = []
+
+[locale]
+phone_codes = ["31"]
+tlds = ["nl"]
+iban_countries = ["NL"]
+languages = ["nl"]
+
+[context.bsn]
+nl = ["bsn", "burgerservicenummer", "burgerservice-nummer", "bsn-nummer", "sofinummer", "sofi-nummer"]
+[context.vat]
+nl = ["btw-nummer", "btw-id", "btw-identificatienummer", "btw nummer", "omzetbelastingnummer"]
+[context.kvk]
+nl = ["kvk", "kvk-nummer", "kvk-nr", "kvk nummer", "kamer van koophandel"]
+[context.id_card]
+nl = ["identiteitskaart", "id-kaart", "identiteitsbewijs", "documentnummer"]
+[context.passport]
+nl = ["paspoort", "paspoortnummer"]
+[context.driver_license]
+nl = ["rijbewijs", "rijbewijsnummer"]
+[context.address]
+nl = ["woonadres", "postadres", "woonplaats", "woonachtig", "huisnummer", "vestigingsadres", "bezoekadres",
+      "correspondentieadres", "factuuradres", "afleveradres", "huisadres"]
+[context.phone]
+nl = ["telefoon", "telefoonnummer", "mobiel", "mobiel nummer", "mobiele nummer", "vaste lijn"]
+# Indices d'entreprise individuelle / sole-trader cues.
+[context.ei]
+nl = ["eenmanszaak", "zzp", "zzp'er", "zzper", "zelfstandige zonder personeel", "zelfstandig ondernemer"]
+
+[headers]
+NL_BSN = ["bsn", "burgerservicenummer", "sofinummer"]
+NL_KVK = ["kvk", "kvk-nummer", "kvk nummer"]
+VAT = ["btw-nummer", "btw-id", "btw nummer", "btw"]
+ID_CARD = ["identiteitskaart", "id-kaart", "documentnummer"]
+PASSPORT = ["paspoort", "paspoortnummer"]
+DRIVER_LICENSE = ["rijbewijs", "rijbewijsnummer"]
+PHONE = ["telefoon", "telefoonnummer", "tel.", "mobiel", "mobiel nummer", "gsm"]
+EMAIL = ["e-mail", "email", "e-mailadres"]
+PERSON = ["naam", "voornaam", "achternaam", "voorletters", "volledige naam", "medewerker", "klant", "patiënt",
+          "contactpersoon"]
+ADDRESS = ["adres", "straat", "woonadres", "straatnaam", "huisnummer"]
+BIRTH_DATE = ["geboortedatum", "geboren op"]
+POSTAL_CODE = ["postcode"]
+IBAN = ["iban", "rekeningnummer", "bankrekening"]
+
+[labels.NL_BSN]
+fr = "BSN"
+en = "BSN"
+nl = "BSN"
+neutral = "NATIONAL_ID"
+aliases = ["BURGERSERVICENUMMER"]
+
+[labels.NL_KVK]
+fr = "KVK"
+en = "KVK"
+nl = "KVK"
+neutral = "COMPANY_ID"
+
+# BSN : 11-proef (1 nombre sur 11), contexte requis ; 8 chiffres si Excel a retiré le 0 initial.
+# BSN: eleven test (1 number in 11), context required; 8 digits when Excel dropped the leading 0.
+[[recognizer]]
+id = "NL_BSN"
+entity = "NATIONAL_ID"
+label = "NL_BSN"
+tier = "B"
+prefilter = "digit"
+pattern = '[0-9](?<![0-9A-Za-z]{2})[0-9]{2}(?:[0-9]{S}[0-9]{2}{S}[0-9]{3}|{S}[0-9]{3}{S}[0-9]{3}|[0-9]{5})(?![0-9A-Za-z])'
+validator = "nl.bsn"
+boundary = "alnum"
+context = "bsn"
+
+# Btw-id MOD 97-10 : attribué depuis 2020 aux seules eenmanszaken, donc donnée personnelle (masqué toujours).
+# Btw-nummer à 11-proef : RSIN d'une personne morale (ou ancien numéro fondé sur le BSN), politique entreprise.
+# MOD 97-10 btw-id: issued since 2020 to sole traders only, hence personal data (always masked). Eleven-test
+# btw-nummer: a legal entity's RSIN (or an older BSN-based number), company policy.
+[[recognizer]]
+id = "NL_VAT_PERSON"
+entity = "VAT"
+label = "VAT"
+tier = "A"
+prefilter = "digit"
+pattern = 'NL{S}[0-9]{9}{S}B{S}[0-9]{2}'
+validator = "nl.btw_person"
+boundary = "alnum"
+context = "vat"
+
+[[recognizer]]
+id = "NL_VAT"
+entity = "VAT"
+label = "VAT"
+tier = "A"
+policy = "company"
+prefilter = "digit"
+pattern = 'NL{S}[0-9]{9}{S}B{S}[0-9]{2}'
+validator = "nl.btw_company"
+boundary = "alnum"
+context = "vat"
+
+[[recognizer]]
+id = "NL_KVK"
+entity = "COMPANY_ID"
+label = "NL_KVK"
+tier = "C"
+policy = "company"
+prefilter = "digit"
+pattern = '[0-9](?<![0-9A-Za-z]{2})[0-9]{3}{S}[0-9]{4}(?![0-9A-Za-z])'
+validator = "nl.kvk"
+boundary = "alnum"
+context = "kvk"
+
+[[recognizer]]
+id = "NL_ID_CARD"
+entity = "ID_CARD"
+label = "ID_CARD"
+tier = "C"
+prefilter = "digit"
+pattern = '[A-NP-Z](?<![0-9A-Za-z]{2})[A-NP-Z][A-NP-Z0-9]{6}[0-9](?![0-9A-Za-z])'
+validator = "nl.document_number"
+boundary = "alnum"
+context = "id_card"
+
+[[recognizer]]
+id = "NL_PASSPORT"
+entity = "PASSPORT"
+label = "PASSPORT"
+tier = "C"
+prefilter = "digit"
+pattern = '[A-NP-Z](?<![0-9A-Za-z]{2})[A-NP-Z][A-NP-Z0-9]{6}[0-9](?![0-9A-Za-z])'
+validator = "nl.document_number"
+boundary = "alnum"
+context = "passport"
+
+[[recognizer]]
+id = "NL_DRIVER_LICENSE"
+entity = "DRIVER_LICENSE"
+label = "DRIVER_LICENSE"
+tier = "C"
+prefilter = "digit"
+pattern = '[0-9](?<![0-9A-Za-z]{2})[0-9]{9}(?![0-9A-Za-z])'
+boundary = "alnum"
+context = "driver_license"
+
+# Postcode : 6 caractères qui désignent une portion de rue, quasi-identifiant, contexte d'adresse requis.
+# Postcode: 6 characters designating part of a street, a quasi-identifier, address context required.
+[[recognizer]]
+id = "NL_POSTCODE"
+entity = "POSTAL_CODE"
+label = "POSTAL_CODE"
+tier = "C"
+prefilter = "digit"
+pattern = '[1-9](?<![0-9A-Za-z]{2})[0-9]{3} ?[A-Z]{2}(?![0-9A-Za-z])'
+validator = "nl.postcode"
+boundary = "alnum"
+context = "address"
+
+# « Postcode » et « Adres » sont aussi anglais et polonais, donc absents du contexte (activation du pack) :
+# ils sont ancrés ici, le code postal suivant sur la même ligne. "Postcode" and "Adres" are also English and
+# Polish, so they stay out of the context (pack activation): they are anchored here, the postcode following
+# on the same line.
+[[recognizer]]
+id = "NL_POSTCODE_LABELED"
+entity = "POSTAL_CODE"
+label = "POSTAL_CODE"
+tier = "A"
+prefilter = ["postcode", "adres"]
+pattern = '(?:P(?i:ostcode)|p(?i:ostcode)|A(?i:dres)|a(?i:dres))[^\n]{0,48}?(?<![0-9A-Za-z])(?P<v>[1-9][0-9]{3} ?[A-Z]{2})(?![0-9A-Za-z])'
+group = "v"
+validator = "nl.postcode"
+boundary = "alnum"
+
+# Téléphones nationaux (0 + 9 chiffres) ; les numéros +31 relèvent du pack INTL. Seuls des espaces séparent
+# les chiffres de l'abonné (« 06-12-2024 12:00 » n'est pas un numéro). Une branche par longueur d'indicatif
+# (2 à 4 chiffres) fixe le total à 10 chiffres, et la borne finale fait reculer la regex devant un nombre
+# voisin. Libellés : une branche par casse de l'initiale. National phone numbers (0 + 9 digits); +31 numbers
+# belong to the INTL pack. Only spaces split subscriber digits ("06-12-2024 12:00" is no number). One branch per
+# area-code length (2 to 4 digits) fixes the total at 10 digits, and the final boundary makes the regex back off
+# a neighbouring number. Labels: one branch per initial-letter case.
+[[recognizer]]
+id = "NL_PHONE_MOBILE"
+entity = "PHONE"
+label = "PHONE"
+tier = "A"
+prefilter = "digit"
+pattern = '\(?0(?<![0-9A-Za-z\+]0)6\)?[ \-]?[0-9](?: ?[0-9]){7}(?![0-9A-Za-z])'
+validator = "nl.phone_mobile"
+boundary = "phone"
+context = "phone"
+
+[[recognizer]]
+id = "NL_PHONE_LABELED"
+entity = "PHONE"
+label = "PHONE"
+tier = "A"
+prefilter = ["tel", "mob", "gsm", "fax"]
+pattern = '(?:T(?i:el(?:efoon(?:nummer)?)?(?:\.?[ \-]?nr)?)|t(?i:el(?:efoon(?:nummer)?)?(?:\.?[ \-]?nr)?)|M(?i:ob(?:iel)?)|m(?i:ob(?:iel)?)|G(?i:sm)|g(?i:sm)|F(?i:ax)|f(?i:ax))\.?(?:\s{0,3}\([^()\n0-9]{1,20}\))?\s{0,3}:?\s{0,3}(?P<v>\(?0(?:[1-9]\)?(?: ?/ ?|[ \-]{1,3})?[0-9](?: ?[0-9]){7}|[1-9][0-9]\)?(?: ?/ ?|[ \-]{1,3})?[0-9](?: ?[0-9]){6}|[1-9][0-9]{2}\)?(?: ?/ ?|[ \-]{1,3})?[0-9](?: ?[0-9]){5})(?![0-9A-Za-z]))'
+group = "v"
+validator = "nl.phone"
+boundary = "alnum"
+
+[[recognizer]]
+id = "NL_PHONE"
+entity = "PHONE"
+label = "PHONE"
+tier = "B"
+prefilter = "digit"
+pattern = '\(?0(?<![0-9A-Za-z\+]0)(?:[1-9]\)?(?: ?/ ?|[ \-]{1,3})?[0-9](?: ?[0-9]){7}|[1-9][0-9]\)?(?: ?/ ?|[ \-]{1,3})?[0-9](?: ?[0-9]){6}|[1-9][0-9]{2}\)?(?: ?/ ?|[ \-]{1,3})?[0-9](?: ?[0-9]){5})(?![0-9A-Za-z])'
+validator = "nl.phone"
+boundary = "phone"
+context = "phone"

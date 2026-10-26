@@ -1,0 +1,51 @@
+GDPR Guardian · launch video · all on-screen text, in order
+Silent video (no voice, no music): this file lists every on-screen text at the moment it appears.
+74.2 s · 1080 x 1350 · 30 fps
+
+[00:00] GDPR Guardian
+[00:00] Mr Jean Dupont, 06 12 34 56 78
+[00:02] Mr [PERSON_1], [PHONE_1]
+[00:03] Anonymise your documents, irreversibly, before they reach an AI.
+[00:04] gdprguardian.com · gardienrgpd.fr
+[00:07] Every day, documents go to AI assistants.
+[00:08] Contract — Jean Dupont
+[00:08] HR file — FR76 3000 6000
+[00:08] Medical record — Type 2 diabetes
+[00:08] E-mail — c.martin@example.com
+[00:10] AI assistant
+[00:12] Their personal data goes with them.
+[00:16] Guillaume annoys Nadège. Nadège hits Guillaume.
+[00:18] Naive masking — [NAME] annoys [NAME]. [NAME] hits [NAME].
+[00:19] Who hit whom?
+[00:22] GDPR Guardian — [PERSON_1] annoys [PERSON_2]. [PERSON_2] hits [PERSON_1].
+[00:22] The roles survive, the identities do not.
+[00:27] Three ways in, one engine
+[00:28] Website
+[00:28] MCP
+[00:28] REST API
+[00:29] GDPR Guardian — Nothing is kept.
+[00:31] Anonymised Markdown
+[00:31] Your AI
+[00:32] Over MCP, send the file, not pasted text.
+[00:35] 100% local: Claude plugin, Python, Docker without network.
+[00:39] Copy the repository, make your own version.
+[00:39] $ git clone https://github.com/FlowLineIntegration/GDPRGuardian
+[00:41] Code published when the public repository opens.
+[00:42] MIT licence — use it, change it, share it
+[00:47] Your server — docker compose
+[00:50] Measured, published
+[00:50] 99.2% — masked, synthetic data: the best case
+[00:53] 35–93% — masked, real French texts, by corpus
+[00:55] Confidence index
+[00:56] Being measured
+[00:57] German, Spanish, Italian, Dutch, Portuguese names: not detected.
+[01:00] A first barrier, not a GDPR certification.
+[01:03] GDPR Guardian
+[01:03] The best open-source tool for GDPR and AI!
+[01:06] You be the judge.
+[01:08] gdprguardian.com · gardienrgpd.fr
+[01:08] github.com/FlowLineIntegration/GDPRGuardian
+[01:09] Offered by Flow Line Intégration
+[01:09] Guillaume CLEMENT, CTO Data & AI
+[01:10] Design: Claude Design
+[01:10] MIT licence · version 1.0.0

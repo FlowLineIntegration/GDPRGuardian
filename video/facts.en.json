@@ -1,0 +1,212 @@
+{
+  "lang": "en",
+  "file_stem": "gdpr-guardian-launch-en",
+  "html_title": "GDPR Guardian · launch video",
+  "transcript_title": "GDPR Guardian · launch video · all on-screen text, in order",
+  "transcript_note": "Silent video (no voice, no music): this file lists every on-screen text at the moment it appears.",
+  "chrome": {
+    "brand": "GDPR Guardian",
+    "site": "gdprguardian.com"
+  },
+  "chapters": {
+    "problem": "01 · The problem",
+    "answer": "02 · Our answer",
+    "use": "03 · Three ways in",
+    "fork": "04 · Your own version",
+    "numbers": "05 · The numbers"
+  },
+  "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+  "title": {
+    "name": "GDPR Guardian",
+    "specimen": [
+      [["Mr "], ["Jean Dupont", "[PERSON_1]", "p1"], [", "], ["06 12 34 56 78", "[PHONE_1]", "p3"]]
+    ],
+    "kicker": "Anonymise your documents, irreversibly, before they reach an AI.",
+    "line1": "The best open-source tool for GDPR and AI!",
+    "line2": "You be the judge.",
+    "urls": "gdprguardian.com · gardienrgpd.fr"
+  },
+  "problem": {
+    "headline": "Every day, real documents end up in AI assistants.",
+    "docs": [
+      ["Contract", "Jean Dupont"],
+      ["HR file", "FR76 3000 6000"],
+      ["Medical record", "Type 2\ndiabetes"],
+      ["E-mail", "c.martin@\nexample.com"]
+    ],
+    "ai": "AI assistant",
+    "caption": "Personal data ends up with a third party."
+  },
+  "shortfalls": {
+    "headline": "Today’s answers fall short.",
+    "rows": [
+      ["Manual redaction", "Slow, and names slip through."],
+      ["Reversible pseudonymisation", "The mapping table is still personal data."],
+      ["<p0>[REDACTED]</p0> everywhere", "The AI loses the meaning."],
+      ["Black boxes", "Nothing explains the masking."]
+    ]
+  },
+  "demo": {
+    "headline": "Remove the names, keep the meaning.",
+    "label": "real output, version 1.0.0",
+    "lines": [
+      [["Mr "], ["Jean Dupont", "[PERSON_1]", "p1"], [" · "], ["jean.dupont@example.com", "[EMAIL_1]", "p3"], [" · "], ["06 12 34 56 78", "[PHONE_1]", "p3"]],
+      [["IBAN "], ["FR76 3000 6000 0112 3456 7890 189", "[IBAN_1]", "p3"]],
+      [["Mr "], ["Dupont", "[PERSON_1]", "p1"], [" will call Ms "], ["Claire Martin", "[PERSON_2]", "p2"], [" back."]],
+      [["DUPONT Jean", "[PERSON_1]", "p1"], [" will pay invoice no. 2026-0042."]]
+    ],
+    "key_on": "Random 256-bit key, for this document only",
+    "key_off": "Key destroyed: no way back.",
+    "caption": "Same person, same tag."
+  },
+  "story": {
+    "headline": "<n1>Guillaume</n1> annoys <n2>Nadège</n2>. <n2>Nadège</n2> hits <n1>Guillaume</n1>.",
+    "rows": [
+      {"label": "Naive masking", "text": "<p0>[NAME]</p0> annoys <p0>[NAME]</p0>.\n<p0>[NAME]</p0> hits <p0>[NAME]</p0>.", "why": "Who hit whom?"},
+      {"label": "GDPR Guardian", "text": "<p1>[PERSON_1]</p1> annoys <p2>[PERSON_2]</p2>.\n<p2>[PERSON_2]</p2> hits <p1>[PERSON_1]</p1>.", "why": "The roles survive, the identities do not."}
+    ]
+  },
+  "pillars": {
+    "headline": "Six principles",
+    "tiles": [
+      ["Irreversible", "256-bit key destroyed, no table."],
+      ["Consistent", "One person, one tag."],
+      ["Verified", "Official check digits."],
+      ["Explainable", "A rule per tag, no LLM."],
+      ["Fast", "2\u00a0KB in 0.5\u00a0ms, on CPU."],
+      ["Nothing kept", "All in memory."]
+    ]
+  },
+  "use": {
+    "headline": "Three ways in, one engine",
+    "entries": [
+      ["Website", "Drop or paste, then download."],
+      ["MCP", "Claude and other agents, no key."],
+      ["REST API", "<m>/v1/anonymize/text</m>\n<m>/v1/anonymize/file</m>"]
+    ],
+    "engine": ["GDPR Guardian", "One fresh process per request, nothing kept."],
+    "output": "Anonymised Markdown",
+    "ai": "Your AI",
+    "note": "Over MCP, send the file: it never goes through the model. Pasted text has already left.",
+    "local": "<b>100% local</b>: Claude plugin, Python package, Docker without network."
+  },
+  "fork": {
+    "headline": "Copy the repository, make your own version.",
+    "command": "git clone https://github.com/FlowLineIntegration/GDPRGuardian",
+    "note": "Code published on GitHub.",
+    "steps": [
+      ["MIT licence", "Use it, change it, share it."],
+      ["Your rules", "In the call, never stored.", "<m>CLT-204518</m>\n<arrow/> <p3>[CLIENT_ID_1]</p3>"],
+      ["Your server", "<m>docker compose</m>\n<m>deploy/README.md</m>"],
+      ["Contribute", "Improve, propose: <m>/issues</m>"]
+    ]
+  },
+  "numbers": {
+    "headline": "Tested, measured, published",
+    "figures": [
+      {"id": "tests", "fig": "{tests}+", "fallback_fig": "3,700+", "label": "automated tests, Windows and Linux"},
+      {"id": "redteam", "fig": "{q.redteam_operators}", "fallback_fig": "51", "label": "ways to disguise an identifier"},
+      {"id": "recall", "fig": "{q.recall_direct_pct}%", "fallback_fig": "99.2%", "label": "of the text to mask is masked ({q.eval_docs} synthetic documents: the best case)", "fallback_label": "of the text to mask is masked (540 synthetic documents: the best case)"},
+      {"id": "real", "fig": "15", "label": "real-text datasets, 8,478 documents"},
+      {"id": "range", "fig": "35–93%", "label": "of mentions masked in real French texts, by corpus (1.0.0)"},
+      {"id": "bodacc", "fig": "79 <arrow/> 98%", "label": "of mentions masked in BODACC notices (unseen data): 1.0.0, then the 25 October rules"}
+    ]
+  },
+  "index": {
+    "headline": "How we grade ourselves",
+    "title": "Confidence index",
+    "pending": "Being measured",
+    "value": "{v}%",
+    "ci": "95% CI: {lo}–{hi}%",
+    "guards": "Mentions masked:\u00a0{mr}%\u00a0· precision:\u00a0{p}%\u00a0· neutral text masked by mistake:\u00a0{o}%",
+    "definition": "Share of documents with no readable direct identifier.",
+    "protocol_pending": "Protocol written before measuring: 1,019,385 documents, 8,478 of them real, through the real service.",
+    "protocol_done": "Run of {date}: {docs} documents, protocol written beforehand.",
+    "protocol_done_nodate": "Run of {docs} documents, protocol written beforehand.",
+    "limits_title": "Known limits",
+    "limits": [
+      "German, Spanish, Italian, Dutch, Portuguese names: not detected.",
+      "Old newspapers, EU legal texts (names as initials): weak.",
+      "A first barrier, not a GDPR certification."
+    ],
+    "link": "The protocol: <m>gdprguardian.com/#protocol</m>"
+  },
+  "closing": {
+    "brand": "GDPR Guardian",
+    "line1": "The best open-source tool for GDPR and AI!",
+    "big": "You be the judge.",
+    "urls": "gdprguardian.com · gardienrgpd.fr",
+    "repo": "github.com/FlowLineIntegration/GDPRGuardian",
+    "credits": [
+      "Offered by\n<b>Flow Line Intégration</b>",
+      "<b>Guillaume CLEMENT</b>,\nCTO Data & AI",
+      "Design:\n<b>Claude Design</b>"
+    ],
+    "licence": "MIT licence · version 1.0.0"
+  },
+  "social": {
+    "title": {
+      "specimen": [
+        [["Mr "], ["Jean Dupont", "[PERSON_1]", "p1"], [","]],
+        [["06 12 34 56 78", "[PHONE_1]", "p3"]]
+      ],
+      "line1": null,
+      "line2": null
+    },
+    "problem": {
+      "headline": "Every day, documents go to AI assistants.",
+      "caption": "Their personal data goes with them."
+    },
+    "use": {
+      "entries": [["Website"], ["MCP"], ["REST API"]],
+      "engine": ["GDPR Guardian", "Nothing is kept."],
+      "note": "Over MCP, send the file, not pasted text.",
+      "local": "<b>100% local</b>: Claude plugin, Python, Docker without network."
+    },
+    "fork": {
+      "command": "git clone https://github.com/\nFlowLineIntegration/GDPRGuardian",
+      "steps": [
+        ["MIT licence", "use it, change it, share it"],
+        ["Your server", "<m>docker compose</m>"]
+      ]
+    },
+    "numbers": {
+      "headline": "Measured, published",
+      "figures": [
+        {"id": "recall", "fig": "{q.recall_direct_pct}%", "fallback_fig": "99.2%", "label": "masked, synthetic data: the best case"},
+        {"id": "range", "fig": "35–93%", "label": "masked, real French texts, by corpus"}
+      ],
+      "limits": [
+        "German, Spanish, Italian, Dutch, Portuguese names: not detected.",
+        "A first barrier, not a GDPR certification."
+      ]
+    }
+  },
+  "sources": [
+    {"figure": "Opening line “Mr Jean Dupont, 06 12 34 56 78” → “Mr [PERSON_1], [PHONE_1]”", "source": "The site’s API example (site/templates/index.en.html, “Use it” panel); identical output from the repository engine and from the published dist/1.0.0 packages, checked on 26 October 2026"},
+    {"figure": "Data on the problem cards (Jean Dupont, FR76 3000 6000, type 2 diabetes, c.martin@example.com)", "source": "Fictitious illustration data, the same fictitious people as the demo document; not a measurement"},
+    {"figure": "Random 256-bit key per document, destroyed; no mapping table", "source": "site/templates/index.en.html, Architecture panel; README.md, “Irreversible by design”"},
+    {"figure": "“Mr Dupont”, “Jean Dupont”, “DUPONT Jean” → one [PERSON_1]; “Ms Claire Martin” → Ms [PERSON_2]; invoice kept", "source": "Real output, Anonymizer(countries=\"FR\", explain=True, label_language=\"en\"), identical with the published dist/1.0.0 packages and with the repository engine, checked on 26 October 2026 on the four lines shown"},
+    {"figure": "Guillaume annoys Nadège / [PERSON_1] annoys [PERSON_2]", "source": "site/templates/index.en.html, “The story” panel (verbatim); output checked on 26 October 2026 (published 1.0.0 and repository)"},
+    {"figure": "NIR, SIRET, VAT, IBAN of 89 countries validated by official check digits", "source": "README.md, “Expert des identifiants européens”; site/templates/index.en.html (“check digits”)"},
+    {"figure": "Every tag has its rule and its reason (explain=true)", "source": "README.md, “Explicable”; docs/REGLES.md"},
+    {"figure": "About 0.5 ms for a 2 KB document, one core, no GPU, no LLM", "source": "README.md, “Performances”: 0.45 ms on Windows, 0.48 ms on Linux (Rust core); site/data/quality.json, ms_per_doc = 0.56 ms (25 October 2026, shared laptop)"},
+    {"figure": "One fresh process per request, in memory, nothing kept; no content logged, no cookie, no account, no key", "source": "README.md, “Service en ligne, gratuit et sans clé / free online service, no key”; deploy/README.md"},
+    {"figure": "Website, public MCP without a key (/mcp), REST API /v1/anonymize/text and /v1/anonymize/file", "source": "README.md; site/templates/index.en.html, “Use it” panel"},
+    {"figure": "Over MCP the file never goes through the model; text pasted into the chat has already left", "source": "site/templates/index.en.html, “Use it” panel (“create_upload … the file goes straight to the service, without passing through the model … A text already pasted into the chat has already left: anonymize_text cannot bring it back”)"},
+    {"figure": "100% local: Claude plugin (local MCP), Python package, Docker container without network", "source": "README.md; docs/LOCAL.md; deploy/README.md (docker run --network none)"},
+    {"figure": "MIT licence; git clone; code published on GitHub", "source": "README.md (MIT); site/templates/index.en.html, legal notice (“code in the public repository”)"},
+    {"figure": "Organisation rules passed in the call, never stored; CLT-204518 → [CLIENT_ID_1]; docker compose; issues", "source": "README.md, “Vos règles en plus” (CLIENT_ID rule, “Client CLT-204518” → “Client [CLIENT_ID_1]”, checked with the engine on 26 October 2026); deploy/README.md and deploy/server/compose.yaml; https://github.com/FlowLineIntegration/GDPRGuardian/issues"},
+    {"figure": "Automated tests, Windows and Linux: the smaller of the two, rounded down to the hundred, followed by “+”", "source": "site/data/quality.json (tests_windows, tests_linux), read at every render: 3,751 · 3,701 → “3,700+” on 26 October 2026. The full suites re-run on 25-26 October (4,162 · 4,109, two skill-script tests failing) are not in it yet: the video follows quality.json."},
+    {"figure": "51 ways to disguise an identifier (red-team operators)", "source": "site/data/quality.json (redteam_operators), read at every render; docs/PROTOCOLE.md § 2"},
+    {"figure": "99.2% of the text to mask is masked (direct identifiers), 540 synthetic documents, the best case", "source": "site/data/quality.json (recall_direct_pct, eval_docs), read at every render; the site’s wording (index.en.html, “Today’s measurements, synthetic corpus”); docs/CORPUS_REELS.md § 12.6"},
+    {"figure": "15 real-text datasets, 8,478 documents", "source": "docs/CORPUS_REELS.md § 1 (“8 478 documents distincts, 22 passages (15 principaux, 7 variantes)”; Judilibre has no annotation, it is the negative control)"},
+    {"figure": "35–93% of mentions fully masked in real French texts, by corpus, engine 1.0.0", "source": "site/templates/index.en.html, “Real French texts, 25 October 2026”; docs/CORPUS_REELS.md § 1 (MAPA FR 34.8% … ParlaMint-FR 93.2%)"},
+    {"figure": "BODACC: 79 → 98% of mentions fully masked, 1.0.0 then the 25 October rules, on unseen data", "source": "docs/CORPUS_REELS.md § 12.1 (before: published dist/1.0.0 packages; after: this repository, “rules2” rules) and § 12.4 / 12.9: test half 78.9 → 97.8%; unseen August 2026 79.3 → 97.6%. These rules are not in the published 1.0.0 packages: the screen says so."},
+    {"figure": "Confidence index (value, 95% CI, mentions masked, precision, over-masking, documents, date)", "source": "site/data/quality.json, read at every render (confidence_index, confidence_ci_low, confidence_ci_high, mention_recall_pct, precision_structured_pct, overmask_pct, protocol_docs, protocol_date); “Being measured” while any of these is missing (docs/PROTOCOLE.md: the index is published only next to precision and over-masking)"},
+    {"figure": "Protocol written before measuring: 1,019,385 documents, 8,478 of them real, through the real service", "source": "docs/PROTOCOLE.md, summary (“1,019,385 documents, of which 1,010,907 synthetic and 8,478 real”) and header (version 1.0 written on 25 October 2026, before any campaign)"},
+    {"figure": "Limits: DE, ES, IT, NL, PT names not detected; old OCR newspapers and EU legal texts with names as initials weak; first barrier, not a certification", "source": "docs/CORPUS_REELS.md § 1 (MAPA DE, ES, IT, NL, PT: 0.0%; HIPE 45.6%; MAPA FR 34.8%) and § 12.8; README.md, “Disclaimer”"},
+    {"figure": "The protocol: gdprguardian.com/#protocol", "source": "site/templates/index.en.html, section id=\"protocol\""},
+    {"figure": "Offered by Flow Line Intégration; Guillaume CLEMENT, CTO Data & AI; Design: Claude Design; MIT licence, version 1.0.0", "source": "site/templates/index.en.html, footer (“CTO Data & AI”) and “Thanks” panel"}
+  ]
+}

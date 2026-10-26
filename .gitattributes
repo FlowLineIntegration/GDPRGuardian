@@ -1,0 +1,28 @@
+# Fins de ligne LF dans le dépôt et dans les copies de travail, sous Windows comme ailleurs : les contrôles
+# (tools/build_skills.py check, empreintes du protocole) comparent des octets.
+# LF line endings in the repository and in working copies, on Windows too: several checks compare bytes.
+* text=auto eol=lf
+
+# Binaires : jamais convertis ni comparés comme du texte / binaries: never converted or diffed as text
+*.zip binary
+*.whl binary
+*.gz binary
+*.tgz binary
+*.png binary
+*.jpg binary
+*.ico binary
+*.mp4 binary
+*.woff2 binary
+*.onnx binary
+*.parquet binary
+*.pdf binary
+*.docx binary
+*.xlsx binary
+*.pptx binary
+*.odt binary
+*.msg binary
+
+# Scripts Windows : CRLF / Windows scripts keep CRLF
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf

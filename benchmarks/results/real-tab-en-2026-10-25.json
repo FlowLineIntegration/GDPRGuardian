@@ -1,0 +1,176 @@
+{
+  "corpus": "tab_en",
+  "title": "TAB, Text Anonymization Benchmark (ECHR, English, test split)",
+  "language": "en",
+  "licence": "MIT",
+  "source": "https://github.com/NorskRegnesentral/text-anonymization-benchmark",
+  "revision": "NorskRegnesentral/text-anonymization-benchmark@558e09e26d6b36f5f78440074e6a233946d98bd9",
+  "real_text": "yes (ECHR judgments)",
+  "gold": "manual, DIRECT and QUASI mentions of the first annotator",
+  "gold_complete": true,
+  "negative_control": false,
+  "measures": "person-name recall in English legal prose (no English pack: FR pack + international detectors)",
+  "cannot_measure": "dates, places and organisations are kept by policy",
+  "build": {
+    "documents": 127,
+    "mentions": 5146,
+    "chars": 647638,
+    "source": "https://github.com/NorskRegnesentral/text-anonymization-benchmark",
+    "revision": "NorskRegnesentral/text-anonymization-benchmark@558e09e26d6b36f5f78440074e6a233946d98bd9",
+    "licence": "MIT",
+    "fetched": "2026-10-25"
+  },
+  "gold_labels": {
+    "DATE": 2487,
+    "LOCATION": 294,
+    "ORG": 550,
+    "OTHER": 857,
+    "PERSON": 958
+  },
+  "run": {
+    "date": "2026-10-25",
+    "countries": "FR",
+    "profile": "standard",
+    "engine": {
+      "package": "gdprguardian",
+      "version": "1.0.0",
+      "native_core": true,
+      "python": "3.12.11",
+      "platform": "Windows 11",
+      "machine": "AMD64"
+    },
+    "tag": "",
+    "review": null
+  },
+  "documents": 127,
+  "evaluated": 127,
+  "errors": {},
+  "chars": 647638,
+  "seconds": 0.076,
+  "chars_per_second": 8514304,
+  "families": [
+    "PERSON"
+  ],
+  "totals": {
+    "m_total": 958,
+    "m_full": 798,
+    "m_cov80": 809,
+    "m_literal_checked": 917,
+    "m_literal": 81,
+    "c_gold": 8936,
+    "c_gold_masked": 8092,
+    "c_pred": 10437,
+    "c_pred_tp": 8092,
+    "c_neutral": 463535,
+    "c_neutral_masked": 1137,
+    "d_has_gold": 127,
+    "d_leak": 48,
+    "d_leak_literal": 26,
+    "k_total": 4188,
+    "k_touched": 109,
+    "chars": 647638,
+    "detections": 1062,
+    "d_detection": 127,
+    "g_PERSON": 958,
+    "f_PERSON": 798
+  },
+  "metrics": {
+    "mention_recall": 0.8329853862212944,
+    "mention_recall_at80": 0.8444676409185804,
+    "char_recall": 0.905550581915846,
+    "precision": 0.7753185781354796,
+    "over_masking": 0.0024528892100920104,
+    "doc_leak_rate": 0.3779527559055118,
+    "doc_literal_leak_rate": 0.2047244094488189,
+    "mention_literal_leak_rate": 0.08833151581243184,
+    "kept_touched_rate": 0.026026743075453676,
+    "detections_per_10k_chars": 16.398049527668235,
+    "docs_with_detection": 1.0,
+    "recall_PERSON": 0.8329853862212944
+  },
+  "intervals_95": {
+    "mention_recall": [
+      0.7727,
+      0.889
+    ],
+    "mention_recall_at80": [
+      0.7855,
+      0.8963
+    ],
+    "char_recall": [
+      0.8595,
+      0.942
+    ],
+    "precision": [
+      0.7265,
+      0.8194
+    ],
+    "over_masking": [
+      0.0018,
+      0.0033
+    ],
+    "doc_leak_rate": [
+      0.2992,
+      0.4646
+    ],
+    "doc_literal_leak_rate": [
+      0.1339,
+      0.2758
+    ],
+    "mention_literal_leak_rate": [
+      0.052,
+      0.1354
+    ],
+    "kept_touched_rate": [
+      0.0193,
+      0.0338
+    ],
+    "detections_per_10k_chars": [
+      13.8969,
+      19.4286
+    ],
+    "docs_with_detection": [
+      1.0,
+      1.0
+    ],
+    "recall_PERSON": [
+      0.7727,
+      0.889
+    ]
+  },
+  "kept_families": {
+    "DATE": {
+      "mentions": 2487,
+      "touched": 60,
+      "touched_rate": 0.024125452352231604
+    },
+    "LOCATION": {
+      "mentions": 294,
+      "touched": 17,
+      "touched_rate": 0.05782312925170068
+    },
+    "ORG": {
+      "mentions": 550,
+      "touched": 28,
+      "touched_rate": 0.05090909090909091
+    },
+    "OTHER": {
+      "mentions": 857,
+      "touched": 4,
+      "touched_rate": 0.004667444574095682
+    }
+  },
+  "by_origin": {
+    "PERSON:manual": {
+      "mentions": 958,
+      "masked": 798,
+      "recall": 0.8329853862212944
+    }
+  },
+  "detected_labels": {
+    "PERSON": 997,
+    "BIRTH_DATE": 63,
+    "ORG": 1,
+    "ADDRESS": 1
+  }
+}

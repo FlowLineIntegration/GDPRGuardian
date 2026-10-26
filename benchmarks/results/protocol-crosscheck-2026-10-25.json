@@ -1,0 +1,1160 @@
+{
+ "superseded_by": "protocol-crosscheck-2026-10-26.json",
+ "superseded_because": "describes the engine before the rules2 rules; its same-engine run loaded a copy of the engine taken mid-edit (2 documents failed on both sides); kept for the record",
+ "date": "2026-10-25",
+ "what": "The 540-document synthetic evaluation (seed 20261024) and its 6,192 mutated documents sent through a local GDPR Guardian service (public mode, local token, Unix socket) by tools/protocol, masked zones rebuilt from the output, scored with tools.eval (score_document, summarize), compared leaf by leaf.",
+ "run_1_service_vs_reference_file": {
+  "note": "service started at 21:47 (engine of 25 October, native core) vs benchmarks/results/eval-2026-10-25-standard.json (countries auto) and -standard-fr.json (FR); the in-process re-run of this run is not comparable (the engine sources were edited by a parallel development task after the service started and its native core no longer matched them)",
+  "countries_auto": {
+   "headline": {
+    "service": {
+     "recall_direct": 0.9918466828185524,
+     "recall_structured": 0.9883266244968373,
+     "recall": 0.9347851134923378,
+     "precision": 0.988198513987197,
+     "f2": 0.9450008153587708,
+     "entity_recall_direct": 0.9869927159209158,
+     "doc_leak_rate": 0.09074074074074075,
+     "doc_leak_rate_structured": 0.046296296296296294,
+     "over_masking": 0.0008179290037624734,
+     "decoy_false_mask_rate": 0.034560143626570915
+    },
+    "inprocess": {
+     "recall_direct": 0.9918466828185524,
+     "recall_structured": 0.9883266244968373,
+     "recall": 0.9347851134923378,
+     "precision": 0.9839107409952702,
+     "f2": 0.9442138340380959,
+     "entity_recall_direct": 0.9869927159209158,
+     "doc_leak_rate": 0.09074074074074075,
+     "doc_leak_rate_structured": 0.046296296296296294,
+     "over_masking": 0.0008179290037624734,
+     "decoy_false_mask_rate": 0.04488330341113106
+    },
+    "reference": {
+     "recall_direct": 0.9918466828185524,
+     "recall_structured": 0.9883266244968373,
+     "recall": 0.9347851134923378,
+     "precision": 0.988198513987197,
+     "f2": 0.9450008153587708,
+     "entity_recall_direct": 0.9869927159209158,
+     "doc_leak_rate": 0.09074074074074075,
+     "doc_leak_rate_structured": 0.046296296296296294,
+     "over_masking": 0.0008179290037624734,
+     "decoy_false_mask_rate": 0.034560143626570915
+    }
+   },
+   "base": {
+    "different": 21,
+    "leaves": 773,
+    "by_section": {
+     "ci95": 9,
+     "confusion": 6,
+     "labels": 3,
+     "system_labels": 3
+    },
+    "explained_by": {
+     "ci95": "interval bounds: bootstrap random draws differ (numpy for the reference file on Windows, the pure-Python fallback of tools.eval.metrics in WSL); point values identical",
+     "confusion": "per system label: the boundary between two placeholders separated only by spaces cannot be recovered from the output (leftmost placement used); what is masked does not depend on it",
+     "labels": "per system label (precision, F2, IoU>=90%, typed rate, strict recall): same boundary effect",
+     "system_labels": "characters attributed to each system label: same boundary effect"
+    },
+    "diffs": {
+     "ci95.decoy_false_mask_rate": [
+      [
+       0.026143713188697532,
+       0.044036390944995375
+      ],
+      [
+       0.02617923648474861,
+       0.043459070600507806
+      ]
+     ],
+     "ci95.doc_leak_rate": [
+      [
+       0.06481481481481481,
+       0.11666666666666667
+      ],
+      [
+       0.06851851851851852,
+       0.11481481481481481
+      ]
+     ],
+     "ci95.entity_recall_direct": [
+      [
+       0.9834591707917741,
+       0.9906977036491401
+      ],
+      [
+       0.9834991256669819,
+       0.990250668635356
+      ]
+     ],
+     "ci95.f2": [
+      [
+       0.9379749228046224,
+       0.9519582201983824
+      ],
+      [
+       0.9382175156024056,
+       0.9510806492363104
+      ]
+     ],
+     "ci95.over_masking": [
+      [
+       0.0004936143007795235,
+       0.0011813192813526247
+      ],
+      [
+       0.0004987854019818937,
+       0.0012038501724049243
+      ]
+     ],
+     "ci95.precision": [
+      [
+       0.9853550850497912,
+       0.9906897160719468
+      ],
+      [
+       0.9855358027296675,
+       0.9906331833632186
+      ]
+     ],
+     "ci95.recall": [
+      [
+       0.9260612029275272,
+       0.9432941344362175
+      ],
+      [
+       0.9263983081539054,
+       0.9423718740840432
+      ]
+     ],
+     "ci95.recall_direct": [
+      [
+       0.9893040921133701,
+       0.994334337373651
+      ],
+      [
+       0.9891103540671952,
+       0.9942975219566302
+      ]
+     ],
+     "ci95.recall_structured": [
+      [
+       0.9831585575528957,
+       0.9927886706782886
+      ],
+      [
+       0.9826906659472797,
+       0.9927941225833656
+      ]
+     ],
+     "confusion[2].count": [
+      4,
+      1
+     ],
+     "confusion[2].gold": [
+      "ADDRESS",
+      "LOCATION"
+     ],
+     "confusion[2].system": [
+      "BIRTH_DATE",
+      "PERSON"
+     ],
+     "confusion[3].count": [
+      1,
+      null
+     ],
+     "confusion[3].gold": [
+      "LOCATION",
+      null
+     ],
+     "confusion[3].system": [
+      "PERSON",
+      null
+     ],
+     "labels.ADDRESS.typed_rate": [
+      0.964735516372796,
+      0.9748110831234257
+     ],
+     "labels.BIRTH_DATE.f2": [
+      0.9793747985820175,
+      0.9791327029670688
+     ],
+     "labels.BIRTH_DATE.precision": [
+      0.9047335516522774,
+      0.9037014745711707
+     ],
+     "system_labels.ADDRESS.chars": [
+      11880,
+      11916
+     ],
+     "system_labels.BIRTH_DATE.chars": [
+      3359,
+      3323
+     ],
+     "system_labels.BIRTH_DATE.precision": [
+      0.9047335516522774,
+      0.9037014745711707
+     ]
+    }
+   },
+   "mutated": {
+    "different": 30,
+    "leaves": 8535,
+    "by_section": {
+     "confusion": 15,
+     "entities": 3,
+     "labels": 7,
+     "system_labels": 5
+    },
+    "explained_by": {
+     "confusion": "per system label: the boundary between two placeholders separated only by spaces cannot be recovered from the output (leftmost placement used); what is masked does not depend on it",
+     "entities": "strict entity rate only (requires the spaces between words to be covered too): same boundary effect",
+     "labels": "per system label (precision, F2, IoU>=90%, typed rate, strict recall): same boundary effect",
+     "system_labels": "characters attributed to each system label: same boundary effect"
+    },
+    "diffs": {
+     "confusion[10].count": [
+      3,
+      2
+     ],
+     "confusion[10].gold": [
+      "IBAN",
+      "ID"
+     ],
+     "confusion[10].system": [
+      "RIB",
+      "PERSON"
+     ],
+     "confusion[11].count": [
+      2,
+      1
+     ],
+     "confusion[11].system": [
+      "PERSON",
+      "IP"
+     ],
+     "confusion[12].count": [
+      1,
+      null
+     ],
+     "confusion[12].gold": [
+      "ID",
+      null
+     ],
+     "confusion[12].system": [
+      "IP",
+      null
+     ],
+     "confusion[7].count": [
+      11,
+      7
+     ],
+     "confusion[7].gold": [
+      "PERSON",
+      "ADDRESS"
+     ],
+     "confusion[7].system": [
+      "ADDRESS",
+      "PERSON"
+     ],
+     "confusion[8].count": [
+      7,
+      3
+     ],
+     "confusion[8].gold": [
+      "ADDRESS",
+      "IBAN"
+     ],
+     "confusion[8].system": [
+      "PERSON",
+      "NIR"
+     ],
+     "confusion[9].system": [
+      "NIR",
+      "RIB"
+     ],
+     "entities.DIRECT.strict_rate": [
+      0.8525262430631394,
+      0.8529719851122156
+     ],
+     "entities.DIRECT:ADDRESS.strict_rate": [
+      0.8577084303679553,
+      0.8574755472752679
+     ],
+     "entities.DIRECT:PERSON.strict_rate": [
+      0.9181492537313433,
+      0.9194029850746268
+     ],
+     "labels.ADDRESS.iou90_rate": [
+      0.8446669771774569,
+      0.847694457382394
+     ],
+     "labels.ADDRESS.strict_recall": [
+      0.8577084303679553,
+      0.8574755472752679
+     ],
+     "labels.PERSON.f2": [
+      0.9539307231253943,
+      0.953931193879464
+     ],
+     "labels.PERSON.iou90_rate": [
+      0.8635878489326765,
+      0.8644499178981938
+     ],
+     "labels.PERSON.precision": [
+      0.9959481165199002,
+      0.9959506822132507
+     ],
+     "labels.PERSON.strict_recall": [
+      0.9250821018062397,
+      0.925944170771757
+     ],
+     "labels.PERSON.typed_rate": [
+      0.9353448275862069,
+      0.9357963875205254
+     ],
+     "system_labels.ADDRESS.chars": [
+      116809,
+      116652
+     ],
+     "system_labels.ADDRESS.iou90_precision": [
+      0.8929098966026587,
+      0.896110290497292
+     ],
+     "system_labels.PERSON.chars": [
+      247786,
+      247943
+     ],
+     "system_labels.PERSON.iou90_precision": [
+      0.8916860588110852,
+      0.8925745716099006
+     ],
+     "system_labels.PERSON.precision": [
+      0.9959481165199002,
+      0.9959506822132507
+     ]
+    }
+   },
+   "docs_per_second": 192.9
+  },
+  "countries_fr": {
+   "headline_service": {
+    "recall_direct": 0.9918466828185524,
+    "recall_structured": 0.9883266244968373,
+    "recall": 0.9347851134923378,
+    "precision": 0.988198513987197,
+    "f2": 0.9450008153587708,
+    "entity_recall_direct": 0.9869927159209158,
+    "doc_leak_rate": 0.09074074074074075,
+    "doc_leak_rate_structured": 0.046296296296296294,
+    "over_masking": 0.0008179290037624734,
+    "decoy_false_mask_rate": 0.034560143626570915
+   },
+   "headline_reference": {
+    "recall_direct": 0.9918466828185524,
+    "recall_structured": 0.9883266244968373,
+    "recall": 0.9347851134923378,
+    "precision": 0.988198513987197,
+    "f2": 0.9450008153587708,
+    "entity_recall_direct": 0.9869927159209158,
+    "doc_leak_rate": 0.09074074074074075,
+    "doc_leak_rate_structured": 0.046296296296296294,
+    "over_masking": 0.0008179290037624734,
+    "decoy_false_mask_rate": 0.034560143626570915
+   },
+   "base": {
+    "different": 21,
+    "leaves": 773,
+    "by_section": {
+     "ci95": 9,
+     "confusion": 6,
+     "labels": 3,
+     "system_labels": 3
+    },
+    "explained_by": {
+     "ci95": "interval bounds: bootstrap random draws differ (numpy for the reference file on Windows, the pure-Python fallback of tools.eval.metrics in WSL); point values identical",
+     "confusion": "per system label: the boundary between two placeholders separated only by spaces cannot be recovered from the output (leftmost placement used); what is masked does not depend on it",
+     "labels": "per system label (precision, F2, IoU>=90%, typed rate, strict recall): same boundary effect",
+     "system_labels": "characters attributed to each system label: same boundary effect"
+    },
+    "diffs": {
+     "ci95.decoy_false_mask_rate": [
+      [
+       0.026143713188697532,
+       0.044036390944995375
+      ],
+      [
+       0.02617923648474861,
+       0.043459070600507806
+      ]
+     ],
+     "ci95.doc_leak_rate": [
+      [
+       0.06481481481481481,
+       0.11666666666666667
+      ],
+      [
+       0.06851851851851852,
+       0.11481481481481481
+      ]
+     ],
+     "ci95.entity_recall_direct": [
+      [
+       0.9834591707917741,
+       0.9906977036491401
+      ],
+      [
+       0.9834991256669819,
+       0.990250668635356
+      ]
+     ],
+     "ci95.f2": [
+      [
+       0.9379749228046224,
+       0.9519582201983824
+      ],
+      [
+       0.9382175156024056,
+       0.9510806492363104
+      ]
+     ],
+     "ci95.over_masking": [
+      [
+       0.0004936143007795235,
+       0.0011813192813526247
+      ],
+      [
+       0.0004987854019818937,
+       0.0012038501724049243
+      ]
+     ],
+     "ci95.precision": [
+      [
+       0.9853550850497912,
+       0.9906897160719468
+      ],
+      [
+       0.9855358027296675,
+       0.9906331833632186
+      ]
+     ],
+     "ci95.recall": [
+      [
+       0.9260612029275272,
+       0.9432941344362175
+      ],
+      [
+       0.9263983081539054,
+       0.9423718740840432
+      ]
+     ],
+     "ci95.recall_direct": [
+      [
+       0.9893040921133701,
+       0.994334337373651
+      ],
+      [
+       0.9891103540671952,
+       0.9942975219566302
+      ]
+     ],
+     "ci95.recall_structured": [
+      [
+       0.9831585575528957,
+       0.9927886706782886
+      ],
+      [
+       0.9826906659472797,
+       0.9927941225833656
+      ]
+     ],
+     "confusion[2].count": [
+      4,
+      1
+     ],
+     "confusion[2].gold": [
+      "ADDRESS",
+      "LOCATION"
+     ],
+     "confusion[2].system": [
+      "BIRTH_DATE",
+      "PERSON"
+     ],
+     "confusion[3].count": [
+      1,
+      null
+     ],
+     "confusion[3].gold": [
+      "LOCATION",
+      null
+     ],
+     "confusion[3].system": [
+      "PERSON",
+      null
+     ],
+     "labels.ADDRESS.typed_rate": [
+      0.964735516372796,
+      0.9748110831234257
+     ],
+     "labels.BIRTH_DATE.f2": [
+      0.9793747985820175,
+      0.9791327029670688
+     ],
+     "labels.BIRTH_DATE.precision": [
+      0.9047335516522774,
+      0.9037014745711707
+     ],
+     "system_labels.ADDRESS.chars": [
+      11880,
+      11916
+     ],
+     "system_labels.BIRTH_DATE.chars": [
+      3359,
+      3323
+     ],
+     "system_labels.BIRTH_DATE.precision": [
+      0.9047335516522774,
+      0.9037014745711707
+     ]
+    }
+   },
+   "mutated": {
+    "different": 30,
+    "leaves": 8535,
+    "by_section": {
+     "confusion": 15,
+     "entities": 3,
+     "labels": 7,
+     "system_labels": 5
+    },
+    "explained_by": {
+     "confusion": "per system label: the boundary between two placeholders separated only by spaces cannot be recovered from the output (leftmost placement used); what is masked does not depend on it",
+     "entities": "strict entity rate only (requires the spaces between words to be covered too): same boundary effect",
+     "labels": "per system label (precision, F2, IoU>=90%, typed rate, strict recall): same boundary effect",
+     "system_labels": "characters attributed to each system label: same boundary effect"
+    },
+    "diffs": {
+     "confusion[10].count": [
+      3,
+      2
+     ],
+     "confusion[10].gold": [
+      "IBAN",
+      "ID"
+     ],
+     "confusion[10].system": [
+      "RIB",
+      "PERSON"
+     ],
+     "confusion[11].count": [
+      2,
+      1
+     ],
+     "confusion[11].system": [
+      "PERSON",
+      "IP"
+     ],
+     "confusion[12].count": [
+      1,
+      null
+     ],
+     "confusion[12].gold": [
+      "ID",
+      null
+     ],
+     "confusion[12].system": [
+      "IP",
+      null
+     ],
+     "confusion[7].count": [
+      11,
+      7
+     ],
+     "confusion[7].gold": [
+      "PERSON",
+      "ADDRESS"
+     ],
+     "confusion[7].system": [
+      "ADDRESS",
+      "PERSON"
+     ],
+     "confusion[8].count": [
+      7,
+      3
+     ],
+     "confusion[8].gold": [
+      "ADDRESS",
+      "IBAN"
+     ],
+     "confusion[8].system": [
+      "PERSON",
+      "NIR"
+     ],
+     "confusion[9].system": [
+      "NIR",
+      "RIB"
+     ],
+     "entities.DIRECT.strict_rate": [
+      0.8525262430631394,
+      0.8529719851122156
+     ],
+     "entities.DIRECT:ADDRESS.strict_rate": [
+      0.8577084303679553,
+      0.8574755472752679
+     ],
+     "entities.DIRECT:PERSON.strict_rate": [
+      0.9181492537313433,
+      0.9194029850746268
+     ],
+     "labels.ADDRESS.iou90_rate": [
+      0.8446669771774569,
+      0.847694457382394
+     ],
+     "labels.ADDRESS.strict_recall": [
+      0.8577084303679553,
+      0.8574755472752679
+     ],
+     "labels.PERSON.f2": [
+      0.9539307231253943,
+      0.953931193879464
+     ],
+     "labels.PERSON.iou90_rate": [
+      0.8635878489326765,
+      0.8644499178981938
+     ],
+     "labels.PERSON.precision": [
+      0.9959481165199002,
+      0.9959506822132507
+     ],
+     "labels.PERSON.strict_recall": [
+      0.9250821018062397,
+      0.925944170771757
+     ],
+     "labels.PERSON.typed_rate": [
+      0.9353448275862069,
+      0.9357963875205254
+     ],
+     "system_labels.ADDRESS.chars": [
+      116809,
+      116652
+     ],
+     "system_labels.ADDRESS.iou90_precision": [
+      0.8929098966026587,
+      0.896110290497292
+     ],
+     "system_labels.PERSON.chars": [
+      247786,
+      247943
+     ],
+     "system_labels.PERSON.iou90_precision": [
+      0.8916860588110852,
+      0.8925745716099006
+     ],
+     "system_labels.PERSON.precision": [
+      0.9959481165199002,
+      0.9959506822132507
+     ]
+    }
+   },
+   "docs_per_second": 216.9
+  }
+ },
+ "run_2_same_engine": {
+  "note": "service and in-process evaluation both loaded one frozen copy of the engine sources (pure-Python engine: the copy's native contract differed from the installed core)",
+  "countries_auto": {
+   "headline": {
+    "service": {
+     "recall_direct": 0.991263010990289,
+     "recall_structured": 0.9883215878038257,
+     "recall": 0.9341602319078526,
+     "precision": 0.9838698782810748,
+     "f2": 0.9436962093549398,
+     "entity_recall_direct": 0.9869723814486712,
+     "doc_leak_rate": 0.09090909090909091,
+     "doc_leak_rate_structured": 0.04638218923933209,
+     "over_masking": 0.0008191654937706187,
+     "decoy_false_mask_rate": 0.0449438202247191
+    },
+    "inprocess": {
+     "recall_direct": 0.991263010990289,
+     "recall_structured": 0.9883215878038257,
+     "recall": 0.9341602319078526,
+     "precision": 0.9838698782810748,
+     "f2": 0.9436962093549398,
+     "entity_recall_direct": 0.9869723814486712,
+     "doc_leak_rate": 0.09090909090909091,
+     "doc_leak_rate_structured": 0.04638218923933209,
+     "over_masking": 0.0008191654937706187,
+     "decoy_false_mask_rate": 0.0449438202247191
+    },
+    "reference": {
+     "recall_direct": 0.9918466828185524,
+     "recall_structured": 0.9883266244968373,
+     "recall": 0.9347851134923378,
+     "precision": 0.988198513987197,
+     "f2": 0.9450008153587708,
+     "entity_recall_direct": 0.9869927159209158,
+     "doc_leak_rate": 0.09074074074074075,
+     "doc_leak_rate_structured": 0.046296296296296294,
+     "over_masking": 0.0008179290037624734,
+     "decoy_false_mask_rate": 0.034560143626570915
+    }
+   },
+   "base": {
+    "different": 15,
+    "leaves": 778,
+    "by_section": {
+     "confusion": 7,
+     "errors": 2,
+     "labels": 3,
+     "system_labels": 3
+    },
+    "explained_by": {
+     "confusion": "per system label: the boundary between two placeholders separated only by spaces cannot be recovered from the output (leftmost placement used); what is masked does not depend on it",
+     "errors": "error type names: the service answers HTTP 500 (named DocumentRefused by the tool), the in-process run names the Python exception (NameError) of the frozen mid-edit engine; same documents excluded on both sides",
+     "labels": "per system label (precision, F2, IoU>=90%, typed rate, strict recall): same boundary effect",
+     "system_labels": "characters attributed to each system label: same boundary effect"
+    },
+    "diffs": {
+     "confusion[2].count": [
+      4,
+      1
+     ],
+     "confusion[2].gold": [
+      "ADDRESS",
+      "LOCATION"
+     ],
+     "confusion[2].system": [
+      "BIRTH_DATE",
+      "PERSON"
+     ],
+     "confusion[3].gold": [
+      "LOCATION",
+      "ADDRESS"
+     ],
+     "confusion[4].count": [
+      1,
+      null
+     ],
+     "confusion[4].gold": [
+      "ADDRESS",
+      null
+     ],
+     "confusion[4].system": [
+      "PERSON",
+      null
+     ],
+     "errors.by_type.DocumentRefused": [
+      1,
+      null
+     ],
+     "errors.by_type.NameError": [
+      null,
+      1
+     ],
+     "labels.ADDRESS.typed_rate": [
+      0.9645569620253165,
+      0.9746835443037974
+     ],
+     "labels.BIRTH_DATE.f2": [
+      0.9793214862681745,
+      0.9790781301078785
+     ],
+     "labels.BIRTH_DATE.precision": [
+      0.9045061175768427,
+      0.9034690799396682
+     ],
+     "system_labels.ADDRESS.chars": [
+      11769,
+      11805
+     ],
+     "system_labels.BIRTH_DATE.chars": [
+      3351,
+      3315
+     ],
+     "system_labels.BIRTH_DATE.precision": [
+      0.9045061175768427,
+      0.9034690799396682
+     ]
+    }
+   },
+   "mutated": {
+    "different": 27,
+    "leaves": 8537,
+    "by_section": {
+     "confusion": 12,
+     "entities": 2,
+     "errors": 2,
+     "labels": 6,
+     "system_labels": 5
+    },
+    "explained_by": {
+     "confusion": "per system label: the boundary between two placeholders separated only by spaces cannot be recovered from the output (leftmost placement used); what is masked does not depend on it",
+     "entities": "strict entity rate only (requires the spaces between words to be covered too): same boundary effect",
+     "errors": "error type names: the service answers HTTP 500 (named DocumentRefused by the tool), the in-process run names the Python exception (NameError) of the frozen mid-edit engine; same documents excluded on both sides",
+     "labels": "per system label (precision, F2, IoU>=90%, typed rate, strict recall): same boundary effect",
+     "system_labels": "characters attributed to each system label: same boundary effect"
+    },
+    "diffs": {
+     "confusion[10].count": [
+      3,
+      2
+     ],
+     "confusion[10].gold": [
+      "IBAN",
+      "ID"
+     ],
+     "confusion[10].system": [
+      "RIB",
+      "PERSON"
+     ],
+     "confusion[11].count": [
+      2,
+      1
+     ],
+     "confusion[11].system": [
+      "PERSON",
+      "IP"
+     ],
+     "confusion[12].count": [
+      1,
+      null
+     ],
+     "confusion[12].gold": [
+      "ID",
+      null
+     ],
+     "confusion[12].system": [
+      "IP",
+      null
+     ],
+     "confusion[8].count": [
+      10,
+      3
+     ],
+     "confusion[8].gold": [
+      "PERSON",
+      "IBAN"
+     ],
+     "confusion[8].system": [
+      "ADDRESS",
+      "NIR"
+     ],
+     "confusion[9].system": [
+      "NIR",
+      "RIB"
+     ],
+     "entities.DIRECT.strict_rate": [
+      0.8561941939247095,
+      0.8565980167810832
+     ],
+     "entities.DIRECT:PERSON.strict_rate": [
+      0.9201224269339254,
+      0.9212026645862089
+     ],
+     "errors.by_type.DocumentRefused": [
+      52,
+      null
+     ],
+     "errors.by_type.NameError": [
+      null,
+      52
+     ],
+     "labels.ADDRESS.iou90_rate": [
+      0.8560302100542837,
+      0.8593344347415625
+     ],
+     "labels.PERSON.f2": [
+      0.9540958373131929,
+      0.9540962386820794
+     ],
+     "labels.PERSON.iou90_rate": [
+      0.8651323929720366,
+      0.8658747834694382
+     ],
+     "labels.PERSON.precision": [
+      0.9959440604821701,
+      0.9959462472383809
+     ],
+     "labels.PERSON.strict_recall": [
+      0.9269157799224614,
+      0.9276581704198631
+     ],
+     "labels.PERSON.typed_rate": [
+      0.9359894415573703,
+      0.9364018807225934
+     ],
+     "system_labels.ADDRESS.chars": [
+      113909,
+      113776
+     ],
+     "system_labels.ADDRESS.iou90_precision": [
+      0.9504716981132075,
+      0.9541404612159329
+     ],
+     "system_labels.PERSON.chars": [
+      246552,
+      246685
+     ],
+     "system_labels.PERSON.iou90_precision": [
+      0.8944792065721704,
+      0.8952453922444984
+     ],
+     "system_labels.PERSON.precision": [
+      0.9959440604821701,
+      0.9959462472383809
+     ]
+    }
+   }
+  },
+  "countries_fr": {
+   "headline": {
+    "service": {
+     "recall_direct": 0.991263010990289,
+     "recall_structured": 0.9883215878038257,
+     "recall": 0.9341602319078526,
+     "precision": 0.9838698782810748,
+     "f2": 0.9436962093549398,
+     "entity_recall_direct": 0.9869723814486712,
+     "doc_leak_rate": 0.09090909090909091,
+     "doc_leak_rate_structured": 0.04638218923933209,
+     "over_masking": 0.0008191654937706187,
+     "decoy_false_mask_rate": 0.0449438202247191
+    },
+    "inprocess": {
+     "recall_direct": 0.991263010990289,
+     "recall_structured": 0.9883215878038257,
+     "recall": 0.9341602319078526,
+     "precision": 0.9838698782810748,
+     "f2": 0.9436962093549398,
+     "entity_recall_direct": 0.9869723814486712,
+     "doc_leak_rate": 0.09090909090909091,
+     "doc_leak_rate_structured": 0.04638218923933209,
+     "over_masking": 0.0008191654937706187,
+     "decoy_false_mask_rate": 0.0449438202247191
+    },
+    "reference": {
+     "recall_direct": 0.9918466828185524,
+     "recall_structured": 0.9883266244968373,
+     "recall": 0.9347851134923378,
+     "precision": 0.988198513987197,
+     "f2": 0.9450008153587708,
+     "entity_recall_direct": 0.9869927159209158,
+     "doc_leak_rate": 0.09074074074074075,
+     "doc_leak_rate_structured": 0.046296296296296294,
+     "over_masking": 0.0008179290037624734,
+     "decoy_false_mask_rate": 0.034560143626570915
+    }
+   },
+   "base": {
+    "different": 15,
+    "leaves": 778,
+    "by_section": {
+     "confusion": 7,
+     "errors": 2,
+     "labels": 3,
+     "system_labels": 3
+    },
+    "explained_by": {
+     "confusion": "per system label: the boundary between two placeholders separated only by spaces cannot be recovered from the output (leftmost placement used); what is masked does not depend on it",
+     "errors": "error type names: the service answers HTTP 500 (named DocumentRefused by the tool), the in-process run names the Python exception (NameError) of the frozen mid-edit engine; same documents excluded on both sides",
+     "labels": "per system label (precision, F2, IoU>=90%, typed rate, strict recall): same boundary effect",
+     "system_labels": "characters attributed to each system label: same boundary effect"
+    },
+    "diffs": {
+     "confusion[2].count": [
+      4,
+      1
+     ],
+     "confusion[2].gold": [
+      "ADDRESS",
+      "LOCATION"
+     ],
+     "confusion[2].system": [
+      "BIRTH_DATE",
+      "PERSON"
+     ],
+     "confusion[3].gold": [
+      "LOCATION",
+      "ADDRESS"
+     ],
+     "confusion[4].count": [
+      1,
+      null
+     ],
+     "confusion[4].gold": [
+      "ADDRESS",
+      null
+     ],
+     "confusion[4].system": [
+      "PERSON",
+      null
+     ],
+     "errors.by_type.DocumentRefused": [
+      1,
+      null
+     ],
+     "errors.by_type.NameError": [
+      null,
+      1
+     ],
+     "labels.ADDRESS.typed_rate": [
+      0.9645569620253165,
+      0.9746835443037974
+     ],
+     "labels.BIRTH_DATE.f2": [
+      0.9793214862681745,
+      0.9790781301078785
+     ],
+     "labels.BIRTH_DATE.precision": [
+      0.9045061175768427,
+      0.9034690799396682
+     ],
+     "system_labels.ADDRESS.chars": [
+      11769,
+      11805
+     ],
+     "system_labels.BIRTH_DATE.chars": [
+      3351,
+      3315
+     ],
+     "system_labels.BIRTH_DATE.precision": [
+      0.9045061175768427,
+      0.9034690799396682
+     ]
+    }
+   },
+   "mutated": {
+    "different": 27,
+    "leaves": 8537,
+    "by_section": {
+     "confusion": 12,
+     "entities": 2,
+     "errors": 2,
+     "labels": 6,
+     "system_labels": 5
+    },
+    "explained_by": {
+     "confusion": "per system label: the boundary between two placeholders separated only by spaces cannot be recovered from the output (leftmost placement used); what is masked does not depend on it",
+     "entities": "strict entity rate only (requires the spaces between words to be covered too): same boundary effect",
+     "errors": "error type names: the service answers HTTP 500 (named DocumentRefused by the tool), the in-process run names the Python exception (NameError) of the frozen mid-edit engine; same documents excluded on both sides",
+     "labels": "per system label (precision, F2, IoU>=90%, typed rate, strict recall): same boundary effect",
+     "system_labels": "characters attributed to each system label: same boundary effect"
+    },
+    "diffs": {
+     "confusion[10].count": [
+      3,
+      2
+     ],
+     "confusion[10].gold": [
+      "IBAN",
+      "ID"
+     ],
+     "confusion[10].system": [
+      "RIB",
+      "PERSON"
+     ],
+     "confusion[11].count": [
+      2,
+      1
+     ],
+     "confusion[11].system": [
+      "PERSON",
+      "IP"
+     ],
+     "confusion[12].count": [
+      1,
+      null
+     ],
+     "confusion[12].gold": [
+      "ID",
+      null
+     ],
+     "confusion[12].system": [
+      "IP",
+      null
+     ],
+     "confusion[8].count": [
+      10,
+      3
+     ],
+     "confusion[8].gold": [
+      "PERSON",
+      "IBAN"
+     ],
+     "confusion[8].system": [
+      "ADDRESS",
+      "NIR"
+     ],
+     "confusion[9].system": [
+      "NIR",
+      "RIB"
+     ],
+     "entities.DIRECT.strict_rate": [
+      0.8561941939247095,
+      0.8565980167810832
+     ],
+     "entities.DIRECT:PERSON.strict_rate": [
+      0.9201224269339254,
+      0.9212026645862089
+     ],
+     "errors.by_type.DocumentRefused": [
+      52,
+      null
+     ],
+     "errors.by_type.NameError": [
+      null,
+      52
+     ],
+     "labels.ADDRESS.iou90_rate": [
+      0.8560302100542837,
+      0.8593344347415625
+     ],
+     "labels.PERSON.f2": [
+      0.9540958373131929,
+      0.9540962386820794
+     ],
+     "labels.PERSON.iou90_rate": [
+      0.8651323929720366,
+      0.8658747834694382
+     ],
+     "labels.PERSON.precision": [
+      0.9959440604821701,
+      0.9959462472383809
+     ],
+     "labels.PERSON.strict_recall": [
+      0.9269157799224614,
+      0.9276581704198631
+     ],
+     "labels.PERSON.typed_rate": [
+      0.9359894415573703,
+      0.9364018807225934
+     ],
+     "system_labels.ADDRESS.chars": [
+      113909,
+      113776
+     ],
+     "system_labels.ADDRESS.iou90_precision": [
+      0.9504716981132075,
+      0.9541404612159329
+     ],
+     "system_labels.PERSON.chars": [
+      246552,
+      246685
+     ],
+     "system_labels.PERSON.iou90_precision": [
+      0.8944792065721704,
+      0.8952453922444984
+     ],
+     "system_labels.PERSON.precision": [
+      0.9959440604821701,
+      0.9959462472383809
+     ]
+    }
+   }
+  }
+ }
+}

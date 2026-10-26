@@ -1,0 +1,32 @@
+Fonts of the gardienrgpd.fr / gdprguardian.com website
+=======================================================
+
+Both files are subsets of fonts released under the SIL Open Font License, Version 1.1. No serif face is used.
+Full licence texts, copied unchanged: LICENSE-red-hat-text.txt and LICENSE-red-hat-mono.txt.
+
+gr-sans.woff2  ("GR Sans", variable, weights 400 to 600)
+  Source:        Red Hat Text, variable font RedHatText[wght].ttf
+                 https://github.com/google/fonts/tree/main/ofl/redhattext
+                 (upstream: https://github.com/RedHatOfficial/RedHatFont)
+  Copyright:     Copyright 2024 The Red Hat Project Authors
+  Licence:       SIL Open Font License 1.1 (no Reserved Font Name)
+  Modifications: weight axis limited to 400-600 (fontTools varLib.instancer); Latin subset (Basic Latin, Latin-1,
+                 Latin Extended-A, the comma-below letters U+0218-021B, spacing accents, thin and hair spaces, dashes,
+                 typographic quotes, bullet, ellipsis, guillemets, euro, trade mark, minus); U+202F (narrow no-break
+                 space, the French thousands separator) mapped to the thin-space glyph; features kept: kern, liga,
+                 calt, tnum, pnum, lnum, case, zero, ccmp, locl, mark, mkmk; hinting removed; renamed "GR Sans".
+
+gr-mono.woff2  ("GR Mono", weight 400)
+  Source:        Red Hat Mono, variable font RedHatMono[wght].ttf
+                 https://github.com/google/fonts/tree/main/ofl/redhatmono
+                 (upstream: https://github.com/RedHatOfficial/RedHatFont)
+  Copyright:     Copyright 2024 The Red Hat Project Authors
+  Licence:       SIL Open Font License 1.1 (no Reserved Font Name)
+  Modifications: static instance at weight 400; same Latin subset, U+202F mapping, features and hinting removal;
+                 renamed "GR Mono".
+
+Built with fontTools 4 (subsetter and varLib.instancer, woff2 with Brotli), 25 October 2026. Sizes: gr-sans.woff2
+25,840 bytes, gr-mono.woff2 10,452 bytes. Requested but absent from the sources, so not in the subsets: soft
+hyphen, the U+2010 and U+2011 hyphens (the ASCII hyphen is in), L with middle dot, n preceded by apostrophe, long s,
+the place-of-interest sign (Mac command key), check and cross marks; the browser draws those with a fallback font.
+No arrows.

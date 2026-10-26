@@ -1,0 +1,676 @@
+# ids-europe-west details
+
+### Items
+| name | license | verdict | reco | status | notes |
+|---|---|---|---|---|---|
+| Presidio (presidio-analyzer) | MIT | ok | adopt | 2.2.364, released 2026-07-22. Moved from Microsoft to the github.com/data-privacy-stack org. Active. | Covers DE (13 recognizers incl. LANR, BSNR, VAT_ID), UK (6), ES (3), IT (5). Nothing for AT, CH, BE, NL, LU, IE, PT, GR, MT, CY, MC, AD, LI. Audit before trusting: the DE_ID_CARD/PASSPORT check digit logic, the loose DE_TAX_ID repetition rule, and recognizers bound to a single language. |
+| python-stdnum | LGPL-2.1-or-later | caution | optional | 2.2, released 2026-01-04. Active. | Widest coverage for this region. Using it as an unmodified, separately installed pip dependency is compatible with MIT code. Copying or porting its code into the MIT repo is not. Shipping it in a container image requires the LGPL notice. Best used as an optional extra and as a CI test oracle for clean-room validators. |
+| django-localflavor | BSD-3-Clause | ok | borrow-ideas | 5.1, released 2026-08-01. Active. | Requires Django, so it is too heavy to use at runtime. Useful logic to borrow (with attribution): PT NISS and CC, CH ID card (7-3-1), NL plate sidecodes and postcode, IE Eircode regex, GR AMKA/AFM, ES CCC, IT CF/P.IVA, AT SVNR. |
+| Faker | MIT | ok | optional | 40.43.0. Active. | Dev and test dependency only. Has ssn providers for de_DE (rvnr, kvnr), de_AT, de_CH/fr_CH, nl_BE, nl_NL, en_GB, es_ES (nif, nie, cif, nuss), it_IT (ssn, cie), el_GR (AMKA, AFM, police_id). Many vat_id providers have no checksum (AT, LU, MT, CY, PT, IE, IT), en_GB NINOs always start ZZ, and the el_CY VAT length is wrong. |
+
+### Identifiers
+- **DE DE_STEUER_ID** (Steuerliche Identifikationsnummer (IdNr, Steuer-ID); tax; FP medium)
+  - format: 11 digits, first digit not 0, often written 12 345 678 901
+  - regex: `\b[1-9]\d[ ./-]?\d{3}[ ./-]?\d{3}[ ./-]?\d{3}\b`
+  - checksum: ISO/IEC 7064 MOD 11,10 over digits 1-10 gives digit 11. Structural rule for digits 1-10: exactly one digit occurs 2 or 3 times (3 allowed since 2016, never 3 in a row), the others at most once.
+  - edge: Presidio applies a looser rule (no digit more than 3 times). stdnum does not check the 'not 3 consecutive' rule. Collides with 11-digit phone numbers, so the structural rule is the main filter.
+  - ctx: steuer-id, steueridentifikationsnummer, identifikationsnummer, idnr, steuerliche identifikationsnummer, tin, bzst, lohnsteuer
+  - impls: Presidio DE_TAX_ID (MIT); stdnum de.idnr (LGPL). No localflavor or Faker support.
+  - src: https://de.wikipedia.org/wiki/Steuerliche_Identifikationsnummer ; https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/de/idnr.py ; https://github.com/data-privacy-stack/presidio/blob/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/country_specific/germany/de_tax_id_recognizer.py
+- **DE DE_STEUERNUMMER** (Steuernummer (St.-Nr.); tax; FP high)
+  - format: Regional form of 10-11 digits written with slashes (e.g. 21/815/08150), or the 13-digit nationwide form with a state prefix
+  - regex: `\b(?:\d{2,3}/\d{3,4}/\d{4,5}|\d{13})\b`
+  - checksum: Each state has its own check method (ELSTER spec). stdnum validates the format per state but not the check digit.
+  - edge: Being replaced by the IdNr for individuals and still used by businesses. The slash form is quite distinctive. The bare 13-digit form is high-FP without context.
+  - ctx: steuernummer, st.-nr., stnr, finanzamt, steuer-nr
+  - impls: Presidio DE_TAX_NUMBER; stdnum de.stnr
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/de/stnr.py ; https://presidio.dataprivacystack.org/supported_entities/
+- **DE DE_RVNR** (Rentenversicherungsnummer / Sozialversicherungsnummer; social security; FP low)
+  - format: 12 characters: area number (2 digits), birth date DDMMYY, initial of birth surname, serial (00-49 male, 50-99 female or divers), check digit. Example: 15 070649 C 103
+  - regex: `\b\d{2}[ ]?\d{6}[ ]?[A-Za-z][ ]?\d{3}\b`
+  - checksum: Per VKVV §2(6): replace the letter by its 2-digit alphabet position, multiply the 12 digits by 2,1,2,5,7,1,2,1,2,1,2,1, add the cross sums of the products, take mod 10.
+  - edge: The day can be +50 when the serials for a date run out (Presidio accepts 51-81). It embeds date of birth and sex, so it should always be masked.
+  - ctx: rentenversicherungsnummer, sozialversicherungsnummer, versicherungsnummer, rvnr, sv-nummer, sozialversicherungsausweis, drv
+  - impls: Presidio DE_SOCIAL_SECURITY; Faker de_DE rvnr(). Not in stdnum or localflavor.
+  - src: https://www.gesetze-im-internet.de/vkvv/__2.html ; https://github.com/joke2k/faker/blob/master/faker/providers/ssn/de_DE/__init__.py
+- **DE DE_KVNR** (Krankenversichertennummer (eGK); health; FP medium)
+  - format: 10 characters: 1 letter, 8 digits, 1 check digit (the unchangeable part)
+  - regex: `\b[A-Z][ ]?\d{9}\b`
+  - checksum: Letter becomes 01-26, giving 10 digits. Multiply by 1,2,1,2,... and reduce each product of 10 or more to its digit sum. The sum mod 10 must equal digit 10.
+  - edge: The structure comes from GKV-Spitzenverband guidelines under §290 SGB V, and the number must not be derivable from the RVNR. On the card it is followed by a changeable part (insurer IK number). Treat as Art. 9 health data.
+  - ctx: krankenversichertennummer, versichertennummer, kvnr, krankenkasse, gesundheitskarte, egk, versichertenkarte
+  - impls: Presidio DE_HEALTH_INSURANCE; Faker de_DE kvnr()
+  - src: https://www.gesetze-im-internet.de/sgb_5/__290.html ; https://github.com/data-privacy-stack/presidio/blob/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/country_specific/germany/de_health_insurance_recognizer.py
+- **DE DE_ID_DOC** (Personalausweisnummer / Reisepassnummer (Seriennummer); travel doc; FP high)
+  - format: 9 characters: 4-character authority code plus 5 random characters, from [CFGHJKLMNPRTVWXYZ] and digits (0 dropped since Nov 2021). Old IDs: T plus 8 digits. Provisional documents: 1 letter plus 7 digits. The check digit is a separate 10th character in the MRZ.
+  - regex: `\b(?:[CFGHJKLMNPRTVWXYZ][CFGHJKLMNPRTVWXYZ0-9]{8}\d?|T\d{8}\d?)\b`
+  - checksum: ICAO 9303 weights 7,3,1 (letters A=10 to Z=35), mod 10. Applies only when the 10th MRZ character is present.
+  - edge: Presidio validates character 9 against characters 1-8, which is likely wrong (specimen T22000129 has its check digit 3 as character 10). localflavor DEIdentityCardNumberField validates only the old full MRZ-style string.
+  - ctx: personalausweis, ausweisnummer, reisepass, passnummer, dokumentennummer, seriennummer, npa
+  - impls: Presidio DE_ID_CARD and DE_PASSPORT (validator questionable); localflavor DEIdentityCardNumberField (legacy)
+  - src: https://de.wikipedia.org/wiki/Ausweisnummer ; https://github.com/data-privacy-stack/presidio/blob/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/country_specific/germany/de_id_card_recognizer.py ; https://django-localflavor.readthedocs.io/en/stable/localflavor/de.html
+- **DE DE_FUEHRERSCHEIN** (Führerscheinnummer (field 5); other; FP high)
+  - format: 11 alphanumeric characters (authority code, serial, check character, counter)
+  - regex: `\b[A-Z0-9]{10}\d\b`
+  - checksum: Check character not published (per the Presidio docstring)
+  - edge: Presidio's regex ([A-Z]{2}\d{8}[A-Z0-9]) may not match the real layout; verify against a specimen. Detect only with context.
+  - ctx: führerschein, führerscheinnummer, fahrerlaubnis, feld 5, kba
+  - impls: Presidio DE_FUEHRERSCHEIN
+  - src: https://github.com/data-privacy-stack/presidio/blob/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/country_specific/germany/de_fuehrerschein_recognizer.py
+- **DE DE_UST_IDNR** (Umsatzsteuer-Identifikationsnummer; vat; FP low)
+  - format: DE plus 9 digits
+  - regex: `\bDE[ .-]?\d{3}[ .-]?\d{3}[ .-]?\d{3}\b`
+  - checksum: ISO 7064 MOD 11,10 over digits 1-8
+  - edge: Personal data only for sole traders.
+  - ctx: ust-idnr, ust-id, umsatzsteuer-identifikationsnummer, vat, mwst
+  - impls: Presidio DE_VAT_ID; stdnum de.vat; Faker de_DE vat_id()
+  - src: https://github.com/data-privacy-stack/presidio/blob/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/country_specific/germany/de_vat_id_recognizer.py ; https://arthurdejong.org/python-stdnum/formats
+- **DE DE_HANDELSREGISTER** (Handelsregisternummer; company; FP low)
+  - format: HRA/HRB/GnR/PR/VR plus 1-6 digits plus optional suffix, together with the register court
+  - regex: `\b(?:HRA|HRB|GnR|GsR|PR|VR)[ ]?\d{1,6}(?:[ ]?[A-Z]{1,2})?\b`
+  - checksum: none
+  - edge: Personal data only for e.K. and partnerships.
+  - ctx: handelsregister, amtsgericht, registergericht, hrb, hra
+  - impls: Presidio DE_HANDELSREGISTER; stdnum de.handelsregisternummer
+  - src: https://presidio.dataprivacystack.org/supported_entities/ ; https://arthurdejong.org/python-stdnum/formats
+- **DE DE_LANR** (Lebenslange Arztnummer (also BSNR, the practice number); health; FP high)
+  - format: 9 digits: 6-digit doctor ID, check digit, 2-digit specialty code
+  - regex: `\b\d{9}\b`
+  - checksum: Digits 1-6 times 4,9,4,9,4,9. Check = (10 - sum mod 10) mod 10.
+  - edge: Identifies a health professional, not a patient. A bare 9-digit match must not be used without context.
+  - ctx: lanr, arztnummer, bsnr, betriebsstättennummer, kv, kbv, rezept
+  - impls: Presidio DE_LANR and DE_BSNR
+  - src: https://github.com/data-privacy-stack/presidio/blob/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/country_specific/germany/de_lanr_recognizer.py
+- **DE DE_PLZ** (Postleitzahl; contact; FP high)
+  - format: 5 digits, 01001-99998
+  - regex: `\b(?:0[1-9]|[1-9]\d)\d{3}\b`
+  - checksum: none
+  - edge: Mask only when part of an address (PLZ plus city). Excel drops the leading 0.
+  - ctx: plz, postleitzahl, straße, str., wohnort, anschrift
+  - impls: Presidio DE_PLZ (score 0.05); localflavor DEZipCodeField; Faker postcode
+  - src: https://presidio.dataprivacystack.org/supported_entities/ ; https://django-localflavor.readthedocs.io/en/stable/localflavor/de.html
+- **DE DE_KFZ** (Kfz-Kennzeichen; vehicle; FP medium)
+  - format: District code (1-3 letters, Ä/Ö/Ü allowed), 1-2 letters, 1-4 digits, optional E or H suffix
+  - regex: `\b[A-ZÄÖÜ]{1,3}[ -][A-Z]{1,2}[ -]?\d{1,4}[EH]?\b`
+  - checksum: none. Validate against a gazetteer of district codes (Unterscheidungszeichen).
+  - edge: Presidio has no district-code gazetteer. Add one, after checking its data licence.
+  - ctx: kennzeichen, kfz, nummernschild, fahrzeug, zulassung
+  - impls: Presidio DE_KFZ; Faker de_DE license_plate()
+  - src: https://github.com/data-privacy-stack/presidio/blob/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/country_specific/germany/de_kfz_recognizer.py
+- **AT AT_SVNR** (Sozialversicherungsnummer (VSNR, e-card); social security; FP medium)
+  - format: 10 digits: 3-digit serial (100 or more), check digit, birth date DDMMYY. Written 1237 010180.
+  - regex: `\b[1-9]\d{3}[ ]?\d{6}\b`
+  - checksum: Weights 3,7,9,(check digit skipped),5,8,4,2,1,6. Sum mod 11 = digit 4. When the remainder is 10, that serial is skipped and never issued.
+  - edge: The birth-date part is not always a real date. Embeds date of birth.
+  - ctx: sozialversicherungsnummer, svnr, vsnr, versicherungsnummer, sv-nummer, e-card
+  - impls: stdnum at.vnr; localflavor ATSocialSecurityNumberField; Faker de_AT ssn()
+  - src: https://de.wikipedia.org/wiki/Sozialversicherungsnummer ; https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/at/vnr.py
+- **AT AT_ABGABENKONTONUMMER** (Steuernummer / Abgabenkontonummer; tax; FP medium)
+  - format: 9 digits: 2-digit tax office code, 6 digits, check digit. Written 12 345/6789.
+  - regex: `\b\d{2}[ -]?\d{3}/?\d{4}\b`
+  - checksum: Digits at odd positions mapped through '0246813579', others kept. Check = (10 - sum) mod 10. The office code must exist.
+  - edge: stdnum checks the office code against a bundled list.
+  - ctx: steuernummer, abgabenkontonummer, finanzamt, st.nr.
+  - impls: stdnum at.tin
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/at/tin.py
+- **AT AT_UID** (Umsatzsteuer-Identifikationsnummer (UID); vat; FP low)
+  - format: ATU plus 8 digits
+  - regex: `\bATU[ ]?\d{8}\b`
+  - checksum: Check = (6 - luhn_checksum(digits 1-7)) mod 10
+  - edge: Faker de_AT vat_id() computes no checksum.
+  - ctx: uid, uid-nummer, ust-id, vat
+  - impls: stdnum at.uid; Faker de_AT vat_id()
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/at/uid.py
+- **AT AT_FIRMENBUCHNUMMER** (Firmenbuchnummer (FN); company; FP low)
+  - format: FN plus 1-6 digits plus a check letter, e.g. FN 122119m
+  - regex: `\bFN[ ]?\d{1,6}[ ]?[a-zA-Z]\b`
+  - checksum: A check letter exists. stdnum checks the format only.
+  - edge: Personal data only for sole traders.
+  - ctx: firmenbuch, fn, firmenbuchnummer, handelsgericht
+  - impls: stdnum at.businessid (format only)
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/at/businessid.py
+- **AT AT_ZMR_BPK** (ZMR-Zahl / bereichsspezifisches Personenkennzeichen (bPK); national id; FP high)
+  - format: ZMR: 12 digits. bPK: base64 string, sector-specific
+  - regex: `\b\d{12}\b|\b[A-Za-z0-9+/]{27}=`
+  - checksum: none public. The bPK is derived cryptographically from the ZMR number.
+  - edge: Detect only with context.
+  - ctx: zmr, zmr-zahl, bpk, bereichsspezifisches personenkennzeichen, stammzahl
+  - impls: none
+  - src: https://en.wikipedia.org/wiki/National_identification_number
+- **AT AT_PLZ_KENNZEICHEN** (Postleitzahl / Kfz-Kennzeichen; contact; FP high)
+  - format: Postcode: 4 digits 1010-9992. Plate: district code (1-2 letters) plus up to 6 alphanumeric characters, e.g. W-12345A
+  - regex: `\b[1-9]\d{3}\b|\b[A-Z]{1,2}[ -]\d{1,5}[ -]?[A-Z]{0,3}\b`
+  - checksum: none
+  - edge: Postcode only within an address. stdnum includes a postcode database.
+  - ctx: plz, postleitzahl, kennzeichen, wohnort
+  - impls: localflavor ATZipCodeField; stdnum at.postleitzahl; Faker de_AT automotive
+  - src: https://django-localflavor.readthedocs.io/en/stable/localflavor/at.html ; https://github.com/joke2k/faker/tree/master/faker/providers/automotive
+- **CH CH_AHV** (AHV-Nummer / numéro AVS / numero AVS (AHVN13); social security; FP low)
+  - format: 13 digits 756.XXXX.XXXX.XC, random since 2008
+  - regex: `\b756[ .-]?\d{4}[ .-]?\d{4}[ .-]?\d{2}\b`
+  - checksum: EAN-13: weights 1,3 alternating over 12 digits. Check = (10 - sum mod 10) mod 10.
+  - edge: Also used as a general administrative identifier. The fixed 756 prefix makes FPs rare.
+  - ctx: ahv, ahv-nr, ahvn13, avs, navs13, numéro avs, numero avs, sozialversicherungsnummer, assicurazione vecchiaia
+  - impls: stdnum ch.ssn; localflavor CHSocialSecurityNumberField; Faker de_CH/fr_CH ssn()
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/ch/ssn.py ; https://de.wikipedia.org/wiki/Sozialversicherungsnummer ; https://django-localflavor.readthedocs.io/en/stable/localflavor/ch.html
+- **CH CH_UID** (UID / IDE / IDI (plus MWST/TVA/IVA for VAT); company; FP low)
+  - format: CHE-123.456.789, optionally followed by MWST/TVA/IVA
+  - regex: `\bCHE[ -]?\d{3}[ .]?\d{3}[ .]?\d{3}(?:[ ]?(?:MWST|TVA|IVA|TPV))?\b`
+  - checksum: Weights 5,4,3,2,7,6,5,4. Check = (11 - sum mod 11) mod 11. A result of 10 is invalid.
+  - edge: Personal data only for sole proprietorships.
+  - ctx: uid, ide, idi, mwst, tva, iva, handelsregister
+  - impls: stdnum ch.uid, ch.vat; Faker de_CH vat_id()
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/ch/uid.py
+- **CH CH_ID_DOC** (Identitätskarte / Pass number; travel doc; FP high)
+  - format: 1 letter plus 7 digits (or 8 digits). The MRZ form adds '<' or a digit and then a check digit.
+  - regex: `\b[A-Z]\d{7}(?:[<\d]\d)?\b`
+  - checksum: ICAO 7-3-1 mod 10 (localflavor maps the leading letter A=0 and accepts only A to I)
+  - edge: The bare 8-character form has no check digit and needs context.
+  - ctx: identitätskarte, pass, passnummer, carte d'identité, passeport, carta d'identità
+  - impls: localflavor CHIdentityCardNumberField
+  - src: https://django-localflavor.readthedocs.io/en/stable/localflavor/ch.html ; https://github.com/django/django-localflavor/blob/master/localflavor/ch/forms.py
+- **CH CH_PLZ_KENNZEICHEN** (PLZ / NPA / Kontrollschild; contact; FP high)
+  - format: Postcode: 4 digits 1000-9658 (the same system covers LI). Plate: 2-letter canton code plus 1-6 digits
+  - regex: `\b[1-9]\d{3}\b|\b(?:AG|AI|AR|BE|BL|BS|FR|GE|GL|GR|JU|LU|NE|NW|OW|SG|SH|SO|SZ|TG|TI|UR|VD|VS|ZG|ZH)[ ]?\d{1,6}\b`
+  - checksum: none
+  - edge: Canton codes collide with words (BE, GE, SO), so require digits and context.
+  - ctx: plz, npa, cap, kennzeichen, plaque, targa
+  - impls: localflavor CHZipCodeField; Faker de_CH automotive
+  - src: https://django-localflavor.readthedocs.io/en/stable/localflavor/ch.html ; https://github.com/joke2k/faker/tree/master/faker/providers/automotive
+- **LI LI_PEID_AHV** (PEID / AHV-Nummer (Versichertennummer); national id; FP high)
+  - format: 4-12 digits
+  - regex: `\b\d{4,12}\b`
+  - checksum: none
+  - edge: Usable only with context or a column header. LI residents may also hold Swiss 756 numbers (verify).
+  - ctx: peid, ahv-nummer, versichertennummer, steuerverwaltung, liechtenstein
+  - impls: stdnum li.peid
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/li/peid.py ; https://de.wikipedia.org/wiki/AHV-Nummer
+- **LI LI_PLZ_KENNZEICHEN** (PLZ / Kontrollschild; contact; FP medium)
+  - format: Postcode 9485-9498 (Swiss system). Plate: FL plus up to 5 digits
+  - regex: `\b94(?:8[5-9]|9[0-8])\b|\bFL[ ]?\d{1,5}\b`
+  - checksum: none
+  - edge: Postcodes overlap with Swiss data.
+  - ctx: plz, kennzeichen, vaduz, schaan
+  - impls: Faker de_LI (address only)
+  - src: https://faker.readthedocs.io/en/master/locales.html
+- **BE BE_NN** (Rijksregisternummer / numéro de registre national / INSZ-NISS; national id; FP low)
+  - format: 11 digits YY.MM.DD-SSS.CC (serial odd for men, even for women)
+  - regex: `\b\d{2}[ .]?\d{2}[ .]?\d{2}[ .-]?\d{3}[ .-]?\d{2}\b`
+  - checksum: CC = 97 - (first 9 digits mod 97). For births from 2000 onwards, compute on '2' followed by the 9 digits.
+  - edge: Month or day 00 when the birth date is unknown. When daily serials run out, the day digits continue counting. Excel drops the leading 0 for births 2000-2009.
+  - ctx: rijksregisternummer, rijksregister, insz, niss, numéro national, registre national, nationalregisternummer, rrn
+  - impls: stdnum be.nn, be.ssn; Faker nl_BE ssn()
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/be/nn.py ; https://www.ibz.rrn.fgov.be/fileadmin/user_upload/nl/rr/instructies/IT-lijst/IT000_Rijksregisternummer.pdf
+- **BE BE_BIS** (BIS-nummer / numéro BIS; social security; FP low)
+  - format: Like the NN, but the month is +20 (sex unknown) or +40 (sex known)
+  - regex: `\b\d{2}[ .]?[2-5]\d[ .]?\d{2}[ .-]?\d{3}[ .-]?\d{2}\b`
+  - checksum: Same mod 97 rule as the NN, including the 2000 rule
+  - edge: Issued to people who are not in the National Register.
+  - ctx: bis, bisnummer, numéro bis, insz, niss
+  - impls: stdnum be.bis, be.ssn
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/be/bis.py
+- **BE BE_EID** (eID kaartnummer / numéro de carte; national id; FP medium)
+  - format: 12 digits xxx-xxxxxxx-yy
+  - regex: `\b\d{3}[ -]?\d{7}[ -]?\d{2}\b`
+  - checksum: yy = first 10 digits mod 97, with 0 written as 97
+  - edge: Foreigner cards use different series.
+  - ctx: kaartnummer, numéro de carte, eid, identiteitskaart, carte d'identité
+  - impls: stdnum be.eid
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/be/eid.py
+- **BE BE_KBO_VAT** (Ondernemingsnummer (KBO) / numéro d'entreprise (BCE) / btw; vat; FP low)
+  - format: 10 digits starting with 0 or 1, written BE0123.456.789
+  - regex: `\b(?:BE[ ]?)?[01]\d{3}[ .]?\d{3}[ .]?\d{3}\b`
+  - checksum: Last 2 digits = 97 - (first 8 digits mod 97)
+  - edge: Personal data for sole traders.
+  - ctx: ondernemingsnummer, kbo, bce, numéro d'entreprise, btw, tva
+  - impls: stdnum be.vat; Faker nl_BE vat_id()
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/be/vat.py
+- **BE BE_POSTCODE_PLATE** (Postcode / nummerplaat; contact; FP medium)
+  - format: Postcode: 4 digits 1000-9992. Plate: 1-ABC-123
+  - regex: `\b[1-9]\d{3}\b|\b[1-9][ -]?[A-Z]{3}[ -]?\d{3}\b`
+  - checksum: none
+  - edge: The plate shape is distinctive. The postcode needs an address context.
+  - ctx: postcode, code postal, nummerplaat, plaque
+  - impls: localflavor BEPostalCodeField; Faker nl_BE automotive
+  - src: https://django-localflavor.readthedocs.io/en/stable/localflavor/be.html
+- **NL NL_BSN** (Burgerservicenummer (formerly sofinummer); national id; FP medium)
+  - format: 9 digits (leading zeros are often dropped, leaving 8)
+  - regex: `\b\d{3}[ .]?\d{3}[ .]?\d{3}\b|\b\d{8}\b`
+  - checksum: 11-proef: sum of d_i*(9-i) for i=0..7, minus d_8, must be 0 mod 11
+  - edge: About 1 in 11 random numbers pass. Zero-pad 8-digit values (Excel). Collides with PT NIF and GR AFM under 'auto'.
+  - ctx: bsn, burgerservicenummer, sofinummer, persoonsnummer, sofi
+  - impls: stdnum nl.bsn; localflavor NLBSNFormField; Faker nl_NL ssn()
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/nl/bsn.py ; https://github.com/django/django-localflavor/blob/master/localflavor/nl/validators.py
+- **NL NL_BTW** (Btw-identificatienummer; vat; FP low)
+  - format: NL plus 9 digits plus B plus 2 digits
+  - regex: `\bNL[ ]?\d{9}[ ]?B[ ]?\d{2}\b`
+  - checksum: Since 2020: mod 97-10 over the full string including 'NL'. Older numbers: 11-proef on the 9 digits (BSN-based).
+  - edge: Older numbers for sole traders contain the BSN.
+  - ctx: btw, btw-id, btw-nummer, omzetbelastingnummer, vat
+  - impls: stdnum nl.btw; Faker nl_NL vat_id()
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/nl/btw.py
+- **NL NL_KVK** (KvK-nummer; company; FP high)
+  - format: 8 digits
+  - regex: `\b\d{8}\b`
+  - checksum: none
+  - edge: Use only with context.
+  - ctx: kvk, kvk-nummer, kamer van koophandel, handelsregister
+  - impls: none
+  - src: https://arthurdejong.org/python-stdnum/formats
+- **NL NL_ID_DOC** (Paspoort- / identiteitskaartnummer; travel doc; FP medium)
+  - format: 9 characters: 2 letters, 6 alphanumeric, 1 digit. The letter O is never used.
+  - regex: `\b[A-NP-Z]{2}[A-NP-Z0-9]{6}\d\b`
+  - checksum: none in the number (an MRZ check digit exists separately)
+  - edge: The BSN is printed on the same documents.
+  - ctx: paspoort, paspoortnummer, identiteitskaart, documentnummer, id-kaart
+  - impls: stdnum nl.identiteitskaartnummer
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/nl/identiteitskaartnummer.py
+- **NL NL_POSTCODE** (Postcode; contact; FP medium)
+  - format: 4 digits (first 1-9) plus 2 letters (never SA, SD or SS)
+  - regex: `\b[1-9]\d{3}[ ]?(?!SA|SD|SS)[A-Z]{2}\b`
+  - checksum: none
+  - edge: Postcode plus house number is nearly unique per address.
+  - ctx: postcode, adres, woonplaats
+  - impls: stdnum nl.postcode; localflavor NLZipCodeField; Faker nl_NL
+  - src: https://github.com/django/django-localflavor/blob/master/localflavor/nl/validators.py
+- **NL NL_KENTEKEN** (Kenteken; vehicle; FP medium)
+  - format: Sidecodes 1-14, e.g. 99-AAA-9 or AA-999-A
+  - regex: `\b[A-Z0-9]{1,3}-[A-Z0-9]{2,3}-[A-Z0-9]{1,2}\b`
+  - checksum: none. Validate against the sidecode patterns.
+  - edge: Ambiguous with dates and reference codes when written without hyphens.
+  - ctx: kenteken, nummerbord, rdw
+  - impls: localflavor NLLicensePlateFormField (sidecodes); Faker nl_NL automotive
+  - src: https://github.com/django/django-localflavor/blob/master/localflavor/nl/validators.py
+- **LU LU_MATRICULE** (Numéro d'identification national / matricule / Sozialversicherungsnummer; national id; FP low)
+  - format: 13 digits: YYYYMMDD, 3-digit serial, 2 check digits
+  - regex: `\b(?:19|20)\d{2}[ ]?(?:0[1-9]|1[0-2])[ ]?(?:0[1-9]|[12]\d|3[01])[ ]?\d{3}[ ]?\d{2}\b`
+  - checksum: Digit 12 = Luhn check over the first 11 digits. Digit 13 = Verhoeff check over the first 11 digits.
+  - edge: Older 11-digit matricules exist. None of the four libraries implements it, so write it from the spec.
+  - ctx: matricule, numéro d'identification, identifiant national, cns, ccss, sécurité sociale, sozialversicherungsnummer
+  - impls: none of Presidio, stdnum, localflavor or Faker (lb_LU covers VAT only)
+  - src: https://en.wikipedia.org/wiki/National_identification_number ; https://www.oecd.org/tax/automatic-exchange/crs-implementation-and-assistance/tax-identification-numbers/Luxembourg-TIN.pdf
+- **LU LU_TVA** (Numéro TVA; vat; FP low)
+  - format: LU plus 8 digits
+  - regex: `\bLU[ ]?\d{8}\b`
+  - checksum: Last 2 digits = first 6 digits mod 89
+  - edge: Faker lb_LU generates random values without a checksum.
+  - ctx: tva, numéro tva, vat, rcs
+  - impls: stdnum lu.tva; Faker lb_LU vat_id()
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/lu/tva.py
+- **LU LU_POSTCODE** (Code postal; contact; FP medium)
+  - format: L- plus 4 digits
+  - regex: `\bL-?[1-9]\d{3}\b`
+  - checksum: none
+  - edge: The L- prefix reduces FPs.
+  - ctx: code postal, luxembourg, rue
+  - impls: Faker lb_LU, de_LU address
+  - src: https://faker.readthedocs.io/en/master/locales.html
+- **IE IE_PPSN** (Personal Public Service Number (Uimhir PSP); national id; FP low)
+  - format: 7 digits, a check letter, and an optional second letter (A, H, or B since 2024; W/T/X on legacy numbers)
+  - regex: `\b\d{7}[ ]?[A-W][ABHWTX]?\b`
+  - checksum: (sum of d_i*(8-i) + 9*index(second letter)) mod 23, mapped to 'WABCDEFGHIJKLMNOPQRSTUV'. A W/T/X second letter is ignored.
+  - edge: Also used as the individual tax number (TIN).
+  - ctx: pps, ppsn, pps number, personal public service, revenue, tax number
+  - impls: stdnum ie.pps. Faker en_IE has VAT only.
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/ie/pps.py ; https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/ie/vat.py
+- **IE IE_VAT** (VAT number; vat; FP low)
+  - format: IE plus 7 digits plus 1-2 letters, or the old form (digit, letter or +/*, 5 digits, letter)
+  - regex: `\bIE[ ]?(?:\d{7}[A-W][AHBW]?|\d[A-Z+*]\d{5}[A-W])\b`
+  - checksum: Same mod-23 letter as the PPSN
+  - edge: Sole-trader VAT numbers embed the PPSN.
+  - ctx: vat, vat number, cáin bhreisluacha
+  - impls: stdnum ie.vat; Faker en_IE vat_id()
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/ie/vat.py
+- **IE IE_EIRCODE** (Eircode; contact; FP low)
+  - format: Routing key (letter plus 2 digits, or D6W) plus 4 characters from [AC-FHKNPRTV-Y0-9]
+  - regex: `\b(?:D6W|[AC-FHKNPRTV-Y]\d{2})[ ]?[AC-FHKNPRTV-Y0-9]{4}\b`
+  - checksum: none
+  - edge: Unique per address, so treat as a direct identifier and always mask.
+  - ctx: eircode, address, co., county
+  - impls: localflavor EircodeField
+  - src: https://github.com/django/django-localflavor/blob/master/localflavor/ie/forms.py
+- **IE IE_PLATE** (Registration plate; vehicle; FP medium)
+  - format: YY(Y)-CC-N (year, county code, serial), e.g. 231-D-12345
+  - regex: `\b\d{2,3}[ -]?[A-Z]{1,2}[ -]?\d{1,6}\b`
+  - checksum: none
+  - edge: Validate against the list of county codes.
+  - ctx: reg, registration, vehicle, car
+  - impls: none
+  - src: https://github.com/joke2k/faker/tree/master/faker/providers/automotive
+- **GB GB_NINO** (National Insurance number; social security; FP low)
+  - format: 2 letters, 6 digits, suffix A-D
+  - regex: `\b(?!BG|GB|KN|NK|NT|TN|ZZ)[A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z][ ]?\d{2}[ ]?\d{2}[ ]?\d{2}[ ]?[A-D]\b`
+  - checksum: none. Prefix rules: D, F, I, Q, U, V never used. O never second. BG, GB, KN, NK, NT, TN, ZZ excluded.
+  - edge: Administrative prefixes OO, FY, NC, PZ, PY and TN are not real NINOs. Faker en_GB ssn() always emits ZZ (invalid).
+  - ctx: national insurance, ni number, nino, ni no, hmrc
+  - impls: Presidio UK_NINO; Faker en_GB ssn()
+  - src: https://www.gov.uk/hmrc-internal-manuals/national-insurance-manual/nim39110 ; https://github.com/data-privacy-stack/presidio/blob/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/country_specific/uk/uk_nino_recognizer.py
+- **GB GB_NHS_CHI_HC** (NHS number / CHI number (Scotland) / H&C number (Northern Ireland); health; FP medium)
+  - format: 10 digits 3-3-4. CHI is DDMMYY plus 4 digits. H&C range 320-399.
+  - regex: `\b\d{3}[ -]?\d{3}[ -]?\d{4}\b`
+  - checksum: Weights 10..2 on digits 1-9, then 11 - (sum mod 11). A result of 11 becomes 0. A result of 10 is invalid.
+  - edge: 999xxxxxxx is a test range. Collides with UK phone numbers. CHI embeds date of birth and sex.
+  - ctx: nhs number, nhs no, chi number, health and care number, patient, gp
+  - impls: Presidio UK_NHS; stdnum gb.nhs
+  - src: https://en.wikipedia.org/wiki/NHS_number ; https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/gb/nhs.py
+- **GB GB_UTR** (Unique Taxpayer Reference; tax; FP medium)
+  - format: 10 digits, sometimes followed by K
+  - regex: `\b\d{5}[ ]?\d{5}K?\b`
+  - checksum: The first digit is the check: weights 6,7,8,9,10,5,4,3,2 on digits 2-10, sum mod 11, mapped through '21987654321'
+  - edge: Corporation tax UTRs use the same format.
+  - ctx: utr, unique taxpayer reference, self assessment, hmrc
+  - impls: stdnum gb.utr
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/gb/utr.py
+- **GB GB_VAT** (VAT registration number; vat; FP low)
+  - format: GB (or XI for Northern Ireland) plus 9 digits, or 12 digits with a branch suffix. GD/HA plus 3 digits for government departments and health authorities.
+  - regex: `\b(?:GB|XI)[ ]?(?:\d{3}[ ]?\d{4}[ ]?\d{2}(?:[ ]?\d{3})?|GD\d{3}|HA\d{3})\b`
+  - checksum: Weights 8,7,6,5,4,3,2,10,1. Sum mod 97 must be 0 (classic) or 42/55 (9755 scheme).
+  - edge: Personal data for sole traders.
+  - ctx: vat, vat reg, vat number
+  - impls: stdnum gb.vat; Faker en_GB vat_id()
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/gb/vat.py
+- **GB GB_CRN** (Companies House registration number; company; FP high)
+  - format: 8 digits, or a 2-letter prefix (SC, NI, OC, SO, NC, ...) plus 6 digits
+  - regex: `\b(?:\d{8}|(?:SC|NI|OC|SO|NC|NL|R0|SE|FC|GE|LP|SL)\d{6})\b`
+  - checksum: none
+  - edge: Personal data only for LLPs and sole directors.
+  - ctx: company number, companies house, crn, registered number
+  - impls: none
+  - src: https://arthurdejong.org/python-stdnum/formats
+- **GB GB_PASSPORT** (UK passport number; travel doc; FP high)
+  - format: 2 letters plus 7 digits (per Presidio). Older passports use 9 digits.
+  - regex: `\b(?:[A-Z]{2}\d{7}|\d{9})\b`
+  - checksum: none in the number (an MRZ check digit exists)
+  - edge: Needs context. Prefer full-MRZ detection.
+  - ctx: passport, passport number, hmpo, travel document
+  - impls: Presidio UK_PASSPORT (score 0.1)
+  - src: https://github.com/data-privacy-stack/presidio/blob/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/country_specific/uk/uk_passport_recognizer.py
+- **GB GB_DRIVING_LICENCE** (DVLA driving licence number; other; FP low)
+  - format: 16 characters: 5-letter surname (padded with 9s), decade digit, month (+50 for women), day, year digit, 2 initials, an arbitrary character, 2 check letters
+  - regex: `\b[A-Z9]{5}\d[0156]\d(?:0[1-9]|[12]\d|3[01])\d[A-Z9]{2}[A-Z0-9][A-Z]{2}\b`
+  - checksum: Check letters not published
+  - edge: Embeds surname, date of birth and sex. Northern Ireland licences use 8 digits.
+  - ctx: driving licence, dvla, licence number, driver number
+  - impls: Presidio UK_DRIVING_LICENCE
+  - src: https://github.com/data-privacy-stack/presidio/blob/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/country_specific/uk/uk_driving_licence_recognizer.py
+- **GB GB_POSTCODE** (Postcode; contact; FP medium)
+  - format: Outward code (A9, A99, A9A, AA9, AA99, AA9A) plus inward code (9AA). Special case: GIR 0AA.
+  - regex: `\b(?:GIR ?0AA|[A-PR-UWYZ](?:\d{1,2}|[A-HK-Y]\d{1,2}|\d[A-HJKPSTUW]|[A-HK-Y]\d[ABEHMNPRV-Y]) ?\d[ABD-HJLNP-UW-Z]{2})\b`
+  - checksum: none
+  - edge: A full postcode covers about 15 addresses, so it is a strong quasi-identifier.
+  - ctx: postcode, address, post code
+  - impls: Presidio UK_POSTCODE; localflavor GBPostcodeField; Faker en_GB
+  - src: https://github.com/data-privacy-stack/presidio/blob/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/country_specific/uk/uk_postcode_recognizer.py
+- **GB GB_PLATE** (Vehicle registration mark; vehicle; FP medium)
+  - format: AA00 AAA since 2001, plus older prefix and suffix formats
+  - regex: `\b[A-Z]{2}\d{2}[ ]?[A-Z]{3}\b`
+  - checksum: none
+  - edge: Northern Ireland uses a different format.
+  - ctx: registration, reg, number plate, vrm, dvla
+  - impls: Presidio UK_VEHICLE_REGISTRATION; Faker en_GB automotive
+  - src: https://presidio.dataprivacystack.org/supported_entities/
+- **ES ES_DNI_NIF** (DNI / NIF (persona física); national id; FP low)
+  - format: 8 digits plus a letter. K/L/M plus 7 digits plus a letter for minors, non-residents and some foreigners.
+  - regex: `\b[KLM]?\d{7,8}[ -]?[TRWAGMYFPDXBNJZSQVHLCKE]\b`
+  - checksum: Letter = 'TRWAGMYFPDXBNJZSQVHLCKE'[number mod 23]. I, Ñ, O and U are never used.
+  - edge: Written with dots or hyphens. Lowercase letters occur.
+  - ctx: dni, nif, documento nacional de identidad, número de identificación fiscal, n.i.f., document nacional d'identitat, nan
+  - impls: Presidio ES_NIF; stdnum es.dni, es.nif; localflavor ESIdentityCardNumberField; Faker es_ES nif()
+  - src: https://github.com/data-privacy-stack/presidio/blob/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/country_specific/spain/es_nif_recognizer.py ; https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/es/nif.py
+- **ES ES_NIE** (Número de Identidad de Extranjero; national id; FP low)
+  - format: X, Y or Z, then 7 digits, then a letter
+  - regex: `\b[XYZ][ -]?\d{7}[ -]?[TRWAGMYFPDXBNJZSQVHLCKE]\b`
+  - checksum: Replace X/Y/Z with 0/1/2, then apply the DNI mod-23 letter
+  - edge: Also printed on TIE residence cards.
+  - ctx: nie, número de identidad de extranjero, tie, extranjero
+  - impls: Presidio ES_NIE; stdnum es.nie; localflavor; Faker es_ES nie()
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/es/nif.py ; https://presidio.dataprivacystack.org/supported_entities/
+- **ES ES_CIF** (NIF de persona jurídica (ex-CIF); company; FP low)
+  - format: Letter [ABCDEFGHJNPQRSUVW], 7 digits, control digit or letter
+  - regex: `\b[ABCDEFGHJNPQRSUVW][ -]?\d{7}[ -]?[0-9A-J]\b`
+  - checksum: Luhn check digit over the 7 digits. The letter form maps it through 'JABCDEFGHI'. Some entity types (P, Q, R, S, N, W) use the letter form.
+  - edge: stdnum accepts either the digit or the letter form for all types.
+  - ctx: cif, nif, razón social, sociedad
+  - impls: stdnum es.cif; localflavor ESIdentityCardNumberField; Faker es_ES cif()
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/es/cif.py
+- **ES ES_NSS** (Número de la Seguridad Social (NUSS / NAF); social security; FP medium)
+  - format: 12 digits: province (01-53, 66), 8 digits, 2 control digits. Written 28/12345678/40.
+  - regex: `\b\d{2}[ /-]?\d{8}[ /-]?\d{2}\b`
+  - checksum: Control = (province plus number, as one integer) mod 97. A variant reported when the number is below 10^7 uses province*10^7 + number; verify against the TGSS spec.
+  - edge: Only Faker implements it, as a generator. Excel can drop the leading 0.
+  - ctx: nss, nuss, naf, número de afiliación, seguridad social, número de la seguridad social
+  - impls: Faker es_ES nuss() (MIT)
+  - src: https://github.com/joke2k/faker/blob/master/faker/providers/ssn/es_ES/__init__.py
+- **ES ES_PASSPORT** (Pasaporte; travel doc; FP high)
+  - format: 3 letters plus 6 digits
+  - regex: `\b[A-Z]{3}\d{6}\b`
+  - checksum: none in the number (an MRZ check digit exists)
+  - edge: The DNI support number (IDESP) has the same shape.
+  - ctx: pasaporte, número de pasaporte, passport
+  - impls: Presidio ES_PASSPORT (score 0.05)
+  - src: https://github.com/data-privacy-stack/presidio/blob/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/country_specific/spain/es_passport_recognizer.py
+- **ES ES_CP_MATRICULA** (Código postal / matrícula; contact; FP high)
+  - format: Postcode: 5 digits, province 01-52. Plate: 4 digits plus 3 consonants (since 2000).
+  - regex: `\b(?:0[1-9]|[1-4]\d|5[0-2])\d{3}\b|\b\d{4}[ -]?[BCDFGHJKLMNPRSTVWXYZ]{3}\b`
+  - checksum: none
+  - edge: Excel drops the leading 0 in postcodes.
+  - ctx: código postal, c.p., matrícula, domicilio
+  - impls: stdnum es.postal_code; localflavor ESPostalCodeField; Faker es_ES automotive
+  - src: https://django-localflavor.readthedocs.io/en/stable/localflavor/es.html
+- **ES ES_REF_CATASTRAL** (Referencia catastral (also CUPS for energy supply points); other; FP low)
+  - format: 20 characters: 14 for the parcel, 4 digits, 2 check letters
+  - regex: `\b[0-9A-Z]{14}\d{4}[A-Z]{2}\b`
+  - checksum: Two control letters (stdnum es.referenciacatastral). CUPS: ES plus 16 digits plus 2 check letters (stdnum es.cups).
+  - edge: Identifies a dwelling, so it is a quasi-identifier.
+  - ctx: referencia catastral, catastro, cups, suministro
+  - impls: stdnum es.referenciacatastral, es.cups
+  - src: https://arthurdejong.org/python-stdnum/formats
+- **PT PT_NIF** (Número de Identificação Fiscal / NIPC (contribuinte); tax; FP medium)
+  - format: 9 digits. The first digit gives the type (1-3 individuals, 45 non-resident, 5 companies, 6 public bodies, 7/8/9x other).
+  - regex: `\b[1-9]\d{2}[ .]?\d{3}[ .]?\d{3}\b`
+  - checksum: Check = 11 - (sum of d_i*(9-i) over 8 digits mod 11). Results of 10 or 11 become 0.
+  - edge: PT mobile numbers (9 digits starting 9) and the 1-in-11 pass rate mean context is needed.
+  - ctx: nif, contribuinte, número de contribuinte, nipc, número de identificação fiscal
+  - impls: stdnum pt.nif; Faker pt_PT vat_id() (no checksum)
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/pt/nif.py
+- **PT PT_CC** (Cartão de Cidadão (número de documento) / NIC; national id; FP low)
+  - format: 8-digit civil number, check digit, 2-character version, check digit. Written 12345678 9 ZZ1.
+  - regex: `\b\d{8}[ -]?\d[ ]?[A-Z0-9]{2}\d\b`
+  - checksum: Base-36 values, alternate doubling from the right (subtract 9 if over 9). The sum must be 0 mod 10.
+  - edge: The old BI number (8 digits) has no validated check.
+  - ctx: cartão de cidadão, cc, número de documento, bi, nic, identificação civil
+  - impls: stdnum pt.cc; localflavor PTCitizenCardNumberField
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/pt/cc.py ; https://django-localflavor.readthedocs.io/en/stable/localflavor/pt.html
+- **PT PT_NISS** (Número de Identificação da Segurança Social; social security; FP medium)
+  - format: 11 digits, first digit 1 or 2
+  - regex: `\b[12]\d{10}\b`
+  - checksum: Weights 29,23,19,17,13,11,7,5,3,2. Check = 9 - (sum mod 10).
+  - edge: Not in stdnum.
+  - ctx: niss, segurança social, número de segurança social
+  - impls: localflavor PTSocialSecurityNumberField
+  - src: https://github.com/django/django-localflavor/blob/master/localflavor/pt/forms.py
+- **PT PT_SNS** (Número de utente do SNS; health; FP high)
+  - format: 9 digits
+  - regex: `\b\d{9}\b`
+  - checksum: none published (unverified)
+  - edge: Detect only from context or a column header.
+  - ctx: número de utente, utente, sns, serviço nacional de saúde
+  - impls: none
+  - src: https://en.wikipedia.org/wiki/National_identification_number
+- **PT PT_CP_MATRICULA** (Código postal / matrícula; contact; FP medium)
+  - format: Postcode 1234-567. Plates AA-00-AA (since 2020), 00-AA-00, 00-00-AA, AA-00-00.
+  - regex: `\b[1-9]\d{3}-\d{3}\b|\b(?:[A-Z]{2}-\d{2}-[A-Z]{2}|\d{2}-\d{2}-[A-Z]{2}|\d{2}-[A-Z]{2}-\d{2}|[A-Z]{2}-\d{2}-\d{2})\b`
+  - checksum: none
+  - edge: The postcode shape is distinctive.
+  - ctx: código postal, matrícula, morada
+  - impls: localflavor PTZipCodeField; Faker pt_PT automotive
+  - src: https://django-localflavor.readthedocs.io/en/stable/localflavor/pt.html
+- **IT IT_CODICE_FISCALE** (Codice fiscale; tax; FP low)
+  - format: 16 characters: 3 surname letters, 3 name letters, YY, month letter (ABCDEHLMPRST), DD (+40 for women), Belfiore code, check letter. Entities use 11 digits (same as the P.IVA).
+  - regex: `\b[A-Z]{6}[\dLMNP-V]{2}[ABCDEHLMPRST][\dLMNP-V]{2}[A-Z][\dLMNP-V]{3}[A-Z]\b`
+  - checksum: Odd and even positions use separate value tables. Sum mod 26 gives a letter A-Z. Omocodia: digits are replaced by LMNPQRSTUV and the check is computed over the substituted string.
+  - edge: Match case-insensitively. Embeds name, date of birth, sex and birthplace. The Belfiore gazetteer can decode it.
+  - ctx: codice fiscale, c.f., cf, cod. fisc., tessera sanitaria, partita iva
+  - impls: Presidio IT_FISCAL_CODE; stdnum it.codicefiscale; localflavor ITSocialSecurityNumberField; Faker it_IT ssn()
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/it/codicefiscale.py ; https://github.com/data-privacy-stack/presidio/blob/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/country_specific/italy/it_fiscal_code_recognizer.py
+- **IT IT_PARTITA_IVA** (Partita IVA; vat; FP medium)
+  - format: 11 digits (optionally IT before): 7-digit company ID, 3-digit office code, check digit
+  - regex: `\b(?:IT[ ]?)?\d{11}\b`
+  - checksum: Luhn over all 11 digits. Office code must be 001-100, 120, 121, 888 or 999.
+  - edge: Personal data for ditte individuali. Faker's vat_id has no checksum.
+  - ctx: partita iva, p.iva, p. iva, piva, codice iva, vat
+  - impls: Presidio IT_VAT_CODE; stdnum it.iva; localflavor ITVatNumberField; Faker it_IT vat_id()
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/it/iva.py
+- **IT IT_CARTA_IDENTITA** (Carta d'identità (CIE); national id; FP medium)
+  - format: CIE 3.0: CA00000AA (2 letters, 5 digits, 2 letters). Paper: AA1234567. CIE 2.0: 1234567AA.
+  - regex: `\b(?:[A-Z]{2}\d{5}[A-Z]{2}|[A-Z]{2}[ ]?\d{7}|\d{7}[A-Z]{2})\b`
+  - checksum: none public
+  - edge: Presidio's base score is 0.01, so it relies on context.
+  - ctx: carta d'identità, carta di identità, cie, documento di riconoscimento, numero documento
+  - impls: Presidio IT_IDENTITY_CARD; Faker it_IT cie()
+  - src: https://github.com/data-privacy-stack/presidio/blob/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/country_specific/italy/it_identity_card_recognizer.py
+- **IT IT_PASSAPORTO_PATENTE** (Passaporto / patente di guida; travel doc; FP high)
+  - format: Passport: 2 letters plus 7 digits. Licence: 2 letters, 7 digits, 1 letter; or U1 plus 7 alphanumeric plus 1 letter.
+  - regex: `\b(?:[A-Z]{2}\d{7}[A-Z]?|U1[A-Z0-9]{7}[A-Z])\b`
+  - checksum: none public
+  - edge: Presidio's patente regex places (?i) mid-pattern, which can error on Python 3.11+.
+  - ctx: passaporto, patente, patente di guida, numero patente
+  - impls: Presidio IT_PASSPORT and IT_DRIVER_LICENSE
+  - src: https://github.com/data-privacy-stack/presidio/blob/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/country_specific/italy/it_driver_license_recognizer.py
+- **IT IT_CAP_TARGA** (CAP / targa; contact; FP high)
+  - format: CAP: 5 digits. Plate: AA 000 AA.
+  - regex: `\b\d{5}\b|\b[A-HJ-NPR-TV-Z]{2}[ ]?\d{3}[ ]?[A-HJ-NPR-TV-Z]{2}\b`
+  - checksum: none
+  - edge: A CAP alone has extreme FP. Excel drops the leading 0.
+  - ctx: cap, indirizzo, targa, via
+  - impls: localflavor ITZipCodeField; Faker it_IT automotive
+  - src: https://django-localflavor.readthedocs.io/en/stable/localflavor/it.html
+- **GR GR_AMKA** (ΑΜΚΑ (Αριθμός Μητρώου Κοινωνικής Ασφάλισης); social security; FP low)
+  - format: 11 digits: DDMMYY plus 4 digits plus a check digit. Digit 10 is odd for men, even for women.
+  - regex: `\b(?:0[1-9]|[12]\d|3[01])(?:0[1-9]|1[0-2])\d{2}[ ]?\d{5}\b`
+  - checksum: Luhn over all 11 digits, plus a valid-date check
+  - edge: Being replaced by the Personal Number. Excel drops the leading 0.
+  - ctx: αμκα, α.μ.κ.α., amka, αριθμός μητρώου κοινωνικής ασφάλισης, ασφαλισμένος
+  - impls: stdnum gr.amka; localflavor GRSocialSecurityNumberCodeField; Faker el_GR ssn()
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/gr/amka.py ; https://www.amka.gr/tieinai_en.html
+- **GR GR_AFM** (ΑΦΜ (Αριθμός Φορολογικού Μητρώου). VAT uses the EL prefix.; tax; FP medium)
+  - format: 9 digits
+  - regex: `\b(?:EL[ ]?)?\d{9}\b`
+  - checksum: Check = (sum of d_i * 2^(8-i) for i=0..7) mod 11 mod 10
+  - edge: About 1 in 10 random numbers pass. Collides with NL BSN and PT NIF.
+  - ctx: αφμ, α.φ.μ., αριθμός φορολογικού μητρώου, δου, tin, el
+  - impls: stdnum gr.vat; localflavor GRTaxNumberCodeField; Faker el_GR tin()/vat_id()
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/gr/vat.py
+- **GR GR_ADT** (Αριθμός Δελτίου Ταυτότητας (ΑΔΤ); national id; FP medium)
+  - format: Old cards: 1-2 letters (ΑΒΕΖΗΙΚΜΝΟΡΤΥΧ) plus 6 digits, e.g. ΑΒ 123456. New cards since 2023-09-25.
+  - regex: `\b[ΑΒΕΖΗΙΚΜΝΟΡΤΥΧABEZHIKMNOPTYX]{1,2}[ -]?\d{6}\b`
+  - checksum: none public
+  - edge: Greek and Latin look-alike letters get mixed, so normalise homoglyphs first.
+  - ctx: αδτ, α.δ.τ., αριθμός ταυτότητας, δελτίο ταυτότητας, ταυτότητα
+  - impls: Faker el_GR police_id()
+  - src: https://en.wikipedia.org/wiki/National_identification_number ; https://en.wikipedia.org/wiki/Greek_identity_card
+- **GR GR_PA** (Προσωπικός Αριθμός (ΠΑ); national id; FP medium)
+  - format: 12 characters: 3 alphanumeric plus 9 digits, rolled out from 2025
+  - regex: `\b[0-9A-ZΑ-Ω]{3}[ -]?\d{9}\b`
+  - checksum: unknown (unverified)
+  - edge: The 9 digits reportedly relate to the AFM (unverified). Printed on new ID cards.
+  - ctx: προσωπικός αριθμός, π.α., pa.gov.gr
+  - impls: none
+  - src: https://pa.gov.gr/ ; https://en.wikipedia.org/wiki/National_identification_number
+- **GR GR_TK_PLATE** (Ταχυδρομικός Κώδικας / πινακίδα; contact; FP high)
+  - format: Postcode: 5 digits (often 123 45), first digit not 0 or 9. Plate: 3 letters plus 4 digits.
+  - regex: `\b[1-8]\d{2}[ ]?\d{2}\b|\b[ΑΒΕΖΗΙΚΜΝΟΡΤΥΧABEZHIKMNOPTYX]{3}[ -]?\d{4}\b`
+  - checksum: none
+  - edge: Homoglyphs again.
+  - ctx: τ.κ., ταχυδρομικός κώδικας, οδός, πινακίδα
+  - impls: localflavor GRPostalCodeField; Faker el_GR automotive
+  - src: https://django-localflavor.readthedocs.io/en/stable/localflavor/gr.html
+- **MT MT_ID** (Identity card number (also individual TIN); national id; FP high)
+  - format: Up to 7 digits plus a letter: M/G/B/Z (Malta or Gozo, by century), L/H (21st century), A (foreign residents), P
+  - regex: `\b\d{1,7}[ ]?[MGAPLHBZ]\b`
+  - checksum: none
+  - edge: Leading zeros optional. Require at least 3 digits plus context. Use as TIN unverified.
+  - ctx: id card, identity card, karta tal-identità, id number, tin
+  - impls: none
+  - src: https://en.wikipedia.org/wiki/Maltese_identity_card
+- **MT MT_VAT** (VAT number; vat; FP low)
+  - format: MT plus 8 digits
+  - regex: `\bMT[ ]?\d{8}\b`
+  - checksum: Weights 3,4,6,7,8,9,10,1. Sum mod 37 must be 0.
+  - edge: Faker mt_MT has no checksum.
+  - ctx: vat, vat number
+  - impls: stdnum mt.vat; Faker mt_MT vat_id()
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/mt/vat.py
+- **MT MT_POSTCODE** (Postcode; contact; FP medium)
+  - format: 3 letters plus 4 digits, e.g. VLT 1117
+  - regex: `\b[A-Z]{3}[ ]?\d{4}\b`
+  - checksum: none
+  - edge: Validate against the list of locality codes.
+  - ctx: postcode, triq, street
+  - impls: localflavor mt
+  - src: https://django-localflavor.readthedocs.io/en/stable/localflavor/mt.html
+- **CY CY_TIC_VAT** (Αριθμός Φορολογικής Ταυτότητας (TIC) / Αριθμός Εγγραφής ΦΠΑ; tax; FP low)
+  - format: 8 digits plus a check letter. VAT adds the CY prefix.
+  - regex: `\b(?:CY[ ]?)?\d{8}[ ]?[A-Z]\b`
+  - checksum: Even positions mapped 0→1, 1→0, 2→5, 3→7, 4→9, 5→13, 6→15, 7→17, 8→19, 9→21. Odd positions at face value. Sum mod 26 gives A-Z. Numbers cannot start with 12.
+  - edge: Faker el_CY emits CY plus 9 digits plus a letter, which is the wrong length.
+  - ctx: αφτ, tic, αριθμός φορολογικής ταυτότητας, φπα, vat
+  - impls: stdnum cy.vat; Faker el_CY vat_id()
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/cy/vat.py
+- **CY CY_ID_ARC** (Αριθμός Δελτίου Ταυτότητας / ARC; national id; FP high)
+  - format: Numeric, up to about 10 digits (unverified)
+  - regex: `\b\d{6,10}\b`
+  - checksum: none public
+  - edge: Detect only from context.
+  - ctx: αριθμός ταυτότητας, δελτίο ταυτότητας, arc, alien registration
+  - impls: none
+  - src: https://en.wikipedia.org/wiki/Cypriot_identity_card
+- **MC MC_TVA** (Numéro de TVA monégasque; vat; FP low)
+  - format: FR plus a 2-character key plus 000 plus 6 digits (French scheme)
+  - regex: `\bFR[ ]?[0-9A-HJ-NP-Z]{2}[ ]?000[ ]?\d{6}\b`
+  - checksum: French TVA key over the 9-digit SIREN-like part, which must start with 000
+  - edge: Monaco has no public national ID algorithm (see open questions).
+  - ctx: tva, numéro de tva, monaco, rci
+  - impls: stdnum mc.tva
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/mc/tva.py
+- **MC MC_POSTCODE** (Code postal; contact; FP low)
+  - format: 980xx (98000 Monaco)
+  - regex: `\b(?:MC[ -]?)?980\d{2}\b`
+  - checksum: none
+  - edge: A single postcode is barely identifying.
+  - ctx: monaco, code postal
+  - impls: none
+  - src: https://arthurdejong.org/python-stdnum/formats
+- **AD AD_NRT** (Número de Registre Tributari; tax; FP medium)
+  - format: Letter, 6 digits, check letter, e.g. U-132950-X. F = resident individual (at most 699999). A/L = 700000-799999. Others: C, D, E, G, O, P, U.
+  - regex: `\b[ACDEFGLOPU][ -]?\d{6}[ -]?[A-Z]\b`
+  - checksum: Check letter algorithm not published (stdnum skips it)
+  - edge: Validate the range per type letter.
+  - ctx: nrt, número de registre tributari, registre tributari
+  - impls: stdnum ad.nrt
+  - src: https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/ad/nrt.py
+- **AD AD_POSTCODE** (Codi postal; contact; FP low)
+  - format: AD plus 3 digits, AD100-AD700
+  - regex: `\bAD[ ]?[1-7]00\b`
+  - checksum: none
+  - edge: Low value on its own.
+  - ctx: codi postal, andorra
+  - impls: none
+  - src: https://arthurdejong.org/python-stdnum/formats
+- **INTL IBAN** (IBAN; financial; FP low)
+  - format: Country code, 2 check digits, BBAN. Lengths: DE22 AT20 CH21 LI21 BE16 NL18 LU20 IE22 GB22 ES24 PT25 IT27 MT31 CY28 GR27 MC27 AD24.
+  - regex: `\b[A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]{4}){2,7}(?:[ ]?[A-Z0-9]{1,4})?\b`
+  - checksum: ISO 13616 / ISO 7064 mod 97-10: move the first 4 characters to the end, convert letters to 10-35, and the number mod 97 must equal 1
+  - edge: Validate the length per country. Embedded national bank codes such as ES CCC have their own checks.
+  - ctx: iban, bank, konto, rekening, cuenta, conta, conto, compte
+  - impls: Presidio IBAN_CODE; stdnum iban
+  - src: https://presidio.dataprivacystack.org/supported_entities/ ; https://arthurdejong.org/python-stdnum/formats
+- **INTL MRZ** (Machine Readable Zone (ICAO 9303); travel doc; FP low)
+  - format: TD1: 3 lines of 30 characters (ID cards). TD2: 2 lines of 36. TD3: 2 lines of 44 (passports).
+  - regex: `(?m)^[A-Z0-9<]{30}\n[A-Z0-9<]{30}\n[A-Z0-9<]{30}$|^[A-Z0-9<]{36}\n[A-Z0-9<]{36}$|^[A-Z0-9<]{44}\n[A-Z0-9<]{44}$`
+  - checksum: Weights 7,3,1 with A=10..Z=35 and <=0, mod 10, for the document number, date of birth, expiry date and composite
+  - edge: One generic detector covers ID cards and passports of all 17 countries. OCR noise needs some tolerance.
+  - ctx: passport, ausweis, p<, id<, i<
+  - impls: Presidio and localflavor implement the 7-3-1 rule for DE/CH
+  - src: https://www.icao.int/publications/Documents/9303_p3_cons_en.pdf ; https://de.wikipedia.org/wiki/Ausweisnummer
+

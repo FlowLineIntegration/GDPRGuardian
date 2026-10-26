@@ -1,0 +1,80 @@
+# Registre des licences des modèles NER / NER model licence register.
+# Une entrée par modèle de gdprguardian.ner.registry.MODELS ; tests/ner/test_ner_registry.py vérifie que chaque
+# champ est rempli et que révisions et SHA-256 correspondent au code. One entry per registry model; the test
+# suite checks that every field is filled and that revisions and SHA-256 match the code.
+# Les poids ne sont jamais dans le paquet pip : tools/download_models.py les télécharge (révision figée,
+# SHA-256 vérifié) / weights are never in the pip wheel: the download tool fetches and verifies them.
+# Vérifié le / checked on 2026-10-24 (API Hugging Face, cartes de modèles à la révision figée, Figshare).
+
+schema_version: 1
+
+models:
+  distilcamembert-base-ner:
+    license: MIT                                   # SPDX, carte du modèle / model card
+    source: https://huggingface.co/cmarkea/distilcamembert-base-ner
+    authors: Crédit Mutuel Arkéa (cmarkea)
+    task: "token-classification (IO tags: O, I-PER, I-LOC, I-ORG, I-MISC)"
+    base_model:
+      - name: cmarkea/distilcamembert-base
+        license: MIT
+        url: https://huggingface.co/cmarkea/distilcamembert-base
+        training_data: "OSCAR, French part (~140 GB of web text, Common Crawl)"
+      - name: almanach/camembert-base             # modèle enseignant / teacher model
+        license: MIT
+        url: https://huggingface.co/almanach/camembert-base
+    training_data:
+      - name: "WikiNER (French), Nothman et al. 2013, Learning multilingual named entity recognition from Wikipedia"
+        license: CC-BY-4.0
+        url: https://api.figshare.com/v2/articles/5462500
+        note: >-
+          Licence lue sur Figshare (API v2, article 5462500). Le jeu Hugging Face Jean-Baptiste/wikiner_fr
+          (révision 7037bf1d59316b4f3368adf7a958cf31c1eb07ab), cité par la carte du modèle, ne déclare aucune
+          licence. Étiquettes « argent » dérivées des liens Wikipédia (texte Wikipédia sous CC BY-SA, non vérifié
+          ici). / Licence read on Figshare; the HF copy cited by the model card declares none. Silver-standard
+          labels derived from Wikipedia links (Wikipedia text is CC BY-SA, not verified here).
+      - name: OSCAR (pre-training of the base model)
+        license: CC0-1.0 (packaging) / rights of the original web authors (content)
+        url: https://oscar-project.org/
+        note: Non revérifié ici, d'après la documentation du projet OSCAR / not re-verified here.
+    generator_llm: none                            # aucune donnée générée par un LLM / no LLM-generated data
+    attribution: >-
+      DistilCamemBERT-NER par Crédit Mutuel Arkéa (MIT), entraîné sur WikiNER (Nothman et al., CC BY 4.0).
+      Attribution recommandée ; l'effet juridique de CC BY sur des poids entraînés n'est pas établi.
+      / DistilCamemBERT-NER by Crédit Mutuel Arkéa (MIT), trained on WikiNER (Nothman et al., CC BY 4.0).
+      Attribution recommended; the legal effect of CC BY on trained weights is not settled.
+    reported_metrics: "model card, wikiner_fr test split, per sub-word F1: PER 96.82, LOC 93.82, ORG 85.98"
+    files:
+      model.onnx:
+        repo: cmarkea/distilcamembert-base-ner
+        revision: e539d952f70088b450c300c28ba455da87f2dc4b
+        sha256: 666ce15c968ca49874d2449aa9b83164dbb1126090d012dda7c35b2ef3672e1d
+        size: 270089674
+        format: ONNX fp32 (default)
+      config.json:
+        repo: cmarkea/distilcamembert-base-ner
+        revision: e539d952f70088b450c300c28ba455da87f2dc4b
+        sha256: 103f36a11079994f128a20c46cb388912dc9d481fded4ce12fbfe2d9f63d2662
+        size: 945
+      tokenizer.json:
+        # Le dépôt NER n'a pas de tokenizer.json ; même sentencepiece.bpe.model que camembert-base.
+        # The NER repository ships no tokenizer.json; same sentencepiece model as camembert-base.
+        repo: almanach/camembert-base
+        revision: a75967561c78f2aa81cc41045378d3b4ee25af9e
+        sha256: 94e041bf917a884207001cc0758f393b2cdcc4a6d24fdc8b2339a83dd47c9218
+        size: 1395301
+        license: MIT
+      model_quantized.onnx:
+        repo: cmarkea/distilcamembert-base-ner
+        revision: e539d952f70088b450c300c28ba455da87f2dc4b
+        sha256: 770067d0fef15f0bee29bfcc04509f6e63e0451b15c958d6b3472ad4a845fd96
+        size: 142727986
+        format: "ONNX dynamic INT8, optional, NOT for production (recall collapses, see models/README.md)"
+    derived:
+      # Construit localement, jamais redistribué ; empreinte inscrite au manifeste à la construction.
+      # Built locally, never redistributed; digest recorded in the manifest at build time.
+      model_int8.onnx:
+        source: model.onnx
+        recipe: "onnxruntime.quantization.quantize_dynamic(op_types=[MatMul], per_channel=True, weight_type=QUInt8)"
+        license: MIT                               # dérivé des poids MIT / derived from the MIT weights
+        build: python tools/download_models.py --build-int8   # exige / requires the `onnx` package
+        quality_gate: "token-label agreement with fp32 >= 98 % overall and >= 95 % on fp32 PER/ORG/LOC tokens"

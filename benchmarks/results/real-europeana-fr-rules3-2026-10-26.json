@@ -1,0 +1,167 @@
+{
+  "corpus": "europeana_fr",
+  "title": "Europeana Newspapers NER, French (BnF), historical OCR press",
+  "language": "fr",
+  "licence": "CC0 1.0",
+  "source": "https://github.com/EuropeanaNewspapers/ner-corpora",
+  "revision": "EuropeanaNewspapers/ner-corpora@6bf838d23112c255fd81431b1187ab30ef6c2d90",
+  "real_text": "yes (noisy 19th-20th c. OCR)",
+  "gold": "manual (PER, LOC, ORG, IO tags)",
+  "gold_complete": true,
+  "negative_control": false,
+  "measures": "person-name recall on noisy historical OCR text",
+  "cannot_measure": "modern identifiers (none in the text)",
+  "build": {
+    "documents": 515,
+    "mentions": 9845,
+    "chars": 1005936,
+    "source": "https://github.com/EuropeanaNewspapers/ner-corpora",
+    "revision": "EuropeanaNewspapers/ner-corpora@6bf838d23112c255fd81431b1187ab30ef6c2d90",
+    "licence": "CC0 1.0",
+    "fetched": "2026-10-25"
+  },
+  "gold_labels": {
+    "LOCATION": 4230,
+    "ORG": 1343,
+    "PERSON": 4272
+  },
+  "run": {
+    "date": "2026-10-26",
+    "countries": "FR",
+    "profile": "standard",
+    "engine": {
+      "package": "gdprguardian",
+      "version": "1.0.0",
+      "native_core": true,
+      "python": "3.12.11",
+      "platform": "Windows 11",
+      "machine": "AMD64"
+    },
+    "tag": "rules3",
+    "review": null,
+    "split": "all",
+    "split_rule": null
+  },
+  "documents": 515,
+  "evaluated": 515,
+  "errors": {},
+  "chars": 1005936,
+  "seconds": 0.314,
+  "chars_per_second": 3206161,
+  "families": [
+    "PERSON"
+  ],
+  "totals": {
+    "m_total": 4272,
+    "m_full": 3057,
+    "m_cov80": 3069,
+    "m_literal_checked": 4237,
+    "m_literal": 1069,
+    "c_gold": 35625,
+    "c_gold_masked": 26674,
+    "c_pred": 34853,
+    "c_pred_tp": 26674,
+    "c_neutral": 699553,
+    "c_neutral_masked": 3224,
+    "d_has_gold": 445,
+    "d_leak": 334,
+    "d_leak_literal": 308,
+    "k_total": 5571,
+    "k_touched": 533,
+    "chars": 1005936,
+    "detections": 3960,
+    "d_detection": 466,
+    "g_PERSON": 4272,
+    "f_PERSON": 3057
+  },
+  "metrics": {
+    "mention_recall": 0.7155898876404494,
+    "mention_recall_at80": 0.7183988764044944,
+    "char_recall": 0.7487438596491228,
+    "precision": 0.7653286661119559,
+    "over_masking": 0.0046086572425534595,
+    "doc_leak_rate": 0.750561797752809,
+    "doc_literal_leak_rate": 0.6921348314606741,
+    "mention_literal_leak_rate": 0.25230115647864054,
+    "kept_touched_rate": 0.09567402620714414,
+    "detections_per_10k_chars": 39.36632151548409,
+    "docs_with_detection": 0.9048543689320389,
+    "recall_PERSON": 0.7155898876404494
+  },
+  "intervals_95": {
+    "mention_recall": [
+      0.6885,
+      0.7393
+    ],
+    "mention_recall_at80": [
+      0.6919,
+      0.7421
+    ],
+    "char_recall": [
+      0.7224,
+      0.7719
+    ],
+    "precision": [
+      0.7379,
+      0.7925
+    ],
+    "over_masking": [
+      0.0039,
+      0.0053
+    ],
+    "doc_leak_rate": [
+      0.7117,
+      0.7915
+    ],
+    "doc_literal_leak_rate": [
+      0.6486,
+      0.7363
+    ],
+    "mention_literal_leak_rate": [
+      0.229,
+      0.2802
+    ],
+    "kept_touched_rate": [
+      0.0839,
+      0.1073
+    ],
+    "detections_per_10k_chars": [
+      36.3096,
+      42.6783
+    ],
+    "docs_with_detection": [
+      0.8796,
+      0.9282
+    ],
+    "recall_PERSON": [
+      0.6885,
+      0.7393
+    ]
+  },
+  "kept_families": {
+    "LOCATION": {
+      "mentions": 4228,
+      "touched": 391,
+      "touched_rate": 0.09247871333964049
+    },
+    "ORG": {
+      "mentions": 1343,
+      "touched": 142,
+      "touched_rate": 0.10573343261355175
+    }
+  },
+  "by_origin": {
+    "PERSON:manual": {
+      "mentions": 4272,
+      "masked": 3057,
+      "recall": 0.7155898876404494
+    }
+  },
+  "detected_labels": {
+    "PERSON": 3798,
+    "ADDRESS": 144,
+    "ORG": 10,
+    "BIRTH_DATE": 6,
+    "NIR": 2
+  }
+}

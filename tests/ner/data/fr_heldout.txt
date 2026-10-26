@@ -1,0 +1,47 @@
+# Corpus de contrôle, rédigé APRÈS le réglage des seuils (aucun réglage ne doit s'en servir).
+# Held-out corpus, written AFTER threshold tuning (never tune on it). Personnes fictives / fictional people.
+# Même format que fr_sentences.txt / same format as fr_sentences.txt.
+
+# --- Assurance, immobilier / insurance, real estate
+Sinistre déclaré par [[PER:Marcel Thibault]] le 4 avril : dégât des eaux dans l'appartement de [[PER:Agnès Morvan]].
+L'expert mandaté par [[ORG:Groupama]], M. [[PER:Didier Lenoir]], passera jeudi.
+Le bail est consenti par la SCI [[ORG:Les Tilleuls]] à [[PER:Yasmine Cherif]] pour un logement situé à [[LOC:Tours]].
+État des lieux réalisé en présence de [[PER:Noémie Gauthier]] et de l'agent de [[ORG:Foncia]].
+[[PER:Bertrand Roussel]] souhaite résilier son contrat habitation avant son départ pour [[LOC:Annecy]].
+
+# --- École, formation / school, training
+L'élève [[PER:Tom Lefranc]] a été absent trois jours ; sa mère, [[PER:Caroline Lefranc]], a prévenu le collège.
+Le conseil de classe présidé par Mme [[PER:Bénédicte Arnaud]] a félicité [[PER:Ilyes Mokrani]].
+Inscription de [[PER:Manon Duval]] à l'[[ORG:IUT de Lannion]] pour la rentrée.
+Le stage de [[PER:Quentin Rey]] se déroulera chez [[ORG:Thales]] à [[LOC:Élancourt]].
+
+# --- Police, justice
+Le plaignant, [[PER:Joël Picard]], déclare avoir été suivi depuis la gare de [[LOC:Perpignan]].
+Procès-verbal dressé par le brigadier [[PER:Kévin Lopes]] du commissariat de [[LOC:Béziers]].
+L'avocat de Mme [[PER:Sabrina Ferreira]] a déposé des conclusions devant la cour d'appel de [[LOC:Douai]].
+
+# --- Relation client, conversation / customer service, chat
+Client : bonjour, je suis [[PER:Patricia Leclerc]], ma commande n'est toujours pas arrivée.
+Agent : merci madame [[PER:Leclerc]], je vérifie avec le transporteur [[ORG:Chronopost]].
+salut c'est [[PER:Mehdi]], tu peux dire à [[PER:Anaïs]] que je serai en retard ?
+Vu avec [[PER:Fred]] ce matin, il attend le retour de [[PER:Sylvain Marty]].
+Je vous mets en relation avec ma collègue [[PER:Ophélie Barre]], du service facturation.
+
+# --- Listes, tableaux, en-têtes / lists, tables, headings
+Participants : [[PER:Alain Ferry]], [[PER:Nathalie Giraud]], [[PER:Omar Saïdi]], [[PER:Céline Bertin]].
+| Nom | Ville |\n| [[PER:Roger Maillard]] | [[LOC:Dijon]] |\n| [[PER:Lucie Poirier]] | [[LOC:Metz]] |
+DOSSIER [[PER:MARCHAND Henri]] - SUIVI DES PAIEMENTS
+- Responsable : [[PER:Estelle Vigneron]]\n- Suppléant : [[PER:Guillaume Texier]]
+Signé : [[PER:Raphaël Benoit]], directeur de l'agence de [[LOC:Cherbourg]].
+
+# --- Noms rares ou étrangers / rare or foreign names
+[[PER:Dragan Petrović]] et [[PER:Ngozi Okafor]] interviendront au colloque de [[LOC:Grenoble]].
+Le dossier de [[PER:Thi Hoa Tran]] a été transmis à [[PER:Ewa Zielińska]].
+[[PER:Jean-Marc Ah-Fat]] est arrivé de [[LOC:Saint-Denis]] la semaine dernière.
+
+# --- Sans entité / without entity
+Le montant de la franchise reste à la charge de l'assuré.
+Les horaires d'ouverture sont modifiés pendant les vacances scolaires.
+Merci de joindre une copie de votre pièce d'identité.
+Le devis est valable trente jours à compter de sa date d'émission.
+SUIVI DES PAIEMENTS - ÉCHÉANCIER 2026

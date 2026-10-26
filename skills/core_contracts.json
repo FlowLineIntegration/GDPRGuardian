@@ -1,0 +1,13 @@
+{
+ "comment": "Contrat de chaque noyau, vérifié en l'important sur sa plateforme (build) ; check exige le contrat des sources / each core's contract, verified by importing it on its platform",
+ "cores": {
+  "gdprguardian_core-1.0.0-cp311-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": {
+   "sha256": "aaefc943a32a58425f7862b29e55aa4282c268a5aa9da3b1775a12eeeab19ffe",
+   "contract": 5
+  },
+  "gdprguardian_core-1.0.0-cp311-abi3-win_amd64.whl": {
+   "sha256": "9bd57802c7804c184708065aea0f59cc10a3278609351f99cae331b59711c46d",
+   "contract": 5
+  }
+ }
+}

@@ -1,0 +1,39 @@
+[package]
+name = "gdprguardian-core"
+version = "1.0.0"
+edition = "2021"
+license = "MIT"
+description = "Noyau Rust de Gardien RGPD : mots-clés, motifs, clés de contrôle / Rust core of GDPR Guardian"
+authors = ["Guillaume CLEMENT - Flow Line Intégration"]
+readme = "README.md"
+publish = false
+
+[lib]
+name = "gdprguardian_core"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+pyo3 = { version = "0.30", features = ["extension-module", "abi3-py311"] }
+# Moteur du crate `regex` (mêmes réglages), pour chercher dans une plage en gardant le contexte / `regex`'s
+# engine (same settings), for searching a range while keeping the surrounding context. MIT OR Apache-2.0.
+regex-automata = "0.4.18"
+regex-syntax = "0.8.11"
+aho-corasick = "1.1"
+sha2 = "0.10"
+sha3 = "0.10"
+# Portée irréversible : empreintes BLAKE2b à clé, clé tirée par l'OS et effacée à la fermeture.
+# Irreversible scope: keyed BLAKE2b digests, OS-drawn key wiped on close.
+blake2 = { version = "0.11", default-features = false, features = ["zeroize"] }
+getrandom = "0.4"
+zeroize = "1.8"
+# Propagation : une recherche SIMD par forme sur les textes courants / one SIMD search per form.
+memchr = "2.7"
+# Classeurs xlsx : décompression en flux (zlib-rs, licence Zlib) et CRC des parties.
+# xlsx workbooks: streamed inflation (zlib-rs, Zlib licence) and part CRCs. MIT OR Apache-2.0.
+flate2 = { version = "1.1", default-features = false, features = ["zlib-rs"] }
+crc32fast = "1.4"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1

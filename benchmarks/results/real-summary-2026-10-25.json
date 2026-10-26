@@ -1,0 +1,2441 @@
+{
+  "date": "2026-10-25",
+  "engine": {
+    "package": "gdprguardian",
+    "version": "1.0.0",
+    "native_core": true,
+    "python": "3.12.11",
+    "platform": "Windows 11",
+    "machine": "AMD64"
+  },
+  "corpora": {
+    "boamp_fr": {
+      "name": "boamp_fr",
+      "variant": null,
+      "title": "BOAMP, public procurement notices 2022-2023 (IDENTITE schema)",
+      "language": "fr",
+      "licence": "Licence Ouverte / Open Licence (Etalab), DILA",
+      "real_text": true,
+      "real_text_note": "yes (values and free text are real; 'Label : value' layout rendered by us)",
+      "gold_type": "exact by construction: e-mail, phone, fax and street address fields of every party block; contact person names extracted from the CONTACT/CORRESPONDANT fields by a rule (civility and role removed)",
+      "gold_complete": true,
+      "negative_control": false,
+      "countries": "FR",
+      "profile": "standard",
+      "documents": 3000,
+      "mentions_personal": 24404,
+      "mentions_kept": 35133,
+      "chars": 18224002,
+      "metrics": {
+        "mention_recall": 0.845271267005409,
+        "mention_recall_at80": 0.8846500573676447,
+        "char_recall": 0.8903214998154083,
+        "precision": 0.8087207114420963,
+        "over_masking": 0.005410473517748986,
+        "doc_leak_rate": 0.5383008356545961,
+        "doc_literal_leak_rate": 0.11942896935933148,
+        "mention_literal_leak_rate": 0.031559963931469794,
+        "kept_touched_rate": 0.285543506105371,
+        "detections_per_10k_chars": 24.36457151398469,
+        "docs_with_detection": 0.9973333333333333,
+        "recall_PERSON": 0.8845598845598845,
+        "recall_ADDRESS": 0.6938754503345342,
+        "recall_EMAIL": 0.9993084370677732,
+        "recall_PHONE": 0.8940289683712681
+      },
+      "intervals_95": {
+        "mention_recall": [
+          0.8313,
+          0.8577
+        ],
+        "mention_recall_at80": [
+          0.8722,
+          0.8953
+        ],
+        "char_recall": [
+          0.88,
+          0.9
+        ],
+        "precision": [
+          0.7909,
+          0.8245
+        ],
+        "over_masking": [
+          0.0047,
+          0.0063
+        ],
+        "doc_leak_rate": [
+          0.5199,
+          0.5571
+        ],
+        "doc_literal_leak_rate": [
+          0.1072,
+          0.1316
+        ],
+        "mention_literal_leak_rate": [
+          0.0269,
+          0.0363
+        ],
+        "kept_touched_rate": [
+          0.2705,
+          0.2997
+        ],
+        "detections_per_10k_chars": [
+          23.3866,
+          25.4329
+        ],
+        "docs_with_detection": [
+          0.9953,
+          0.999
+        ],
+        "recall_PERSON": [
+          0.8535,
+          0.9123
+        ],
+        "recall_ADDRESS": [
+          0.6694,
+          0.7166
+        ],
+        "recall_EMAIL": [
+          0.9987,
+          0.9999
+        ],
+        "recall_PHONE": [
+          0.8789,
+          0.9096
+        ]
+      },
+      "kept_families": {
+        "DATE": {
+          "mentions": 13093,
+          "touched": 0,
+          "touched_rate": 0.0
+        },
+        "LOCATION": {
+          "mentions": 5399,
+          "touched": 2725,
+          "touched_rate": 0.5047230968697907
+        },
+        "ORG": {
+          "mentions": 14439,
+          "touched": 7305,
+          "touched_rate": 0.5059214627051735
+        },
+        "ORG_ID": {
+          "mentions": 2202,
+          "touched": 2,
+          "touched_rate": 0.0009082652134423251
+        }
+      },
+      "review": {
+        "summary": "Gold reviewed by hand on two random samples of 50 notices (seeds 20261025 and 20261026). The second sample was drawn after the contact-parsing fixes and is the estimate for the gold used here. Lines of codes, amounts, criteria and titles were hidden in the second review.",
+        "sample_1_before_fixes": "seed 20261025: 9 of 50 documents with a personal-gold error; 15 errors for about 481 personal mentions (3.1%): 12 missing (contact names written with a role or an e-mail, a lawyer awardee labelled as an organisation, street addresses typed inside a name or ID field), 2 wrong labels (a postcode-only line labelled as a street address), 1 boundary (a service name inside the address field). Fixed: contact parser (civilities, roles, several persons, e-mails and phones inside the field), awardee with a civility labelled PERSON, house-number rule for addresses, address typed in the ID field.",
+        "sample_2_after_fixes": "seed 20261026: 6 of 50 documents with an error; 6 errors for 287 personal mentions (2.1%, 95% Wilson interval 1.0-4.5%): 4 missing (a name after 'Monsieur le Président', a sole-trader awardee written 'Surname Given-name' without civility and labelled ORG, two street addresses typed in the city field or glued to 'Hôtel de Ville'), 1 wrong (a tunnel name with a department number labelled as a street address), 1 boundary (unit names inside the address field). Not fixed, to keep this sample an unbiased estimate.",
+        "documents_reviewed": 100,
+        "gold_error_rate_documents": "6/50 (final), 9/50 (before fixes)",
+        "gold_error_rate_mentions": "6/287 (final), 15/481 (before fixes)"
+      },
+      "reproduce": [
+        "python tools/corpus/build_boamp.py --cache DIR --per-month 125",
+        "python tools/corpus/evaluate_real.py --cache DIR --corpora boamp_fr"
+      ],
+      "report": "benchmarks/results/real-boamp-fr-2026-10-25.md"
+    },
+    "bodacc_fr": {
+      "name": "bodacc_fr",
+      "variant": null,
+      "title": "BODACC, commercial announcements naming natural persons",
+      "language": "fr",
+      "licence": "Licence Ouverte / Open Licence (Etalab), DILA",
+      "real_text": true,
+      "real_text_note": "yes (record values and free text are real; line layout rendered by us after bodacc.fr)",
+      "gold_type": "exact by construction: values of the structured fields (surname, given names, address, RCS/RM number) are rendered at known positions; exact repeats of a person's name elsewhere in the notice are added; owner addresses in the fixed 'Adresse de l'ancien/du nouveau propriétaire :' phrase are added",
+      "gold_complete": true,
+      "negative_control": false,
+      "countries": "FR",
+      "profile": "standard",
+      "documents": 2693,
+      "mentions_personal": 14207,
+      "mentions_kept": 9110,
+      "chars": 2163537,
+      "metrics": {
+        "mention_recall": 0.789258816076582,
+        "mention_recall_at80": 0.7960160484268318,
+        "char_recall": 0.8520618947961961,
+        "precision": 0.9007233571598907,
+        "over_masking": 0.014012430482730777,
+        "doc_leak_rate": 0.9264760490159674,
+        "doc_literal_leak_rate": 0.9082807278128481,
+        "mention_literal_leak_rate": 0.18727516399802496,
+        "kept_touched_rate": 0.007135016465422613,
+        "detections_per_10k_chars": 70.06582277076842,
+        "docs_with_detection": 1.0,
+        "recall_PERSON": 0.9814390467461045,
+        "recall_ADDRESS": 0.8911806543385491,
+        "recall_ID": 0.052868391451068614
+      },
+      "intervals_95": {
+        "mention_recall": [
+          0.7854,
+          0.7934
+        ],
+        "mention_recall_at80": [
+          0.7924,
+          0.7998
+        ],
+        "char_recall": [
+          0.8489,
+          0.8553
+        ],
+        "precision": [
+          0.8963,
+          0.9052
+        ],
+        "over_masking": [
+          0.0132,
+          0.0148
+        ],
+        "doc_leak_rate": [
+          0.9164,
+          0.9361
+        ],
+        "doc_literal_leak_rate": [
+          0.8975,
+          0.9187
+        ],
+        "mention_literal_leak_rate": [
+          0.1843,
+          0.1904
+        ],
+        "kept_touched_rate": [
+          0.005,
+          0.0094
+        ],
+        "detections_per_10k_chars": [
+          68.8196,
+          71.2919
+        ],
+        "docs_with_detection": [
+          1.0,
+          1.0
+        ],
+        "recall_PERSON": [
+          0.978,
+          0.9847
+        ],
+        "recall_ADDRESS": [
+          0.8802,
+          0.9028
+        ],
+        "recall_ID": [
+          0.0444,
+          0.0617
+        ]
+      },
+      "kept_families": {
+        "DATE": {
+          "mentions": 3096,
+          "touched": 0,
+          "touched_rate": 0.0
+        },
+        "LOCATION": {
+          "mentions": 2592,
+          "touched": 25,
+          "touched_rate": 0.009645061728395061
+        },
+        "ORG": {
+          "mentions": 2769,
+          "touched": 39,
+          "touched_rate": 0.014084507042253521
+        },
+        "ORG_ID": {
+          "mentions": 74,
+          "touched": 1,
+          "touched_rate": 0.013513513513513514
+        },
+        "OTHER": {
+          "mentions": 579,
+          "touched": 0,
+          "touched_rate": 0.0
+        }
+      },
+      "review": {
+        "summary": "Gold reviewed by hand on two random samples of 50 announcements (spotcheck_real.py, seeds 20261025 and 20261026). The first review found errors that were fixed by rule; the second, fresh sample measures the gold used here.",
+        "sample_1_before_fixes": "seed 20261025: 8 of 50 documents with a personal-gold error; 8 errors for about 263 personal mentions (3.0%): 2 boundaries ('(EI)' marker inside the name span), 6 names written inside a trade name and missing from the gold. Fixed: '(EI)' excluded, names and given names searched inside trade names.",
+        "sample_2_after_fixes": "seed 20261026: 0 of 50 documents with an error in the scored zone (0 of 274 personal mentions; 95% Wilson upper bound 1.4%). One owner address written 'Adresse ancien propriétaire' (no 'de l'') was missed in free text (ignored zone, outside precision); the phrase rule was widened afterwards.",
+        "documents_reviewed": 100,
+        "gold_error_rate_documents": "0/50 (final), 8/50 (before fixes)",
+        "gold_error_rate_mentions": "0/274 (final), 8/263 (before fixes)"
+      },
+      "reproduce": [
+        "python tools/corpus/build_bodacc.py --cache DIR --per-family 500",
+        "python tools/corpus/evaluate_real.py --cache DIR --corpora bodacc_fr"
+      ],
+      "report": "benchmarks/results/real-bodacc-fr-2026-10-25.md"
+    },
+    "europeana_fr": {
+      "name": "europeana_fr",
+      "variant": null,
+      "title": "Europeana Newspapers NER, French (BnF), historical OCR press",
+      "language": "fr",
+      "licence": "CC0 1.0",
+      "real_text": true,
+      "real_text_note": "yes (noisy 19th-20th c. OCR)",
+      "gold_type": "manual (PER, LOC, ORG, IO tags)",
+      "gold_complete": true,
+      "negative_control": false,
+      "countries": "FR",
+      "profile": "standard",
+      "documents": 515,
+      "mentions_personal": 4272,
+      "mentions_kept": 5571,
+      "chars": 1005936,
+      "metrics": {
+        "mention_recall": 0.7144194756554307,
+        "mention_recall_at80": 0.7172284644194756,
+        "char_recall": 0.7476771929824562,
+        "precision": 0.7661508370246792,
+        "over_masking": 0.004605798274040709,
+        "doc_leak_rate": 0.750561797752809,
+        "doc_literal_leak_rate": 0.6921348314606741,
+        "mention_literal_leak_rate": 0.2525371725277319,
+        "kept_touched_rate": 0.09441751929635613,
+        "detections_per_10k_chars": 39.42596745717422,
+        "docs_with_detection": 0.9048543689320389,
+        "recall_PERSON": 0.7144194756554307
+      },
+      "intervals_95": {
+        "mention_recall": [
+          0.687,
+          0.7381
+        ],
+        "mention_recall_at80": [
+          0.6904,
+          0.741
+        ],
+        "char_recall": [
+          0.7214,
+          0.7713
+        ],
+        "precision": [
+          0.7388,
+          0.7932
+        ],
+        "over_masking": [
+          0.0039,
+          0.0053
+        ],
+        "doc_leak_rate": [
+          0.7117,
+          0.7915
+        ],
+        "doc_literal_leak_rate": [
+          0.6486,
+          0.7363
+        ],
+        "mention_literal_leak_rate": [
+          0.2296,
+          0.2802
+        ],
+        "kept_touched_rate": [
+          0.0828,
+          0.1059
+        ],
+        "detections_per_10k_chars": [
+          36.3884,
+          42.7178
+        ],
+        "docs_with_detection": [
+          0.8796,
+          0.9282
+        ],
+        "recall_PERSON": [
+          0.687,
+          0.7381
+        ]
+      },
+      "kept_families": {
+        "LOCATION": {
+          "mentions": 4228,
+          "touched": 384,
+          "touched_rate": 0.09082308420056764
+        },
+        "ORG": {
+          "mentions": 1343,
+          "touched": 142,
+          "touched_rate": 0.10573343261355175
+        }
+      },
+      "review": null,
+      "reproduce": [
+        "python tools/corpus/fetch_real.py --cache DIR --only europeana_fr",
+        "python tools/corpus/evaluate_real.py --cache DIR --corpora europeana_fr"
+      ],
+      "report": "benchmarks/results/real-europeana-fr-2026-10-25.md"
+    },
+    "german_ler_de": {
+      "name": "german_ler_de",
+      "variant": null,
+      "title": "German LER, federal court decisions (test split)",
+      "language": "de",
+      "licence": "CC BY 4.0",
+      "real_text": true,
+      "real_text_note": "yes (court decisions, tokenised)",
+      "gold_type": "manual (19 fine classes: person, judge, lawyer, street, city, country, organisation, court, law...)",
+      "gold_complete": true,
+      "negative_control": false,
+      "countries": "DE",
+      "profile": "standard",
+      "documents": 334,
+      "mentions_personal": 337,
+      "mentions_kept": 4979,
+      "chars": 1365559,
+      "metrics": {
+        "mention_recall": 0.0,
+        "mention_recall_at80": 0.0,
+        "char_recall": 0.0,
+        "precision": 0.0,
+        "over_masking": 0.0,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 0.6733668341708543,
+        "mention_literal_leak_rate": 1.0,
+        "kept_touched_rate": 0.0002008435428800964,
+        "detections_per_10k_chars": 0.007323008379718489,
+        "docs_with_detection": 0.0029940119760479044,
+        "recall_PERSON": 0.0,
+        "recall_ADDRESS": 0.0
+      },
+      "intervals_95": {
+        "mention_recall": [
+          0.0,
+          0.0
+        ],
+        "mention_recall_at80": [
+          0.0,
+          0.0
+        ],
+        "char_recall": [
+          0.0,
+          0.0
+        ],
+        "precision": [
+          0.0,
+          0.0
+        ],
+        "over_masking": [
+          0.0,
+          0.0
+        ],
+        "doc_leak_rate": [
+          1.0,
+          1.0
+        ],
+        "doc_literal_leak_rate": [
+          0.6073,
+          0.7333
+        ],
+        "mention_literal_leak_rate": [
+          1.0,
+          1.0
+        ],
+        "kept_touched_rate": [
+          0.0,
+          0.0006
+        ],
+        "detections_per_10k_chars": [
+          0.0,
+          0.0223
+        ],
+        "docs_with_detection": [
+          0.0,
+          0.009
+        ],
+        "recall_PERSON": [
+          0.0,
+          0.0
+        ],
+        "recall_ADDRESS": [
+          0.0,
+          0.0
+        ]
+      },
+      "kept_families": {
+        "LOCATION": {
+          "mentions": 233,
+          "touched": 0,
+          "touched_rate": 0.0
+        },
+        "ORG": {
+          "mentions": 795,
+          "touched": 0,
+          "touched_rate": 0.0
+        },
+        "OTHER": {
+          "mentions": 3951,
+          "touched": 1,
+          "touched_rate": 0.0002531004808909137
+        }
+      },
+      "review": null,
+      "reproduce": [
+        "python tools/corpus/fetch_real.py --cache DIR --only german_ler_de",
+        "python tools/corpus/evaluate_real.py --cache DIR --corpora german_ler_de"
+      ],
+      "report": "benchmarks/results/real-german-ler-de-2026-10-25.md"
+    },
+    "german_ler_de@with-fr": {
+      "name": "german_ler_de",
+      "variant": "with-fr",
+      "title": "German LER, federal court decisions (test split)",
+      "language": "de",
+      "licence": "CC BY 4.0",
+      "real_text": true,
+      "real_text_note": "yes (court decisions, tokenised)",
+      "gold_type": "manual (19 fine classes: person, judge, lawyer, street, city, country, organisation, court, law...)",
+      "gold_complete": true,
+      "negative_control": false,
+      "countries": "DE,FR",
+      "profile": "standard",
+      "documents": 334,
+      "mentions_personal": 337,
+      "mentions_kept": 4979,
+      "chars": 1365559,
+      "metrics": {
+        "mention_recall": 0.22255192878338279,
+        "mention_recall_at80": 0.22551928783382788,
+        "char_recall": 0.3191489361702128,
+        "precision": 0.05383153894870171,
+        "over_masking": 0.005917006280147451,
+        "doc_leak_rate": 0.8592964824120602,
+        "doc_literal_leak_rate": 0.48743718592964824,
+        "mention_literal_leak_rate": 0.6512820512820513,
+        "kept_touched_rate": 0.06406909017875076,
+        "detections_per_10k_chars": 7.908849050095968,
+        "docs_with_detection": 0.9281437125748503,
+        "recall_PERSON": 0.2329192546583851,
+        "recall_ADDRESS": 0.0
+      },
+      "intervals_95": {
+        "mention_recall": [
+          0.1759,
+          0.2667
+        ],
+        "mention_recall_at80": [
+          0.1789,
+          0.2708
+        ],
+        "char_recall": [
+          0.2492,
+          0.3877
+        ],
+        "precision": [
+          0.04,
+          0.0701
+        ],
+        "over_masking": [
+          0.0053,
+          0.0066
+        ],
+        "doc_leak_rate": [
+          0.8111,
+          0.9029
+        ],
+        "doc_literal_leak_rate": [
+          0.4145,
+          0.5561
+        ],
+        "mention_literal_leak_rate": [
+          0.5813,
+          0.7222
+        ],
+        "kept_touched_rate": [
+          0.0555,
+          0.0726
+        ],
+        "detections_per_10k_chars": [
+          7.3937,
+          8.4746
+        ],
+        "docs_with_detection": [
+          0.8981,
+          0.9551
+        ],
+        "recall_PERSON": [
+          0.1829,
+          0.2786
+        ],
+        "recall_ADDRESS": [
+          0.0,
+          0.0
+        ]
+      },
+      "kept_families": {
+        "LOCATION": {
+          "mentions": 233,
+          "touched": 10,
+          "touched_rate": 0.04291845493562232
+        },
+        "ORG": {
+          "mentions": 795,
+          "touched": 20,
+          "touched_rate": 0.025157232704402517
+        },
+        "OTHER": {
+          "mentions": 3951,
+          "touched": 289,
+          "touched_rate": 0.07314603897747406
+        }
+      },
+      "review": null,
+      "reproduce": [
+        "python tools/corpus/fetch_real.py --cache DIR --only german_ler_de",
+        "python tools/corpus/evaluate_real.py --cache DIR --corpora german_ler_de --countries DE,FR --tag with-fr"
+      ],
+      "report": "benchmarks/results/real-german-ler-de-with-fr-2026-10-25.md"
+    },
+    "hipe_newseye_fr": {
+      "name": "hipe_newseye_fr",
+      "variant": null,
+      "title": "HIPE-2022 NewsEye French, historical newspapers",
+      "language": "fr",
+      "licence": "CC BY 4.0",
+      "real_text": true,
+      "real_text_note": "yes (historical OCR)",
+      "gold_type": "manual (pers, loc, org, time, prod; coarse literal layer)",
+      "gold_complete": true,
+      "negative_control": false,
+      "countries": "FR",
+      "profile": "standard",
+      "documents": 140,
+      "mentions_personal": 6664,
+      "mentions_kept": 8339,
+      "chars": 1574597,
+      "metrics": {
+        "mention_recall": 0.45558223289315725,
+        "mention_recall_at80": 0.4714885954381753,
+        "char_recall": 0.4885420343281436,
+        "precision": 0.7427901337626458,
+        "over_masking": 0.005194265917738991,
+        "doc_leak_rate": 0.9672131147540983,
+        "doc_literal_leak_rate": 0.8442622950819673,
+        "mention_literal_leak_rate": 0.25388127853881276,
+        "kept_touched_rate": 0.09341647679577887,
+        "detections_per_10k_chars": 36.03461711155299,
+        "docs_with_detection": 0.9357142857142857,
+        "recall_PERSON": 0.45558223289315725
+      },
+      "intervals_95": {
+        "mention_recall": [
+          0.4361,
+          0.481
+        ],
+        "mention_recall_at80": [
+          0.4505,
+          0.4946
+        ],
+        "char_recall": [
+          0.4708,
+          0.5066
+        ],
+        "precision": [
+          0.7002,
+          0.7855
+        ],
+        "over_masking": [
+          0.004,
+          0.0062
+        ],
+        "doc_leak_rate": [
+          0.9339,
+          0.9921
+        ],
+        "doc_literal_leak_rate": [
+          0.7731,
+          0.9052
+        ],
+        "mention_literal_leak_rate": [
+          0.2203,
+          0.282
+        ],
+        "kept_touched_rate": [
+          0.0739,
+          0.1127
+        ],
+        "detections_per_10k_chars": [
+          31.1038,
+          39.8278
+        ],
+        "docs_with_detection": [
+          0.8929,
+          0.9714
+        ],
+        "recall_PERSON": [
+          0.4361,
+          0.481
+        ]
+      },
+      "kept_families": {
+        "LOCATION": {
+          "mentions": 6099,
+          "touched": 585,
+          "touched_rate": 0.09591736350221347
+        },
+        "ORG": {
+          "mentions": 1975,
+          "touched": 179,
+          "touched_rate": 0.09063291139240506
+        },
+        "OTHER": {
+          "mentions": 265,
+          "touched": 15,
+          "touched_rate": 0.05660377358490566
+        }
+      },
+      "review": null,
+      "reproduce": [
+        "python tools/corpus/fetch_real.py --cache DIR --only hipe_newseye_fr",
+        "python tools/corpus/evaluate_real.py --cache DIR --corpora hipe_newseye_fr"
+      ],
+      "report": "benchmarks/results/real-hipe-newseye-fr-2026-10-25.md"
+    },
+    "judilibre_fr": {
+      "name": "judilibre_fr",
+      "variant": null,
+      "title": "Judilibre (Cour de cassation, cours d'appel, tribunaux judiciaires), negative control",
+      "language": "fr",
+      "licence": "Licence Ouverte 2.0 (etalab-2.0)",
+      "real_text": true,
+      "real_text_note": "yes (decisions pseudonymised by the courts before publication)",
+      "gold_type": "none: parties are already replaced by '[X]'-style placeholders; detections are reviewed by hand",
+      "gold_complete": false,
+      "negative_control": true,
+      "countries": "FR",
+      "profile": "standard",
+      "documents": 300,
+      "mentions_personal": 0,
+      "mentions_kept": 0,
+      "chars": 3296812,
+      "metrics": {
+        "mention_recall": null,
+        "mention_recall_at80": null,
+        "char_recall": null,
+        "precision": null,
+        "over_masking": null,
+        "doc_leak_rate": null,
+        "doc_literal_leak_rate": null,
+        "mention_literal_leak_rate": null,
+        "kept_touched_rate": null,
+        "detections_per_10k_chars": 12.59701796766088,
+        "docs_with_detection": 1.0
+      },
+      "intervals_95": {
+        "detections_per_10k_chars": [
+          11.2846,
+          14.1699
+        ],
+        "docs_with_detection": [
+          1.0,
+          1.0
+        ]
+      },
+      "kept_families": {},
+      "review": {
+        "summary": "No gold: 120 masked spans drawn at random over the 300 decisions (4,153 masked spans in all; spotcheck_real.py --detections --detection-contexts 120, seed 20261025) and classified by hand with their context.",
+        "residual_personal_data_correctly_masked": "82/120 (68.3%): 78 names of magistrates, court clerks and lawyers (left in clear by the court pseudonymisation), 3 birth dates of parties written 'né(e) le <date>' next to a pseudonymised name, 1 residence name next to a street address",
+        "false_positives": "38/120 (31.7%, 95% Wilson interval 24.0-40.4%): 27 company, brand or law-firm names masked as a person or organisation (international brands, insurers, SCI and SAS names, 3 law firms), 6 capitalised common words taken for a name ('doit' twice, 'Faisant', 'Premier', 'Constitué', 'de Chambre'), 2 restaurant name mentions, 1 grape variety, 1 hiring date taken for a birth date, 1 legal reference ('R. 3211-18, R. 3211') masked as an address. Recounted by an independent reviewer: same totals (82/38); two law-firm names made of lawyers' surnames are counted here as false positives, while SCP names are counted as residual data, a debatable boundary worth +-2 spans",
+        "placeholders": "No court placeholder ('[E]', '[Adresse 1]', '[Localité 4]') was masked in the 120 drawn spans"
+      },
+      "reproduce": [
+        "python tools/corpus/fetch_real.py --cache DIR --only judilibre_fr",
+        "python tools/corpus/evaluate_real.py --cache DIR --corpora judilibre_fr"
+      ],
+      "report": "benchmarks/results/real-judilibre-fr-2026-10-25.md"
+    },
+    "mapa_de": {
+      "name": "mapa_de",
+      "variant": null,
+      "title": "MAPA EUR-Lex legal NER (de)",
+      "language": "de",
+      "licence": "CC BY 4.0",
+      "real_text": true,
+      "real_text_note": "yes (EU legal texts and judgments, tokenised)",
+      "gold_type": "manual, single annotator",
+      "gold_complete": true,
+      "negative_control": false,
+      "countries": "DE",
+      "profile": "standard",
+      "documents": 12,
+      "mentions_personal": 337,
+      "mentions_kept": 1083,
+      "chars": 450315,
+      "metrics": {
+        "mention_recall": 0.0,
+        "mention_recall_at80": 0.0,
+        "char_recall": 0.0,
+        "precision": null,
+        "over_masking": 0.0,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 0.8888888888888888,
+        "mention_literal_leak_rate": 1.0,
+        "kept_touched_rate": 0.0,
+        "detections_per_10k_chars": 0.0,
+        "docs_with_detection": 0.0,
+        "recall_PERSON": 0.0,
+        "recall_ADDRESS": 0.0
+      },
+      "intervals_95": {
+        "mention_recall": [
+          0.0,
+          0.0
+        ],
+        "mention_recall_at80": [
+          0.0,
+          0.0
+        ],
+        "char_recall": [
+          0.0,
+          0.0
+        ],
+        "over_masking": [
+          0.0,
+          0.0
+        ],
+        "doc_leak_rate": [
+          1.0,
+          1.0
+        ],
+        "doc_literal_leak_rate": [
+          0.6667,
+          1.0
+        ],
+        "mention_literal_leak_rate": [
+          1.0,
+          1.0
+        ],
+        "kept_touched_rate": [
+          0.0,
+          0.0
+        ],
+        "detections_per_10k_chars": [
+          0.0,
+          0.0
+        ],
+        "docs_with_detection": [
+          0.0,
+          0.0
+        ],
+        "recall_PERSON": [
+          0.0,
+          0.0
+        ],
+        "recall_ADDRESS": [
+          0.0,
+          0.0
+        ]
+      },
+      "kept_families": {
+        "DATE": {
+          "mentions": 467,
+          "touched": 0,
+          "touched_rate": 0.0
+        },
+        "LOCATION": {
+          "mentions": 156,
+          "touched": 0,
+          "touched_rate": 0.0
+        },
+        "ORG": {
+          "mentions": 385,
+          "touched": 0,
+          "touched_rate": 0.0
+        },
+        "OTHER": {
+          "mentions": 75,
+          "touched": 0,
+          "touched_rate": 0.0
+        }
+      },
+      "review": null,
+      "reproduce": [
+        "python tools/corpus/fetch_real.py --cache DIR --only mapa_de",
+        "python tools/corpus/evaluate_real.py --cache DIR --corpora mapa_de"
+      ],
+      "report": "benchmarks/results/real-mapa-de-2026-10-25.md"
+    },
+    "mapa_de@with-fr": {
+      "name": "mapa_de",
+      "variant": "with-fr",
+      "title": "MAPA EUR-Lex legal NER (de)",
+      "language": "de",
+      "licence": "CC BY 4.0",
+      "real_text": true,
+      "real_text_note": "yes (EU legal texts and judgments, tokenised)",
+      "gold_type": "manual, single annotator",
+      "gold_complete": true,
+      "negative_control": false,
+      "countries": "DE,FR",
+      "profile": "standard",
+      "documents": 12,
+      "mentions_personal": 337,
+      "mentions_kept": 1083,
+      "chars": 450315,
+      "metrics": {
+        "mention_recall": 0.32047477744807124,
+        "mention_recall_at80": 0.34124629080118696,
+        "char_recall": 0.39463141025641024,
+        "precision": 0.14123888729566964,
+        "over_masking": 0.01518256124671592,
+        "doc_leak_rate": 0.8888888888888888,
+        "doc_literal_leak_rate": 0.7777777777777778,
+        "mention_literal_leak_rate": 0.5247148288973384,
+        "kept_touched_rate": 0.06001846722068329,
+        "detections_per_10k_chars": 23.361424780431477,
+        "docs_with_detection": 1.0,
+        "recall_PERSON": 0.32142857142857145,
+        "recall_ADDRESS": 0.0
+      },
+      "intervals_95": {
+        "mention_recall": [
+          0.2163,
+          0.4392
+        ],
+        "mention_recall_at80": [
+          0.257,
+          0.4561
+        ],
+        "char_recall": [
+          0.3268,
+          0.4867
+        ],
+        "precision": [
+          0.105,
+          0.175
+        ],
+        "over_masking": [
+          0.0112,
+          0.0202
+        ],
+        "doc_leak_rate": [
+          0.6667,
+          1.0
+        ],
+        "doc_literal_leak_rate": [
+          0.5,
+          1.0
+        ],
+        "mention_literal_leak_rate": [
+          0.3769,
+          0.6368
+        ],
+        "kept_touched_rate": [
+          0.034,
+          0.0925
+        ],
+        "detections_per_10k_chars": [
+          17.3851,
+          29.6402
+        ],
+        "docs_with_detection": [
+          1.0,
+          1.0
+        ],
+        "recall_PERSON": [
+          0.2178,
+          0.4392
+        ],
+        "recall_ADDRESS": [
+          0.0,
+          0.0
+        ]
+      },
+      "kept_families": {
+        "DATE": {
+          "mentions": 467,
+          "touched": 1,
+          "touched_rate": 0.0021413276231263384
+        },
+        "LOCATION": {
+          "mentions": 156,
+          "touched": 1,
+          "touched_rate": 0.00641025641025641
+        },
+        "ORG": {
+          "mentions": 385,
+          "touched": 16,
+          "touched_rate": 0.04155844155844156
+        },
+        "OTHER": {
+          "mentions": 75,
+          "touched": 47,
+          "touched_rate": 0.6266666666666667
+        }
+      },
+      "review": null,
+      "reproduce": [
+        "python tools/corpus/fetch_real.py --cache DIR --only mapa_de",
+        "python tools/corpus/evaluate_real.py --cache DIR --corpora mapa_de --countries DE,FR --tag with-fr"
+      ],
+      "report": "benchmarks/results/real-mapa-de-with-fr-2026-10-25.md"
+    },
+    "mapa_es": {
+      "name": "mapa_es",
+      "variant": null,
+      "title": "MAPA EUR-Lex legal NER (es)",
+      "language": "es",
+      "licence": "CC BY 4.0",
+      "real_text": true,
+      "real_text_note": "yes (EU legal texts and judgments, tokenised)",
+      "gold_type": "manual, single annotator",
+      "gold_complete": true,
+      "negative_control": false,
+      "countries": "ES",
+      "profile": "standard",
+      "documents": 9,
+      "mentions_personal": 271,
+      "mentions_kept": 787,
+      "chars": 343692,
+      "metrics": {
+        "mention_recall": 0.0,
+        "mention_recall_at80": 0.0,
+        "char_recall": 0.0,
+        "precision": null,
+        "over_masking": 0.0,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "mention_literal_leak_rate": 1.0,
+        "kept_touched_rate": 0.0,
+        "detections_per_10k_chars": 0.0,
+        "docs_with_detection": 0.0,
+        "recall_PERSON": 0.0
+      },
+      "intervals_95": {
+        "mention_recall": [
+          0.0,
+          0.0
+        ],
+        "mention_recall_at80": [
+          0.0,
+          0.0
+        ],
+        "char_recall": [
+          0.0,
+          0.0
+        ],
+        "over_masking": [
+          0.0,
+          0.0
+        ],
+        "doc_leak_rate": [
+          1.0,
+          1.0
+        ],
+        "doc_literal_leak_rate": [
+          1.0,
+          1.0
+        ],
+        "mention_literal_leak_rate": [
+          1.0,
+          1.0
+        ],
+        "kept_touched_rate": [
+          0.0,
+          0.0
+        ],
+        "detections_per_10k_chars": [
+          0.0,
+          0.0
+        ],
+        "docs_with_detection": [
+          0.0,
+          0.0
+        ],
+        "recall_PERSON": [
+          0.0,
+          0.0
+        ]
+      },
+      "kept_families": {
+        "DATE": {
+          "mentions": 460,
+          "touched": 0,
+          "touched_rate": 0.0
+        },
+        "LOCATION": {
+          "mentions": 113,
+          "touched": 0,
+          "touched_rate": 0.0
+        },
+        "ORG": {
+          "mentions": 156,
+          "touched": 0,
+          "touched_rate": 0.0
+        },
+        "OTHER": {
+          "mentions": 58,
+          "touched": 0,
+          "touched_rate": 0.0
+        }
+      },
+      "review": null,
+      "reproduce": [
+        "python tools/corpus/fetch_real.py --cache DIR --only mapa_es",
+        "python tools/corpus/evaluate_real.py --cache DIR --corpora mapa_es"
+      ],
+      "report": "benchmarks/results/real-mapa-es-2026-10-25.md"
+    },
+    "mapa_es@with-fr": {
+      "name": "mapa_es",
+      "variant": "with-fr",
+      "title": "MAPA EUR-Lex legal NER (es)",
+      "language": "es",
+      "licence": "CC BY 4.0",
+      "real_text": true,
+      "real_text_note": "yes (EU legal texts and judgments, tokenised)",
+      "gold_type": "manual, single annotator",
+      "gold_complete": true,
+      "negative_control": false,
+      "countries": "ES,FR",
+      "profile": "standard",
+      "documents": 9,
+      "mentions_personal": 271,
+      "mentions_kept": 787,
+      "chars": 343692,
+      "metrics": {
+        "mention_recall": 0.3173431734317343,
+        "mention_recall_at80": 0.33948339483394835,
+        "char_recall": 0.4804270462633452,
+        "precision": 0.5491525423728814,
+        "over_masking": 0.0013482164376958303,
+        "doc_leak_rate": 0.8333333333333334,
+        "doc_literal_leak_rate": 0.8333333333333334,
+        "mention_literal_leak_rate": 0.5025125628140703,
+        "kept_touched_rate": 0.03939008894536213,
+        "detections_per_10k_chars": 5.208151484468652,
+        "docs_with_detection": 1.0,
+        "recall_PERSON": 0.3173431734317343
+      },
+      "intervals_95": {
+        "mention_recall": [
+          0.2372,
+          0.4447
+        ],
+        "mention_recall_at80": [
+          0.2584,
+          0.4447
+        ],
+        "char_recall": [
+          0.3345,
+          0.6035
+        ],
+        "precision": [
+          0.3447,
+          0.665
+        ],
+        "over_masking": [
+          0.0009,
+          0.0022
+        ],
+        "doc_leak_rate": [
+          0.5,
+          1.0
+        ],
+        "doc_literal_leak_rate": [
+          0.5,
+          1.0
+        ],
+        "mention_literal_leak_rate": [
+          0.3509,
+          0.609
+        ],
+        "kept_touched_rate": [
+          0.0258,
+          0.0574
+        ],
+        "detections_per_10k_chars": [
+          3.9042,
+          6.4175
+        ],
+        "docs_with_detection": [
+          1.0,
+          1.0
+        ],
+        "recall_PERSON": [
+          0.2372,
+          0.4447
+        ]
+      },
+      "kept_families": {
+        "DATE": {
+          "mentions": 460,
+          "touched": 0,
+          "touched_rate": 0.0
+        },
+        "LOCATION": {
+          "mentions": 113,
+          "touched": 2,
+          "touched_rate": 0.017699115044247787
+        },
+        "ORG": {
+          "mentions": 156,
+          "touched": 18,
+          "touched_rate": 0.11538461538461539
+        },
+        "OTHER": {
+          "mentions": 58,
+          "touched": 11,
+          "touched_rate": 0.1896551724137931
+        }
+      },
+      "review": null,
+      "reproduce": [
+        "python tools/corpus/fetch_real.py --cache DIR --only mapa_es",
+        "python tools/corpus/evaluate_real.py --cache DIR --corpora mapa_es --countries ES,FR --tag with-fr"
+      ],
+      "report": "benchmarks/results/real-mapa-es-with-fr-2026-10-25.md"
+    },
+    "mapa_fr": {
+      "name": "mapa_fr",
+      "variant": null,
+      "title": "MAPA EUR-Lex legal NER (fr)",
+      "language": "fr",
+      "licence": "CC BY 4.0",
+      "real_text": true,
+      "real_text_note": "yes (EU legal texts and judgments, tokenised)",
+      "gold_type": "manual, single annotator",
+      "gold_complete": true,
+      "negative_control": false,
+      "countries": "FR",
+      "profile": "standard",
+      "documents": 12,
+      "mentions_personal": 282,
+      "mentions_kept": 1161,
+      "chars": 453160,
+      "metrics": {
+        "mention_recall": 0.3475177304964539,
+        "mention_recall_at80": 0.375886524822695,
+        "char_recall": 0.435515873015873,
+        "precision": 0.4270428015564202,
+        "over_masking": 0.000279611426594794,
+        "doc_leak_rate": 0.8888888888888888,
+        "doc_literal_leak_rate": 0.8888888888888888,
+        "mention_literal_leak_rate": 0.5889830508474576,
+        "kept_touched_rate": 0.08440999138673558,
+        "detections_per_10k_chars": 5.119604554682673,
+        "docs_with_detection": 0.8333333333333334,
+        "recall_PERSON": 0.35,
+        "recall_ADDRESS": 0.0
+      },
+      "intervals_95": {
+        "mention_recall": [
+          0.2373,
+          0.446
+        ],
+        "mention_recall_at80": [
+          0.2597,
+          0.4769
+        ],
+        "char_recall": [
+          0.3303,
+          0.5184
+        ],
+        "precision": [
+          0.3218,
+          0.5337
+        ],
+        "over_masking": [
+          0.0001,
+          0.0006
+        ],
+        "doc_leak_rate": [
+          0.6667,
+          1.0
+        ],
+        "doc_literal_leak_rate": [
+          0.6667,
+          1.0
+        ],
+        "mention_literal_leak_rate": [
+          0.437,
+          0.6795
+        ],
+        "kept_touched_rate": [
+          0.0487,
+          0.1248
+        ],
+        "detections_per_10k_chars": [
+          3.6619,
+          6.7669
+        ],
+        "docs_with_detection": [
+          0.5833,
+          1.0
+        ],
+        "recall_PERSON": [
+          0.2379,
+          0.4483
+        ],
+        "recall_ADDRESS": [
+          0.0,
+          0.0
+        ]
+      },
+      "kept_families": {
+        "DATE": {
+          "mentions": 491,
+          "touched": 4,
+          "touched_rate": 0.008146639511201629
+        },
+        "LOCATION": {
+          "mentions": 201,
+          "touched": 2,
+          "touched_rate": 0.009950248756218905
+        },
+        "ORG": {
+          "mentions": 343,
+          "touched": 25,
+          "touched_rate": 0.0728862973760933
+        },
+        "OTHER": {
+          "mentions": 126,
+          "touched": 67,
+          "touched_rate": 0.5317460317460317
+        }
+      },
+      "review": null,
+      "reproduce": [
+        "python tools/corpus/fetch_real.py --cache DIR --only mapa_fr",
+        "python tools/corpus/evaluate_real.py --cache DIR --corpora mapa_fr"
+      ],
+      "report": "benchmarks/results/real-mapa-fr-2026-10-25.md"
+    },
+    "mapa_it": {
+      "name": "mapa_it",
+      "variant": null,
+      "title": "MAPA EUR-Lex legal NER (it)",
+      "language": "it",
+      "licence": "CC BY 4.0",
+      "real_text": true,
+      "real_text_note": "yes (EU legal texts and judgments, tokenised)",
+      "gold_type": "manual, single annotator",
+      "gold_complete": true,
+      "negative_control": false,
+      "countries": "IT",
+      "profile": "standard",
+      "documents": 12,
+      "mentions_personal": 110,
+      "mentions_kept": 805,
+      "chars": 458822,
+      "metrics": {
+        "mention_recall": 0.0,
+        "mention_recall_at80": 0.0,
+        "char_recall": 0.0,
+        "precision": null,
+        "over_masking": 0.0,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "mention_literal_leak_rate": 1.0,
+        "kept_touched_rate": 0.0,
+        "detections_per_10k_chars": 0.0,
+        "docs_with_detection": 0.0,
+        "recall_PERSON": 0.0,
+        "recall_ADDRESS": 0.0
+      },
+      "intervals_95": {
+        "mention_recall": [
+          0.0,
+          0.0
+        ],
+        "mention_recall_at80": [
+          0.0,
+          0.0
+        ],
+        "char_recall": [
+          0.0,
+          0.0
+        ],
+        "over_masking": [
+          0.0,
+          0.0
+        ],
+        "doc_leak_rate": [
+          1.0,
+          1.0
+        ],
+        "doc_literal_leak_rate": [
+          1.0,
+          1.0
+        ],
+        "mention_literal_leak_rate": [
+          1.0,
+          1.0
+        ],
+        "kept_touched_rate": [
+          0.0,
+          0.0
+        ],
+        "detections_per_10k_chars": [
+          0.0,
+          0.0
+        ],
+        "docs_with_detection": [
+          0.0,
+          0.0
+        ],
+        "recall_PERSON": [
+          0.0,
+          0.0
+        ],
+        "recall_ADDRESS": [
+          0.0,
+          0.0
+        ]
+      },
+      "kept_families": {
+        "DATE": {
+          "mentions": 470,
+          "touched": 0,
+          "touched_rate": 0.0
+        },
+        "LOCATION": {
+          "mentions": 163,
+          "touched": 0,
+          "touched_rate": 0.0
+        },
+        "ORG": {
+          "mentions": 116,
+          "touched": 0,
+          "touched_rate": 0.0
+        },
+        "OTHER": {
+          "mentions": 56,
+          "touched": 0,
+          "touched_rate": 0.0
+        }
+      },
+      "review": null,
+      "reproduce": [
+        "python tools/corpus/fetch_real.py --cache DIR --only mapa_it",
+        "python tools/corpus/evaluate_real.py --cache DIR --corpora mapa_it"
+      ],
+      "report": "benchmarks/results/real-mapa-it-2026-10-25.md"
+    },
+    "mapa_it@with-fr": {
+      "name": "mapa_it",
+      "variant": "with-fr",
+      "title": "MAPA EUR-Lex legal NER (it)",
+      "language": "it",
+      "licence": "CC BY 4.0",
+      "real_text": true,
+      "real_text_note": "yes (EU legal texts and judgments, tokenised)",
+      "gold_type": "manual, single annotator",
+      "gold_complete": true,
+      "negative_control": false,
+      "countries": "IT,FR",
+      "profile": "standard",
+      "documents": 12,
+      "mentions_personal": 110,
+      "mentions_kept": 805,
+      "chars": 458822,
+      "metrics": {
+        "mention_recall": 0.38181818181818183,
+        "mention_recall_at80": 0.42727272727272725,
+        "char_recall": 0.5125786163522013,
+        "precision": 0.23537906137184114,
+        "over_masking": 0.004611377852171615,
+        "doc_leak_rate": 0.8888888888888888,
+        "doc_literal_leak_rate": 0.7777777777777778,
+        "mention_literal_leak_rate": 0.20652173913043478,
+        "kept_touched_rate": 0.0670807453416149,
+        "detections_per_10k_chars": 8.478233388983092,
+        "docs_with_detection": 1.0,
+        "recall_PERSON": 0.3853211009174312,
+        "recall_ADDRESS": 0.0
+      },
+      "intervals_95": {
+        "mention_recall": [
+          0.3048,
+          0.4822
+        ],
+        "mention_recall_at80": [
+          0.3272,
+          0.5636
+        ],
+        "char_recall": [
+          0.4378,
+          0.6816
+        ],
+        "precision": [
+          0.0979,
+          0.4122
+        ],
+        "over_masking": [
+          0.0031,
+          0.0064
+        ],
+        "doc_leak_rate": [
+          0.6667,
+          1.0
+        ],
+        "doc_literal_leak_rate": [
+          0.5,
+          1.0
+        ],
+        "mention_literal_leak_rate": [
+          0.15,
+          0.3396
+        ],
+        "kept_touched_rate": [
+          0.0323,
+          0.1101
+        ],
+        "detections_per_10k_chars": [
+          7.1349,
+          10.0174
+        ],
+        "docs_with_detection": [
+          1.0,
+          1.0
+        ],
+        "recall_PERSON": [
+          0.3143,
+          0.4849
+        ],
+        "recall_ADDRESS": [
+          0.0,
+          0.0
+        ]
+      },
+      "kept_families": {
+        "DATE": {
+          "mentions": 470,
+          "touched": 0,
+          "touched_rate": 0.0
+        },
+        "LOCATION": {
+          "mentions": 163,
+          "touched": 8,
+          "touched_rate": 0.049079754601226995
+        },
+        "ORG": {
+          "mentions": 116,
+          "touched": 3,
+          "touched_rate": 0.02586206896551724
+        },
+        "OTHER": {
+          "mentions": 56,
+          "touched": 43,
+          "touched_rate": 0.7678571428571429
+        }
+      },
+      "review": null,
+      "reproduce": [
+        "python tools/corpus/fetch_real.py --cache DIR --only mapa_it",
+        "python tools/corpus/evaluate_real.py --cache DIR --corpora mapa_it --countries IT,FR --tag with-fr"
+      ],
+      "report": "benchmarks/results/real-mapa-it-with-fr-2026-10-25.md"
+    },
+    "mapa_nl": {
+      "name": "mapa_nl",
+      "variant": null,
+      "title": "MAPA EUR-Lex legal NER (nl)",
+      "language": "nl",
+      "licence": "CC BY 4.0",
+      "real_text": true,
+      "real_text_note": "yes (EU legal texts and judgments, tokenised)",
+      "gold_type": "manual, single annotator",
+      "gold_complete": true,
+      "negative_control": false,
+      "countries": "NL",
+      "profile": "standard",
+      "documents": 12,
+      "mentions_personal": 363,
+      "mentions_kept": 805,
+      "chars": 451012,
+      "metrics": {
+        "mention_recall": 0.0,
+        "mention_recall_at80": 0.0,
+        "char_recall": 0.0,
+        "precision": 0.0,
+        "over_masking": 0.0,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 0.8888888888888888,
+        "mention_literal_leak_rate": 1.0,
+        "kept_touched_rate": 0.0012422360248447205,
+        "detections_per_10k_chars": 0.022172359050313516,
+        "docs_with_detection": 0.08333333333333333,
+        "recall_PERSON": 0.0
+      },
+      "intervals_95": {
+        "mention_recall": [
+          0.0,
+          0.0
+        ],
+        "mention_recall_at80": [
+          0.0,
+          0.0
+        ],
+        "char_recall": [
+          0.0,
+          0.0
+        ],
+        "precision": [
+          0.0,
+          0.0
+        ],
+        "over_masking": [
+          0.0,
+          0.0
+        ],
+        "doc_leak_rate": [
+          1.0,
+          1.0
+        ],
+        "doc_literal_leak_rate": [
+          0.6667,
+          1.0
+        ],
+        "mention_literal_leak_rate": [
+          1.0,
+          1.0
+        ],
+        "kept_touched_rate": [
+          0.0,
+          0.0033
+        ],
+        "detections_per_10k_chars": [
+          0.0,
+          0.0618
+        ],
+        "docs_with_detection": [
+          0.0,
+          0.25
+        ],
+        "recall_PERSON": [
+          0.0,
+          0.0
+        ]
+      },
+      "kept_families": {
+        "DATE": {
+          "mentions": 484,
+          "touched": 1,
+          "touched_rate": 0.002066115702479339
+        },
+        "LOCATION": {
+          "mentions": 84,
+          "touched": 0,
+          "touched_rate": 0.0
+        },
+        "ORG": {
+          "mentions": 222,
+          "touched": 0,
+          "touched_rate": 0.0
+        },
+        "OTHER": {
+          "mentions": 15,
+          "touched": 0,
+          "touched_rate": 0.0
+        }
+      },
+      "review": null,
+      "reproduce": [
+        "python tools/corpus/fetch_real.py --cache DIR --only mapa_nl",
+        "python tools/corpus/evaluate_real.py --cache DIR --corpora mapa_nl"
+      ],
+      "report": "benchmarks/results/real-mapa-nl-2026-10-25.md"
+    },
+    "mapa_nl@with-fr": {
+      "name": "mapa_nl",
+      "variant": "with-fr",
+      "title": "MAPA EUR-Lex legal NER (nl)",
+      "language": "nl",
+      "licence": "CC BY 4.0",
+      "real_text": true,
+      "real_text_note": "yes (EU legal texts and judgments, tokenised)",
+      "gold_type": "manual, single annotator",
+      "gold_complete": true,
+      "negative_control": false,
+      "countries": "NL,FR",
+      "profile": "standard",
+      "documents": 12,
+      "mentions_personal": 363,
+      "mentions_kept": 805,
+      "chars": 451012,
+      "metrics": {
+        "mention_recall": 0.31129476584022037,
+        "mention_recall_at80": 0.3333333333333333,
+        "char_recall": 0.4585820895522388,
+        "precision": 0.3788532675709001,
+        "over_masking": 0.005178000797479515,
+        "doc_leak_rate": 0.8888888888888888,
+        "doc_literal_leak_rate": 0.7777777777777778,
+        "mention_literal_leak_rate": 0.45936395759717313,
+        "kept_touched_rate": 0.02236024844720497,
+        "detections_per_10k_chars": 12.970830044433407,
+        "docs_with_detection": 0.75,
+        "recall_PERSON": 0.31129476584022037
+      },
+      "intervals_95": {
+        "mention_recall": [
+          0.2532,
+          0.4426
+        ],
+        "mention_recall_at80": [
+          0.2861,
+          0.4501
+        ],
+        "char_recall": [
+          0.3942,
+          0.5435
+        ],
+        "precision": [
+          0.2592,
+          0.5238
+        ],
+        "over_masking": [
+          0.0034,
+          0.007
+        ],
+        "doc_leak_rate": [
+          0.6667,
+          1.0
+        ],
+        "doc_literal_leak_rate": [
+          0.5,
+          1.0
+        ],
+        "mention_literal_leak_rate": [
+          0.268,
+          0.5668
+        ],
+        "kept_touched_rate": [
+          0.0126,
+          0.0315
+        ],
+        "detections_per_10k_chars": [
+          10.0625,
+          15.8723
+        ],
+        "docs_with_detection": [
+          0.5,
+          1.0
+        ],
+        "recall_PERSON": [
+          0.2532,
+          0.4426
+        ]
+      },
+      "kept_families": {
+        "DATE": {
+          "mentions": 484,
+          "touched": 1,
+          "touched_rate": 0.002066115702479339
+        },
+        "LOCATION": {
+          "mentions": 84,
+          "touched": 0,
+          "touched_rate": 0.0
+        },
+        "ORG": {
+          "mentions": 222,
+          "touched": 12,
+          "touched_rate": 0.05405405405405406
+        },
+        "OTHER": {
+          "mentions": 15,
+          "touched": 5,
+          "touched_rate": 0.3333333333333333
+        }
+      },
+      "review": null,
+      "reproduce": [
+        "python tools/corpus/fetch_real.py --cache DIR --only mapa_nl",
+        "python tools/corpus/evaluate_real.py --cache DIR --corpora mapa_nl --countries NL,FR --tag with-fr"
+      ],
+      "report": "benchmarks/results/real-mapa-nl-with-fr-2026-10-25.md"
+    },
+    "mapa_pt": {
+      "name": "mapa_pt",
+      "variant": null,
+      "title": "MAPA EUR-Lex legal NER (pt)",
+      "language": "pt",
+      "licence": "CC BY 4.0",
+      "real_text": true,
+      "real_text_note": "yes (EU legal texts and judgments, tokenised)",
+      "gold_type": "manual, single annotator",
+      "gold_complete": true,
+      "negative_control": false,
+      "countries": "PT",
+      "profile": "standard",
+      "documents": 12,
+      "mentions_personal": 378,
+      "mentions_kept": 1027,
+      "chars": 440808,
+      "metrics": {
+        "mention_recall": 0.0,
+        "mention_recall_at80": 0.0,
+        "char_recall": 0.0,
+        "precision": null,
+        "over_masking": 0.0,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "mention_literal_leak_rate": 1.0,
+        "kept_touched_rate": 0.0,
+        "detections_per_10k_chars": 0.0,
+        "docs_with_detection": 0.0,
+        "recall_PERSON": 0.0,
+        "recall_ADDRESS": 0.0
+      },
+      "intervals_95": {
+        "mention_recall": [
+          0.0,
+          0.0
+        ],
+        "mention_recall_at80": [
+          0.0,
+          0.0
+        ],
+        "char_recall": [
+          0.0,
+          0.0
+        ],
+        "over_masking": [
+          0.0,
+          0.0
+        ],
+        "doc_leak_rate": [
+          1.0,
+          1.0
+        ],
+        "doc_literal_leak_rate": [
+          1.0,
+          1.0
+        ],
+        "mention_literal_leak_rate": [
+          1.0,
+          1.0
+        ],
+        "kept_touched_rate": [
+          0.0,
+          0.0
+        ],
+        "detections_per_10k_chars": [
+          0.0,
+          0.0
+        ],
+        "docs_with_detection": [
+          0.0,
+          0.0
+        ],
+        "recall_PERSON": [
+          0.0,
+          0.0
+        ],
+        "recall_ADDRESS": [
+          0.0,
+          0.0
+        ]
+      },
+      "kept_families": {
+        "DATE": {
+          "mentions": 476,
+          "touched": 0,
+          "touched_rate": 0.0
+        },
+        "LOCATION": {
+          "mentions": 204,
+          "touched": 0,
+          "touched_rate": 0.0
+        },
+        "ORG": {
+          "mentions": 311,
+          "touched": 0,
+          "touched_rate": 0.0
+        },
+        "OTHER": {
+          "mentions": 36,
+          "touched": 0,
+          "touched_rate": 0.0
+        }
+      },
+      "review": null,
+      "reproduce": [
+        "python tools/corpus/fetch_real.py --cache DIR --only mapa_pt",
+        "python tools/corpus/evaluate_real.py --cache DIR --corpora mapa_pt"
+      ],
+      "report": "benchmarks/results/real-mapa-pt-2026-10-25.md"
+    },
+    "mapa_pt@with-fr": {
+      "name": "mapa_pt",
+      "variant": "with-fr",
+      "title": "MAPA EUR-Lex legal NER (pt)",
+      "language": "pt",
+      "licence": "CC BY 4.0",
+      "real_text": true,
+      "real_text_note": "yes (EU legal texts and judgments, tokenised)",
+      "gold_type": "manual, single annotator",
+      "gold_complete": true,
+      "negative_control": false,
+      "countries": "PT,FR",
+      "profile": "standard",
+      "documents": 12,
+      "mentions_personal": 378,
+      "mentions_kept": 1027,
+      "chars": 440808,
+      "metrics": {
+        "mention_recall": 0.4021164021164021,
+        "mention_recall_at80": 0.42857142857142855,
+        "char_recall": 0.4994678964171692,
+        "precision": 0.3099955966534566,
+        "over_masking": 0.00809931837419623,
+        "doc_leak_rate": 0.7777777777777778,
+        "doc_literal_leak_rate": 0.7777777777777778,
+        "mention_literal_leak_rate": 0.4675324675324675,
+        "kept_touched_rate": 0.045764362220058426,
+        "detections_per_10k_chars": 15.063247490971126,
+        "docs_with_detection": 0.9166666666666666,
+        "recall_PERSON": 0.4053333333333333,
+        "recall_ADDRESS": 0.0
+      },
+      "intervals_95": {
+        "mention_recall": [
+          0.3218,
+          0.4938
+        ],
+        "mention_recall_at80": [
+          0.347,
+          0.5195
+        ],
+        "char_recall": [
+          0.4182,
+          0.5891
+        ],
+        "precision": [
+          0.2515,
+          0.417
+        ],
+        "over_masking": [
+          0.0046,
+          0.0112
+        ],
+        "doc_leak_rate": [
+          0.5,
+          1.0
+        ],
+        "doc_literal_leak_rate": [
+          0.5,
+          1.0
+        ],
+        "mention_literal_leak_rate": [
+          0.3144,
+          0.5507
+        ],
+        "kept_touched_rate": [
+          0.0121,
+          0.0858
+        ],
+        "detections_per_10k_chars": [
+          8.778,
+          21.8877
+        ],
+        "docs_with_detection": [
+          0.75,
+          1.0
+        ],
+        "recall_PERSON": [
+          0.3234,
+          0.4966
+        ],
+        "recall_ADDRESS": [
+          0.0,
+          0.0
+        ]
+      },
+      "kept_families": {
+        "DATE": {
+          "mentions": 476,
+          "touched": 0,
+          "touched_rate": 0.0
+        },
+        "LOCATION": {
+          "mentions": 204,
+          "touched": 21,
+          "touched_rate": 0.10294117647058823
+        },
+        "ORG": {
+          "mentions": 311,
+          "touched": 11,
+          "touched_rate": 0.03536977491961415
+        },
+        "OTHER": {
+          "mentions": 36,
+          "touched": 15,
+          "touched_rate": 0.4166666666666667
+        }
+      },
+      "review": null,
+      "reproduce": [
+        "python tools/corpus/fetch_real.py --cache DIR --only mapa_pt",
+        "python tools/corpus/evaluate_real.py --cache DIR --corpora mapa_pt --countries PT,FR --tag with-fr"
+      ],
+      "report": "benchmarks/results/real-mapa-pt-with-fr-2026-10-25.md"
+    },
+    "meddocan_es": {
+      "name": "meddocan_es",
+      "variant": null,
+      "title": "MEDDOCAN, Spanish clinical case reports (de-identification task)",
+      "language": "es",
+      "licence": "CC BY 4.0",
+      "real_text": true,
+      "real_text_note": "yes (real published case reports) with SURROGATE identifiers added by the corpus authors",
+      "gold_type": "manual gold (29 PHI types), inter-annotator agreement reported at 98%",
+      "gold_complete": true,
+      "negative_control": false,
+      "countries": "ES",
+      "profile": "standard",
+      "documents": 1000,
+      "mentions_personal": 9822,
+      "mentions_kept": 12973,
+      "chars": 2887969,
+      "metrics": {
+        "mention_recall": 0.1086336794950112,
+        "mention_recall_at80": 0.10883730401140297,
+        "char_recall": 0.14440161699727366,
+        "precision": 0.6112777811792077,
+        "over_masking": 3.7259880117514835e-05,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "mention_literal_leak_rate": 0.8907554469558134,
+        "kept_touched_rate": 0.1216372465890696,
+        "detections_per_10k_chars": 9.189849337025432,
+        "docs_with_detection": 1.0,
+        "recall_PERSON": 0.0,
+        "recall_ADDRESS": 0.0011702750146284377,
+        "recall_EMAIL": 0.9927007299270073,
+        "recall_PHONE": 0.8248175182481752,
+        "recall_NATIONAL_ID": 0.0,
+        "recall_ID": 0.0
+      },
+      "intervals_95": {
+        "mention_recall": [
+          0.106,
+          0.1114
+        ],
+        "mention_recall_at80": [
+          0.1062,
+          0.1116
+        ],
+        "char_recall": [
+          0.1411,
+          0.1478
+        ],
+        "precision": [
+          0.6034,
+          0.6193
+        ],
+        "over_masking": [
+          0.0,
+          0.0001
+        ],
+        "doc_leak_rate": [
+          1.0,
+          1.0
+        ],
+        "doc_literal_leak_rate": [
+          1.0,
+          1.0
+        ],
+        "mention_literal_leak_rate": [
+          0.888,
+          0.8935
+        ],
+        "kept_touched_rate": [
+          0.1184,
+          0.1249
+        ],
+        "detections_per_10k_chars": [
+          8.9216,
+          9.4619
+        ],
+        "docs_with_detection": [
+          1.0,
+          1.0
+        ],
+        "recall_PERSON": [
+          0.0,
+          0.0
+        ],
+        "recall_ADDRESS": [
+          0.0,
+          0.0035
+        ],
+        "recall_EMAIL": [
+          0.9874,
+          0.9979
+        ],
+        "recall_PHONE": [
+          0.7447,
+          0.8963
+        ],
+        "recall_NATIONAL_ID": [
+          0.0,
+          0.0
+        ],
+        "recall_ID": [
+          0.0,
+          0.0
+        ]
+      },
+      "kept_families": {
+        "DATE": {
+          "mentions": 2566,
+          "touched": 1576,
+          "touched_rate": 0.6141855027279813
+        },
+        "LOCATION": {
+          "mentions": 5241,
+          "touched": 2,
+          "touched_rate": 0.00038160656363289447
+        },
+        "ORG": {
+          "mentions": 776,
+          "touched": 0,
+          "touched_rate": 0.0
+        },
+        "OTHER": {
+          "mentions": 4390,
+          "touched": 0,
+          "touched_rate": 0.0
+        }
+      },
+      "review": null,
+      "reproduce": [
+        "python tools/corpus/fetch_real.py --cache DIR --only meddocan_es",
+        "python tools/corpus/evaluate_real.py --cache DIR --corpora meddocan_es"
+      ],
+      "report": "benchmarks/results/real-meddocan-es-2026-10-25.md"
+    },
+    "meddocan_es@with-fr": {
+      "name": "meddocan_es",
+      "variant": "with-fr",
+      "title": "MEDDOCAN, Spanish clinical case reports (de-identification task)",
+      "language": "es",
+      "licence": "CC BY 4.0",
+      "real_text": true,
+      "real_text_note": "yes (real published case reports) with SURROGATE identifiers added by the corpus authors",
+      "gold_type": "manual gold (29 PHI types), inter-annotator agreement reported at 98%",
+      "gold_complete": true,
+      "negative_control": false,
+      "countries": "ES,FR",
+      "profile": "standard",
+      "documents": 1000,
+      "mentions_personal": 9822,
+      "mentions_kept": 12973,
+      "chars": 2887969,
+      "metrics": {
+        "mention_recall": 0.4984728161270617,
+        "mention_recall_at80": 0.520667888413765,
+        "char_recall": 0.6233611269805686,
+        "precision": 0.6005727105512513,
+        "over_masking": 0.009818214232991219,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "mention_literal_leak_rate": 0.41183058440236203,
+        "kept_touched_rate": 0.32983889616896633,
+        "detections_per_10k_chars": 40.845313782800304,
+        "docs_with_detection": 1.0,
+        "recall_PERSON": 0.9526420737786641,
+        "recall_ADDRESS": 0.004095962551199532,
+        "recall_EMAIL": 0.9937434827945777,
+        "recall_PHONE": 0.8248175182481752,
+        "recall_NATIONAL_ID": 0.0,
+        "recall_ID": 0.00045004500450045
+      },
+      "intervals_95": {
+        "mention_recall": [
+          0.4936,
+          0.5029
+        ],
+        "mention_recall_at80": [
+          0.5156,
+          0.5256
+        ],
+        "char_recall": [
+          0.6185,
+          0.6285
+        ],
+        "precision": [
+          0.5927,
+          0.6082
+        ],
+        "over_masking": [
+          0.0093,
+          0.0104
+        ],
+        "doc_leak_rate": [
+          1.0,
+          1.0
+        ],
+        "doc_literal_leak_rate": [
+          1.0,
+          1.0
+        ],
+        "mention_literal_leak_rate": [
+          0.4068,
+          0.4168
+        ],
+        "kept_touched_rate": [
+          0.3225,
+          0.3375
+        ],
+        "detections_per_10k_chars": [
+          39.8788,
+          41.8926
+        ],
+        "docs_with_detection": [
+          1.0,
+          1.0
+        ],
+        "recall_PERSON": [
+          0.9437,
+          0.9604
+        ],
+        "recall_ADDRESS": [
+          0.0012,
+          0.0076
+        ],
+        "recall_EMAIL": [
+          0.9885,
+          0.9979
+        ],
+        "recall_PHONE": [
+          0.7447,
+          0.8963
+        ],
+        "recall_NATIONAL_ID": [
+          0.0,
+          0.0
+        ],
+        "recall_ID": [
+          0.0,
+          0.0014
+        ]
+      },
+      "kept_families": {
+        "DATE": {
+          "mentions": 2566,
+          "touched": 1580,
+          "touched_rate": 0.6157443491816056
+        },
+        "LOCATION": {
+          "mentions": 5241,
+          "touched": 1907,
+          "touched_rate": 0.3638618584239649
+        },
+        "ORG": {
+          "mentions": 776,
+          "touched": 455,
+          "touched_rate": 0.586340206185567
+        },
+        "OTHER": {
+          "mentions": 4390,
+          "touched": 337,
+          "touched_rate": 0.07676537585421413
+        }
+      },
+      "review": null,
+      "reproduce": [
+        "python tools/corpus/fetch_real.py --cache DIR --only meddocan_es",
+        "python tools/corpus/evaluate_real.py --cache DIR --corpora meddocan_es --countries ES,FR --tag with-fr"
+      ],
+      "report": "benchmarks/results/real-meddocan-es-with-fr-2026-10-25.md"
+    },
+    "parlamint_fr": {
+      "name": "parlamint_fr",
+      "variant": null,
+      "title": "ParlaMint-FR 5.0, Assemblée nationale debates 2017-2022 (sample)",
+      "language": "fr",
+      "licence": "CC BY 4.0",
+      "real_text": true,
+      "real_text_note": "yes",
+      "gold_type": "speaker labels rendered from the TEI 'who' metadata (exact); in-text mentions = exact matches of the full name, or civility + surname, of the 1,000+ persons of the corpus person list",
+      "gold_complete": false,
+      "negative_control": false,
+      "countries": "FR",
+      "profile": "standard",
+      "documents": 300,
+      "mentions_personal": 3006,
+      "mentions_kept": 0,
+      "chars": 1029684,
+      "metrics": {
+        "mention_recall": 0.9324683965402528,
+        "mention_recall_at80": 0.9334664005322688,
+        "char_recall": 0.9717954482999825,
+        "precision": null,
+        "over_masking": null,
+        "doc_leak_rate": 0.3010033444816054,
+        "doc_literal_leak_rate": 0.033444816053511704,
+        "mention_literal_leak_rate": 0.003992015968063872,
+        "kept_touched_rate": null,
+        "detections_per_10k_chars": 30.766720663815306,
+        "docs_with_detection": 0.9966666666666667,
+        "recall_PERSON": 0.9324683965402528
+      },
+      "intervals_95": {
+        "mention_recall": [
+          0.9166,
+          0.9469
+        ],
+        "mention_recall_at80": [
+          0.9174,
+          0.9475
+        ],
+        "char_recall": [
+          0.9652,
+          0.9781
+        ],
+        "doc_leak_rate": [
+          0.2441,
+          0.3557
+        ],
+        "doc_literal_leak_rate": [
+          0.0135,
+          0.0569
+        ],
+        "mention_literal_leak_rate": [
+          0.0017,
+          0.0068
+        ],
+        "detections_per_10k_chars": [
+          28.7095,
+          32.887
+        ],
+        "docs_with_detection": [
+          0.99,
+          1.0
+        ],
+        "recall_PERSON": [
+          0.9166,
+          0.9469
+        ]
+      },
+      "kept_families": {},
+      "review": null,
+      "reproduce": [
+        "python tools/corpus/fetch_real.py --cache DIR --only parlamint_fr",
+        "python tools/corpus/evaluate_real.py --cache DIR --corpora parlamint_fr"
+      ],
+      "report": "benchmarks/results/real-parlamint-fr-2026-10-25.md"
+    },
+    "tab_en": {
+      "name": "tab_en",
+      "variant": null,
+      "title": "TAB, Text Anonymization Benchmark (ECHR, English, test split)",
+      "language": "en",
+      "licence": "MIT",
+      "real_text": true,
+      "real_text_note": "yes (ECHR judgments)",
+      "gold_type": "manual, DIRECT and QUASI mentions of the first annotator",
+      "gold_complete": true,
+      "negative_control": false,
+      "countries": "FR",
+      "profile": "standard",
+      "documents": 127,
+      "mentions_personal": 958,
+      "mentions_kept": 4188,
+      "chars": 647638,
+      "metrics": {
+        "mention_recall": 0.8329853862212944,
+        "mention_recall_at80": 0.8444676409185804,
+        "char_recall": 0.905550581915846,
+        "precision": 0.7753185781354796,
+        "over_masking": 0.0024528892100920104,
+        "doc_leak_rate": 0.3779527559055118,
+        "doc_literal_leak_rate": 0.2047244094488189,
+        "mention_literal_leak_rate": 0.08833151581243184,
+        "kept_touched_rate": 0.026026743075453676,
+        "detections_per_10k_chars": 16.398049527668235,
+        "docs_with_detection": 1.0,
+        "recall_PERSON": 0.8329853862212944
+      },
+      "intervals_95": {
+        "mention_recall": [
+          0.7727,
+          0.889
+        ],
+        "mention_recall_at80": [
+          0.7855,
+          0.8963
+        ],
+        "char_recall": [
+          0.8595,
+          0.942
+        ],
+        "precision": [
+          0.7265,
+          0.8194
+        ],
+        "over_masking": [
+          0.0018,
+          0.0033
+        ],
+        "doc_leak_rate": [
+          0.2992,
+          0.4646
+        ],
+        "doc_literal_leak_rate": [
+          0.1339,
+          0.2758
+        ],
+        "mention_literal_leak_rate": [
+          0.052,
+          0.1354
+        ],
+        "kept_touched_rate": [
+          0.0193,
+          0.0338
+        ],
+        "detections_per_10k_chars": [
+          13.8969,
+          19.4286
+        ],
+        "docs_with_detection": [
+          1.0,
+          1.0
+        ],
+        "recall_PERSON": [
+          0.7727,
+          0.889
+        ]
+      },
+      "kept_families": {
+        "DATE": {
+          "mentions": 2487,
+          "touched": 60,
+          "touched_rate": 0.024125452352231604
+        },
+        "LOCATION": {
+          "mentions": 294,
+          "touched": 17,
+          "touched_rate": 0.05782312925170068
+        },
+        "ORG": {
+          "mentions": 550,
+          "touched": 28,
+          "touched_rate": 0.05090909090909091
+        },
+        "OTHER": {
+          "mentions": 857,
+          "touched": 4,
+          "touched_rate": 0.004667444574095682
+        }
+      },
+      "review": null,
+      "reproduce": [
+        "python tools/corpus/fetch_real.py --cache DIR --only tab_en",
+        "python tools/corpus/evaluate_real.py --cache DIR --corpora tab_en"
+      ],
+      "report": "benchmarks/results/real-tab-en-2026-10-25.md"
+    }
+  }
+}

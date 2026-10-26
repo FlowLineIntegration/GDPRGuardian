@@ -1,0 +1,183 @@
+{
+  "corpus": "german_ler_de",
+  "title": "German LER, federal court decisions (test split)",
+  "language": "de",
+  "licence": "CC BY 4.0",
+  "source": "https://huggingface.co/datasets/elenanereiss/german-ler",
+  "revision": "elenanereiss/german-ler@405b6923dfd2299da3d76a68220ee15a95bc1eab",
+  "real_text": "yes (court decisions, tokenised)",
+  "gold": "manual (19 fine classes: person, judge, lawyer, street, city, country, organisation, court, law...)",
+  "gold_complete": true,
+  "negative_control": false,
+  "measures": "names of judges, lawyers and persons, street names in real German legal prose",
+  "cannot_measure": "parties' identities (already pseudonymised by the courts); contact or ID numbers",
+  "build": {
+    "documents": 334,
+    "mentions": 5322,
+    "chars": 1365559,
+    "source": "https://huggingface.co/datasets/elenanereiss/german-ler",
+    "revision": "elenanereiss/german-ler@405b6923dfd2299da3d76a68220ee15a95bc1eab",
+    "licence": "CC BY 4.0",
+    "fetched": "2026-10-25"
+  },
+  "gold_labels": {
+    "ADDRESS": 15,
+    "LOCATION": 235,
+    "ORG": 796,
+    "OTHER": 3952,
+    "PERSON": 324
+  },
+  "run": {
+    "date": "2026-10-26",
+    "countries": "DE",
+    "profile": "standard",
+    "engine": {
+      "package": "gdprguardian",
+      "version": "1.0.0",
+      "native_core": true,
+      "python": "3.12.11",
+      "platform": "Windows 11",
+      "machine": "AMD64"
+    },
+    "tag": "rules3",
+    "review": null,
+    "split": "all",
+    "split_rule": null
+  },
+  "documents": 334,
+  "evaluated": 334,
+  "errors": {},
+  "chars": 1365559,
+  "seconds": 0.115,
+  "chars_per_second": 11899000,
+  "families": [
+    "PERSON",
+    "ADDRESS"
+  ],
+  "totals": {
+    "m_total": 337,
+    "m_full": 0,
+    "m_cov80": 0,
+    "m_literal_checked": 195,
+    "m_literal": 195,
+    "c_gold": 1598,
+    "c_gold_masked": 0,
+    "c_pred": 4,
+    "c_pred_tp": 0,
+    "c_neutral": 1002365,
+    "c_neutral_masked": 0,
+    "d_has_gold": 199,
+    "d_leak": 199,
+    "d_leak_literal": 134,
+    "k_total": 4979,
+    "k_touched": 1,
+    "chars": 1365559,
+    "detections": 1,
+    "d_detection": 1,
+    "g_PERSON": 322,
+    "f_PERSON": 0,
+    "g_ADDRESS": 15,
+    "f_ADDRESS": 0
+  },
+  "metrics": {
+    "mention_recall": 0.0,
+    "mention_recall_at80": 0.0,
+    "char_recall": 0.0,
+    "precision": 0.0,
+    "over_masking": 0.0,
+    "doc_leak_rate": 1.0,
+    "doc_literal_leak_rate": 0.6733668341708543,
+    "mention_literal_leak_rate": 1.0,
+    "kept_touched_rate": 0.0002008435428800964,
+    "detections_per_10k_chars": 0.007323008379718489,
+    "docs_with_detection": 0.0029940119760479044,
+    "recall_PERSON": 0.0,
+    "recall_ADDRESS": 0.0
+  },
+  "intervals_95": {
+    "mention_recall": [
+      0.0,
+      0.0
+    ],
+    "mention_recall_at80": [
+      0.0,
+      0.0
+    ],
+    "char_recall": [
+      0.0,
+      0.0
+    ],
+    "precision": [
+      0.0,
+      0.0
+    ],
+    "over_masking": [
+      0.0,
+      0.0
+    ],
+    "doc_leak_rate": [
+      1.0,
+      1.0
+    ],
+    "doc_literal_leak_rate": [
+      0.6073,
+      0.7333
+    ],
+    "mention_literal_leak_rate": [
+      1.0,
+      1.0
+    ],
+    "kept_touched_rate": [
+      0.0,
+      0.0006
+    ],
+    "detections_per_10k_chars": [
+      0.0,
+      0.0223
+    ],
+    "docs_with_detection": [
+      0.0,
+      0.009
+    ],
+    "recall_PERSON": [
+      0.0,
+      0.0
+    ],
+    "recall_ADDRESS": [
+      0.0,
+      0.0
+    ]
+  },
+  "kept_families": {
+    "LOCATION": {
+      "mentions": 233,
+      "touched": 0,
+      "touched_rate": 0.0
+    },
+    "ORG": {
+      "mentions": 795,
+      "touched": 0,
+      "touched_rate": 0.0
+    },
+    "OTHER": {
+      "mentions": 3951,
+      "touched": 1,
+      "touched_rate": 0.0002531004808909137
+    }
+  },
+  "by_origin": {
+    "ADDRESS:manual": {
+      "mentions": 15,
+      "masked": 0,
+      "recall": 0.0
+    },
+    "PERSON:manual": {
+      "mentions": 322,
+      "masked": 0,
+      "recall": 0.0
+    }
+  },
+  "detected_labels": {
+    "IP": 1
+  }
+}

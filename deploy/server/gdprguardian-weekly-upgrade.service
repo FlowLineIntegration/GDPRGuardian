@@ -1,0 +1,13 @@
+# Gardien RGPD · GDPR Guardian : mises à jour du samedi, /etc/systemd/system/gdprguardian-weekly-upgrade.service,
+# lancées par gdprguardian-weekly-upgrade.timer. Saturday updates, run by the timer.
+[Unit]
+Description=Gardien RGPD - GDPR Guardian Saturday updates (security and stable updates)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/gdprguardian-maintenance upgrade
+# Comme apt-daily-upgrade.service : dpkg n'est jamais tué en cours de route / dpkg is never killed midway.
+KillMode=process
+TimeoutStartSec=3h

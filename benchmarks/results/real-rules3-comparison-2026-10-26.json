@@ -1,0 +1,2423 @@
+{
+  "before": "rules2",
+  "after": "rules3",
+  "date": "2026-10-26",
+  "rows": [
+    {
+      "corpus": "boamp-fr",
+      "split": "dev",
+      "before": {
+        "documents": 1523,
+        "mentions": 12436,
+        "mention_recall": 0.9075265358636218,
+        "precision": 0.8655085818528383,
+        "doc_leak_rate": 0.3941256830601093,
+        "doc_literal_leak_rate": 0.11270491803278689,
+        "detections_per_10k_chars": 20.68403525237336,
+        "families": {
+          "PERSON": 0.8859416445623343,
+          "ADDRESS": 0.849112426035503,
+          "EMAIL": 0.9989506820566632,
+          "PHONE": 0.8893314366998577
+        },
+        "org_id_touched": 0.0017985611510791368,
+        "location_touched": 0.17899761336515513,
+        "intervals_95": {
+          "mention_recall": [
+            0.8983,
+            0.9177
+          ],
+          "precision": [
+            0.843,
+            0.8854
+          ],
+          "doc_leak_rate": [
+            0.3696,
+            0.4187
+          ]
+        },
+        "chars_per_second": 3526279,
+        "errors": 0
+      },
+      "after": {
+        "documents": 1523,
+        "mentions": 12436,
+        "mention_recall": 0.9086522997748472,
+        "precision": 0.8654841763275991,
+        "doc_leak_rate": 0.3907103825136612,
+        "doc_literal_leak_rate": 0.11202185792349727,
+        "detections_per_10k_chars": 20.681854657227888,
+        "families": {
+          "PERSON": 0.8859416445623343,
+          "ADDRESS": 0.8520710059171598,
+          "EMAIL": 0.9989506820566632,
+          "PHONE": 0.8893314366998577
+        },
+        "org_id_touched": 0.0017985611510791368,
+        "location_touched": 0.17899761336515513,
+        "intervals_95": {
+          "mention_recall": [
+            0.8993,
+            0.9188
+          ],
+          "precision": [
+            0.843,
+            0.8854
+          ],
+          "doc_leak_rate": [
+            0.3664,
+            0.4151
+          ]
+        },
+        "chars_per_second": 3417504,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "bodacc-fr",
+      "split": "dev",
+      "before": {
+        "documents": 1358,
+        "mentions": 7150,
+        "mention_recall": 0.9748251748251748,
+        "precision": 0.9928651240746776,
+        "doc_leak_rate": 0.10972017673048601,
+        "doc_literal_leak_rate": 0.06848306332842416,
+        "detections_per_10k_chars": 70.26956116582151,
+        "families": {
+          "PERSON": 0.9799224275610312,
+          "ADDRESS": 0.9508771929824561,
+          "ID": 0.9836065573770492
+        },
+        "org_id_touched": 0.023255813953488372,
+        "location_touched": 0.003028009084027252,
+        "intervals_95": {
+          "mention_recall": [
+            0.9708,
+            0.9791
+          ],
+          "precision": [
+            0.9909,
+            0.9946
+          ],
+          "doc_leak_rate": [
+            0.092,
+            0.1259
+          ]
+        },
+        "chars_per_second": 1635156,
+        "errors": 0
+      },
+      "after": {
+        "documents": 1358,
+        "mentions": 7150,
+        "mention_recall": 0.9748251748251748,
+        "precision": 0.9927159330238187,
+        "doc_leak_rate": 0.10972017673048601,
+        "doc_literal_leak_rate": 0.06774668630338733,
+        "detections_per_10k_chars": 70.35098591804146,
+        "families": {
+          "PERSON": 0.9799224275610312,
+          "ADDRESS": 0.9508771929824561,
+          "ID": 0.9836065573770492
+        },
+        "org_id_touched": 0.023255813953488372,
+        "location_touched": 0.003028009084027252,
+        "intervals_95": {
+          "mention_recall": [
+            0.9708,
+            0.9791
+          ],
+          "precision": [
+            0.9908,
+            0.9945
+          ],
+          "doc_leak_rate": [
+            0.092,
+            0.1259
+          ]
+        },
+        "chars_per_second": 1463514,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "europeana-fr",
+      "split": "dev",
+      "before": {
+        "documents": 270,
+        "mentions": 2202,
+        "mention_recall": 0.7193460490463215,
+        "precision": 0.7697186982901268,
+        "doc_leak_rate": 0.7161016949152542,
+        "doc_literal_leak_rate": 0.6567796610169492,
+        "detections_per_10k_chars": 38.59190668257305,
+        "families": {
+          "PERSON": 0.7193460490463215
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0979923518164436,
+        "intervals_95": {
+          "mention_recall": [
+            0.6812,
+            0.7583
+          ],
+          "precision": [
+            0.7294,
+            0.8058
+          ],
+          "doc_leak_rate": [
+            0.6584,
+            0.7745
+          ]
+        },
+        "chars_per_second": 2117472,
+        "errors": 0
+      },
+      "after": {
+        "documents": 270,
+        "mentions": 2202,
+        "mention_recall": 0.7198001816530427,
+        "precision": 0.7682913411816481,
+        "doc_leak_rate": 0.7161016949152542,
+        "doc_literal_leak_rate": 0.6567796610169492,
+        "detections_per_10k_chars": 38.68658751349202,
+        "families": {
+          "PERSON": 0.7198001816530427
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0979923518164436,
+        "intervals_95": {
+          "mention_recall": [
+            0.6813,
+            0.7587
+          ],
+          "precision": [
+            0.7278,
+            0.805
+          ],
+          "doc_leak_rate": [
+            0.6584,
+            0.7745
+          ]
+        },
+        "chars_per_second": 3702966,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "german-ler-de",
+      "split": "dev",
+      "before": {
+        "documents": 165,
+        "mentions": 171,
+        "mention_recall": 0.0,
+        "precision": 0.0,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 0.65625,
+        "detections_per_10k_chars": 0.01462300432548468,
+        "families": {
+          "PERSON": 0.0,
+          "ADDRESS": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "precision": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 13878175,
+        "errors": 0
+      },
+      "after": {
+        "documents": 165,
+        "mentions": 171,
+        "mention_recall": 0.0,
+        "precision": 0.0,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 0.65625,
+        "detections_per_10k_chars": 0.01462300432548468,
+        "families": {
+          "PERSON": 0.0,
+          "ADDRESS": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "precision": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 12368002,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "hipe-newseye-fr",
+      "split": "dev",
+      "before": {
+        "documents": 68,
+        "mentions": 3142,
+        "mention_recall": 0.46467218332272436,
+        "precision": 0.7332333877155077,
+        "doc_leak_rate": 0.9491525423728814,
+        "doc_literal_leak_rate": 0.8135593220338984,
+        "detections_per_10k_chars": 37.51790660616587,
+        "families": {
+          "PERSON": 0.46467218332272436
+        },
+        "org_id_touched": null,
+        "location_touched": 0.08589411329137357,
+        "intervals_95": {
+          "mention_recall": [
+            0.4313,
+            0.5152
+          ],
+          "precision": [
+            0.6492,
+            0.7797
+          ],
+          "doc_leak_rate": [
+            0.8871,
+            1.0
+          ]
+        },
+        "chars_per_second": 5144127,
+        "errors": 0
+      },
+      "after": {
+        "documents": 68,
+        "mentions": 3142,
+        "mention_recall": 0.46499045194143857,
+        "precision": 0.7322858903265558,
+        "doc_leak_rate": 0.9491525423728814,
+        "doc_literal_leak_rate": 0.8135593220338984,
+        "detections_per_10k_chars": 37.59106945056167,
+        "families": {
+          "PERSON": 0.46499045194143857
+        },
+        "org_id_touched": null,
+        "location_touched": 0.08589411329137357,
+        "intervals_95": {
+          "mention_recall": [
+            0.4318,
+            0.5152
+          ],
+          "precision": [
+            0.6481,
+            0.779
+          ],
+          "doc_leak_rate": [
+            0.8871,
+            1.0
+          ]
+        },
+        "chars_per_second": 5374243,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "judilibre-fr",
+      "split": "dev",
+      "before": {
+        "documents": 145,
+        "mentions": 0,
+        "mention_recall": null,
+        "precision": null,
+        "doc_leak_rate": null,
+        "doc_literal_leak_rate": null,
+        "detections_per_10k_chars": 13.03430422361073,
+        "families": {},
+        "org_id_touched": null,
+        "location_touched": null,
+        "intervals_95": {},
+        "chars_per_second": 6838435,
+        "errors": 0
+      },
+      "after": {
+        "documents": 145,
+        "mentions": 0,
+        "mention_recall": null,
+        "precision": null,
+        "doc_leak_rate": null,
+        "doc_literal_leak_rate": null,
+        "detections_per_10k_chars": 13.041009112614645,
+        "families": {},
+        "org_id_touched": null,
+        "location_touched": null,
+        "intervals_95": {},
+        "chars_per_second": 7033252,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "mapa-de",
+      "split": "dev",
+      "before": {
+        "documents": 6,
+        "mentions": 53,
+        "mention_recall": 0.0,
+        "precision": null,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 0.75,
+        "detections_per_10k_chars": 0.0,
+        "families": {
+          "PERSON": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 21203582,
+        "errors": 0
+      },
+      "after": {
+        "documents": 6,
+        "mentions": 53,
+        "mention_recall": 0.0,
+        "precision": null,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 0.75,
+        "detections_per_10k_chars": 0.0,
+        "families": {
+          "PERSON": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 19619460,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "mapa-es",
+      "split": "dev",
+      "before": {
+        "documents": 4,
+        "mentions": 142,
+        "mention_recall": 0.0,
+        "precision": null,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 0.0,
+        "families": {
+          "PERSON": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 22779141,
+        "errors": 0
+      },
+      "after": {
+        "documents": 4,
+        "mentions": 142,
+        "mention_recall": 0.0,
+        "precision": null,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 0.0,
+        "families": {
+          "PERSON": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 22805252,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "mapa-fr",
+      "split": "dev",
+      "before": {
+        "documents": 4,
+        "mentions": 119,
+        "mention_recall": 0.37815126050420167,
+        "precision": 0.36773428232502964,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 6.486695373744065,
+        "families": {
+          "PERSON": 0.3813559322033898,
+          "ADDRESS": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.402
+          ],
+          "precision": [
+            0.0,
+            0.3899
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 8921340,
+        "errors": 0
+      },
+      "after": {
+        "documents": 4,
+        "mentions": 119,
+        "mention_recall": 0.37815126050420167,
+        "precision": 0.36773428232502964,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 6.486695373744065,
+        "families": {
+          "PERSON": 0.3813559322033898,
+          "ADDRESS": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.402
+          ],
+          "precision": [
+            0.0,
+            0.3899
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 9801484,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "mapa-it",
+      "split": "dev",
+      "before": {
+        "documents": 5,
+        "mentions": 63,
+        "mention_recall": 0.0,
+        "precision": null,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 0.0,
+        "families": {
+          "PERSON": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 21111753,
+        "errors": 0
+      },
+      "after": {
+        "documents": 5,
+        "mentions": 63,
+        "mention_recall": 0.0,
+        "precision": null,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 0.0,
+        "families": {
+          "PERSON": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 31617710,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "mapa-nl",
+      "split": "dev",
+      "before": {
+        "documents": 7,
+        "mentions": 173,
+        "mention_recall": 0.0,
+        "precision": 0.0,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 0.8333333333333334,
+        "detections_per_10k_chars": 0.04014081397542579,
+        "families": {
+          "PERSON": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "precision": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 24894873,
+        "errors": 0
+      },
+      "after": {
+        "documents": 7,
+        "mentions": 173,
+        "mention_recall": 0.0,
+        "precision": 0.0,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 0.8333333333333334,
+        "detections_per_10k_chars": 0.04014081397542579,
+        "families": {
+          "PERSON": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "precision": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 32356579,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "mapa-pt",
+      "split": "dev",
+      "before": {
+        "documents": 8,
+        "mentions": 340,
+        "mention_recall": 0.0,
+        "precision": null,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 0.0,
+        "families": {
+          "PERSON": 0.0,
+          "ADDRESS": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 24786347,
+        "errors": 0
+      },
+      "after": {
+        "documents": 8,
+        "mentions": 340,
+        "mention_recall": 0.0,
+        "precision": null,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 0.0,
+        "families": {
+          "PERSON": 0.0,
+          "ADDRESS": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 28743518,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "meddocan-es",
+      "split": "dev",
+      "before": {
+        "documents": 531,
+        "mentions": 5233,
+        "mention_recall": 0.10987961016625263,
+        "precision": 0.6114164662773388,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 9.207650626559934,
+        "families": {
+          "PERSON": 0.0,
+          "ADDRESS": 0.002173913043478261,
+          "EMAIL": 0.9960159362549801,
+          "PHONE": 0.8202247191011236,
+          "ID": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.1063,
+            0.1135
+          ],
+          "precision": [
+            0.6013,
+            0.621
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 7152900,
+        "errors": 0
+      },
+      "after": {
+        "documents": 531,
+        "mentions": 5233,
+        "mention_recall": 0.10987961016625263,
+        "precision": 0.6114164662773388,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 9.207650626559934,
+        "families": {
+          "PERSON": 0.0,
+          "ADDRESS": 0.002173913043478261,
+          "EMAIL": 0.9960159362549801,
+          "PHONE": 0.8202247191011236,
+          "ID": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.1063,
+            0.1135
+          ],
+          "precision": [
+            0.6013,
+            0.621
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 7683018,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "parlamint-fr",
+      "split": "dev",
+      "before": {
+        "documents": 156,
+        "mentions": 1645,
+        "mention_recall": 0.9817629179331308,
+        "precision": null,
+        "doc_leak_rate": 0.10256410256410256,
+        "doc_literal_leak_rate": 0.04487179487179487,
+        "detections_per_10k_chars": 31.607703664431853,
+        "families": {
+          "PERSON": 0.9817629179331308
+        },
+        "org_id_touched": null,
+        "location_touched": null,
+        "intervals_95": {
+          "mention_recall": [
+            0.9706,
+            0.9907
+          ],
+          "doc_leak_rate": [
+            0.0577,
+            0.1538
+          ]
+        },
+        "chars_per_second": 4382176,
+        "errors": 0
+      },
+      "after": {
+        "documents": 156,
+        "mentions": 1645,
+        "mention_recall": 0.9817629179331308,
+        "precision": null,
+        "doc_leak_rate": 0.10256410256410256,
+        "doc_literal_leak_rate": 0.04487179487179487,
+        "detections_per_10k_chars": 31.607703664431853,
+        "families": {
+          "PERSON": 0.9817629179331308
+        },
+        "org_id_touched": null,
+        "location_touched": null,
+        "intervals_95": {
+          "mention_recall": [
+            0.9706,
+            0.9907
+          ],
+          "doc_leak_rate": [
+            0.0577,
+            0.1538
+          ]
+        },
+        "chars_per_second": 5747390,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "tab-en",
+      "split": "dev",
+      "before": {
+        "documents": 72,
+        "mentions": 568,
+        "mention_recall": 0.8362676056338029,
+        "precision": 0.7723616473616474,
+        "doc_leak_rate": 0.4166666666666667,
+        "doc_literal_leak_rate": 0.19444444444444445,
+        "detections_per_10k_chars": 16.898458511507613,
+        "families": {
+          "PERSON": 0.8362676056338029
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0374331550802139,
+        "intervals_95": {
+          "mention_recall": [
+            0.7487,
+            0.9035
+          ],
+          "precision": [
+            0.6998,
+            0.8324
+          ],
+          "doc_leak_rate": [
+            0.2917,
+            0.5417
+          ]
+        },
+        "chars_per_second": 6262749,
+        "errors": 0
+      },
+      "after": {
+        "documents": 72,
+        "mentions": 568,
+        "mention_recall": 0.8362676056338029,
+        "precision": 0.7723616473616474,
+        "doc_leak_rate": 0.4166666666666667,
+        "doc_literal_leak_rate": 0.19444444444444445,
+        "detections_per_10k_chars": 16.898458511507613,
+        "families": {
+          "PERSON": 0.8362676056338029
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0374331550802139,
+        "intervals_95": {
+          "mention_recall": [
+            0.7487,
+            0.9035
+          ],
+          "precision": [
+            0.6998,
+            0.8324
+          ],
+          "doc_leak_rate": [
+            0.2917,
+            0.5417
+          ]
+        },
+        "chars_per_second": 7609037,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "boamp-fr",
+      "split": "test",
+      "before": {
+        "documents": 1477,
+        "mentions": 12033,
+        "mention_recall": 0.8952879581151832,
+        "precision": 0.8726112202833882,
+        "doc_leak_rate": 0.39417613636363635,
+        "doc_literal_leak_rate": 0.13210227272727273,
+        "detections_per_10k_chars": 20.169807344823067,
+        "families": {
+          "PERSON": 0.8876404494382022,
+          "ADDRESS": 0.8220846645367412,
+          "EMAIL": 0.9997074312463429,
+          "PHONE": 0.8991079667794525
+        },
+        "org_id_touched": 0.0,
+        "location_touched": 0.15085158150851583,
+        "intervals_95": {
+          "mention_recall": [
+            0.8753,
+            0.912
+          ],
+          "precision": [
+            0.8521,
+            0.8923
+          ],
+          "doc_leak_rate": [
+            0.3702,
+            0.419
+          ]
+        },
+        "chars_per_second": 4361128,
+        "errors": 0
+      },
+      "after": {
+        "documents": 1477,
+        "mentions": 12033,
+        "mention_recall": 0.89586969168121,
+        "precision": 0.8725755798666402,
+        "doc_leak_rate": 0.3927556818181818,
+        "doc_literal_leak_rate": 0.13210227272727273,
+        "detections_per_10k_chars": 20.16538268597809,
+        "families": {
+          "PERSON": 0.8876404494382022,
+          "ADDRESS": 0.8234824281150159,
+          "EMAIL": 0.9997074312463429,
+          "PHONE": 0.8991079667794525
+        },
+        "org_id_touched": 0.0,
+        "location_touched": 0.15085158150851583,
+        "intervals_95": {
+          "mention_recall": [
+            0.8757,
+            0.9124
+          ],
+          "precision": [
+            0.852,
+            0.8923
+          ],
+          "doc_leak_rate": [
+            0.3688,
+            0.4173
+          ]
+        },
+        "chars_per_second": 5053432,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "bodacc-fr",
+      "split": "test",
+      "before": {
+        "documents": 1335,
+        "mentions": 7057,
+        "mention_recall": 0.9780359926314298,
+        "precision": 0.991291037073974,
+        "doc_leak_rate": 0.10112359550561797,
+        "doc_literal_leak_rate": 0.056179775280898875,
+        "detections_per_10k_chars": 71.79967908435093,
+        "families": {
+          "PERSON": 0.9836593785960874,
+          "ADDRESS": 0.9459264599855803,
+          "ID": 0.9932075471698113
+        },
+        "org_id_touched": 0.0,
+        "location_touched": 0.006294256490952006,
+        "intervals_95": {
+          "mention_recall": [
+            0.9743,
+            0.9816
+          ],
+          "precision": [
+            0.9892,
+            0.9931
+          ],
+          "doc_leak_rate": [
+            0.0861,
+            0.1176
+          ]
+        },
+        "chars_per_second": 2408462,
+        "errors": 0
+      },
+      "after": {
+        "documents": 1335,
+        "mentions": 7057,
+        "mention_recall": 0.9780359926314298,
+        "precision": 0.9912926526684367,
+        "doc_leak_rate": 0.10112359550561797,
+        "doc_literal_leak_rate": 0.05543071161048689,
+        "detections_per_10k_chars": 71.85637796228012,
+        "families": {
+          "PERSON": 0.9836593785960874,
+          "ADDRESS": 0.9459264599855803,
+          "ID": 0.9932075471698113
+        },
+        "org_id_touched": 0.0,
+        "location_touched": 0.006294256490952006,
+        "intervals_95": {
+          "mention_recall": [
+            0.9743,
+            0.9816
+          ],
+          "precision": [
+            0.9892,
+            0.9931
+          ],
+          "doc_leak_rate": [
+            0.0861,
+            0.1176
+          ]
+        },
+        "chars_per_second": 2139094,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "europeana-fr",
+      "split": "test",
+      "before": {
+        "documents": 245,
+        "mentions": 2070,
+        "mention_recall": 0.7101449275362319,
+        "precision": 0.7627230667547918,
+        "doc_leak_rate": 0.7894736842105263,
+        "doc_literal_leak_rate": 0.7320574162679426,
+        "detections_per_10k_chars": 40.03381842685719,
+        "families": {
+          "PERSON": 0.7101449275362319
+        },
+        "org_id_touched": null,
+        "location_touched": 0.08707865168539326,
+        "intervals_95": {
+          "mention_recall": [
+            0.6719,
+            0.7443
+          ],
+          "precision": [
+            0.7218,
+            0.7987
+          ],
+          "doc_leak_rate": [
+            0.7366,
+            0.8454
+          ]
+        },
+        "chars_per_second": 2502055,
+        "errors": 0
+      },
+      "after": {
+        "documents": 245,
+        "mentions": 2070,
+        "mention_recall": 0.7111111111111111,
+        "precision": 0.7620989505247376,
+        "doc_leak_rate": 0.7894736842105263,
+        "doc_literal_leak_rate": 0.7320574162679426,
+        "detections_per_10k_chars": 40.117527404226465,
+        "families": {
+          "PERSON": 0.7111111111111111
+        },
+        "org_id_touched": null,
+        "location_touched": 0.08707865168539326,
+        "intervals_95": {
+          "mention_recall": [
+            0.6724,
+            0.7459
+          ],
+          "precision": [
+            0.721,
+            0.7983
+          ],
+          "doc_leak_rate": [
+            0.7366,
+            0.8454
+          ]
+        },
+        "chars_per_second": 3488915,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "german-ler-de",
+      "split": "test",
+      "before": {
+        "documents": 169,
+        "mentions": 166,
+        "mention_recall": 0.0,
+        "precision": null,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 0.6893203883495146,
+        "detections_per_10k_chars": 0.0,
+        "families": {
+          "PERSON": 0.0,
+          "ADDRESS": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 13314993,
+        "errors": 0
+      },
+      "after": {
+        "documents": 169,
+        "mentions": 166,
+        "mention_recall": 0.0,
+        "precision": null,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 0.6893203883495146,
+        "detections_per_10k_chars": 0.0,
+        "families": {
+          "PERSON": 0.0,
+          "ADDRESS": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 12658486,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "hipe-newseye-fr",
+      "split": "test",
+      "before": {
+        "documents": 72,
+        "mentions": 3522,
+        "mention_recall": 0.44775695627484385,
+        "precision": 0.7519200115925229,
+        "doc_leak_rate": 0.9841269841269841,
+        "doc_literal_leak_rate": 0.873015873015873,
+        "detections_per_10k_chars": 34.773729507736846,
+        "families": {
+          "PERSON": 0.44775695627484385
+        },
+        "org_id_touched": null,
+        "location_touched": 0.10417892878163626,
+        "intervals_95": {
+          "mention_recall": [
+            0.4259,
+            0.4717
+          ],
+          "precision": [
+            0.6955,
+            0.8237
+          ],
+          "doc_leak_rate": [
+            0.95,
+            1.0
+          ]
+        },
+        "chars_per_second": 6442628,
+        "errors": 0
+      },
+      "after": {
+        "documents": 72,
+        "mentions": 3522,
+        "mention_recall": 0.44832481544576946,
+        "precision": 0.7511574074074074,
+        "doc_leak_rate": 0.9841269841269841,
+        "doc_literal_leak_rate": 0.873015873015873,
+        "detections_per_10k_chars": 34.908380928870386,
+        "families": {
+          "PERSON": 0.44832481544576946
+        },
+        "org_id_touched": null,
+        "location_touched": 0.107416127133608,
+        "intervals_95": {
+          "mention_recall": [
+            0.4262,
+            0.4722
+          ],
+          "precision": [
+            0.6936,
+            0.8242
+          ],
+          "doc_leak_rate": [
+            0.95,
+            1.0
+          ]
+        },
+        "chars_per_second": 6791804,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "judilibre-fr",
+      "split": "test",
+      "before": {
+        "documents": 155,
+        "mentions": 0,
+        "mention_recall": null,
+        "precision": null,
+        "doc_leak_rate": null,
+        "doc_literal_leak_rate": null,
+        "detections_per_10k_chars": 12.075133920435945,
+        "families": {},
+        "org_id_touched": null,
+        "location_touched": null,
+        "intervals_95": {},
+        "chars_per_second": 8296530,
+        "errors": 0
+      },
+      "after": {
+        "documents": 155,
+        "mentions": 0,
+        "mention_recall": null,
+        "precision": null,
+        "doc_leak_rate": null,
+        "doc_literal_leak_rate": null,
+        "detections_per_10k_chars": 12.075133920435945,
+        "families": {},
+        "org_id_touched": null,
+        "location_touched": null,
+        "intervals_95": {},
+        "chars_per_second": 8085791,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "mapa-de",
+      "split": "test",
+      "before": {
+        "documents": 6,
+        "mentions": 284,
+        "mention_recall": 0.0,
+        "precision": null,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 0.0,
+        "families": {
+          "PERSON": 0.0,
+          "ADDRESS": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 28333105,
+        "errors": 0
+      },
+      "after": {
+        "documents": 6,
+        "mentions": 284,
+        "mention_recall": 0.0,
+        "precision": null,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 0.0,
+        "families": {
+          "PERSON": 0.0,
+          "ADDRESS": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 31664461,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "mapa-es",
+      "split": "test",
+      "before": {
+        "documents": 5,
+        "mentions": 129,
+        "mention_recall": 0.0,
+        "precision": null,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 0.0,
+        "families": {
+          "PERSON": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 27834221,
+        "errors": 0
+      },
+      "after": {
+        "documents": 5,
+        "mentions": 129,
+        "mention_recall": 0.0,
+        "precision": null,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 0.0,
+        "families": {
+          "PERSON": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 27178505,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "mapa-fr",
+      "split": "test",
+      "before": {
+        "documents": 8,
+        "mentions": 163,
+        "mention_recall": 0.32515337423312884,
+        "precision": 0.4682605111294312,
+        "doc_leak_rate": 0.8333333333333334,
+        "doc_literal_leak_rate": 0.8333333333333334,
+        "detections_per_10k_chars": 4.476914692066129,
+        "families": {
+          "PERSON": 0.3271604938271605,
+          "ADDRESS": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.013245033112582781,
+        "intervals_95": {
+          "mention_recall": [
+            0.1999,
+            0.5325
+          ],
+          "precision": [
+            0.3026,
+            0.6041
+          ],
+          "doc_leak_rate": [
+            0.5,
+            1.0
+          ]
+        },
+        "chars_per_second": 11266992,
+        "errors": 0
+      },
+      "after": {
+        "documents": 8,
+        "mentions": 163,
+        "mention_recall": 0.3312883435582822,
+        "precision": 0.47087776866283837,
+        "doc_leak_rate": 0.8333333333333334,
+        "doc_literal_leak_rate": 0.8333333333333334,
+        "detections_per_10k_chars": 4.509356102878202,
+        "families": {
+          "PERSON": 0.3333333333333333,
+          "ADDRESS": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.013245033112582781,
+        "intervals_95": {
+          "mention_recall": [
+            0.2151,
+            0.5325
+          ],
+          "precision": [
+            0.3129,
+            0.6041
+          ],
+          "doc_leak_rate": [
+            0.5,
+            1.0
+          ]
+        },
+        "chars_per_second": 11575520,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "mapa-it",
+      "split": "test",
+      "before": {
+        "documents": 7,
+        "mentions": 47,
+        "mention_recall": 0.0,
+        "precision": null,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 0.0,
+        "families": {
+          "PERSON": 0.0,
+          "ADDRESS": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 33972954,
+        "errors": 0
+      },
+      "after": {
+        "documents": 7,
+        "mentions": 47,
+        "mention_recall": 0.0,
+        "precision": null,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 0.0,
+        "families": {
+          "PERSON": 0.0,
+          "ADDRESS": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 33387730,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "mapa-nl",
+      "split": "test",
+      "before": {
+        "documents": 5,
+        "mentions": 190,
+        "mention_recall": 0.0,
+        "precision": null,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 0.0,
+        "families": {
+          "PERSON": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 32516588,
+        "errors": 0
+      },
+      "after": {
+        "documents": 5,
+        "mentions": 190,
+        "mention_recall": 0.0,
+        "precision": null,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 0.0,
+        "families": {
+          "PERSON": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 28700654,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "mapa-pt",
+      "split": "test",
+      "before": {
+        "documents": 4,
+        "mentions": 38,
+        "mention_recall": 0.0,
+        "precision": null,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 0.0,
+        "families": {
+          "PERSON": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 28572291,
+        "errors": 0
+      },
+      "after": {
+        "documents": 4,
+        "mentions": 38,
+        "mention_recall": 0.0,
+        "precision": null,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 0.0,
+        "families": {
+          "PERSON": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.0,
+            0.0
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 31165246,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "meddocan-es",
+      "split": "test",
+      "before": {
+        "documents": 469,
+        "mentions": 4589,
+        "mention_recall": 0.10721290041403356,
+        "precision": 0.6111184210526316,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 9.169326143985257,
+        "families": {
+          "PERSON": 0.0,
+          "ADDRESS": 0.0,
+          "EMAIL": 0.9890590809628009,
+          "PHONE": 0.8333333333333334,
+          "ID": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0008213552361396304,
+        "intervals_95": {
+          "mention_recall": [
+            0.1033,
+            0.1111
+          ],
+          "precision": [
+            0.5992,
+            0.6224
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 8898563,
+        "errors": 0
+      },
+      "after": {
+        "documents": 469,
+        "mentions": 4589,
+        "mention_recall": 0.10721290041403356,
+        "precision": 0.6111184210526316,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 9.169326143985257,
+        "families": {
+          "PERSON": 0.0,
+          "ADDRESS": 0.0,
+          "EMAIL": 0.9890590809628009,
+          "PHONE": 0.8333333333333334,
+          "ID": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0008213552361396304,
+        "intervals_95": {
+          "mention_recall": [
+            0.1033,
+            0.1111
+          ],
+          "precision": [
+            0.5992,
+            0.6224
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 9332205,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "parlamint-fr",
+      "split": "test",
+      "before": {
+        "documents": 144,
+        "mentions": 1361,
+        "mention_recall": 0.9853049228508449,
+        "precision": null,
+        "doc_leak_rate": 0.06993006993006994,
+        "doc_literal_leak_rate": 0.013986013986013986,
+        "detections_per_10k_chars": 29.827612434270304,
+        "families": {
+          "PERSON": 0.9853049228508449
+        },
+        "org_id_touched": null,
+        "location_touched": null,
+        "intervals_95": {
+          "mention_recall": [
+            0.9744,
+            0.9943
+          ],
+          "doc_leak_rate": [
+            0.0284,
+            0.1128
+          ]
+        },
+        "chars_per_second": 4285503,
+        "errors": 0
+      },
+      "after": {
+        "documents": 144,
+        "mentions": 1361,
+        "mention_recall": 0.9853049228508449,
+        "precision": null,
+        "doc_leak_rate": 0.06993006993006994,
+        "doc_literal_leak_rate": 0.013986013986013986,
+        "detections_per_10k_chars": 29.827612434270304,
+        "families": {
+          "PERSON": 0.9853049228508449
+        },
+        "org_id_touched": null,
+        "location_touched": null,
+        "intervals_95": {
+          "mention_recall": [
+            0.9744,
+            0.9943
+          ],
+          "doc_leak_rate": [
+            0.0284,
+            0.1128
+          ]
+        },
+        "chars_per_second": 5150182,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "tab-en",
+      "split": "test",
+      "before": {
+        "documents": 55,
+        "mentions": 390,
+        "mention_recall": 0.8256410256410256,
+        "precision": 0.7826606161929782,
+        "doc_leak_rate": 0.32727272727272727,
+        "doc_literal_leak_rate": 0.21818181818181817,
+        "detections_per_10k_chars": 15.584589067781831,
+        "families": {
+          "PERSON": 0.8256410256410256
+        },
+        "org_id_touched": null,
+        "location_touched": 0.09345794392523364,
+        "intervals_95": {
+          "mention_recall": [
+            0.7447,
+            0.9029
+          ],
+          "precision": [
+            0.7237,
+            0.8288
+          ],
+          "doc_leak_rate": [
+            0.2,
+            0.4545
+          ]
+        },
+        "chars_per_second": 6270609,
+        "errors": 0
+      },
+      "after": {
+        "documents": 55,
+        "mentions": 390,
+        "mention_recall": 0.8282051282051283,
+        "precision": 0.7794640739862462,
+        "doc_leak_rate": 0.32727272727272727,
+        "doc_literal_leak_rate": 0.21818181818181817,
+        "detections_per_10k_chars": 15.69590756112313,
+        "families": {
+          "PERSON": 0.8282051282051283
+        },
+        "org_id_touched": null,
+        "location_touched": 0.09345794392523364,
+        "intervals_95": {
+          "mention_recall": [
+            0.7449,
+            0.9065
+          ],
+          "precision": [
+            0.7185,
+            0.8281
+          ],
+          "doc_leak_rate": [
+            0.2,
+            0.4545
+          ]
+        },
+        "chars_per_second": 6148871,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "boamp-fr",
+      "split": "unseen-2021",
+      "before": {
+        "documents": 1500,
+        "mentions": 15022,
+        "mention_recall": 0.9006124350951937,
+        "precision": 0.8787331330317447,
+        "doc_leak_rate": 0.48333333333333334,
+        "doc_literal_leak_rate": 0.112,
+        "detections_per_10k_chars": 22.037194962183715,
+        "families": {
+          "PERSON": 0.8615384615384616,
+          "ADDRESS": 0.8385023300658846,
+          "EMAIL": 0.9997391757955139,
+          "PHONE": 0.9053551912568306
+        },
+        "org_id_touched": 0.0,
+        "location_touched": 0.15247148288973383,
+        "intervals_95": {
+          "mention_recall": [
+            0.8922,
+            0.9094
+          ],
+          "precision": [
+            0.8596,
+            0.8972
+          ],
+          "doc_leak_rate": [
+            0.4573,
+            0.508
+          ]
+        },
+        "chars_per_second": 5245340,
+        "errors": 0
+      },
+      "after": {
+        "documents": 1500,
+        "mentions": 15022,
+        "mention_recall": 0.9014778325123153,
+        "precision": 0.8786731241938232,
+        "doc_leak_rate": 0.47933333333333333,
+        "doc_literal_leak_rate": 0.112,
+        "detections_per_10k_chars": 22.04223572227388,
+        "families": {
+          "PERSON": 0.8615384615384616,
+          "ADDRESS": 0.8405913546520971,
+          "EMAIL": 0.9997391757955139,
+          "PHONE": 0.9053551912568306
+        },
+        "org_id_touched": 0.0,
+        "location_touched": 0.15285171102661596,
+        "intervals_95": {
+          "mention_recall": [
+            0.8931,
+            0.9102
+          ],
+          "precision": [
+            0.8595,
+            0.8971
+          ],
+          "doc_leak_rate": [
+            0.454,
+            0.5033
+          ]
+        },
+        "chars_per_second": 5502108,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "bodacc-fr",
+      "split": "unseen-2026-08",
+      "before": {
+        "documents": 2689,
+        "mentions": 14195,
+        "mention_recall": 0.9764001408946812,
+        "precision": 0.9916385354453389,
+        "doc_leak_rate": 0.10189661584232057,
+        "doc_literal_leak_rate": 0.05950167348456675,
+        "detections_per_10k_chars": 72.63202894629347,
+        "families": {
+          "PERSON": 0.9803045917783122,
+          "ADDRESS": 0.9501766784452297,
+          "ID": 0.9916413373860182
+        },
+        "org_id_touched": 0.011235955056179775,
+        "location_touched": 0.004212945231711987,
+        "intervals_95": {
+          "mention_recall": [
+            0.9734,
+            0.9793
+          ],
+          "precision": [
+            0.99,
+            0.9931
+          ],
+          "doc_leak_rate": [
+            0.0911,
+            0.1134
+          ]
+        },
+        "chars_per_second": 2243186,
+        "errors": 0
+      },
+      "after": {
+        "documents": 2689,
+        "mentions": 14195,
+        "mention_recall": 0.9764705882352941,
+        "precision": 0.9916389696717907,
+        "doc_leak_rate": 0.10152473038304202,
+        "doc_literal_leak_rate": 0.05912978802528821,
+        "detections_per_10k_chars": 72.65105003545055,
+        "families": {
+          "PERSON": 0.9803045917783122,
+          "ADDRESS": 0.950530035335689,
+          "ID": 0.9916413373860182
+        },
+        "org_id_touched": 0.011235955056179775,
+        "location_touched": 0.004212945231711987,
+        "intervals_95": {
+          "mention_recall": [
+            0.9735,
+            0.9793
+          ],
+          "precision": [
+            0.99,
+            0.9931
+          ],
+          "doc_leak_rate": [
+            0.0907,
+            0.1131
+          ]
+        },
+        "chars_per_second": 2466852,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "german-ler-de",
+      "split": "with-fr",
+      "before": {
+        "documents": 334,
+        "mentions": 337,
+        "mention_recall": 0.20771513353115728,
+        "precision": 0.054242749731471536,
+        "doc_leak_rate": 0.864321608040201,
+        "doc_literal_leak_rate": 0.48743718592964824,
+        "detections_per_10k_chars": 7.813649941159627,
+        "families": {
+          "PERSON": 0.21739130434782608,
+          "ADDRESS": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.03862660944206009,
+        "intervals_95": {
+          "mention_recall": [
+            0.1614,
+            0.2507
+          ],
+          "precision": [
+            0.04,
+            0.0708
+          ],
+          "doc_leak_rate": [
+            0.8154,
+            0.9082
+          ]
+        },
+        "chars_per_second": 4187348,
+        "errors": 0
+      },
+      "after": {
+        "documents": 334,
+        "mentions": 337,
+        "mention_recall": 0.22255192878338279,
+        "precision": 0.05385996409335727,
+        "doc_leak_rate": 0.8592964824120602,
+        "doc_literal_leak_rate": 0.48743718592964824,
+        "detections_per_10k_chars": 7.90152604171625,
+        "families": {
+          "PERSON": 0.2329192546583851,
+          "ADDRESS": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.04291845493562232,
+        "intervals_95": {
+          "mention_recall": [
+            0.1759,
+            0.2667
+          ],
+          "precision": [
+            0.04,
+            0.0701
+          ],
+          "doc_leak_rate": [
+            0.8111,
+            0.9029
+          ]
+        },
+        "chars_per_second": 4723222,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "mapa-de",
+      "split": "with-fr",
+      "before": {
+        "documents": 12,
+        "mentions": 337,
+        "mention_recall": 0.3056379821958457,
+        "precision": 0.1437793427230047,
+        "doc_leak_rate": 0.8888888888888888,
+        "doc_literal_leak_rate": 0.7777777777777778,
+        "detections_per_10k_chars": 23.006117939664456,
+        "families": {
+          "PERSON": 0.30654761904761907,
+          "ADDRESS": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.00641025641025641,
+        "intervals_95": {
+          "mention_recall": [
+            0.1739,
+            0.4392
+          ],
+          "precision": [
+            0.1057,
+            0.1786
+          ],
+          "doc_leak_rate": [
+            0.6667,
+            1.0
+          ]
+        },
+        "chars_per_second": 8683985,
+        "errors": 0
+      },
+      "after": {
+        "documents": 12,
+        "mentions": 337,
+        "mention_recall": 0.3353115727002967,
+        "precision": 0.14976262408286578,
+        "doc_leak_rate": 0.8888888888888888,
+        "doc_literal_leak_rate": 0.7777777777777778,
+        "detections_per_10k_chars": 23.405838135527354,
+        "families": {
+          "PERSON": 0.33630952380952384,
+          "ADDRESS": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.00641025641025641,
+        "intervals_95": {
+          "mention_recall": [
+            0.224,
+            0.4504
+          ],
+          "precision": [
+            0.1102,
+            0.1828
+          ],
+          "doc_leak_rate": [
+            0.6667,
+            1.0
+          ]
+        },
+        "chars_per_second": 7572417,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "mapa-es",
+      "split": "with-fr",
+      "before": {
+        "documents": 9,
+        "mentions": 271,
+        "mention_recall": 0.3173431734317343,
+        "precision": 0.5517711171662125,
+        "doc_leak_rate": 0.8333333333333334,
+        "doc_literal_leak_rate": 0.8333333333333334,
+        "detections_per_10k_chars": 5.179055666119665,
+        "families": {
+          "PERSON": 0.3173431734317343
+        },
+        "org_id_touched": null,
+        "location_touched": 0.017699115044247787,
+        "intervals_95": {
+          "mention_recall": [
+            0.2372,
+            0.4447
+          ],
+          "precision": [
+            0.3498,
+            0.6671
+          ],
+          "doc_leak_rate": [
+            0.5,
+            1.0
+          ]
+        },
+        "chars_per_second": 11537819,
+        "errors": 0
+      },
+      "after": {
+        "documents": 9,
+        "mentions": 271,
+        "mention_recall": 0.3173431734317343,
+        "precision": 0.5491525423728814,
+        "doc_leak_rate": 0.8333333333333334,
+        "doc_literal_leak_rate": 0.8333333333333334,
+        "detections_per_10k_chars": 5.208151484468652,
+        "families": {
+          "PERSON": 0.3173431734317343
+        },
+        "org_id_touched": null,
+        "location_touched": 0.017699115044247787,
+        "intervals_95": {
+          "mention_recall": [
+            0.2372,
+            0.4447
+          ],
+          "precision": [
+            0.3447,
+            0.665
+          ],
+          "doc_leak_rate": [
+            0.5,
+            1.0
+          ]
+        },
+        "chars_per_second": 9809794,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "mapa-it",
+      "split": "with-fr",
+      "before": {
+        "documents": 12,
+        "mentions": 110,
+        "mention_recall": 0.38181818181818183,
+        "precision": 0.23537906137184114,
+        "doc_leak_rate": 0.8888888888888888,
+        "doc_literal_leak_rate": 0.7777777777777778,
+        "detections_per_10k_chars": 8.478233388983092,
+        "families": {
+          "PERSON": 0.3853211009174312,
+          "ADDRESS": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.049079754601226995,
+        "intervals_95": {
+          "mention_recall": [
+            0.3048,
+            0.4822
+          ],
+          "precision": [
+            0.0979,
+            0.4122
+          ],
+          "doc_leak_rate": [
+            0.6667,
+            1.0
+          ]
+        },
+        "chars_per_second": 12202226,
+        "errors": 0
+      },
+      "after": {
+        "documents": 12,
+        "mentions": 110,
+        "mention_recall": 0.4090909090909091,
+        "precision": 0.24893617021276596,
+        "doc_leak_rate": 0.8888888888888888,
+        "doc_literal_leak_rate": 0.6666666666666666,
+        "detections_per_10k_chars": 8.630798000095897,
+        "families": {
+          "PERSON": 0.41284403669724773,
+          "ADDRESS": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.049079754601226995,
+        "intervals_95": {
+          "mention_recall": [
+            0.3158,
+            0.4928
+          ],
+          "precision": [
+            0.1003,
+            0.4379
+          ],
+          "doc_leak_rate": [
+            0.6667,
+            1.0
+          ]
+        },
+        "chars_per_second": 9683916,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "mapa-nl",
+      "split": "with-fr",
+      "before": {
+        "documents": 12,
+        "mentions": 363,
+        "mention_recall": 0.31129476584022037,
+        "precision": 0.37943809817845014,
+        "doc_leak_rate": 0.8888888888888888,
+        "doc_literal_leak_rate": 0.7777777777777778,
+        "detections_per_10k_chars": 12.948657685383093,
+        "families": {
+          "PERSON": 0.31129476584022037
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.2532,
+            0.4426
+          ],
+          "precision": [
+            0.2592,
+            0.5268
+          ],
+          "doc_leak_rate": [
+            0.6667,
+            1.0
+          ]
+        },
+        "chars_per_second": 9539615,
+        "errors": 0
+      },
+      "after": {
+        "documents": 12,
+        "mentions": 363,
+        "mention_recall": 0.31955922865013775,
+        "precision": 0.38265931372549017,
+        "doc_leak_rate": 0.8888888888888888,
+        "doc_literal_leak_rate": 0.7777777777777778,
+        "detections_per_10k_chars": 13.037347121584348,
+        "families": {
+          "PERSON": 0.31955922865013775
+        },
+        "org_id_touched": null,
+        "location_touched": 0.0,
+        "intervals_95": {
+          "mention_recall": [
+            0.2608,
+            0.4501
+          ],
+          "precision": [
+            0.2602,
+            0.5296
+          ],
+          "doc_leak_rate": [
+            0.6667,
+            1.0
+          ]
+        },
+        "chars_per_second": 11079770,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "mapa-pt",
+      "split": "with-fr",
+      "before": {
+        "documents": 12,
+        "mentions": 378,
+        "mention_recall": 0.38095238095238093,
+        "precision": 0.3143947900291938,
+        "doc_leak_rate": 0.7777777777777778,
+        "doc_literal_leak_rate": 0.7777777777777778,
+        "detections_per_10k_chars": 14.813705740367688,
+        "families": {
+          "PERSON": 0.384,
+          "ADDRESS": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.10294117647058823,
+        "intervals_95": {
+          "mention_recall": [
+            0.3041,
+            0.49
+          ],
+          "precision": [
+            0.2529,
+            0.4192
+          ],
+          "doc_leak_rate": [
+            0.5,
+            1.0
+          ]
+        },
+        "chars_per_second": 11751026,
+        "errors": 0
+      },
+      "after": {
+        "documents": 12,
+        "mentions": 378,
+        "mention_recall": 0.41798941798941797,
+        "precision": 0.3175087108013937,
+        "doc_leak_rate": 0.7777777777777778,
+        "doc_literal_leak_rate": 0.7777777777777778,
+        "detections_per_10k_chars": 15.222046786809678,
+        "families": {
+          "PERSON": 0.42133333333333334,
+          "ADDRESS": 0.0
+        },
+        "org_id_touched": null,
+        "location_touched": 0.10294117647058823,
+        "intervals_95": {
+          "mention_recall": [
+            0.3473,
+            0.5238
+          ],
+          "precision": [
+            0.2522,
+            0.4366
+          ],
+          "doc_leak_rate": [
+            0.5,
+            1.0
+          ]
+        },
+        "chars_per_second": 10530203,
+        "errors": 0
+      }
+    },
+    {
+      "corpus": "meddocan-es",
+      "split": "with-fr",
+      "before": {
+        "documents": 1000,
+        "mentions": 9822,
+        "mention_recall": 0.4984728161270617,
+        "precision": 0.6017126732230667,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 40.69295757676069,
+        "families": {
+          "PERSON": 0.9526420737786641,
+          "ADDRESS": 0.004095962551199532,
+          "EMAIL": 0.9937434827945777,
+          "PHONE": 0.8248175182481752,
+          "ID": 0.00045004500450045
+        },
+        "org_id_touched": null,
+        "location_touched": 0.36042739935126883,
+        "intervals_95": {
+          "mention_recall": [
+            0.4936,
+            0.5029
+          ],
+          "precision": [
+            0.594,
+            0.6093
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 3893221,
+        "errors": 0
+      },
+      "after": {
+        "documents": 1000,
+        "mentions": 9822,
+        "mention_recall": 0.4984728161270617,
+        "precision": 0.6010591535144639,
+        "doc_leak_rate": 1.0,
+        "doc_literal_leak_rate": 1.0,
+        "detections_per_10k_chars": 40.75528511559508,
+        "families": {
+          "PERSON": 0.9526420737786641,
+          "ADDRESS": 0.004095962551199532,
+          "EMAIL": 0.9937434827945777,
+          "PHONE": 0.8248175182481752,
+          "ID": 0.00045004500450045
+        },
+        "org_id_touched": null,
+        "location_touched": 0.3608090059149017,
+        "intervals_95": {
+          "mention_recall": [
+            0.4936,
+            0.5029
+          ],
+          "precision": [
+            0.5931,
+            0.6087
+          ],
+          "doc_leak_rate": [
+            1.0,
+            1.0
+          ]
+        },
+        "chars_per_second": 3862247,
+        "errors": 0
+      }
+    }
+  ]
+}

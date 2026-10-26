@@ -1,0 +1,82 @@
+{
+  "prenoms": {
+    "url": "https://www.insee.fr/fr/statistiques/fichier/8595130/prenoms-2025-nat_csv.zip",
+    "sha256": "4c3662bbc75a021a2203b9bed0beff7e85c7928779b88602814ed407cfee512e",
+    "bytes": 4348158,
+    "licence": "Licence Ouverte / Open Licence 2.0 (Etalab)",
+    "attribution": "Source : Insee, Fichier des prénoms, édition 2025 (naissances 1900-2025)",
+    "built": "2026-10-24"
+  },
+  "noms": {
+    "url": "https://www.insee.fr/fr/statistiques/fichier/3536630/noms2008nat_txt.zip",
+    "sha256": "c8693ff69bed32621250f1fc06e71b686e72bba1dbd771055e431d305527cfba",
+    "bytes": 3003271,
+    "licence": "Licence Ouverte / Open Licence 2.0 (Etalab)",
+    "attribution": "Source : Insee, Fichier des noms de famille, édition 2008 (naissances 1891-2000)",
+    "built": "2026-10-24"
+  },
+  "hexasmal": {
+    "url": "https://data.laposte.fr/data-fair/api/v1/datasets/laposte-hexasmal/raw",
+    "sha256": "f921ac020ca3b9efebd8f0d01782555fb70d63d1ae36535109c67e4a74bd6e22",
+    "bytes": 1555485,
+    "licence": "Licence Ouverte / Open Licence 2.0 (Etalab)",
+    "attribution": "Source : La Poste, Base officielle des codes postaux",
+    "built": "2026-10-24"
+  },
+  "cog_communes": {
+    "url": "https://www.insee.fr/fr/statistiques/fichier/8740222/v_commune_2026.csv",
+    "sha256": "7be1153de3a63df48fa0ca77f8490c8a0c5c9c4eb12f5cec1ca7f70b0237b1d3",
+    "bytes": 3565935,
+    "licence": "Licence Ouverte / Open Licence 2.0 (Etalab)",
+    "attribution": "Source : Insee, Code officiel géographique 2026",
+    "built": "2026-10-24"
+  },
+  "cog_departements": {
+    "url": "https://www.insee.fr/fr/statistiques/fichier/8740222/v_departement_2026.csv",
+    "sha256": "513900ca23edc682ef9b912d7bfc317129eac3a7d71ff19bc22b40ea4838e6eb",
+    "bytes": 6076,
+    "licence": "Licence Ouverte / Open Licence 2.0 (Etalab)",
+    "attribution": "Source : Insee, Code officiel géographique 2026",
+    "built": "2026-10-24"
+  },
+  "cog_regions": {
+    "url": "https://www.insee.fr/fr/statistiques/fichier/8740222/v_region_2026.csv",
+    "sha256": "d903566d9c0d263389d279baea6761917b7460749a07bec8ba37dd8f2ff7d98a",
+    "bytes": 1245,
+    "licence": "Licence Ouverte / Open Licence 2.0 (Etalab)",
+    "attribution": "Source : Insee, Code officiel géographique 2026",
+    "built": "2026-10-24"
+  },
+  "cog_arrondissements": {
+    "url": "https://www.insee.fr/fr/statistiques/fichier/8740222/v_arrondissement_2026.csv",
+    "sha256": "1cbd787e52dc8b758167ef1d447615e19d194f10284547fb06b4687dc13a4a80",
+    "bytes": 21989,
+    "licence": "Licence Ouverte / Open Licence 2.0 (Etalab)",
+    "attribution": "Source : Insee, Code officiel géographique 2026",
+    "built": "2026-10-24"
+  },
+  "cog_pays": {
+    "url": "https://www.insee.fr/fr/statistiques/fichier/8740222/v_pays_territoire_2026.csv",
+    "sha256": "0dd9d1e83cfba3229b77444747fab0bba7d0ac1acec0442e8e5123c72fa1502d",
+    "bytes": 18419,
+    "licence": "Licence Ouverte / Open Licence 2.0 (Etalab)",
+    "attribution": "Source : Insee, Code officiel géographique 2026",
+    "built": "2026-10-24"
+  },
+  "lexemes": {
+    "url": "https://query.wikidata.org/sparql",
+    "sha256": "6a9b06cb6bf811a0b20317e36fc51a8f8c54bc1625e7035b7632d895fda01f30",
+    "bytes": 14145855,
+    "licence": "CC0 1.0 (Wikidata)",
+    "attribution": "Wikidata, lexèmes français (formes)",
+    "built": "2026-10-24"
+  },
+  "lexemes_en": {
+    "url": "https://query.wikidata.org/sparql",
+    "sha256": "3bebdd8b54e5bc2adc9542ad6ec5a239e3814afe581ab1f75982b64b6e82b65f",
+    "bytes": 6982713,
+    "licence": "CC0 1.0 (Wikidata)",
+    "attribution": "Wikidata, lexèmes anglais (formes)",
+    "built": "2026-10-24"
+  }
+}

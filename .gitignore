@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.venv-*/
+.pytest_cache/
+.ruff_cache/
+.hypothesis/
+*.egg-info/
+.coverage
+htmlcov/
+
+# Constructions locales : roues, archives, image Docker, paquet MCPB / local builds
+dist/
+build/
+# Sorties de compilation Rust (noyau et démon du site) / Rust build outputs (core and site daemon)
+rust/target/
+site/target/
+
+# Modèles téléchargés (tiers, voir models/MODEL_LICENSES.yaml) / downloaded third-party models
+models/cache/
+# Jeux publics téléchargés : datasets/public/.gitignore / downloaded public datasets: see that file
+
+# Sorties de benchmark : les rapports de scores de benchmarks/results/ sont publiés ; un essai local
+# s'écrit ailleurs (--out) ou dans ce dossier, à ne pas valider. Benchmark outputs: the score reports in
+# benchmarks/results/ are published; local trial runs go elsewhere (--out) and are not committed.
+benchmarks/results/trial-*/
+benchmarks/results/*.tmp
+
+# Planches de relecture de la vidéo (régénérées par video/render.py) / video review sheets (regenerated)
+video/out/review/
+
+# Outils locaux / local tools
+.playwright-mcp/
+.claude/
+.vscode/
+.idea/
+
+# Pas de GitHub Actions pour l'instant : les workflows restent hors du dépôt public.
+# No GitHub Actions for now: workflows stay out of the public repository.
+.github/workflows/
+
+# Secrets et fichiers propres au poste : jamais dans le dépôt / secrets and machine files, never committed
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+local-header

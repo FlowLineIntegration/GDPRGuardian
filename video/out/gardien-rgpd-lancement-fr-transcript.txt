@@ -1,0 +1,84 @@
+Gardien RGPD · vidéo de lancement · tout le texte à l’écran, dans l’ordre
+Vidéo muette (aucune voix, aucune musique) : ce fichier reprend chaque texte au moment où il apparaît.
+160.8 s · 1920 x 1080 · 30 fps
+
+[00:00] Gardien RGPD
+[00:00] M. Jean Dupont, 06 12 34 56 78
+[00:02] M. [PERSONNE_1], [TEL_1]
+[00:03] Anonymisez vos documents, irréversiblement, avant l’IA.
+[00:05] Le meilleur outil open source pour le RGPD et l’IA !
+[00:06] À vous de juger.
+[00:06] gardienrgpd.fr · gdprguardian.com
+[00:12] Chaque jour, de vrais documents partent vers l’IA.
+[00:12] Contrat — Jean Dupont
+[00:12] Dossier RH — FR76 3000 6000
+[00:12] Dossier médical — Diabète de type 2
+[00:12] E-mail — c.martin@exemple.fr
+[00:15] Assistant d’IA
+[00:17] Les données personnelles arrivent chez un tiers.
+[00:21] Les réponses actuelles ne suffisent pas.
+[00:21] Caviardage manuel — Lent, et des oublis.
+[00:23] Pseudonymisation réversible — La table de correspondance reste une donnée personnelle.
+[00:26] [CENSURÉ] partout — L’IA perd le sens.
+[00:28] Boîte noire — Rien n’explique le masquage.
+[00:32] Retirer les noms, garder le sens.
+[00:32] M. Jean Dupont · jean.dupont@exemple.fr · 06 12 34 56 78 / IBAN FR76 3000 6000 0112 3456 7890 189 / M. Dupont rappellera Mme Claire Martin. / DUPONT Jean réglera la facture n° 2026-0042.
+[00:33] sortie réelle, version 1.0.0
+[00:33] Clé aléatoire de 256 bits, propre à ce document
+[00:38] M. [PERSONNE_1] · [EMAIL_1] · [TEL_1] / IBAN [IBAN_1] / M. [PERSONNE_1] rappellera Mme [PERSONNE_2]. / [PERSONNE_1] réglera la facture n° 2026-0042.
+[00:38] Clé détruite : aucun retour possible.
+[00:39] Même personne, même balise.
+[00:42] Guillaume embête Nadège. Nadège frappe Guillaume.
+[00:45] Masquage naïf — [Personne] embête [Personne]. [Personne] frappe [Personne].
+[00:45] Qui frappe qui ?
+[00:48] Gardien RGPD — [PERSONNE_1] embête [PERSONNE_2]. [PERSONNE_2] frappe [PERSONNE_1].
+[00:49] Les rôles survivent, les identités non.
+[00:54] Six principes
+[00:54] Irréversible — Clé de 256 bits détruite, aucune table.
+[00:57] Cohérent — Une personne, une balise.
+[00:58] Vérifié — Clés de contrôle officielles.
+[01:00] Explicable — Une règle par balise, sans LLM.
+[01:03] Rapide — 2 Ko en 0,5 ms, sur CPU.
+[01:05] Rien de conservé — Tout en mémoire.
+[01:09] Trois accès, un moteur
+[01:09] Site web — Déposez ou collez, puis téléchargez.
+[01:09] MCP — Claude et les agents, sans clé.
+[01:10] API REST — /v1/anonymize/text /v1/anonymize/file
+[01:15] Gardien RGPD — Un processus neuf par requête, rien de gardé.
+[01:18] Markdown anonymisé
+[01:19] Votre IA
+[01:20] Par MCP, envoyez le fichier : il ne passe pas par le modèle. Un texte collé est déjà parti.
+[01:27] 100 % local : plugin Claude, paquet Python, Docker sans réseau.
+[01:31] Copiez le dépôt, faites votre version.
+[01:31] $ git clone https://github.com/FlowLineIntegration/GDPRGuardian
+[01:33] Code publié à l’ouverture du dépôt public.
+[01:34] Licence MIT — Utilisez, modifiez, redistribuez.
+[01:37] Vos règles — Dans l’appel, jamais conservées. — CLT-204518 → [CLIENT_ID_1]
+[01:40] Votre serveur — docker compose deploy/README.md
+[01:41] Contribuez — Améliorez, proposez : /issues
+[01:45] Testé, mesuré, publié
+[01:45] 3 700+ — tests automatisés, Windows et Linux
+[01:47] 51 — façons de déguiser un identifiant
+[01:49] 99,2 % — du texte à masquer l’est (540 documents synthétiques : le meilleur cas)
+[01:54] 15 — jeux de textes réels, 8 478 documents
+[01:56] 35 à 93 % — des mentions masquées, textes réels français, selon le corpus (1.0.0)
+[02:00] 79 → 98 % — des mentions masquées au BODACC (données inédites) : 1.0.0, puis règles du 25 octobre
+[02:06] Comment nous nous notons
+[02:06] Indice de confiance
+[02:07] Mesure en cours
+[02:08] Part des documents sans identifiant direct lisible.
+[02:09] Protocole écrit avant la mesure : 1 019 385 documents, dont 8 478 réels, par le vrai service.
+[02:16] Limites connues
+[02:16] Noms allemands, espagnols, italiens, néerlandais, portugais : non détectés.
+[02:19] Presse ancienne, textes juridiques européens (noms en initiales) : faibles.
+[02:22] Une première barrière, pas une certification RGPD.
+[02:25] Le protocole : gardienrgpd.fr/#protocole
+[02:28] Gardien RGPD
+[02:29] Le meilleur outil open source pour le RGPD et l’IA !
+[02:32] À vous de juger.
+[02:34] gardienrgpd.fr · gdprguardian.com
+[02:34] github.com/FlowLineIntegration/GDPRGuardian
+[02:35] Offert par Flow Line Intégration
+[02:36] Guillaume CLEMENT, CTO Data & IA
+[02:36] Conception : Claude Design
+[02:36] Licence MIT · version 1.0.0

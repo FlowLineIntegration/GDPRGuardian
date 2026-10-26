@@ -1,0 +1,43 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.FlowLineIntegration/gdprguardian",
+  "title": "GDPR Guardian",
+  "description": "Irreversible GDPR anonymisation before AI: free public MCP (no key) or fully local, no network.",
+  "version": "1.0.0",
+  "repository": {
+    "url": "https://github.com/FlowLineIntegration/GDPRGuardian",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "pypi",
+      "registryBaseUrl": "https://pypi.org",
+      "identifier": "gdprguardian-mcp",
+      "version": "1.0.0",
+      "runtimeHint": "uvx",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "GDPRGUARDIAN_ALLOWED_DIRS",
+          "description": "Folders the server may read, separated by ';' on Windows and ':' elsewhere. Dossiers autorisés.",
+          "isRequired": true,
+          "isSecret": false,
+          "format": "string",
+          "placeholder": "/home/me/Documents/dossiers"
+        }
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://api.gdprguardian.com/mcp"
+    },
+    {
+      "type": "streamable-http",
+      "url": "https://api.gardienrgpd.fr/mcp"
+    }
+  ]
+}

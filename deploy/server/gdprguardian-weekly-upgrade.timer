@@ -1,0 +1,13 @@
+# Gardien RGPD · GDPR Guardian : /etc/systemd/system/gdprguardian-weekly-upgrade.timer. Chaque samedi à 2 h (heure
+# de Paris) : sécurité et correctifs stables, à la place du passage de sécurité de la nuit. Every Saturday at 2 am
+# (Paris time): security and stable updates, instead of that night's security run.
+[Unit]
+Description=Gardien RGPD - GDPR Guardian Saturday updates at 2 am (Paris time)
+
+[Timer]
+OnCalendar=Sat *-*-* 02:00 Europe/Paris
+RandomizedDelaySec=0
+Persistent=true
+
+[Install]
+WantedBy=timers.target
