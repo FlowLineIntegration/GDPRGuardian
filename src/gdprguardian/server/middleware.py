@@ -51,6 +51,9 @@ _CONTENT = {("POST", "/v1/anonymize/text"): TEXT, ("POST", "/v1/detect"): TEXT, 
 # Requêtes à contenu qui comptent aussi dans le seau bon marché (sans travailleur la plupart du temps).
 # Content requests also counted in the cheap bucket (mostly no worker).
 _CHEAP_CONTENT = frozenset({"/mcp", "/v1/uploads"})
+# Délestage sur l'attente estimée reporté à la prise d'un travailleur (`Service._process`).
+# Wait-based shedding deferred until a worker is taken.
+_DEFERRED_SHED = frozenset({"/mcp", "/v1/uploads"})
 # Sec-Fetch-Site admis : même origine (cockpit) ou navigation directe ; absent : client hors navigateur.
 # Allowed Sec-Fetch-Site: same origin (cockpit) or direct navigation; absent: a non-browser client.
 _FETCH_SITES = frozenset({"same-origin", "none"})
@@ -320,8 +323,11 @@ class GateMiddleware:
         # Taille annoncée, plafonnée à la limite de la route (au-delà : 413 plus loin) ; corps « chunked » : la
         # limite. Declared size, capped at the route's limit (beyond: 413 further in); chunked body: the limit.
         size = min(declared, limit) if declared is not None and declared >= 0 else limit
+        # MCP : délestage sur l'attente reporté à la prise d'un travailleur ; suivre un envoi en cours ne doit pas
+        # être refusé parce que ce même client occupe un travailleur. MCP: wait-based shedding deferred until a worker
+        # is taken; polling an upload in progress must not be refused because the same client holds a worker.
         decision = self.limiter.admit(client, cheap=content is None or route in _CHEAP_CONTENT, content=content,
-                                      size=size)
+                                      size=size, shed=route not in _DEFERRED_SHED)
         if decision.status:
             error: ServiceError = (RateLimited(retry_after=decision.retry_after) if decision.status == 429
                                    else ServiceBusy(retry_after=decision.retry_after))

@@ -242,7 +242,7 @@ def test_a_converted_text_that_cannot_fit_is_refused_before_the_engine(chars: in
     # Plafond 1 000 : 2 500 caractères convertis (plus du double) sont refusés avant le moteur ; 1 500, après.
     # Cap 1,000: 2,500 converted characters (over twice) are refused before the engine; 1,500, after it.
     with pytest.raises(DocumentTooLargeError, match="Résultat trop volumineux"):
-        document = isolation._anonymize_document(data, "document.txt", spy, limits, 1_000)
+        document, _ = isolation._anonymize_document(data, "document.txt", spy, limits, 1_000)
         isolation._check_output(document.markdown, 1_000)
     assert spy.calls == engine_calls
 
@@ -254,10 +254,20 @@ def test_the_capped_engine_changes_nothing_under_the_cap() -> None:
     limits = DocumentOptions(sandbox=False)
     engine = AnonymizeOptions().anonymizer()
     direct = anonymize_document(data, "document.txt", engine, limits)
-    capped = isolation._anonymize_document(data, "document.txt", engine, limits, 1_000_000)
+    capped, score = isolation._anonymize_document(data, "document.txt", engine, limits, 1_000_000)
     assert capped.markdown == direct.markdown and capped.kind == direct.kind
+    assert score is None  # qualité mesurée sur les seuls PDF / quality measured on PDFs only
     assert {key: value for key, value in capped.report.items() if key != "timings_ms"} == {
         key: value for key, value in direct.report.items() if key != "timings_ms"}
+
+
+def test_the_quality_score_is_measured_for_pdfs_only() -> None:
+    text = "Contrat de M. Jean Dupont, signé à Lyon le premier avril, pour la mission de conseil prévue.\n" * 20
+    engine = AnonymizeOptions().anonymizer()
+    pdf = isolation._CappedEngine(engine, None, collect=False, measure=True)
+    other = isolation._CappedEngine(engine, None, collect=False)
+    assert pdf.anonymize(text).text == other.anonymize(text).text
+    assert pdf.quality is not None and pdf.quality < 0.12 and other.quality is None
 
 
 # --- messages : la limite nommée / messages: the limit named ------------------------------------------------------

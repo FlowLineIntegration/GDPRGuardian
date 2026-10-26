@@ -40,13 +40,21 @@ def test_full_flow_over_http_and_principal_isolation(client: TestClient) -> None
     assert KEY_A not in str(ticket)
     put = client.put(ticket["upload_url"].removeprefix("http://testserver"), headers=AUTH_A,
                      content=SENSITIVE_TEXT.encode())
-    assert put.status_code == 200
+    assert put.status_code == 202 and put.json()["stage"] == "queued"
+    assert f"get_anonymized(upload_id='{ticket['upload_id']}')" in put.json()["next_step"]
     stolen = call(client, AUTH_B, "get_anonymized", {"upload_id": ticket["upload_id"]})
     assert stolen["isError"] is True and "not_found" in stolen["content"][0]["text"]
     page = call(client, AUTH_A, "get_anonymized", {"upload_id": ticket["upload_id"]})
     assert page["isError"] is False
     assert "[NIR_1]" in page["content"][0]["text"] and NIR not in page["content"][0]["text"]
-    assert page["structuredContent"]["deleted"] is True
+    structured = page["structuredContent"]
+    assert structured["deleted"] is True and structured["stage"] == "done"
+    # Le texte et le rapport sont aussi dans le contenu structuré / text and report in structured content too.
+    assert "[NIR_1]" in structured["markdown"] and NIR not in structured["markdown"]
+    assert structured["report"]["entities"]["NIR"] == 1 and isinstance(structured["report"]["warnings"], list)
+    # Relecture possible pendant le délai de grâce (réponse perdue) / re-read during the grace period.
+    again = call(client, AUTH_A, "get_anonymized", {"upload_id": ticket["upload_id"]})
+    assert again["isError"] is False and again["content"][0]["text"].count("[NIR_1]") >= 1
 
 
 def test_upload_made_through_rest_is_readable_through_mcp(client: TestClient) -> None:

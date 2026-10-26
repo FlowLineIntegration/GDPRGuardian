@@ -18,6 +18,22 @@ use super::{
 /// Recherche de fin de ligne bornée (`LINE_WINDOW`) / bounded line lookup.
 const LINE_WINDOW: usize = 512;
 
+/// `_vocab.PLACE_VERBS` : verbes de lieu, seulement pour un nom de lieu repris d'une personne trouvée ailleurs.
+/// Place verbs, only for a place name repeated from a person found elsewhere.
+const PLACE_VERBS: &[&str] = &[
+    "quitter",
+    "quitte",
+    "quittent",
+    "quitté",
+    "quittée",
+    "quittera",
+    "rejoindre",
+    "rejoint",
+    "rejoindra",
+    "regagner",
+    "regagne",
+];
+
 /// Style d'une ligne : (Casse De Titre, capitales), mis en cache par début de ligne / per line start.
 type StyleCache = PositionMap<(bool, bool)>;
 
@@ -237,7 +253,7 @@ impl Doc<'_> {
             let accepted = (2..=3).contains(&found.len()) || (single && initial) || run.addressed;
             return if plain && accepted { 0.75 } else { 0.0 };
         };
-        if confirmed_only && single && first.amb() == AMB_ENTITY && self.after_locative(start) {
+        if confirmed_only && single && first.amb() == AMB_ENTITY && self.after_locative(start, true) {
             return 0.0;
         }
         if run.evidence == WEAK && single && !((first.given() > 0 && first.amb() != AMB_ENTITY) || first.solid()) {
@@ -288,7 +304,7 @@ impl Doc<'_> {
         } else {
             e.entry.has(flag::COMMUNE)
         };
-        if self.after_locative(e.start) && (e.amb() != AMB_NONE || commune) {
+        if self.after_locative(e.start, false) && (e.amb() != AMB_NONE || commune) {
             return 0.0; // « à Albert », « en Lorraine »
         }
         if commune && e.given() == 0 && e.surname() < COMMUNE_SURNAME_MIN {
@@ -398,8 +414,10 @@ impl Doc<'_> {
 
     /// `_after_locative` : « à Albert », « en Lorraine » (texte d'origine : « à » et « a » diffèrent).
     /// After a place preposition (original text: "à" and "a" differ).
-    fn after_locative(&self, pos: usize) -> bool {
-        self.det.vocab.get(&self.previous_word(pos)).has(flag::LOCATIVE)
+    fn after_locative(&self, pos: usize, verbs: bool) -> bool {
+        let word = self.previous_word(pos);
+        self.det.vocab.get(&word).has(flag::LOCATIVE)
+            || (verbs && PLACE_VERBS.iter().any(|verb| word.iter().copied().eq(verb.chars())))
     }
 
     /// `_line_style` : (ligne en Casse De Titre, ligne en capitales). Un titre capitalise des mots courants ;

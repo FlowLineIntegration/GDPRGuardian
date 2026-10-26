@@ -164,6 +164,13 @@ def test_validation_errors_never_echo_input(client: TestClient, payload: dict[st
         assert secret not in response.text
 
 
+@pytest.mark.parametrize(("payload", "allowed"), [({"profile": "paranoid"}, "profile: fast | standard | strict"),
+                                                  ({"label_language": "de"}, "label_language: fr | en | auto")])
+def test_closed_options_list_their_allowed_values(client: TestClient, payload: dict[str, str], allowed: str) -> None:
+    response = client.post("/v1/anonymize/text", headers=AUTH_A, json={"text": "x", **payload})
+    assert response.status_code == 422 and response.json()["error"]["allowed"] == [allowed]
+
+
 def test_validation_errors_never_echo_client_keys(client: TestClient) -> None:
     # Une clé JSON inventée peut contenir une donnée personnelle / a made-up JSON key may carry personal data.
     response = client.post("/v1/anonymize/text", headers=AUTH_A, json={SENSITIVE_TEXT: "x", "text": "y"})
@@ -236,7 +243,11 @@ def test_anonymize_file_multipart(client: TestClient) -> None:
     body = response.json()
     assert body["kind"] == "txt" and "document.txt" not in body["markdown"]
     assert NIR not in body["markdown"] and "[NIR_1]" in body["markdown"]
-    assert body["warnings"] == ["note"] and body["dropped"] == {"comments": 1}
+    # Contenu écarté signalé en clair, aussi dans report.warnings / dropped content told, also in report.warnings.
+    dropped_warning = ("1 commentaire(s) écarté(s), ni anonymisé(s) ni rendu(s) / 1 comment(s) dropped, neither "
+                       "anonymised nor returned")
+    assert body["warnings"] == ["note", dropped_warning] and body["dropped"] == {"comments": 1}
+    assert body["report"]["warnings"][-2:] == ["note", dropped_warning]
     assert body["report"]["profile"] == "strict"
 
 

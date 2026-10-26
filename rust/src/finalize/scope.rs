@@ -99,6 +99,8 @@ struct Cluster {
     surname: Digest,
     given: Option<Digest>,
     initial: Option<Digest>,
+    /// Parties d'un nom composé (`_Cluster.parts`) / parts of a hyphenated surname.
+    parts: Vec<Digest>,
 }
 
 pub struct Scope {
@@ -111,6 +113,7 @@ pub struct Scope {
     clusters: Vec<Cluster>,
     by_surname: DigestMap<Vec<usize>>,
     by_given: DigestMap<Vec<usize>>,
+    by_part: DigestMap<Vec<usize>>,
 }
 
 impl Scope {
@@ -130,6 +133,7 @@ impl Scope {
             clusters: Vec::new(),
             by_surname: DigestMap::default(),
             by_given: DigestMap::default(),
+            by_part: DigestMap::default(),
         }
     }
 
@@ -148,6 +152,7 @@ impl Scope {
             {
                 digest.0.zeroize();
             }
+            cluster.parts.iter_mut().for_each(|digest| digest.0.zeroize());
         }
         self.clusters = Vec::new();
         self.indices = DigestMap::default();
@@ -155,6 +160,7 @@ impl Scope {
         self.reserved = HashMap::new();
         self.by_surname = DigestMap::default();
         self.by_given = DigestMap::default();
+        self.by_part = DigestMap::default();
     }
 
     fn digest(&self, kind: &str, value: &str) -> Result<Digest, ScopeClosed> {
@@ -302,7 +308,14 @@ impl Scope {
                 if let Some(&[only]) = self.by_given.get(&by_given).map(Vec::as_slice) {
                     return cluster(only);
                 }
-                return cluster(self.new_cluster(surname_digest, None, None));
+                // « Mme Kervadec » après « Mme Solène Kervadec-Moulin » : une partie d'un seul nom composé.
+                // A part of exactly one hyphenated surname joins that person.
+                if let Some(&[only]) = self.by_part.get(&surname_digest).map(Vec::as_slice) {
+                    return cluster(only);
+                }
+                let index = self.new_cluster(surname_digest, None, None);
+                self.set_parts(chars, index, &surname)?;
+                return cluster(index);
             }
             return Ok(Some(PersonKey::Surname(surname_digest)));
         };
@@ -321,7 +334,9 @@ impl Scope {
                 }
                 return cluster(*only);
             }
-            return cluster(self.new_cluster(surname_digest, None, Some(initial)));
+            let index = self.new_cluster(surname_digest, None, Some(initial));
+            self.set_parts(chars, index, &surname)?;
+            return cluster(index);
         }
         let given_digest = self.digest_folded(chars, "g", given)?;
         if let Some(&found) = candidates.iter().find(|&&c| self.given_of(c) == Some(given_digest)) {
@@ -355,14 +370,50 @@ impl Scope {
                 entry.surname = surname_digest;
             }
             self.by_surname.entry(surname_digest).or_default().push(only);
+            self.set_parts(chars, only, &surname)?;
             return cluster(self.set_given(only, given_digest, initial));
         }
-        cluster(self.new_cluster(surname_digest, Some(given_digest), Some(initial)))
+        let index = self.new_cluster(surname_digest, Some(given_digest), Some(initial));
+        self.set_parts(chars, index, &surname)?;
+        cluster(index)
+    }
+
+    /// `Scope._set_parts` : parties d'au moins 2 lettres d'un nom composé, sans doublon, indexées.
+    /// Parts (2 letters or more, no duplicate) of a hyphenated surname, indexed.
+    fn set_parts(&mut self, chars: &Chars, index: usize, surname: &str) -> Result<(), ScopeClosed> {
+        let old = self.clusters.get_mut(index).map(|c| std::mem::take(&mut c.parts)).unwrap_or_default();
+        for part in old {
+            if let Some(list) = self.by_part.get_mut(&part) {
+                if let Some(position) = list.iter().position(|&c| c == index) {
+                    list.remove(position);
+                }
+            }
+        }
+        let folded: String = chars.folded(surname).collect();
+        let mut pieces: Vec<&str> = Vec::new();
+        for piece in folded.split('-') {
+            if piece.chars().nth(1).is_some() && !pieces.contains(&piece) {
+                pieces.push(piece);
+            }
+        }
+        if pieces.len() < 2 {
+            return Ok(());
+        }
+        let mut parts = Vec::with_capacity(pieces.len());
+        for piece in pieces {
+            let part = self.digest_parts(&[b"s\x1f", piece.as_bytes()])?;
+            self.by_part.entry(part).or_default().push(index);
+            parts.push(part);
+        }
+        if let Some(entry) = self.clusters.get_mut(index) {
+            entry.parts = parts;
+        }
+        Ok(())
     }
 
     fn new_cluster(&mut self, surname: Digest, given: Option<Digest>, initial: Option<Digest>) -> usize {
         let index = self.clusters.len();
-        self.clusters.push(Cluster { surname, given, initial });
+        self.clusters.push(Cluster { surname, given, initial, parts: Vec::new() });
         self.by_surname.entry(surname).or_default().push(index);
         if let Some(given) = given {
             self.by_given.entry(given).or_default().push(index);

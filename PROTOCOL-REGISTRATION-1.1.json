@@ -1,0 +1,79 @@
+{
+  "note_fr": "Enregistrement public de la version 1.1 du protocole d'auto-évaluation de Gardien RGPD, écrite le 26 octobre 2026 après la campagne 1.0 et publiée AVANT toute campagne 1.1. La campagne 1.1 et ses résultats doivent correspondre à ces empreintes : le protocole (docs/PROTOCOLE.md, section « Version 1.1 »), sa spécification (tools/protocol/spec.py), les outils et le paquet exécuté sur le serveur, et le plan de 1 019 385 documents (inchangé). Deux indices publiés : documents normalisés (l'indice principal, cible 95 % ou plus) et documents difficiles (équipe rouge entière). Le résultat 1.0 (61,8 % [58,6–66,9], sept familles) reste publié tel quel.",
+  "note_en": "Public registration of version 1.1 of the GDPR Guardian self-rating protocol, written on 26 October 2026 after the 1.0 campaign and published BEFORE any 1.1 campaign. The 1.1 campaign and its results must match these digests: the protocol (docs/PROTOCOLE.md, 'Version 1.1' section), its specification (tools/protocol/spec.py), the tools and the bundle run on the server, and the plan of 1,019,385 documents (unchanged). Two published indexes: normalised documents (the headline, target 95% or more) and difficult documents (the whole red team). The 1.0 result (61.8% [58.6-66.9], seven families) stays published as it is.",
+  "protocol": "1.1",
+  "written": "2026-10-26",
+  "published": null,
+  "tools_sha256": "306e2ee67dcb7fd11a9dc0f7991be2cab83be6c3f5b5e4c8baff2b047c9e859b",
+  "spec_sha256": "035a231d523838f147724671990cdae8ade1a17abbaa341bf176fe861f2592b8",
+  "protocole_md_sha256": "0fb9254c4511768803f3d94a34f25ad044f95824d96fe6402f5b93ebd4596941",
+  "bundle": {
+    "path": "gg-protocol.pyz",
+    "bundle_sha256": "b64d1bac1898e35bbcdb5a895c8aef13b0cd49724abfe643ce3ff562db1cb1b9"
+  },
+  "registered_plan": {
+    "faker": "40.43.0",
+    "documents": {
+      "synthetic_fr": 450000,
+      "redteam_bases": 12000,
+      "redteam_fr": 548907,
+      "real_annotated": 8478
+    },
+    "synthetic_sha256": "0b91be78435e5434ee5a3b136ab8f08dd10a2c3673dad56fc6dca469c87a955b",
+    "redteam_sha256": "d984ee1bf9dba70bf2ccf32957cab9da9bbf1fdf02adf5b7444956fa0137760b"
+  },
+  "real_corpora_sha256": {
+    "bodacc_fr.jsonl": "504db7aeee386be59d2ca17632c0e0d61e513f01f9d38f53367500d567af47d9",
+    "boamp_fr.jsonl": "435373ea39a1814a19b5cf4aa97801d955faefeb1753c09182bec56a35cac6f8",
+    "parlamint_fr.jsonl": "ab76277f360421960f15d3a9a958b5bbfd49aa258fe872927cc0489d22c70b1d",
+    "europeana_fr.jsonl": "4b96d2df00f8db3f4ca3b1140cd55405d281d9d522263107ae96fb3b7011d3cd",
+    "hipe_newseye_fr.jsonl": "6a69d94fe630e3dc896d52fda6b5ce7c47da208015556a0e1fd25f59f39a9535",
+    "mapa_fr.jsonl": "f446679df5829829a2eff7a510f9a44e3fbe45e70e897c8269d7926267ac356c",
+    "mapa_de.jsonl": "7f224515d68feea7c231417afc18e175e7042eb253c2132469a6054549b5dd96",
+    "mapa_es.jsonl": "b69e6234c340135970f13c2b69947298987a3891c301e31fa786f912e9350921",
+    "mapa_it.jsonl": "6299a9e9e60582de6399b79f39ed273383898e0334dcb0e0fe7cb89308731836",
+    "mapa_nl.jsonl": "cf2c5d171dea9086b75a81be4a1e9425c1351bbc3ec9ba08ff99f07348c678bc",
+    "mapa_pt.jsonl": "4494c20e44c677fce32661e4c1423d4bb257f2ab660f99f9b14adf956dcb132e",
+    "meddocan_es.jsonl": "32408fe009d118394ea6bbaef0e44c243a9e738bb602bf3c1b6baaabfa838c13",
+    "german_ler_de.jsonl": "f56a84e18dca7af61e39768b709c356b411886e8dabbf4770f988d4187d58d6e",
+    "tab_en.jsonl": "98d995139013ab917e92956ced31ffed8fdbaee8c89c8d3ddf9e0cc020b50709",
+    "judilibre_fr.jsonl": "64adc7e85ee5aaa893a5b19856a301ea6c9b0f52fc36b2295367d759c5d0324d"
+  },
+  "results_files": "benchmarks/results/protocol-1.1-<date>.{json,md}",
+  "engine": {
+    "version": "1.0.1",
+    "packs_sha256": "c92770ff020a517756204e35f1f497993a7e3879bb959e2b77290d626662e097",
+    "probe_sha256": "df6f7a380268df3459d57625c4ca3aaf464dc9e8586ed4a28e4d8f9e8b85e561",
+    "probe_docs": 200
+  },
+  "confidence_index": "normalised documents (the headline, site keys confidence_*; target 95% or more, a goal, not a guard): share of documents in which no direct identifier stays readable, 4 families equally weighted (synthetic_fr, bodacc_fr, boamp_fr, parlamint_fr), real corpora counted on their test halves only, 95% bootstrap interval stratified by family (2,000 resamples, seed 20261025)",
+  "hard_index": "difficult documents (site keys hard_*): same measure over the whole red team, 51 operators in three groups (damaged everyday formats 25, deliberate obfuscations 25, OCR noise 1); every mutated document counts once (operators pooled, a group weighs its share of the documents); 95% bootstrap interval stratified by group (2,000 resamples, seed 20261025); per-group and per-operator figures published",
+  "published_apart": "old press (low-quality OCR: degraded performance; outside the use case, and at 272 test documents it would weigh about 0.05% of the pooled difficult index), MAPA FR, other languages and the Judilibre control, in neither index",
+  "changes": [
+    "one use case: texts organisations send to an AI (e-mails, chat requests, internal documents), in French, as text or office files, written in good faith",
+    "scope of a leak written down: any readable character of a postal address, phone, e-mail or other direct identifier whoever it belongs to, or of a natural person's name; company names counted neither as a leak nor as over-masking of neutral text (GDPR recital 14; CJEU C-92/09 and C-93/09; the published precision still counts a masked company name as an unneeded mask, as in 1.0); sole traders are persons; a town alone, or a postcode and town without street or postal box, is a place",
+    "two published indexes, each with its 95% interval, decided on 26 October 2026 before any published registration and any 1.1 campaign (they replace an unregistered single-index first draft of 5 families with the everyday red team): normalised documents (headline, target 95%+) and difficult documents",
+    "normalised index: 4 families, 1/4 each (synthetic FR, BODACC, BOAMP, ParlaMint-FR), instead of 7 families, 1/7 each; no red team in it",
+    "difficult index: all 51 red-team operators, every mutated document counting once, interval stratified by group; the 1.0 red-team family's measure, hence comparable with it",
+    "red-team groups: damaged everyday formats (25; crlf and line_break = a line break INSIDE the identifier; letter_spacing = PDF letter spacing): crlf, line_break, letter_spacing, nbsp, narrow_nbsp, thin_space, figure_space, ideographic_space, tab, double_space, dots, hyphens, slashes, compact, regroup, en_dash_groups, nb_hyphen, pdf_hyphenation, soft_hyphen, upper, lower, surname_first, strip_accents, nfd, markdown_bold; deliberate obfuscations (25): math_bold, fullwidth, superscript, arabic_indic, devanagari, cyrillic, greek, zero_width_space, zero_width_joiner, word_joiner, bom, bidi_mark, bidi_isolate, tag_chars, variation_selector, grapheme_joiner, hangul_filler, at_entity, at_percent, at_fullwidth, at_brackets, at_parens, arobase, dot_brackets, dot_point; OCR noise (1): ocr",
+    "published apart, in neither index: old press Europeana + HIPE (low-quality OCR, degraded performance); MAPA FR (EU legal texts, outside the use case, 6 scored test documents; reverses the 1.0 choice to keep it); other languages; the Judilibre control",
+    "effect on the frozen 1.0 engine, dev halves: headline 59.7% (1.0, 7 families) -> 82.8% [81.3-84.1] (normalised, 4 families); difficult 62.3% [61.8-62.9] (27,441 mutated documents); the move of the everyday red team out of the headline (+5.4 points over the first draft's 77.4%) was decided knowing it was the lowest family the first draft kept",
+    "test halves not blind: engine 1.0.1 is rated on the same test halves as 1.0 (measured at least nine times before, per-family scores published), a declared departure from section 3 (fresh data for a later engine); real-corpus figures are therefore optimistic",
+    "results written to protocol-1.1-<date>.{json,md}; run-protocol.sh finish never overwrites an existing result; the site merge refuses while the site or README still show earlier-version text",
+    "BOAMP gold aligned with the scope (tools/corpus/build_boamp.py): glued or dotted postal boxes and streets written in the postcode/town fields are addresses; services in the contact field are not persons (42 ADDRESS added, 35 LOCATION and 5 PERSON removed, 40 documents of 3,000, 18 in the test half)",
+    "test halves no longer blind: the 26 October 1.0 campaign and the 26 October rules3 evaluation added to spec.TEST_HALVES_MEASURED_BEFORE; the 1.0 campaign listed in spec.EARLIER_CAMPAIGNS",
+    "report and site merge: both indexes with their intervals and the per-group breakdown; site keys confidence_* for the normalised index (protocol_families = 4) and hard_index, hard_ci_low, hard_ci_high, hard_docs, hard_mention_recall_pct for the difficult one; red-team groups under families_apart with \"index\": \"hard\"; a 1.1 result without the difficult index is refused; the 1.0 result recalled at merge time",
+    "declared limit: the difficult index's interval resamples mutated documents one by one, not by base document, so it is too narrow",
+    "sections 8 and 12 under 1.1 (what could flatter the index, real weight): the two favourable families (synthetic, ParlaMint-FR partial gold) weigh 1/2 of the headline instead of 2/7, ParlaMint-FR alone 1/4 instead of 1/7; difficult documents leave the headline and make the second index; 3/4 of the headline rest on the scored real test-half documents of BODACC, BOAMP and ParlaMint-FR (2,886 in the 1.0 campaign); volume buys no weight in the headline only, the difficult index is pooled",
+    "unchanged: leak, readability and failure definitions, the normalised index's bootstrap stratified by family, guards, dev/test split, seeds, campaign plan and its fingerprints, tool, container, route and service options (new: the difficult index's pooled bootstrap stratified by group)"
+  ],
+  "previous": {
+    "protocol": "1.0",
+    "registration": "PROTOCOL-REGISTRATION.json",
+    "campaign": "2026-10-26",
+    "engine": "1.0.0+0c3ff9fc1fb0",
+    "confidence_index": "61.8 % [58.6-66.9]",
+    "results": "benchmarks/results/protocol-2026-10-26.md",
+    "note": "the 1.0 digests in PROTOCOL-REGISTRATION.json match the files as they were at the 1.0 registration (repository history), not the 1.1 files; the 1.0 result copies them"
+  }
+}

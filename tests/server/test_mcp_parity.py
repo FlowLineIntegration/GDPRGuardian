@@ -58,8 +58,11 @@ async def test_tool_lists_differ_only_by_the_document_intake(servers: tuple[Fast
     local, online = [await tool_map(server) for server in servers]
     assert set(local) == SHARED | {"anonymize_file"} and set(online) == SHARED | {"create_upload"}
     for name in sorted(SHARED):
-        # Nom, description, schémas d'entrée et de sortie, annotations : à l'identique / identical, all of it.
-        assert local[name] == online[name], name
+        # Nom, description, schémas d'entrée et de sortie, annotations : à l'identique, au nom de l'outil d'entrée
+        # près (chaque transport ne cite que le sien). Identical, except for the intake tool's name (each transport
+        # names its own only).
+        assert "create_upload" not in str(local[name]) and "anonymize_file" not in str(online[name]), name
+        assert str(local[name]).replace("anonymize_file", "create_upload") == str(online[name]), name
 
 
 async def test_intake_tools_share_the_same_options(servers: tuple[FastMCP, FastMCP]) -> None:

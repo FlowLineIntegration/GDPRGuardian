@@ -151,7 +151,7 @@ function send(it) {
 function done(it, j, ms) {
   var r = j.report || {}, ent = r.entities || {}, m;
   Object.assign(it, { st: "done", ms: ms, out: typeof j.text === "string" ? j.text : String(j.markdown || ""), rep: r,
-    pages: j.pages || 0, warn: [].concat(j.warnings || [], r.warnings || []), dropped: j.dropped || {} });
+    pages: j.pages || 0, warn: [].concat(j.warnings || [], r.warnings || []).filter(function (w, i, a) { return a.indexOf(w) === i; }), dropped: j.dropped || {} });
   it.total = typeof r.total_replaced === "number" ? r.total_replaced : Object.keys(ent).reduce(function (s, k) { return s + ent[k]; }, 0);
   it.N = {};
   TAG.lastIndex = 0;

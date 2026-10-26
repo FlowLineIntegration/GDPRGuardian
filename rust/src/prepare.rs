@@ -243,6 +243,378 @@ fn cuts(text: &str, classes: &Classes) -> Vec<(usize, usize)> {
     cuts
 }
 
+/// Groupes voisins d'un saut de ligne GAP : 12 alphanumériques ASCII au plus / at most 12 ASCII alphanumerics.
+const GAP_GROUP: usize = 12;
+
+/// Plus de `GAP_GROUP` alphanumériques ASCII de suite en tête de ces octets (lus dans l'ordre donné) ?
+/// More than `GAP_GROUP` ASCII alphanumerics in a row at the head of these bytes (read in the given order)?
+fn group_longer<'a>(bytes: impl Iterator<Item = &'a u8>) -> bool {
+    bytes.take(GAP_GROUP + 1).take_while(|b| b.is_ascii_alphanumeric()).count() > GAP_GROUP
+}
+
+/// Forme `[ \t]{0,3}\r?\n[ \t]{0,3}` d'une suite de blancs / shape of a blank run holding one line break.
+fn break_shape(run: &[u8]) -> bool {
+    let Some(newline) = run.iter().position(|&b| b == b'\n') else {
+        return false;
+    };
+    let before = run[..newline].strip_suffix(b"\r").unwrap_or(&run[..newline]);
+    let after = &run[newline + 1..];
+    before.len() <= 3 && after.len() <= 3 && before.iter().chain(after).all(|&b| b == b' ' || b == b'\t')
+}
+
+/// Règle GAP de `_text._gaps` : (caractère de début, longueur, octet de début) de chaque suite de blancs à ramener
+/// à une espace (des octets ASCII : longueur en caractères = longueur en octets). Tabulation ou 2 à 4 blancs entre
+/// deux alphanumériques ASCII dont un chiffre ; un seul saut de ligne entre deux chiffres, groupes voisins de 12
+/// caractères au plus. GAP rule: (start character, length, start byte) of each blank run to make one space.
+fn gaps(text: &str) -> Vec<(usize, usize, usize)> {
+    let mut found = Vec::new();
+    if !text.contains('\t') && !text.contains("  ") && !text.contains('\n') {
+        return found;
+    }
+    let bytes = text.as_bytes();
+    let blank = |b: u8| matches!(b, b' ' | b'\t' | b'\r' | b'\n');
+    let (mut position, mut i) = (0, 0);
+    while i < bytes.len() {
+        if !blank(bytes[i]) {
+            // Un octet de tête par caractère / one lead byte per character.
+            position += usize::from((bytes[i] as i8) >= -0x40);
+            i += 1;
+            continue;
+        }
+        let (start, first) = (i, position);
+        while i < bytes.len() && blank(bytes[i]) {
+            i += 1;
+        }
+        position += i - start;
+        let (Some(&before), Some(&after)) = (start.checked_sub(1).map(|k| &bytes[k]), bytes.get(i)) else {
+            continue;
+        };
+        if !before.is_ascii_alphanumeric() || !after.is_ascii_alphanumeric() {
+            continue;
+        }
+        let run = &bytes[start..i];
+        let gap = match run.iter().filter(|&&b| b == b'\n').count() {
+            0 => {
+                run.len() <= 4
+                    && run != b" "
+                    && !run.contains(&b'\r')
+                    && (before.is_ascii_digit() || after.is_ascii_digit())
+            }
+            1 => {
+                before.is_ascii_digit()
+                    && after.is_ascii_digit()
+                    && break_shape(run)
+                    && !group_longer(bytes[..start].iter().rev())
+                    && !group_longer(bytes[i..].iter())
+            }
+            _ => false,
+        };
+        if gap {
+            found.push((first, run.len(), start));
+        }
+    }
+    found
+}
+
+/// `_text._SEP_RUNS` : séparateur et nombre minimal de groupes / separator and minimum number of groups.
+const SEP_RUNS: [(u8, usize); 2] = [(b'/', 4), (b'.', 5)];
+/// Longueur maximale d'un groupe / longest group.
+const SEP_GROUP: usize = 6;
+
+/// `_text._sep_runs` : octets des « / » et « . » à remplacer par une espace. Mot entier de lettres, chiffres et
+/// séparateurs (un séparateur final permis), groupes de 1 à 6 majuscules ou chiffres dont un chiffre.
+/// Bytes of the separators to turn into spaces: a whole word of letters, digits and separators (one trailing
+/// separator allowed), groups of 1 to 6 capitals or digits, each with a digit.
+fn sep_runs(text: &str) -> Vec<usize> {
+    let bytes = text.as_bytes();
+    let mut found = Vec::new();
+    for (sep, minimum) in SEP_RUNS {
+        if !bytes.contains(&sep) {
+            continue;
+        }
+        let in_word = |b: u8| b.is_ascii_alphanumeric() || b == sep;
+        let mut i = 0;
+        while i < bytes.len() {
+            if !in_word(bytes[i]) || (i > 0 && in_word(bytes[i - 1])) {
+                i += 1;
+                continue;
+            }
+            let start = i;
+            while i < bytes.len() && in_word(bytes[i]) {
+                i += 1;
+            }
+            let body = bytes[start..i].strip_suffix(&[sep]).unwrap_or(&bytes[start..i]);
+            let groups = body.split(|&b| b == sep);
+            let valid = body.iter().filter(|&&b| b == sep).count() + 1 >= minimum
+                && groups.clone().all(|group| {
+                    (1..=SEP_GROUP).contains(&group.len())
+                        && group.iter().all(|b| b.is_ascii_digit() || b.is_ascii_uppercase())
+                        && group.iter().any(u8::is_ascii_digit)
+                });
+            if valid {
+                found.extend(body.iter().enumerate().filter(|&(_, &b)| b == sep).map(|(k, _)| start + k));
+            }
+        }
+    }
+    found
+}
+
+/// Règle BREAK (`_text._breaks`) : groupes de 12 caractères au plus, partie locale de 7 caractères au plus sans
+/// signe / BREAK rule: groups of at most 12 characters, local part of at most 7 characters without a sign.
+const BREAK_GROUP: usize = 12;
+const BREAK_LOCAL: usize = 7;
+
+/// Caractère d'un morceau de courriel (`_text._EMAIL_PART`) / character of an e-mail piece.
+fn email_part(b: u8) -> bool {
+    b.is_ascii_alphanumeric() || matches!(b, b'.' | b'_' | b'%' | b'+' | b'-' | b'@')
+}
+
+/// `_text._token` : octets [début, fin) de la suite maximale vers la gauche (`left`) ou la droite, et « mot
+/// entier » / maximal run leftwards or rightwards, and whether it is a whole word.
+fn token(text: &str, byte: usize, left: bool, part: fn(u8) -> bool, classes: &Classes) -> (usize, usize, bool) {
+    let bytes = text.as_bytes();
+    if left {
+        let mut i = byte;
+        while i > 0 && part(bytes[i - 1]) {
+            i -= 1;
+        }
+        (i, byte, !char_before(text, i).is_some_and(|c| classes.is_alnum(c)))
+    } else {
+        let mut i = byte;
+        while i < bytes.len() && part(bytes[i]) {
+            i += 1;
+        }
+        (byte, i, !char_at(text, i).is_some_and(|c| classes.is_alnum(c)))
+    }
+}
+
+/// `_text._DOMAIN_RE` en entier / full match of the domain shape.
+fn domain_ok(domain: &[u8]) -> bool {
+    let labels: Vec<&[u8]> = domain.split(|&b| b == b'.').collect();
+    let Some((last, rest)) = labels.split_last() else {
+        return false;
+    };
+    !rest.is_empty()
+        && rest.iter().all(|l| !l.is_empty() && l.iter().all(|&b| b.is_ascii_alphanumeric() || b == b'-'))
+        && last.len() >= 2
+        && last.iter().all(u8::is_ascii_alphabetic)
+}
+
+/// `_text._email_join`.
+fn email_join(left: &[u8], right: &[u8]) -> bool {
+    let mut right = right;
+    while let Some((&b'.' | &b'-', head)) = right.split_last() {
+        right = head;
+    }
+    let ats = left.iter().chain(right).filter(|&&b| b == b'@').count();
+    if ats != 1 || left.is_empty() || right.is_empty() {
+        return false;
+    }
+    if let Some(at) = left.iter().position(|&b| b == b'@') {
+        let domain = &left[at + 1..];
+        let joined = [domain, right].concat();
+        return at > 0 && !domain_ok(domain) && domain_ok(&joined);
+    }
+    let at = right.iter().position(|&b| b == b'@').unwrap_or(0);
+    // Le morceau de gauche commence par une lettre / the left piece starts with a letter.
+    domain_ok(&right[at + 1..])
+        && left[0].is_ascii_alphabetic()
+        && (left.len() <= BREAK_LOCAL || left.iter().any(|b| b"._-0123456789".contains(b)))
+}
+
+/// `_text._IBAN_HEAD_RE` en entier / full match of an IBAN head.
+fn iban_head(group: &[u8]) -> bool {
+    group.len() >= 4
+        && group[..2].iter().all(u8::is_ascii_uppercase)
+        && group[2..4].iter().all(u8::is_ascii_digit)
+        && group[4..].iter().all(|b| b.is_ascii_digit() || b.is_ascii_uppercase())
+}
+
+/// `_text._iban_complete` : clé ISO 7064 (mod 97) déjà juste / the key is already right.
+fn iban_complete(group: &[u8]) -> bool {
+    let mut remainder = 0u32;
+    for &b in group[4..].iter().chain(&group[..4]) {
+        let value =
+            if b.is_ascii_digit() { u32::from(b - b'0') } else { u32::from(b.to_ascii_uppercase() - b'A') + 10 };
+        for digit in value.to_string().bytes() {
+            remainder = (remainder * 10 + u32::from(digit - b'0')) % 97;
+        }
+    }
+    remainder == 1
+}
+
+/// Zone GAP : (caractère de début, longueur, octet de début) / GAP zone: (start character, length, start byte).
+type GapZone = (usize, usize, usize);
+/// Zone retirée : [début, fin) en caractères / removed zone: [start, end) in characters.
+type CutZone = (usize, usize);
+
+/// Règle BREAK de `_text._breaks` : zones à ramener à une espace (caractère de début, longueur, octet de début)
+/// et zones à retirer (positions de caractères). BREAK rule: zones to make one space and zones to remove.
+fn breaks(text: &str, classes: &Classes) -> (Vec<GapZone>, Vec<CutZone>) {
+    let mut gaps = Vec::new();
+    let mut cuts = Vec::new();
+    let bytes = text.as_bytes();
+    let alnum = |b: u8| b.is_ascii_alphanumeric();
+    let mut position = 0;
+    for (i, &b) in bytes.iter().enumerate() {
+        if b != b'\n' {
+            position += usize::from((b as i8) >= -0x40);
+            continue;
+        }
+        // Position du « \n » ; « \r » éventuel juste avant / position of the "\n"; optional "\r" just before.
+        let crlf = i > 0 && bytes[i - 1] == b'\r';
+        let (start, first) = if crlf { (i - 1, position - 1) } else { (i, position) };
+        position += 1;
+        let end = i + 1;
+        let (Some(&before), Some(&after)) = (start.checked_sub(1).map(|k| &bytes[k]), bytes.get(end)) else {
+            continue;
+        };
+        if !email_part(before) || !email_part(after) {
+            continue;
+        }
+        let length = end - start;
+        let (l0, l1, left_whole) = token(text, start, true, email_part, classes);
+        let (r0, r1, right_whole) = token(text, end, false, email_part, classes);
+        if left_whole && right_whole && email_join(&bytes[l0..l1], &bytes[r0..r1]) {
+            cuts.push((first, first + length));
+            continue;
+        }
+        let (l0, l1, left_whole) = token(text, start, true, alnum, classes);
+        let (r0, r1, right_whole) = token(text, end, false, alnum, classes);
+        let (left, right) = (&bytes[l0..l1], &bytes[r0..r1]);
+        if left.is_empty() || right.is_empty() || !left_whole || !right_whole {
+            continue;
+        }
+        let upper = |g: &[u8]| !g.iter().any(u8::is_ascii_lowercase);
+        let digit = |g: &[u8]| g.iter().any(u8::is_ascii_digit);
+        if iban_head(left)
+            && upper(right)
+            && digit(right)
+            && (15..=34).contains(&(left.len() + right.len()))
+            && !iban_complete(left)
+        {
+            cuts.push((first, first + length));
+        } else if !(left.last().is_some_and(u8::is_ascii_digit) && right[0].is_ascii_digit())
+            && left.len() <= BREAK_GROUP
+            && right.len() <= BREAK_GROUP
+            && upper(left)
+            && upper(right)
+            && digit(left)
+            && digit(right)
+        {
+            gaps.push((first, length, start));
+        }
+    }
+    (gaps, cuts)
+}
+
+/// Caractère d'une suite de lettres espacées (`_text._SPACED_RE`) / character of a letter-spaced run.
+fn spaced_cell(c: char, classes: &Classes) -> bool {
+    classes.is_word(c) || matches!(c, '@' | '.' | '-' | '\'' | '+' | ',' | '(' | ')')
+}
+
+/// `_text._SPACED_HINT_RE` : « ␣X␣{1,4}Y », Y sans lettre collée : condition nécessaire d'une suite (pré-test bon
+/// marché). A necessary condition for a run (cheap pre-check).
+fn spaced_hint(text: &str, classes: &Classes) -> bool {
+    let bytes = text.as_bytes();
+    for (i, _) in text.match_indices(' ') {
+        let mut it = text[i + 1..].chars();
+        let Some(x) = it.next() else { continue };
+        if !spaced_cell(x, classes) {
+            continue;
+        }
+        let mut k = i + 1 + x.len_utf8();
+        let spaces = bytes[k..].iter().take(5).take_while(|&&b| b == b' ').count();
+        if !(1..=4).contains(&spaces) {
+            continue;
+        }
+        k += spaces;
+        let mut tail = text[k..].chars();
+        if tail.next().is_some_and(|y| spaced_cell(y, classes)) && !tail.next().is_some_and(|c| classes.is_word(c)) {
+            return true;
+        }
+    }
+    false
+}
+
+/// Lettres espacées (`_text._spaced_cuts`) : zones à retirer, en positions de caractères.
+/// Letter spacing: zones to remove, in character positions.
+fn spaced_cuts(text: &str, classes: &Classes) -> Vec<(usize, usize)> {
+    let mut cuts = Vec::new();
+    if !spaced_hint(text, classes) {
+        return cuts;
+    }
+    let chars: Vec<char> = text.chars().collect();
+    let n = chars.len();
+    let cell = |p: usize| p < n && spaced_cell(chars[p], classes);
+    let word = |p: usize| p < n && classes.is_word(chars[p]);
+    let mut p = 0;
+    while p < n {
+        if !cell(p) || (p > 0 && word(p - 1)) {
+            p += 1;
+            continue;
+        }
+        let mut cells = vec![p];
+        let mut last = p;
+        loop {
+            let mut q = last + 1;
+            while q < n && chars[q] == ' ' && q - last <= 4 {
+                q += 1;
+            }
+            let spaces = q - last - 1;
+            if (1..=4).contains(&spaces) && cell(q) && !word(q + 1) {
+                cells.push(q);
+                last = q;
+            } else {
+                break;
+            }
+        }
+        if cells.len() < 3 {
+            p += 1;
+            continue;
+        }
+        let digit = |k: usize| chars[cells[k]].is_ascii_digit();
+        let end = cells.len() - 1;
+        let mut block: Vec<usize> = Vec::new();
+        for (k, &next) in cells.iter().enumerate() {
+            if matches!(chars[next], 'a' | 'à') && (1..end).contains(&k) && digit(k - 1) && digit(k + 1) {
+                // « 4 à 6 » : l'intervalle reste tel quel / the range stays as it is.
+                spaced_block(&chars, &block, &mut cuts, classes);
+                block.clear();
+                continue;
+            }
+            let split = block.last().is_some_and(|&prev| {
+                next - prev == 2 && classes.is_lower(chars[prev]) && classes.is_upper(chars[next])
+            });
+            if split {
+                spaced_block(&chars, &block, &mut cuts, classes);
+                block.clear();
+            }
+            block.push(next);
+        }
+        spaced_block(&chars, &block, &mut cuts, classes);
+        p = last + 1;
+    }
+    cuts
+}
+
+fn spaced_block(chars: &[char], block: &[usize], cuts: &mut Vec<(usize, usize)>, classes: &Classes) {
+    // Lettres et chiffres seulement ; trois pour un mot capitalisé (« Z o é ») / letters and digits only; three
+    // for a capitalised word.
+    let letters = block.iter().filter(|&&cell| classes.is_word(chars[cell])).count();
+    let word = block.len() == 3
+        && classes.is_upper(chars[block[0]])
+        && classes.is_lower(chars[block[1]])
+        && classes.is_lower(chars[block[2]]);
+    if letters < 4 && !word {
+        return;
+    }
+    for pair in block.windows(2) {
+        let (prev, next) = (pair[0], pair[1]);
+        cuts.push(if next - prev == 2 { (prev + 1, next) } else { (prev + 2, next) });
+    }
+}
+
 /// Texte privé des coupes et table des positions (une par caractère gardé, puis la longueur).
 /// Text without the cuts and offset map (one per kept character, then the length).
 fn assemble(text: &str, cuts: &[(usize, usize)]) -> (String, Vec<i64>) {
@@ -288,7 +660,40 @@ impl Preparer {
         if mapped.contains("**") || mapped.contains("__") {
             mapped = unbold(mapped, classes);
         }
-        let cuts = cuts(&mapped, classes);
+        // Règle GAP : le premier blanc devient une espace, les suivants sont coupés / GAP rule: the first blank
+        // becomes a space, the others are cut.
+        let mut gaps = gaps(&mapped);
+        // Règle BREAK : saut de ligne dans un identifiant / BREAK rule: line break inside an identifier.
+        let (break_gaps, break_cuts) =
+            if mapped.contains('\n') { breaks(&mapped, classes) } else { Default::default() };
+        if !break_gaps.is_empty() {
+            gaps.extend(break_gaps);
+            gaps.sort_unstable();
+        }
+        // Lettres espacées, lues avant les remplacements / letter spacing, read before the swaps.
+        let spaced = if mapped.contains(' ') { spaced_cuts(&mapped, classes) } else { Vec::new() };
+        let seps = if mapped.contains('/') || mapped.contains('.') { sep_runs(&mapped) } else { Vec::new() };
+        if !seps.is_empty() || gaps.iter().any(|&(_, _, byte)| mapped.as_bytes()[byte] != b' ') {
+            let mut bytes = mapped.into_owned().into_bytes();
+            for byte in gaps.iter().map(|gap| gap.2).chain(seps) {
+                bytes[byte] = b' ';
+            }
+            // Octets ASCII remplacés par un octet ASCII : UTF-8 intact / ASCII bytes swapped for ASCII: valid UTF-8.
+            mapped = Cow::Owned(String::from_utf8(bytes).unwrap_or_default());
+        }
+        let mut cuts = cuts(&mapped, classes);
+        if gaps.iter().any(|&(_, length, _)| length > 1) {
+            cuts.extend(gaps.iter().filter(|gap| gap.1 > 1).map(|&(first, length, _)| (first + 1, first + length)));
+            cuts.sort_unstable();
+        }
+        if !break_cuts.is_empty() {
+            cuts.extend(break_cuts);
+            cuts.sort_unstable();
+        }
+        if !spaced.is_empty() {
+            cuts.extend(spaced);
+            cuts.sort_unstable();
+        }
         if cuts.is_empty() {
             return (mapped, None);
         }

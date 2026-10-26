@@ -109,17 +109,12 @@ def test_refused_patterns_come_back_from_the_worker_as_422(client: TestClient,
     assert NIR not in response.text
 
 
-def test_an_upload_with_a_refused_pattern_fails_at_processing(client: TestClient) -> None:
-    # Pas de travailleur au ticket : le motif est compilé au traitement / no worker at ticket time.
+def test_an_upload_with_a_refused_pattern_is_refused_at_ticket_time(client: TestClient) -> None:
+    # Le motif est compilé tout de suite, dans un travailleur, sur un texte vide : refus avant que le fichier parte.
+    # The pattern is compiled at once, in a worker, on an empty text: refused before the file leaves.
     ticket = client.post("/v1/uploads", headers=AUTH_A, json={"filename": "note.txt", "rules": REFUSED})
-    assert ticket.status_code == 201, ticket.text
-    put = client.put(ticket.json()["upload_url"].removeprefix("http://testserver"), headers=AUTH_A,
-                     content=TEXT.encode())
-    assert put.status_code == 422 and "linéaire" in put.json()["error"]["message"]
-    result_url = ticket.json()["result_url"].removeprefix("http://testserver")
-    result = client.get(result_url, headers=AUTH_A)
-    assert result.status_code == 422 and result.json()["error"] == put.json()["error"]
-    assert client.get(result_url, headers=AUTH_A).status_code == 404  # signalé une fois / reported once
+    assert ticket.status_code == 422 and "linéaire" in ticket.json()["error"]["message"]
+    assert len(client.app.state.service.store) == 0
     # Erreur de structure : refusée dès le ticket / structural error: refused at ticket time.
     bad = client.post("/v1/uploads", headers=AUTH_A, json={"filename": "note.txt",
                                                             "rules": {"rules": [{"label": "x", "pattern": "a"}]}})

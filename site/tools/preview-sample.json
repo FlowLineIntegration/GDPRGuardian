@@ -1,12 +1,12 @@
 {
   "_comment": "Sample values for site/tools/preview.py only. Raw values, formatted per language by the preview like the daemon does. Not real measurements of production traffic.",
   "live": {
-    "uses_hour": 128,
+    "uses_hour": 486212,
     "uses_hour_protocol": 0,
-    "bytes_hour": 13002342,
-    "docs_total": 18342,
+    "bytes_hour": 1288490188,
+    "docs_total": 12487390,
     "docs_protocol": 0,
-    "bytes_total": 2147483648,
+    "bytes_total": 1869169767219,
     "visitors_total": 4127,
     "visitors_today": 213,
     "cpu_percent": 6.4,
@@ -49,6 +49,11 @@
     "real_corpora": "—",
     "real_docs": "—",
     "protocol_date": "—",
-    "protocol_engine": "—"
+    "protocol_engine": "—",
+    "hard_index": "—",
+    "hard_ci_low": "—",
+    "hard_ci_high": "—",
+    "hard_docs": "—",
+    "hard_mention_recall_pct": "—"
   }
 }

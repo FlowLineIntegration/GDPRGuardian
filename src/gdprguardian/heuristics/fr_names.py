@@ -130,6 +130,19 @@ _VALUE_DASHES = frozenset({"-", "–", "—"})
 # Étiquette suivante sur la même ligne : un à quatre mots puis « : » (« Nom : Dupont Prénom : Jean »).
 # The next field label on the same line: one to four words, then ':'.
 _LABEL_AHEAD_RE = re.compile(r"(?:[ \t]{1,4}[^\W\d_][\w'’()-]{0,40}){1,4}[ \t]{0,4}:")
+# Étiquette de champ : (début de la valeur, force, demande un nom ?, demande un prénom ?).
+# Field label cue: (value start, strength, asks for a name?, asks for a given name?).
+_LabelCue = tuple[int, int, bool, bool]
+# Valeur entière d'un champ d'état civil (« Nom : PANTALON », « Prénom : Chantal, sylvie ») : elle s'arrête en fin
+# de ligne ou de colonne ; mots séparés par des espaces ; civilité en tête et mention d'entrepreneur individuel en
+# queue retirées. Whole civil-status field value: ends at a line or column end; words split on spaces; a leading
+# honorific and a trailing sole-trader mention are dropped.
+_FIELD_VALUE_STOP = frozenset("\n\r|\t:")
+_FIELD_VALUE_WORD_RE = re.compile(r"[^  ]+")
+_FIELD_VALUE_MAX_WORDS = 6
+_FIELD_CIVILITIES = frozenset({"monsieur", "madame", "mademoiselle", "m.", "mme", "mlle", "mr"})
+_FIELD_SOLE_TRADER = frozenset({"ei", "eirl"})
+_FIELD_TRIM = "()[],.;-–—"
 # Lettre suivie d'un numéro (« Bodacc A n° 2026… », « Annexe B 2 ») : une lettre de série, pas une initiale.
 # A letter followed by a number is a series letter, not an initial.
 _SERIES_AFTER_RE = re.compile(r"[ \t]{1,2}(?:[nN][°º]|[0-9])")
@@ -401,6 +414,7 @@ class FrenchNameDetector:
         labels = list(self._label_cues(text)) if ":" in text else []
         if labels:
             spans.extend(self._lowercase_fields(text, labels))
+            spans.extend(self._field_values(text, labels, spans))
         tokens = self._tokens(text, ctx.folded)
         cues = self._cues(ctx, strong_zones, labels)
         spans.extend(self._lowercase_after_cues(text, cues, spans))
@@ -608,7 +622,7 @@ class FrenchNameDetector:
 
     # --- indices / cues --------------------------------------------------------------------------------------
 
-    def _cues(self, ctx: Any, strong_zones: list[tuple[int, int]], labels: list[tuple[int, int, bool]]) -> _Cues:
+    def _cues(self, ctx: Any, strong_zones: list[tuple[int, int]], labels: list[_LabelCue]) -> _Cues:
         text: str = ctx.text
         folded: str = ctx.folded
         length = len(text)
@@ -685,7 +699,7 @@ class FrenchNameDetector:
                 if at.get(pos) != NEG and (head is None or f"{code} {head.group()}" not in _postcode_heads()):
                     postcodes.add(pos)  # pas le début d'une de ses communes / not the start of one of its towns
                 put(pos, NEG, shift=False)  # « 30600 VAUVERT » : la commune / the town
-        for pos, level, _ in labels:
+        for pos, level, *_ in labels:
             put(pos, level, kind=labelled)
         signature.sort()
         display = self._display_ends(text) if "@" in text else set()
@@ -706,7 +720,7 @@ class FrenchNameDetector:
         return (folded[pos:token.end()] in self._lex.names and word not in V.CONTEXTUAL
                 and word not in V.TITLES)
 
-    def _label_cues(self, text: str) -> Iterator[tuple[int, int, bool]]:
+    def _label_cues(self, text: str) -> Iterator[_LabelCue]:
         """« Nom : Dupont », « De : Jean Martin » en début de ligne ou de colonne / field labels.
 
         Produit (début de la valeur, force, l'étiquette demande-t-elle un nom ?) / yields (value start, strength,
@@ -728,8 +742,8 @@ class FrenchNameDetector:
                 if level:
                     value = _AFTER_LABEL_RE.match(text, pos + 1).end()
                     if not self._organisation_value(text, value):
-                        asks_name = label in V.GIVEN_HEADERS or label in V.SURNAME_HEADERS
-                        yield value, level, asks_name
+                        given = label in V.GIVEN_HEADERS
+                        yield value, level, given or label in V.SURNAME_HEADERS, given
             pos = text.find(":", pos + 1)
 
     def _organisation_value(self, text: str, pos: int) -> bool:
@@ -756,7 +770,81 @@ class FrenchNameDetector:
         code = self._lex.code(fold(words[1]))
         return code is None or given_rank(code) < GIVEN_ALONE_MIN
 
-    def _lowercase_fields(self, text: str, labels: list[tuple[int, int, bool]]) -> list[Span]:
+    def _field_values(self, text: str, labels: list[_LabelCue], found: list[Span]) -> list[Span]:
+        """« Nom : PANTALON ⏎ Prénom : Chantal, sylvie » : valeur entière d'un champ d'état civil.
+
+        Whole value of a civil-status field, whatever its case or whether its words are in the dictionary. Only
+        in a document with a given-name field (« Prénom : »), so that « Nom : TESTIX INDUSTRIES » alone stays a
+        company. The value ends at the end of the line or column, within 80 characters, with no other label on
+        the line; it holds 1 to 6 words, no digit and no « @ », and is not an empty cell (« Non précisé »). A
+        value already found with the same bounds (`found`, « Nom : dupont jean ») keeps its span and its
+        propagation choice.
+        """
+        if not any(given for *_, given in labels):
+            return []
+        taken = {(s.start, s.end) for s in found}
+        spans: list[Span] = []
+        length = len(text)
+        for pos, level, asks_name, _ in labels:
+            if level != STRONG or not asks_name:
+                continue
+            limit = min(length, pos + _LABEL_VALUE_MAX)
+            end = pos
+            while end < limit and text[end] not in _FIELD_VALUE_STOP:
+                end += 1
+            if (end == limit and limit < length) or (end < length and text[end] == ":"):
+                continue  # trop longue, ou autre étiquette sur la ligne / too long, or another label on the line
+            words = [[m.start(), m.end()] for m in _FIELD_VALUE_WORD_RE.finditer(text, pos, end)]
+            if words and fold(text[words[0][0]:words[0][1]]) in _FIELD_CIVILITIES:
+                words.pop(0)
+            while words:
+                key = fold(text[words[-1][0]:words[-1][1]]).strip(_FIELD_TRIM)
+                if not key or key in _FIELD_SOLE_TRADER:
+                    words.pop()
+                elif key == "individuel" and len(words) >= 2 \
+                        and fold(text[words[-2][0]:words[-2][1]]).strip(_FIELD_TRIM) == "entrepreneur":
+                    del words[-2:]
+                else:
+                    break
+            if not words or len(words) > _FIELD_VALUE_MAX_WORDS:
+                continue
+            start, stop = words[0][0], words[-1][1]
+            while stop > start and text[stop - 1] in _FIELD_TRIM:
+                stop -= 1
+            value = text[start:stop]
+            if not any(c.isalnum() for c in value) or any(c in "0123456789@" for c in value) \
+                    or fold(value) in V.EMPTY_CELLS or (start, stop) in taken:
+                continue
+            # Propagée seulement si aucun mot n'est un mot courant, une commune ou un nom ambigu (« Nom : LYON »,
+            # « ROUGE », « LA POSTE » : la valeur seule est masquée). Valeur en capitales : aussi propagée en casse
+            # de titre (« TESTAGAR » -> « Nom commercial : Testagar »). Propagated only when no word is a common
+            # word, a town or an ambiguous name; a capitals value is also propagated in title case.
+            safe = self._field_safe(text, words)
+            forms = (surname_form(value),) if safe and value.isupper() else ()
+            spans.append(Span(start, stop, "PERSON", "PERSON", self.id, 0.85, PRIORITY_HEURISTIC, value, True,
+                              forms, propagate=safe))
+        return spans
+
+    def _field_safe(self, text: str, words: list[list[int]]) -> bool:
+        """Un mot au moins de la valeur (particules à part) n'est ni un mot courant, ni une commune, ni un nom
+        ambigu : « LYON », « LA POSTE » non, « Testo le Magnifique » oui.
+
+        At least one word of the value (particles aside) is not a common word, a town or an ambiguous name.
+        """
+        lex = self._lex
+        names = risky = 0
+        for ws, we in words:
+            key = fold(text[ws:we]).strip(_FIELD_TRIM)
+            if not key or key in V.PARTICLES:
+                continue
+            names += 1
+            code = lex.code(key)
+            if key in lex.words or key.replace("-", " ") in lex.communes \
+                    or (code is not None and ambiguity(code) != AMB_NONE):
+                risky += 1
+        return risky < names
+
+    def _lowercase_fields(self, text: str, labels: list[_LabelCue]) -> list[Span]:
         """« Nom : dupont », « Prénom : jean » : valeur en minuscules après une étiquette forte.
 
         Lowercase value after a strong field label (the token path only sees capitalised words). The value
@@ -764,7 +852,7 @@ class FrenchNameDetector:
         """
         lex = self._lex
         spans: list[Span] = []
-        for pos, level, asks_name in labels:
+        for pos, level, asks_name, _ in labels:
             first = _FIELD_WORD_RE.match(text, pos) if level == STRONG else None
             if first is None or not first.group().islower():
                 continue
@@ -1127,7 +1215,7 @@ class FrenchNameDetector:
             if plain and (2 <= len(names) <= 3 or initial or run.addressed):
                 return 0.75
             return 0.0
-        if confirmed_only and single and known[0].amb == AMB_ENTITY and self._after_locative(text, run.start):
+        if confirmed_only and single and known[0].amb == AMB_ENTITY and self._after_locative(text, run.start, True):
             return 0.0
         if run.evidence == WEAK and single:
             # Signature : un prénom ou un nom sûr, pas « Chargé d'affaires » / a name, not a job title.
@@ -1247,8 +1335,9 @@ class FrenchNameDetector:
         word = self._previous_word(text, pos)
         return bool(word) and fold(word) in V.DETERMINERS
 
-    def _after_locative(self, text: str, pos: int) -> bool:
-        return self._previous_word(text, pos) in V.LOCATIVES
+    def _after_locative(self, text: str, pos: int, verbs: bool = False) -> bool:
+        word = self._previous_word(text, pos)
+        return word in V.LOCATIVES or (verbs and word in V.PLACE_VERBS)
 
     def _line_style(self, text: str, pos: int, cache: dict[int, tuple[bool, bool]]) -> tuple[bool, bool]:
         """(ligne en Casse De Titre, ligne en capitales) / (Title Case line, all-caps line).

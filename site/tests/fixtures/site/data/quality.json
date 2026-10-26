@@ -34,5 +34,10 @@
   "real_corpora": "—",
   "real_docs": "—",
   "protocol_date": "—",
-  "protocol_engine": "—"
+  "protocol_engine": "—",
+  "hard_index": "—",
+  "hard_ci_low": "—",
+  "hard_ci_high": "—",
+  "hard_docs": "—",
+  "hard_mention_recall_pct": "—"
 }

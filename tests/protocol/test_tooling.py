@@ -154,6 +154,18 @@ def test_server_script_guards() -> None:
     incomplete = script[script.index("# Campagne incomplète"):]
     assert incomplete.index("return") < incomplete.index("wipe_ram")
     assert '"$RESULTS/trial-' in script  # essais rangés à part / trials kept apart
+    # Un résultat déjà copié n'est jamais écrasé : le contrôle précède la copie / never overwrite a copied result.
+    finish = script[script.index("Jamais écraser un résultat"):]
+    assert finish.index("exit 1") < finish.index("cp '$WORK'/results/protocol-*")
+
+
+def test_results_file_name_carries_the_protocol_version() -> None:
+    """Un résultat 1.1 du 26 octobre n'écrase pas protocol-2026-10-26 (1.0) / 1.1 never overwrites the 1.0 file."""
+    from tools.protocol import spec
+
+    stem = spec.RESULTS_STEM.format(date="2026-10-26")
+    assert stem == f"protocol-{spec.PROTOCOL_VERSION}-2026-10-26"
+    assert all(Path(item["results"]).stem != stem for item in spec.PREVIOUS_VERSIONS)
 
 
 def test_unknown_disclosure_is_refused_by_the_parser() -> None:

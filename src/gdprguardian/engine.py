@@ -58,6 +58,153 @@ NATURAL_PERSON_WINDOW = (120, 120)
 # Une personne morale dans cette fenêtre l'emporte (« la société X SAS, SIRET … ») / a legal entity there wins.
 LEGAL_ENTITY_WINDOW = (80, 40)
 _DIGIT_RE = re.compile(r"[0-9]")
+# Nom de société : une forme juridique de personne morale juste avant (« SARL DUPONT ») ou juste après (« DUPONT
+# SARL ») reste lisible (considérant 14 du RGPD) ; « M. Dupont » reste masqué ; l'entrepreneur individuel (« EI »)
+# est une personne. Même liste dans rust/src/finalize/pipeline.rs. A company name: a legal-entity form right before
+# or right after stays readable; a sole trader is a person. Same list in rust/src/finalize/pipeline.rs.
+COMPANY_FORMS = ("SAS", "SASU", "SARL", "SARLU", "EURL", "SCI", "SNC", "SCP", "SCM", "SELARL", "SELAS", "SELAFA",
+                 "GAEC", "EARL", "SCEA", "GIE", "SCOP", "SEM", "SPL", "SCA", "S.A.R.L.", "S.A.S.", "S.A.S.U.",
+                 "E.U.R.L.", "S.C.I.", "S.N.C.", "S.C.P.", "G.I.E.")
+COMPANY_SUFFIX_FORMS = (*COMPANY_FORMS, "SA", "S.A.")
+_COMPANY_BEFORE_RE = re.compile(r"(?<![\w.])(?:" + "|".join(map(re.escape, COMPANY_FORMS)) + r")[ \t]{1,2}\Z")
+_COMPANY_AFTER_RE = re.compile(r"[ \t]{1,2}(?:" + "|".join(map(re.escape, COMPANY_SUFFIX_FORMS)) + r")(?!\w)")
+
+
+# Civilité juste avant une personne trouvée : le mot capitalisé qui suit le nom en fait partie, même s'il est aussi un
+# mot courant ou une commune (« Mme Christine Pires Beaune », « M. Matthieu Orphelin »). Même règle dans
+# rust/src/finalize/pipeline.rs. A civility right before a found person: the capitalised word after the name belongs
+# to it, even when it is also a common word or a town.
+_CIVILITY_BEFORE_RE = re.compile(r"(?<![\w.])(?:M\.|Mme|Mlle|Monsieur|Madame|Mademoiselle)[ \t]\Z")
+# Civilité ou titre juste avant un nom suivi d'une forme juridique : une personne (« M. Martin SA »). Même liste
+# dans rust/src/finalize/pipeline.rs. A civility or title before a name with a legal form: a person.
+_TITLE_BEFORE_RE = re.compile(
+    r"(?<![\w.])(?:M\.|Mme|Mlle|Monsieur|Madame|Mademoiselle|Me|Maître|Dr)[ \t]\Z")
+
+
+def _surname_end(text: str, pos: int) -> int | None:
+    """Fin du mot capitalisé (« Orphelin », « Prud'homme », « Pires-Beaune ») qui commence en `pos`, sinon None.
+    End of the capitalised word starting at `pos`, else None."""
+    n = len(text)
+    if pos >= n or not (text[pos].isalpha() and text[pos].isupper()):
+        return None
+    i, prev = pos + 1, text[pos]
+    while i < n and (text[i].isalpha() or text[i] in "'-"):
+        if text[i].isalpha() and not text[i].islower() and prev not in "'-":
+            return None
+        prev = text[i]
+        i += 1
+    if text[i - 1] in "'-" or i - pos < 2 or (i < n and text[i].isalnum()):
+        return None
+    return i
+
+
+def _extend_after_civility(spans: list[Span], text: str) -> None:
+    """« M. [Matthieu] Orphelin » -> « M. [Matthieu Orphelin] » (`spans` triées, disjointes / sorted, disjoint)."""
+    for k, span in enumerate(spans):
+        if span.entity != "PERSON" or not span.personal or span.end >= len(text) or text[span.end] != " ":
+            continue
+        if _CIVILITY_BEFORE_RE.search(text, max(0, span.start - 14), span.start) is None:
+            continue
+        end = _surname_end(text, span.end + 1)
+        if end is not None and not (k + 1 < len(spans) and spans[k + 1].start < end):
+            span.end = end
+
+
+# « M. Orphelin », « monsieur Orphelin » : une civilité suivie d'un blanc puis d'un seul mot capitalisé encore libre
+# est un nom de famille, même homonyme d'un mot courant (débats parlementaires) ; jamais un article (« M. Le Maire »)
+# ni un titre (« Monsieur Président »). Même règle dans rust/src/finalize/pipeline.rs. A civility, one blank, then one
+# free capitalised word is a surname, even when it is also a common word; never an article nor a title.
+CIVILITY_WORDS = ("M.", "Mme", "Mlle", "Monsieur", "Madame", "Mademoiselle", "monsieur", "madame", "mademoiselle")
+_CIVILITY_RE = re.compile(r"(?<![\w.])(?:" + "|".join(map(re.escape, CIVILITY_WORDS)) + r")[ \t]")
+NOT_SURNAMES = frozenset({
+    "Le", "La", "Les", "L", "De", "Du", "Des", "Président", "Présidente", "Ministre", "Député", "Députée",
+    "Sénateur", "Sénatrice", "Maire", "Rapporteur", "Rapporteure", "Secrétaire", "Directeur", "Directrice", "Juge",
+    "Procureur", "Préfet", "Préfète", "Commissaire", "Professeur", "Docteur", "Maître", "Monsieur", "Madame",
+    "Mademoiselle", "Et", "Ou"})
+_FR_NAME_SOURCES = frozenset({"FR_NAMES", "propagated:FR_NAMES"})
+
+
+def _civility_surnames(spans: list[Span], text: str) -> list[Span]:
+    """« M. Orphelin » -> « M. [Orphelin] » : nouvelle personne après une civilité (`spans` triées, disjointes).
+
+    Seulement si le détecteur de noms français a trouvé une personne dans le texte (pays FR demandé). A new person
+    after a civility, when the capitalised word touches no span (`spans` sorted, disjoint); only when the French
+    name detector found a person in the text (country FR requested).
+    """
+    if not any(s.source in _FR_NAME_SOURCES for s in spans):
+        return spans
+    starts = [s.start for s in spans]
+    added: list[Span] = []
+    for m in _CIVILITY_RE.finditer(text):
+        pos = m.end()
+        end = _surname_end(text, pos)
+        if end is None or text[pos:end] in NOT_SURNAMES:
+            continue
+        i = bisect_right(starts, end - 1) - 1  # dernière zone qui commence avant la fin / last span starting before
+        if i >= 0 and spans[i].end > m.start():
+            continue
+        added.append(Span(pos, end, "PERSON", "PERSON", "FR_NAMES", 0.8, PRIORITY_HEURISTIC, text[pos:end], True))
+    if not added:
+        return spans
+    return sorted([*spans, *added], key=lambda s: s.start)
+
+
+def _company_named(text: str, start: int, end: int) -> bool:
+    """« SARL DUPONT », « DUPONT SARL » : le nom porte une forme juridique de société / a company legal form.
+
+    Revue du 26/10 : une civilité ou un titre juste avant (« M. Jean Dupont SARL ») fait une personne, et une forme
+    suivie d'un mot capitalisé (« Dupont SARL Lumière ») appartient à ce nom-là. Review of 26/10: a civility or title
+    right before makes a person, and a form followed by a capitalised word belongs to that next name.
+    """
+    if _TITLE_BEFORE_RE.search(text, max(0, start - 14), start) is not None:
+        return False
+    if _COMPANY_BEFORE_RE.search(text, max(0, start - 12), start) is not None:
+        return True
+    after = _COMPANY_AFTER_RE.match(text, end)
+    if after is None:
+        return False
+    i = after.end()
+    while i < len(text) and text[i] in " \t":
+        i += 1
+    return not (i > after.end() and i < len(text) and text[i].isalpha() and text[i].isupper())
+
+
+# Société civile professionnelle ou d'exercice libéral (« SCP Dupont, Martin et Durand », « SELARL Testa & Testi ») :
+# le nom entier de la firme reste lisible, chaque associé compris ; les noms suivants n'en sont séparés que par une
+# virgule, « et », « & » ou un tiret. Même liste dans rust/src/finalize/pipeline.rs. A professional partnership's
+# whole firm name stays readable, every partner included.
+PARTNERSHIP_FORMS = ("SCP", "SELARL", "SELAS", "SELAFA", "SELURL", "SELCA", "SCM", "S.C.P.")
+_PARTNERSHIP_BEFORE_RE = re.compile(r"(?<![\w.])(?:" + "|".join(map(re.escape, PARTNERSHIP_FORMS)) + r")[ \t]{1,2}\Z")
+_FIRM_LINK_RE = re.compile(r"[ \t]{0,2}(?:,|&|et|-|–)[ \t]{1,2}")
+# Un associé enchaîné est un nom seul, d'un seul mot (« Durand », « Testa-Testi ») : un prénom et un nom (« Jean
+# Moulu ») arrêtent la firme et restent masqués. A chained partner is a lone one-word surname; a given name and a
+# surname end the firm and stay masked.
+_FIRM_BLANKS = " \t\n\r\xa0\u202f"
+
+
+def _drop_company_names(text: str, spans: list[Span]) -> list[Span]:
+    """Retire les personnes qui portent une forme juridique de société (`_company_named`) et, après une société
+    civile professionnelle ou d'exercice libéral, les associés suivants de la même firme, noms seuls d'un mot
+    (`spans` disjointes).
+
+    Drops persons carrying a company legal form and, after a professional partnership, the next partners of the
+    same firm, lone one-word surnames (`spans` disjoint); returns them sorted by start.
+    """
+    kept: list[Span] = []
+    firm_end = -1
+    for span in sorted(spans, key=lambda s: s.start):
+        if span.entity == "PERSON":
+            if firm_end >= 0 and _FIRM_LINK_RE.fullmatch(text, firm_end, span.start) is not None \
+                    and not any(c in _FIRM_BLANKS for c in text[span.start:span.end]):
+                firm_end = span.end
+                continue
+            if _company_named(text, span.start, span.end):
+                partnership = _PARTNERSHIP_BEFORE_RE.search(text, max(0, span.start - 12), span.start)
+                firm_end = -1 if partnership is None else span.end
+                continue
+        firm_end = -1
+        kept.append(span)
+    return kept
 # Avertissement du rapport quand le pays FR n'est pas demandé / report warning when FR is not requested.
 NAMES_FRENCH_ONLY = ("Noms et adresses : détectés par les lexiques français seulement ; sans le pays FR, ils ne "
                      "sont pas masqués / Names and addresses are detected by the French lexicons only; without "
@@ -200,20 +347,23 @@ class DetectionContext:
 
     def vetoed(self, groups: Sequence[str], vetoes: Sequence[str], start: int, end: int, after: int) -> bool:
         """Un mot-veto placé entre le dernier mot-clé et la valeur annule le contexte : l'indice le plus proche
-        l'emporte (« né le 3 mai 1953. … la réunion du 12/02/2026 »). En-têtes et mots-clés après la valeur
-        ne sont jamais annulés.
+        l'emporte (« né le 3 mai 1953. … la réunion du 12/02/2026 »). Les en-têtes ne sont jamais annulés ; un
+        mot-clé après la valeur ne l'est que par un mot-veto collé devant elle, à 4 caractères au plus
+        (« hospitalisée le 14/09/2026, née le … », `scanner.rs: VETO_ADJACENT`).
 
         A veto word between the last keyword and the value cancels the context: the nearest cue wins. Column
-        headers and keywords after the value are never vetoed.
+        headers are never vetoed; a keyword after the value only by a veto word right before the value (4
+        characters at most).
         """
         index, lo, hi = self.segment(start)
         if self._header_context(groups, index, start, end):
             return False
-        if any(self.hits.near(g, start, end, 0, after, lo, hi) for g in groups):
-            return False
         keyword = max(self.hits.last_end(g, start, lo) for g in groups)
         veto = max(self.hits.last_end(g, start, lo) for g in vetoes)
-        return veto >= 0 and veto > keyword
+        veto_wins = veto >= 0 and veto > keyword
+        if any(self.hits.near(g, start, end, 0, after, lo, hi) for g in groups):
+            return veto_wins and start - veto <= 4
+        return veto_wins
 
 
 class _FoundView(Sequence[Span]):
@@ -349,8 +499,24 @@ def _boundary_checks() -> dict[str, tuple[Callable[[str, int], bool], Callable[[
             return False
         return not (ch == "." and pos + 1 < len(text) and text[pos + 1].isdigit())
 
+    # Groupes de chiffres regroupés librement (« 0764 945 16 3 ») : la valeur est toute la suite de groupes, jamais
+    # sa fin ni son début (pas de chiffre + séparateur avant, ni de séparateur + chiffre après). Freely regrouped
+    # digit groups: the value is the whole run of groups (no digit + separator before, no separator + digit after).
+    def group_left(text: str, pos: int) -> bool:
+        if pos == 0:
+            return True
+        ch = text[pos - 1]
+        return not (ch.isalnum() or (ch in " ./-" and pos >= 2 and text[pos - 2].isdigit()))
+
+    def group_right(text: str, pos: int) -> bool:
+        if pos >= len(text):
+            return True
+        ch = text[pos]
+        return not (ch.isalnum() or (ch in " ./-" and pos + 1 < len(text) and text[pos + 1].isdigit()))
+
     always = lambda text, pos: True  # noqa: E731
     return {
+        "group": (group_left, group_right),
         "alnum": (left(_not_alnum), right(_not_alnum)),
         "word": (left(lambda c: not (c.isalnum() or c in "_.%+-")), right(lambda c: not (c.isalnum() or c == "_"))),
         "ip": (left(lambda c: not (c.isalnum() or c == ".")), ip_right),
@@ -503,6 +669,36 @@ def _block_bounds(text: str, start: int, end: int, before: int, after: int) -> t
         elif c not in " \t\r":
             blank = False
     return lo, hi
+
+
+# Numéro d'un registre en tête de ligne (« n° RCS : … », « n° RM : … », avis du BODACC) / a register number field.
+_REGISTER_LABELS = frozenset({"n° RCS :", "n° RM :", "n° RCS:", "n° RM:"})
+# Marques d'une personne morale dans une ligne courte du document / legal-entity marks in a short line.
+_ENTITY_WORDS = ("dénomination", "denomination", "raison sociale", "forme juridique", "société", "societe")
+_ENTITY_FORMS = frozenset({"SA", "SAS", "SASU", "SARL", "EURL", "SCI", "SNC", "SCP", "SCM", "SCA", "SCOP", "SCEA",
+                           "SELARL", "SELAS", "SELAFA", "SELURL", "SELCA", "GAEC", "EARL", "SEM", "GIE"})
+_ASCII_CAPS_RE = re.compile(r"[A-Z]+")
+_SHORT_LINE = 150
+
+
+def _no_legal_entity(text: str, start: int) -> bool:
+    """« n° RCS : 123 456 789 RCS Ville » d'un avis qui ne nomme aucune personne morale : un entrepreneur individuel.
+
+    A register number field in a notice that names no legal entity: no short line (150 characters at most; a
+    long free-text paragraph may cite the liquidator's firm) holds « Dénomination », « Raison sociale », « Forme
+    juridique », « société » or a legal form (« SARL »). Then the number is a sole trader's, hence personal.
+    """
+    line_start = text.rfind("\n", 0, start) + 1
+    if text[line_start:start].rstrip(" ") not in _REGISTER_LABELS:
+        return False
+    for line in text.split("\n"):
+        if len(line) > _SHORT_LINE:
+            continue
+        low = line.lower()
+        if any(word in low for word in _ENTITY_WORDS) \
+                or any(token in _ENTITY_FORMS for token in _ASCII_CAPS_RE.findall(line)):
+            return False
+    return True
 
 
 @cache
@@ -1111,6 +1307,8 @@ class Anonymizer:
             return True, "sole_trader"
         if self._person_groups and self._civil_status(ctx, start, end):
             return True, "civil_status_nearby"
+        if _no_legal_entity(ctx.text, start):
+            return True, "no_legal_entity"
         return False, None
 
     def _civil_status(self, ctx: DetectionContext, start: int, end: int) -> bool:
@@ -1166,6 +1364,9 @@ class Anonymizer:
             return []
         resolved = resolve(merge_same_entity(kept), text)
         resolved = self._propagate(ctx, resolved)
+        resolved = _drop_company_names(text, resolved)
+        _extend_after_civility(resolved, text)
+        resolved = _civility_surnames(resolved, text)
         for span in resolved:
             if span.value is None:
                 span.value = text[span.start:span.end]
@@ -1540,6 +1741,8 @@ def _trim_honorific(span: Span, text: str) -> None:
             token_end += 1
         if token_end == 0 or fold(segment[:token_end]) not in HONORIFICS:
             return
+        if segment[token_end:token_end + 1] in ("'", "’"):
+            return  # « M'testa », « M’testo » : un nom, pas « M. » / a name, not an honorific
         rest = token_end
         while rest < len(segment) and segment[rest] in ".  ":
             rest += 1

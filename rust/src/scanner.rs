@@ -42,7 +42,15 @@ pub enum Boundary {
     Hex,
     Phone,
     Digit,
+    /// Suite entière de groupes (« 0764 945 16 3 ») : ni chiffre + séparateur avant, ni séparateur + chiffre
+    /// après / the whole run of groups: no digit + separator before, no separator + digit after.
+    Group,
     None,
+}
+
+/// Séparateurs de groupes de la borne `Group` / group separators of the `Group` boundary.
+fn group_separator(c: char) -> bool {
+    matches!(c, ' ' | '.' | '/' | '-')
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -106,6 +114,31 @@ pub const LEGAL_ENTITY_WINDOW: (usize, usize) = (80, 40);
 /// Raisons propres d'un numéro d'entreprise masqué (`Anonymizer._personal`) / own reasons of a masked company id.
 pub const SOLE_TRADER: &str = "sole_trader";
 pub const CIVIL_STATUS: &str = "civil_status_nearby";
+pub const NO_LEGAL_ENTITY: &str = "no_legal_entity";
+
+/// `engine._REGISTER_LABELS`, `_ENTITY_WORDS`, `_ENTITY_FORMS`, `_SHORT_LINE`.
+const REGISTER_LABELS: [&str; 4] = ["n° RCS :", "n° RM :", "n° RCS:", "n° RM:"];
+const ENTITY_WORDS: [&str; 6] =
+    ["dénomination", "denomination", "raison sociale", "forme juridique", "société", "societe"];
+const ENTITY_FORMS: [&str; 21] = [
+    "SA", "SAS", "SASU", "SARL", "EURL", "SCI", "SNC", "SCP", "SCM", "SCA", "SCOP", "SCEA", "SELARL", "SELAS",
+    "SELAFA", "SELURL", "SELCA", "GAEC", "EARL", "SEM", "GIE",
+];
+const SHORT_LINE: usize = 150;
+
+/// `engine._no_legal_entity` : « n° RCS : … » d'un avis dont aucune ligne courte ne nomme de personne morale.
+/// A register number field in a notice whose short lines name no legal entity. `start` : octet / byte offset.
+fn no_legal_entity(text: &str, start: usize) -> bool {
+    let line_start = text[..start].rfind('\n').map_or(0, |i| i + 1);
+    if !REGISTER_LABELS.contains(&text[line_start..start].trim_end_matches(' ')) {
+        return false;
+    }
+    text.split('\n').filter(|line| line.chars().count() <= SHORT_LINE).all(|line| {
+        let low = line.to_lowercase();
+        !ENTITY_WORDS.iter().any(|word| low.contains(word))
+            && !line.split(|c: char| !c.is_ascii_uppercase()).any(|token| ENTITY_FORMS.contains(&token))
+    })
+}
 
 /// Zone trouvée (positions en caractères Python) / found span (Python character offsets).
 pub struct Found {
@@ -300,6 +333,10 @@ fn left_ok(boundary: Boundary, text: &str, byte: usize, classes: &Classes) -> bo
         Boundary::Hex => !(alnum || c == ':'),
         Boundary::Phone => !(alnum || c == '+'),
         Boundary::Digit => !classes.is_digit(c),
+        Boundary::Group => {
+            !(alnum
+                || (group_separator(c) && char_before(text, byte - c.len_utf8()).is_some_and(|p| classes.is_digit(p))))
+        }
         Boundary::None => true,
     }
 }
@@ -330,6 +367,9 @@ fn right_ok(boundary: Boundary, text: &str, byte: usize, classes: &Classes) -> b
         Boundary::Ip => !alnum && !(c == '.' && char_at(text, byte + 1).is_some_and(|n| classes.is_digit(n))),
         Boundary::Hex => !(alnum || c == ':'),
         Boundary::Digit => !classes.is_digit(c),
+        Boundary::Group => {
+            !(alnum || (group_separator(c) && char_at(text, byte + c.len_utf8()).is_some_and(|n| classes.is_digit(n))))
+        }
         Boundary::None => true,
     }
 }
@@ -426,16 +466,25 @@ impl Context<'_> {
     /// Même règle que `DetectionContext.vetoed` (Python) / same rule as the Python version.
     fn vetoed(&self, groups: &[u32], vetoes: &[u32], start: usize, end: usize, after: usize) -> bool {
         let (index, lo, hi) = self.segment(start);
-        if self.header_context(groups, index, start, end)
-            || groups.iter().any(|&g| self.hits.near(g, start, end, 0, after, lo, hi))
-        {
+        if self.header_context(groups, index, start, end) {
             return false;
         }
         let keyword = groups.iter().filter_map(|&g| self.hits.last_end(g, start, lo)).max();
         let veto = vetoes.iter().filter_map(|&g| self.hits.last_end(g, start, lo)).max();
-        veto.is_some_and(|v| keyword.is_none_or(|k| v > k))
+        let veto_wins = veto.is_some_and(|v| keyword.is_none_or(|k| v > k));
+        if groups.iter().any(|&g| self.hits.near(g, start, end, 0, after, lo, hi)) {
+            // Mot-clé après la valeur : seul un mot-veto collé devant l'annule / a keyword after the value: only a
+            // veto word right before the value cancels it.
+            return veto_wins && veto.is_some_and(|v| start - v <= VETO_ADJACENT);
+        }
+        veto_wins
     }
 }
+
+/// `engine._VETO_ADJACENT` : écart maximal entre un mot-veto et la valeur quand le mot-clé suit la valeur
+/// (« hospitalisée le 14/09/2026, née le … ») / largest gap between a veto word and the value when the keyword
+/// follows the value.
+const VETO_ADJACENT: usize = 4;
 
 /// Correspondance : bornes entières et bornes de la zone (groupe capturé) / whole match and span bounds.
 struct Candidate {
@@ -781,6 +830,7 @@ impl Scanner {
                     {
                         (true, Some(CIVIL_STATUS))
                     }
+                    _ if no_legal_entity(text, start) => (true, Some(NO_LEGAL_ENTITY)),
                     _ => (false, None),
                 },
             };

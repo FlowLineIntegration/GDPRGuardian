@@ -19,6 +19,8 @@ from types import ModuleType
 
 import pytest
 
+from gdprguardian import __version__
+
 ROOT = Path(__file__).resolve().parents[2]
 SKILL = ROOT / "integrations" / "claude" / "plugin" / "skills" / "gdprguardian-local"
 SCRIPT = SKILL / "scripts" / "gdprguardian_local.py"
@@ -240,7 +242,7 @@ def test_archive_runs_on_a_bare_interpreter(unpacked: Path, tmp_path: Path) -> N
     check = _run(unpacked, cache, "--check")
     assert check.returncode == 0, check.stderr.decode("utf-8", "replace")
     info = json.loads(check.stdout)
-    assert info["source"] == "bundled" and info["gdprguardian"] == "1.0.0"
+    assert info["source"] == "bundled" and info["gdprguardian"] == __version__
     assert info["formats"]["PDF"] and info["formats"]["Word (DOCX)"] and info["formats"]["CSV"]
     expected_engine = "rust" if any("gdprguardian_core" in name for name in info["wheels"]) else "python"
     assert info["engine"] == expected_engine and "engine_notes" not in info

@@ -423,6 +423,8 @@ _FORMATS: dict[str, Callable[[random.Random], str]] = {
     "fr.alnum_mixed": lambda r: _letters(r, r.randint(1, 12), _DIGITS + _UPPER + "abcé"),
     "fr.contextual_id": lambda r: r.choice(["", " ", "-", "/ "]) + _letters(r, r.randint(1, 10), _DIGITS + "ABC-/. "),
     "fr.phone": lambda r: _phone(r, "0" + r.choice("1234567896") + _d(r, 8), "33"),
+    "fr.phone_field": lambda r: r.choice(["", "(+33) ", "+33 ", "0033 ", "33 "]) + _letters(
+        r, r.randint(7, 16), _DIGITS * 3 + " ()+./-"),
     "fr.phone_overseas": _overseas,
     "fr.eori": lambda r: "FR" + _siret(r),
     "intl.iban": _iban,
@@ -671,6 +673,7 @@ def _unicode_digits() -> list[str]:
     ("fr.phone", "+33 6 12 34 56 78"), ("fr.phone", "06 12 34 56 78"), ("fr.phone_overseas", "+262 692 12 34 56"),
     ("intl.digits_e164", "0044 20 7946 0958"), ("intl.iban", "FR76 3000 6000 0112 3456 7890 189"),
     ("intl.calendar_date", "03/03/1985"), ("fr.alnum_mixed", "AB"), ("fr.contextual_id", "CLT-"),
+    ("fr.phone_field", "(+33) 6 12 34 56 78"),
     ("intl.ipv6", "fe80::1"), ("be.phone", "0474 12 34 56"), ("nl.bsn", "11122233"), ("es.dni", "1234567Z"),
 ])
 def test_every_unicode_digit_agrees(name, sample):

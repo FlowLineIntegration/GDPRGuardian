@@ -58,7 +58,8 @@ async def test_tools_and_descriptions(server: FastMCP) -> None:
     assert "NEVER open" in (instructions or "")
 
 
-async def test_upload_flow_returns_framed_anonymised_markdown(server: FastMCP, service: Service) -> None:
+async def test_upload_flow_returns_framed_anonymised_markdown(server: FastMCP, service: Service,
+                                                             clock: FakeClock) -> None:
     async with Client(server) as client:
         created = await client.call_tool("create_upload", {"filename": "dossier.txt", "countries": "FR"})
         ticket = created.structured_content
@@ -75,14 +76,76 @@ async def test_upload_flow_returns_framed_anonymised_markdown(server: FastMCP, s
         meta, text = page.structured_content, page.content[0].text
         assert meta["page"] == 1 and meta["pages"] == 1 and meta["next_page"] is None and meta["deleted"]
         assert meta["report"]["entities"]["NIR"] == 1 and "timings_ms" not in meta["report"]
+        # Avertissements de conversion et contenu écarté dans report.warnings, toujours une liste.
+        # Conversion warnings and dropped content in report.warnings, always a list.
+        assert meta["report"]["warnings"][0] == "note" and meta["dropped"] == {"comments": 1}
+        assert any("1 comment(s) dropped" in warning for warning in meta["report"]["warnings"])
+        assert "Warning: note" in text and text.index("Warning: note") < text.index("<<<GDPRGUARDIAN_DOCUMENT")
         frame = FRAME.search(text)
         assert frame is not None and "[NIR_1]" in frame.group(2) and "document.txt" not in frame.group(2)
+        assert meta["markdown"] == frame.group(2)  # le texte aussi en contenu structuré / text in structured too
         assert "untrusted" in text and "deleted from the server" in text
+        assert re.search(r"Replaced: [A-Z_]+ ×\d", text) and "{" not in text.split("\n")[2]
         for secret in (NIR, EMAIL, IBAN):
             assert secret not in text and secret not in str(meta)
 
-        with pytest.raises(ToolError, match="not_found"):
+        # Réponse perdue : relisible pendant le délai de grâce, puis « already_read » / lost answer: grace period.
+        again = await client.call_tool("get_anonymized", {"upload_id": ticket["upload_id"]})
+        assert FRAME.search(again.content[0].text) is not None
+        clock.advance(121)
+        with pytest.raises(ToolError, match="already_read"):
             await client.call_tool("get_anonymized", {"upload_id": ticket["upload_id"]})
+
+
+async def test_progress_is_returned_while_processing(server: FastMCP, service: Service, clock: FakeClock) -> None:
+    async with Client(server) as client:
+        ticket = (await client.call_tool("create_upload", {"filename": "rapport.pdf"})).structured_content
+        token = ticket["upload_url"].rsplit("/", 1)[-1]
+        job, _ = await service.accept_upload(token, DEV_PRINCIPAL, once(b"%PDF-1.7 " + b"x" * 4_000_000))
+        service.store.start(job)
+        service.store.progress(job, "converting", 3, 12)
+        clock.advance(2)
+        result = await client.call_tool("get_anonymized", {"upload_id": ticket["upload_id"]})
+    meta, text = result.structured_content, result.content[0].text
+    assert meta["status"] == "processing" and meta["stage"] == "converting" and meta["page"] is None
+    assert (meta["pages_done"], meta["pages_total"], meta["elapsed_s"]) == (3, 12, 2)
+    assert 5 < meta["percent"] < 65 and 2 <= meta["retry_after_s"] <= 5
+    assert "page 3/12" in text and f"again in {meta['retry_after_s']} s" in text and "do not upload it again" in text
+
+
+async def test_create_upload_validates_extension_and_rules_before_the_file_leaves(server: FastMCP,
+                                                                                  service: Service) -> None:
+    async with Client(server) as client:
+        with pytest.raises(ToolError, match=r"unsupported_format.*PDF"):
+            await client.call_tool("create_upload", {"filename": "photo.png"})
+        with pytest.raises(ToolError, match="invalid_request"):
+            await client.call_tool("create_upload", {"filename": "a.txt", "rules": {"rules": [
+                {"label": "X", "pattern": "a+(?<=a)b"}]}})
+        # Règles en chaîne JSON acceptées / rules as a JSON string accepted.
+        rules = '{"rules": [{"label": "CLIENT", "pattern": "C[0-9]+"}]}'
+        ticket = await client.call_tool("create_upload", {"filename": "a.txt", "rules": rules})
+        assert ticket.structured_content["upload_id"].startswith("up_")
+    assert len(service.store) == 1
+
+
+async def test_online_descriptions_never_mention_the_local_tool(server: FastMCP) -> None:
+    async with Client(server) as client:
+        tools = {tool.name: tool for tool in await client.list_tools()}
+    schemas = {name: tool.model_dump(mode="json", by_alias=True)["inputSchema"] for name, tool in tools.items()}
+    schema = str(schemas["get_anonymized"]) + tools["get_anonymized"].description
+    assert "anonymize_file" not in schema and "create_upload" in schema
+    assert tools["get_anonymized"].annotations.destructive_hint is True
+    assert "retry_after_s" in tools["get_anonymized"].description
+    countries = schemas["anonymize_text"]["properties"]["countries"]["description"]
+    assert "BE" in countries and "'all'" in countries and "not ';'" in countries
+    labels = str(schemas["anonymize_text"]["properties"]["label_language"])
+    assert "'auto'" in labels and "strict" in str(schemas["anonymize_text"]["properties"]["profile"])
+
+
+async def test_unknown_tool_suggests_the_right_name(server: FastMCP) -> None:
+    async with Client(server) as client:
+        with pytest.raises(ToolError, match="Did you mean anonymize_text"):
+            await client.call_tool("anonymise_text", {"text": "x"})
 
 
 async def test_injected_end_marker_cannot_close_the_frame(server: FastMCP, service: Service) -> None:
@@ -129,7 +192,16 @@ async def test_anonymize_text(server: FastMCP) -> None:
     report = result.structured_content["report"]
     assert report["irreversible"] is True and "country_reasons" not in report
     # Pays FR demandé : aucun avertissement, le texte seul / FR requested: no warning, the text alone.
-    assert "warnings" not in report and len(result.content) == 1
+    assert report["warnings"] == [] and len(result.content) == 1
+    # Texte anonymisé aussi en contenu structuré / anonymised text in structured content too.
+    assert result.structured_content["text"] == result.content[0].text
+
+
+async def test_empty_text_gives_a_clear_warning(server: FastMCP) -> None:
+    async with Client(server) as client:
+        result = await client.call_tool("anonymize_text", {"text": "   "})
+    assert any("empty text" in warning for warning in result.structured_content["report"]["warnings"])
+    assert "empty text" not in result.content[0].text
 
 
 async def test_engine_warning_reaches_the_model_without_france(server: FastMCP, service: Service) -> None:
@@ -140,9 +212,10 @@ async def test_engine_warning_reaches_the_model_without_france(server: FastMCP, 
         page = await client.call_tool("get_anonymized", {"upload_id": upload_id})
     warnings = result.structured_content["report"]["warnings"]
     assert any("French lexicons only" in warning for warning in warnings)
-    # Le texte anonymisé reste seul dans le premier bloc ; l'avertissement suit / the text stays alone first.
+    # Le texte anonymisé reste seul ; l'avertissement n'est que dans report.warnings, jamais ajouté au texte.
+    # The anonymised text stays alone; the warning is only in report.warnings, never appended to the text.
     assert EMAIL not in result.content[0].text and "French lexicons" not in result.content[0].text
-    assert len(result.content) == 2 and "French lexicons only" in result.content[1].text
+    assert len(result.content) == 1
     assert "French lexicons only" not in page.content[0].text  # téléversement en FR par défaut / FR by default
 
 
@@ -167,10 +240,15 @@ async def test_list_packs(server: FastMCP) -> None:
 
 @pytest.mark.parametrize(("tool", "arguments", "match"), [
     ("get_anonymized", {"upload_id": "../../etc/passwd"}, r"invalid_request.*upload_id \(string_pattern_mismatch\)"),
-    ("get_anonymized", {"upload_id": "up_" + "a" * 43, "page": 0}, r"page \(greater_than_equal\)"),
+    ("get_anonymized", {"upload_id": "up_" + "a" * 43, "page": 0}, r"page \(greater_than_equal; limit: 1\)"),
     ("get_anonymized", {"upload_id": "up_" + "a" * 43}, "not_found"),
-    ("create_upload", {"filename": ""}, r"filename \(string_too_short\)"),
-    ("create_upload", {"filename": "a.txt", "profile": "paranoid"}, r"profile \(literal_error\)"),
+    ("create_upload", {"filename": ""}, r"filename \(string_too_short; limit: 1\)"),
+    ("create_upload", {"filename": "a.txt", "profile": "paranoid"},
+     r"profile \(literal_error; allowed: fast \| standard \| strict\)"),
+    ("create_upload", {"filename": "a.txt", "country": "BE"},
+     r"country \(unexpected_keyword_argument; unknown argument, did you mean countries\?\)"),
+    ("create_upload", {"filename": "a.txt", "dupont": "x"}, r"\? \(unexpected_keyword_argument; unknown argument"),
+    ("anonymize_text", {"text": "x" * 1_000_001}, r"text \(string_too_long; limit: 1000000; longer text: save it"),
     ("create_upload", {"filename": "a.txt", "countries": "ZZ"}, "invalid_request"),
     ("anonymize_text", {"text": "x", "countries": "FR,ZZ"}, "invalid_request"),
 ])

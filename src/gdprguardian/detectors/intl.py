@@ -61,7 +61,9 @@ class EmailDetector:
 
     id = "EMAIL"
     _local = re.compile(r"[\w.%+\-]{1,64}$")
-    _domain = re.compile(r"(?:[\w\-]{1,63}\.){1,8}[A-Za-z]{2,24}(?![\w\-])")
+    # Un tiret suivi d'autre chose qu'un domaine termine l'adresse (« x@y.fr- Lyon ») / a dash not followed by a
+    # domain ends the address.
+    _domain = re.compile(r"(?:[\w\-]{1,63}\.){1,8}[A-Za-z]{2,24}(?!\w)(?!-[\w\-]*\.)")
 
     def __init__(self, pack: Any) -> None:
         self.pack = pack

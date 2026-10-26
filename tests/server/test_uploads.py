@@ -13,7 +13,9 @@ from server_testkit import AUTH_A, AUTH_B, EMAIL, KEY_A, NIR, SENSITIVE_TEXT, Fa
 
 import gdprguardian.documents as documents
 from gdprguardian.server import ServerConfig, create_app
+from gdprguardian.server.clients import LOCAL_CLIENT, REQUEST, RequestContext
 from gdprguardian.server.errors import UploadTimeout
+from gdprguardian.server.limiter import Ticket
 from gdprguardian.server.options import AnonymizeOptions
 from gdprguardian.server.security import DEV_PRINCIPAL, ApiKeyAuthenticator, result_id
 from gdprguardian.server.service import Service
@@ -30,29 +32,37 @@ def path_of(url: str) -> str:
     return url.removeprefix("http://testserver")
 
 
-def test_complete_flow(client: TestClient) -> None:
+def test_complete_flow(client: TestClient, clock: FakeClock) -> None:
     ticket = start_upload(client, countries="FR")
     assert ticket["method"] == "PUT" and ticket["expires_in"] == 300
     assert ticket["upload_url"].startswith("http://testserver/v1/uploads/")
     assert ticket["upload_id"] not in ticket["upload_url"]
     receipt = client.put(path_of(ticket["upload_url"]), headers=AUTH_A, content=SENSITIVE_TEXT.encode())
-    assert receipt.status_code == 200, receipt.text
-    assert receipt.json()["status"] == "ready" and receipt.json()["pages"] == 1
+    # 202 dès le corps reçu ; le traitement suit en arrière-plan / 202 once received; processing follows.
+    assert receipt.status_code == 202, receipt.text
+    accepted = receipt.json()
+    assert accepted["status"] == "processing" and accepted["stage"] == "queued"
+    assert accepted["received_bytes"] == len(SENSITIVE_TEXT.encode()) and accepted["retry_after_s"] >= 1
+    assert "result_url" not in accepted and accepted["upload_id"] == ticket["upload_id"]
+    assert receipt.headers["retry-after"] == str(accepted["retry_after_s"])
     assert NIR not in receipt.text and EMAIL not in receipt.text  # métadonnées seulement / metadata only
     result = client.get(path_of(ticket["result_url"]), headers=AUTH_A).json()
     assert result["page"] == 1 and result["pages"] == 1 and result["next_page"] is None
-    assert result["deleted"] is True
+    assert result["deleted"] is True and result["expires_in"] <= 120 and result["stage"] == "done"
     assert "document.txt" not in result["markdown"] and "[NIR_1]" in result["markdown"]
     assert NIR not in result["markdown"]
     assert result["report"]["entities"]["NIR"] == 1
-    # Lu en entier, donc effacé / fully read, hence deleted.
-    assert client.get(path_of(ticket["result_url"]), headers=AUTH_A).status_code == 404
+    # Lu en entier : relisible pendant le délai de grâce, puis effacé / fully read: grace period, then deleted.
+    assert client.get(path_of(ticket["result_url"]), headers=AUTH_A).status_code == 200
+    clock.advance(121)
+    gone = client.get(path_of(ticket["result_url"]), headers=AUTH_A)
+    assert gone.status_code == 404 and gone.json()["error"]["code"] == "already_read"
 
 
 def test_upload_url_is_single_use(client: TestClient) -> None:
     ticket = start_upload(client)
     url = path_of(ticket["upload_url"])
-    assert client.put(url, headers=AUTH_A, content=b"premier").status_code == 200
+    assert client.put(url, headers=AUTH_A, content=b"premier").status_code == 202
     again = client.put(url, headers=AUTH_A, content=b"second")
     # Déjà utilisé, faux ou expiré : la même réponse, rien n'indique que le jeton a existé.
     # Already used, wrong or expired: the same answer, nothing tells that the token existed.
@@ -66,7 +76,7 @@ def test_upload_and_results_are_bound_to_the_principal(client: TestClient) -> No
     stolen = client.put(url, headers=AUTH_B, content=b"x")
     assert stolen.status_code == 404
     # La tentative d'un autre principal ne consomme pas le jeton / another principal does not burn the token.
-    assert client.put(url, headers=AUTH_A, content=SENSITIVE_TEXT.encode()).status_code == 200
+    assert client.put(url, headers=AUTH_A, content=SENSITIVE_TEXT.encode()).status_code == 202
     result_url = path_of(ticket["result_url"])
     assert client.get(result_url, headers=AUTH_B).status_code == 404
     assert client.delete(result_url, headers=AUTH_B).status_code == 404
@@ -77,8 +87,36 @@ def test_pending_before_upload(client: TestClient) -> None:
     ticket = start_upload(client)
     response = client.get(path_of(ticket["result_url"]), headers=AUTH_A)
     assert response.status_code == 202
-    assert response.json() == {"upload_id": ticket["upload_id"], "status": "pending", "expires_in": 300}
-    assert response.headers["retry-after"] == "1"
+    assert response.json() == {"upload_id": ticket["upload_id"], "status": "pending", "expires_in": 300,
+                               "stage": "awaiting_upload", "percent": 0, "pages_done": None, "pages_total": None,
+                               "elapsed_s": None, "estimated_remaining_s": None, "retry_after_s": 5}
+    assert response.headers["retry-after"] == "5"
+
+
+def test_progress_while_processing(client: TestClient, clock: FakeClock) -> None:
+    # Reçu, en attente d'un travailleur, puis converti : étape, pages et délai conseillé, jamais une donnée.
+    # Received, queued, then converting: stage, pages and advised delay, never any data.
+    store = client.app.state.service.store
+    ticket = start_upload(client)
+    principal = ApiKeyAuthenticator([KEY_A]).authenticate(AUTH_A["Authorization"])
+    assert principal is not None
+    token = path_of(ticket["upload_url"]).rsplit("/", 1)[-1]
+    job = store.claim(token, principal)
+    store.received(job, 5_000_000)
+    queued = client.get(path_of(ticket["result_url"]), headers=AUTH_A)
+    assert queued.status_code == 202 and queued.json()["stage"] == "queued" and queued.json()["percent"] == 0
+    store.start(job)
+    store.progress(job, "converting", 10, 40)
+    clock.advance(3)
+    converting = client.get(path_of(ticket["result_url"]), headers=AUTH_A).json()
+    assert converting["stage"] == "converting" and (converting["pages_done"], converting["pages_total"]) == (10, 40)
+    assert 5 < converting["percent"] < 65 and converting["elapsed_s"] == 3
+    assert 2 <= converting["retry_after_s"] <= 5 and converting["estimated_remaining_s"] >= 1
+    store.progress(job, "anonymising")
+    store.progress(job, "nonsense", 1, 2)  # étape inconnue ignorée / unknown stage ignored
+    anonymising = client.get(path_of(ticket["result_url"]), headers=AUTH_A).json()
+    assert anonymising["stage"] == "anonymising" and anonymising["pages_total"] is None
+    assert 65 <= anonymising["percent"] <= 99
 
 
 def test_upload_token_ttl(make_client: Callable[..., TestClient], clock: FakeClock) -> None:
@@ -116,24 +154,28 @@ def test_sweeper_deletes_expired_results_without_any_request(make_client: Callab
     assert len(store) == 0  # balayé sans aucune requête / swept without any request
 
 
-def test_pagination_and_deletion_after_every_page(client: TestClient) -> None:
+def test_pagination_and_deletion_after_every_page(client: TestClient, clock: FakeClock) -> None:
     ticket = start_upload(client)
     body = "".join(f"Ligne {i} : contact {i}@exemple.fr\n" for i in range(3000))
-    receipt = client.put(path_of(ticket["upload_url"]), headers=AUTH_A, content=body.encode()).json()
-    assert receipt["pages"] > 1
+    assert client.put(path_of(ticket["upload_url"]), headers=AUTH_A, content=body.encode()).status_code == 202
     url = path_of(ticket["result_url"])
     pages: list[str] = []
     page: int | None = 1
     while page is not None:
         data = client.get(url, headers=AUTH_A, params={"page": page, "page_chars": 20_000}).json()
         assert len(data["markdown"]) <= 20_000 and data["markdown"].endswith("\n")
-        assert (data["report"] is not None) == (page == 1)
+        # Rapport et avertissements à chaque page / report and warnings on every page.
+        assert data["report"] is not None and isinstance(data["warnings"], list)
         pages.append(data["markdown"])
         assert data["deleted"] == (data["next_page"] is None)
         page = data["next_page"]
+    assert len(pages) > 1
     markdown = "".join(pages)
     assert markdown.count("\n") == 3000 and "@exemple.fr" not in markdown
     assert "[EMAIL_3000]" in markdown
+    # Délai de grâce : une page perdue se relit, puis tout est effacé / grace period, then deleted.
+    assert client.get(url, headers=AUTH_A, params={"page": 1, "page_chars": 20_000}).status_code == 200
+    clock.advance(121)
     assert client.get(url, headers=AUTH_A).status_code == 404
 
 
@@ -171,15 +213,19 @@ def test_malformed_tokens(client: TestClient, token: str) -> None:
     assert client.put(f"/v1/uploads/{token}", headers=AUTH_A, content=b"x").status_code == 404
 
 
-def test_upload_size_limit_and_failure_report(make_client: Callable[..., TestClient]) -> None:
+def test_upload_size_limit_and_failure_report(make_client: Callable[..., TestClient], clock: FakeClock) -> None:
     client = make_client(max_upload_bytes=1024)
     ticket = start_upload(client)
     response = client.put(path_of(ticket["upload_url"]), headers=AUTH_A, content=b"x" * 2048)
     assert response.status_code == 413
-    # L'échec est signalé une fois au lecteur du résultat / the failure is reported once to the reader.
+    # L'échec est signalé au lecteur du résultat, relisible pendant le délai de grâce, puis oublié.
+    # The failure is reported to the reader, again during the grace period, then forgotten.
     failed = client.get(path_of(ticket["result_url"]), headers=AUTH_A)
     assert failed.status_code == 413
-    assert client.get(path_of(ticket["result_url"]), headers=AUTH_A).status_code == 404
+    assert client.get(path_of(ticket["result_url"]), headers=AUTH_A).status_code == 413
+    clock.advance(121)
+    gone = client.get(path_of(ticket["result_url"]), headers=AUTH_A)
+    assert gone.status_code == 404 and gone.json()["error"]["code"] == "already_read"
 
 
 def test_chunked_upload_over_limit(make_client: Callable[..., TestClient]) -> None:
@@ -193,9 +239,18 @@ def test_chunked_upload_over_limit(make_client: Callable[..., TestClient]) -> No
 def test_unsupported_format_is_reported(client: TestClient) -> None:
     ticket = start_upload(client, filename="scan.pdf")
     response = client.put(path_of(ticket["upload_url"]), headers=AUTH_A, content=b"%PDF-1.7")
-    assert response.status_code == 415
+    # Reçu (202) ; le refus du format arrive à la lecture / received (202); the refusal comes when reading.
+    assert response.status_code == 202
     failed = client.get(path_of(ticket["result_url"]), headers=AUTH_A)
     assert failed.status_code == 415 and failed.json()["error"]["code"] == "unsupported_format"
+
+
+@pytest.mark.parametrize("filename", ["photo.png", "archive.zip", "setup.exe", "film.mp4"])
+def test_unconvertible_extensions_are_refused_before_the_upload(client: TestClient, filename: str) -> None:
+    response = client.post("/v1/uploads", headers=AUTH_A, json={"filename": filename})
+    assert response.status_code == 415 and response.json()["error"]["code"] == "unsupported_format"
+    assert "PDF" in response.json()["error"]["message"] and "DOCX" in response.json()["error"]["message"]
+    assert len(client.app.state.service.store) == 0
 
 
 def test_quota_of_active_uploads(make_client: Callable[..., TestClient]) -> None:
@@ -211,6 +266,23 @@ def test_public_url_is_used_for_links(make_client: Callable[..., TestClient]) ->
     ticket = start_upload(make_client(public_url="https://rgpd.example.eu"))
     assert ticket["upload_url"].startswith("https://rgpd.example.eu/v1/uploads/")
     assert ticket["result_url"].startswith("https://rgpd.example.eu/v1/results/up_")
+
+
+def test_links_follow_the_declared_host_the_client_used(make_client: Callable[..., TestClient]) -> None:
+    # Le client a joint api.gardienrgpd.fr : l'URL d'envoi reste sur ce domaine déclaré (même schéma que l'URL
+    # publique) ; un hôte local ou non déclaré garde l'URL publique. The client used a declared host: the upload URL
+    # stays on it; a loopback or undeclared host keeps the public URL.
+    client = make_client(public_url="https://api.gdprguardian.com",
+                         allowed_hosts=("api.gdprguardian.com", "api.gardienrgpd.fr", "*.example.eu"))
+    french = start_upload(client, headers={**AUTH_A, "Host": "api.gardienrgpd.fr"})
+    assert french["upload_url"].startswith("https://api.gardienrgpd.fr/v1/uploads/")
+    assert french["result_url"].startswith("https://api.gardienrgpd.fr/v1/results/")
+    local = start_upload(client, headers={**AUTH_A, "Host": "127.0.0.1:8000"})
+    assert local["upload_url"].startswith("https://api.gdprguardian.com/v1/uploads/")
+    pattern = start_upload(client, headers={**AUTH_A, "Host": "rgpd.example.eu"})  # motif, pas un nom exact
+    assert pattern["upload_url"].startswith("https://api.gdprguardian.com/v1/uploads/")
+    refused = client.post("/v1/uploads", headers={**AUTH_A, "Host": "evil.example"}, json={"filename": "a.txt"})
+    assert refused.status_code == 421
 
 
 @pytest.mark.parametrize("filename", ["/home/jdupont/clients/CV_Jean_Dupont.txt", ".txt", "TXT_jdupont.TXT"])
@@ -245,7 +317,7 @@ def test_busy_service_keeps_the_upload_token(client: TestClient) -> None:
         budget.release("someone-else", budget.limit)
     assert busy.status_code == 503 and int(busy.headers["retry-after"]) >= 1
     # Le jeton n'a pas été consommé : nouvel essai possible / the token was not burned: retry works.
-    assert client.put(path_of(ticket["upload_url"]), headers=AUTH_A, content=b"x").status_code == 200
+    assert client.put(path_of(ticket["upload_url"]), headers=AUTH_A, content=b"x").status_code == 202
 
 
 @pytest.mark.anyio
@@ -310,6 +382,29 @@ async def test_time_queued_does_not_count_against_a_processed_upload(clock: Fake
     assert view.markdown is not None and "[NIR_1]" in view.markdown and NIR not in view.markdown
 
 
+@pytest.mark.anyio
+@pytest.mark.usefixtures("fake_documents")
+async def test_processing_after_the_202_frees_the_body_place(clock: FakeClock,
+                                                             monkeypatch: pytest.MonkeyPatch) -> None:
+    # Après le 202, la requête passe « en traitement » pour le limiteur (le suivi du même client n'est plus
+    # refusé) ; le chemin synchrone (MCP local) ne change rien. After the 202 the request counts as "processing"
+    # for the limiter (polling from the same client is no longer refused); the synchronous path changes nothing.
+    service = Service(ServerConfig(dev_no_auth=True, isolation=False), clock=clock)
+    marked: list[Any] = []
+    monkeypatch.setattr(service.limiter, "mark_processing", marked.append)
+    ticket = Ticket(LOCAL_CLIENT, 0.0, True, constrained=False, max_running=1, max_running_prefix=1)
+    for raise_errors in (False, True):
+        job, token = service.create_upload(DEV_PRINCIPAL, "a.txt", AnonymizeOptions())
+        received, data = await service.accept_upload(token, DEV_PRINCIPAL, _once(SENSITIVE_TEXT.encode()))
+        reset = REQUEST.set(RequestContext(client=LOCAL_CLIENT, ticket=ticket))
+        try:
+            await service.process_upload(received, data, DEV_PRINCIPAL, raise_errors=raise_errors)
+        finally:
+            REQUEST.reset(reset)
+        assert job.state.value == "ready"
+    assert marked == [ticket]
+
+
 def test_real_conversion_of_a_text_file(clock: FakeClock) -> None:
     """Vraie façade documents (sans faux convertisseur) ; ignoré tant que `gdprguardian.convert` manque.
 
@@ -319,8 +414,9 @@ def test_real_conversion_of_a_text_file(clock: FakeClock) -> None:
     with TestClient(create_app(ServerConfig(api_keys=(KEY_A,)), clock=clock)) as client:
         ticket = start_upload(client, filename="notes.txt")
         response = client.put(path_of(ticket["upload_url"]), headers=AUTH_A, content=SENSITIVE_TEXT.encode())
-        if response.status_code == 501:
+        assert response.status_code == 202, response.text
+        result = client.get(path_of(ticket["result_url"]), headers=AUTH_A)
+        if result.status_code == 501:
             pytest.skip("gdprguardian.convert indisponible / not available yet")
-        assert response.status_code == 200, response.text
-        markdown = client.get(path_of(ticket["result_url"]), headers=AUTH_A).json()["markdown"]
+        markdown = result.json()["markdown"]
     assert NIR not in markdown and EMAIL not in markdown

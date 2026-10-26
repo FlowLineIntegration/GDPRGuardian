@@ -36,8 +36,8 @@ ne contrôle que la structure (nombre, longueurs, libellés). Son empreinte ne d
 - **Règles de l'organisation** (`rules`) : compilées dans le travailleur de la requête, avant tout contenu, sur
   un seul fil et sous un budget (2 Mo par motif, 16 Mo par jeu) ; au-delà, ou hors des formes exactes du moteur
   linéaire, la règle est refusée avant d'allouer : 422 `invalid_request` avec la raison du moteur (voir
-  `docs/REGLES.md`). Un envoi hors bande n'a pas encore de travailleur au `POST /v1/uploads` : ses motifs sont
-  compilés au traitement, et c'est le `PUT` (puis la lecture du résultat) qui renvoie ce 422.
+  `docs/REGLES.md`). Pour un envoi hors bande, `POST /v1/uploads` (et `create_upload`) compile les motifs dans
+  un travailleur avant que le fichier parte : le 422 tombe dès la création de l'envoi.
 - **Admission** : chaque requête qui porte un contenu réserve sa taille (`Content-Length`) **avant** la lecture
   du corps, dans un budget mémoire (`GDPRGUARDIAN_QUEUE_MB`). Une clé au-delà de sa part équitable ne peut pas
   prendre le dernier quart du budget, gardé pour les autres clés. Les requêtes admises attendent un travailleur
@@ -162,8 +162,10 @@ base de fail2ban (clients SSH seulement) et les anciennes entrées du journal du
   joignable **seulement par capacité**. Jeton d'envoi et identifiant de résultat sont des valeurs aléatoires de
   256 bits (le second dérivé du premier par HMAC sous une clé en mémoire : qui voit l'URL d'envoi, dans un historique
   ou une ligne de commande, n'en déduit pas l'identifiant), remises au seul demandeur, gardées en **empreintes** SHA-256,
-  comparées en temps constant ; le jeton sert une fois ; le résultat est effacé dès sa lecture complète ou à son
-  échéance ; faux, expiré, déjà utilisé ou déjà lu donnent **la même réponse** (404 `not_found`) ; aucune route ne
+  comparées en temps constant ; le jeton sert une fois ; le résultat est effacé 2 minutes après sa lecture complète
+  (une réponse perdue se relit) ou à son échéance, 30 minutes au plus après sa publication ; un jeton faux,
+  expiré ou déjà utilisé donne **la même réponse** (404 `not_found`) ; un résultat disparu donne un motif
+  distinct (`already_read`, `expired`, `deleted`, toujours 404) au seul détenteur de son identifiant ; aucune route ne
   liste quoi que ce soit ; MCP est sans état (aucun identifiant de session, qui ne donnerait de toute façon aucun
   droit). Dans le service public, la capacité suffit (l'adresse d'un agent change entre ses appels) ; avec une clé,
   il faut en plus la clé ;
@@ -400,7 +402,7 @@ noyau de 3,6 Mo ; construction complète sans cache en 3 min 49 s avec PGO, 2 mi
 | `GDPRGUARDIAN_MAX_TEXT_CHARS` | 1 000 000 | Taille maximale d'un texte (`/v1/anonymize/text`, `anonymize_text`). |
 | `GDPRGUARDIAN_UPLOAD_TTL_S` | 300 | Durée de validité d'une URL d'envoi (usage unique), jusqu'au début du `PUT`. |
 | `GDPRGUARDIAN_MIN_BODY_RATE_KIB` | 128 | Débit minimal d'un corps, en Kio/s : chaque corps doit arriver en 15 s plus sa taille à ce débit (client trop lent : 408). |
-| `GDPRGUARDIAN_RESULT_TTL_S` | 600 | Durée de vie d'un résultat non lu ; il est effacé dès sa lecture complète. |
+| `GDPRGUARDIAN_RESULT_TTL_S` | 600 | Durée de vie d'un résultat non lu, prolongée par chaque lecture partielle jusqu'à 3 fois cette durée depuis sa publication ; effacé 2 minutes après sa lecture complète. |
 | `GDPRGUARDIAN_PAGE_CHARS` | 40 000 | Taille d'une page de résultat (adaptée aux clients MCP). |
 | `GDPRGUARDIAN_MAX_ACTIVE_UPLOADS` | 10 | Envois reçus et résultats non lus par client du `PUT` ; envois en attente du fichier par clé ou principal sans réseau. |
 | `GDPRGUARDIAN_MAX_UPLOADS_PER_PREFIX` | 40 | Envois en attente par préfixe réseau du créateur (/24, /48), et envois reçus non lus par préfixe du `PUT`. |
@@ -476,13 +478,13 @@ contenu ; un 422 de validation liste aussi les noms des champs (`fields`). Les o
 | 400 | `invalid_request` | en-tête `Content-Length` invalide | corriger la requête |
 | 401 | `unauthorized` | mode à clés seulement : clé d'API absente ou invalide | vérifier la clé |
 | 403 | `cross_site_request` | requête envoyée par un navigateur depuis une autre page (`Sec-Fetch-Site`) | appeler depuis un script, un agent ou le cockpit |
-| 404 | `not_found`, `page_not_found` | envoi ou résultat faux, expiré, déjà utilisé ou déjà lu, d'une autre clé (toujours la même réponse) ; page inexistante | recréer l'envoi |
+| 404 | `not_found`, `page_not_found`, `already_read`, `expired`, `deleted` | envoi ou résultat faux, d'une autre clé, jeton déjà utilisé (`not_found`) ; résultat lu puis effacé, expiré ou supprimé (motif distinct, pour le seul détenteur de l'identifiant) ; page inexistante | recréer l'envoi |
 | 405 | `method_not_allowed` | méthode non prise en charge | — |
 | 408 | `upload_timeout` | corps reçu trop lentement (15 s plus sa taille à `GDPRGUARDIAN_MIN_BODY_RATE_KIB`) | réessayer une fois |
 | 413 | `payload_too_large`, `document_too_large` | au-delà d'une limite, que le message nomme : fichier de plus de 50 Mo, texte de plus d'un million de caractères, résultat de plus de 12,5 millions de caractères, plus de 10 000 pages ou diapositives, plus d'un million de balises HTML ou de 256 niveaux d'imbrication, plus de 100 000 paragraphes Word ou d'un million d'éléments, mémoire du travailleur épuisée (voir « Gros documents ») | découper le document ; `gdprguardian anonymize` (ligne de commande locale) n'a pas le plafond de résultat, mais garde 50 Mo par fichier, 500 pages et 60 s |
 | 415 | `unsupported_format` | format de document non pris en charge | exporter en PDF ou DOCX |
 | 421 | `misdirected_request` | nom d'hôte non autorisé (`GDPRGUARDIAN_ALLOWED_HOSTS`) | corriger l'hôte |
-| 422 | `invalid_request`, `invalid_text`, `upload_interrupted`, `too_many_page_sizes` | champ ou option invalide (noms des champs seuls), règle de l'organisation refusée par le moteur linéaire (numéro, libellé et raison ; pour un envoi hors bande, au `PUT`), texte à substitut UTF-16 isolé, envoi interrompu, trop de tailles de page | corriger la requête |
+| 422 | `invalid_request`, `invalid_text`, `upload_interrupted`, `too_many_page_sizes` | champ ou option invalide (noms des champs seuls), règle de l'organisation refusée par le moteur linéaire (numéro, libellé et raison ; pour un envoi hors bande, dès sa création), texte à substitut UTF-16 isolé, envoi interrompu, trop de tailles de page | corriger la requête |
 | 422 | `rules_too_costly` | travailleur arrêté pendant un texte traité avec des règles de l'organisation (filet de sécurité derrière le budget de compilation) | simplifier les règles |
 | 422 | `document_error`, `encrypted_document`, `malicious_document` | document illisible, chiffré, refusé par les contrôles | fournir une copie lisible |
 | 422 | `conversion_timeout` | document au-delà de son échéance (conversion + anonymisation) | découper le document |
@@ -713,9 +715,9 @@ so its footprint does not depend on the rules it receives.
   the deadline, no channel back to the zygote. Replies are checked JSON plus UTF-8 text, never pickle.
 - **Organisation rules** (`rules`): compiled in the request's worker, before any content, on one thread and under
   a budget (2 MB per pattern, 16 MB per set); beyond it, or outside the linear-time engine's exact forms, the rule
-  is refused before allocating: 422 `invalid_request` with the engine's reason (see `docs/REGLES.md`). An
-  out-of-band upload has no worker yet at `POST /v1/uploads`: its patterns are compiled at processing time, and
-  the `PUT` (then the result read) returns that 422. A worker that dies while a text is processed with rules
+  is refused before allocating: 422 `invalid_request` with the engine's reason (see `docs/REGLES.md`). For an
+  out-of-band upload, `POST /v1/uploads` (and `create_upload`) compiles the patterns in a worker before the file
+  leaves: the 422 comes at upload creation. A worker that dies while a text is processed with rules
   gives 422 `rules_too_costly` (safety net behind the budget), never 5xx.
 - **Admission**: every request carrying content reserves its size (`Content-Length`) **before** its body is
   read, in a memory budget (`GDPRGUARDIAN_QUEUE_MB`). A key beyond its fair share cannot take the last quarter of
@@ -845,8 +847,10 @@ service remain fail2ban's database (SSH clients only) and older kernel journal e
   reachable **only through a capability**. The upload token and the result id are 256-bit random values (the second
   derived from the first by HMAC under an in-memory key: whoever sees the upload URL, in a shell history or a command
   line, cannot derive the id), handed to the requester alone, stored as SHA-256 **digests**, compared in constant
-  time; the token works once; the result is deleted once fully read or at expiry; wrong, expired, already used or
-  already read all get **the same answer** (404 `not_found`); no route lists anything; MCP is stateless (no session
+  time; the token works once; the result is deleted 2 minutes after a full read (a lost answer can be read again)
+  or at expiry, 30 minutes at most after publication; a wrong, expired or used token gets **the same answer**
+  (404 `not_found`); a vanished result gets a distinct reason (`already_read`, `expired`, `deleted`, always
+  404), told only to the holder of its id; no route lists anything; MCP is stateless (no session
   id, which would grant nothing anyway). In the public service the capability is enough (an agent's address changes
   between calls); with a key, the key is required too;
 - `Cache-Control: no-store` forced on every response (by the service, then Nginx), no `proxy_cache`, no shared
@@ -1183,7 +1187,7 @@ parses, compiles nor anonymises content; inside it, before any document, standar
 zygote; the service drops its settings and keys from the environment once read, before any child process
 (`gdprguardian serve`, `gdprguardian mcp`, `uvicorn --factory`), and is non-dumpable; no shared
 content cache, no internal timings returned to clients, no error retaining the document; results in RAM for
-10 minutes at most, wiped on complete read. Python cannot wipe immutable strings, so the strong guarantee is
+30 minutes at most after publication, wiped 2 minutes after a complete read. Python cannot wipe immutable strings, so the strong guarantee is
 process exit. The host must provide: no network egress for the container besides the proxy; no swap, no core
 dumps (`fs.suid_dumpable=0`, no `systemd-coredump`), no kdump, no hibernation, no VM memory snapshots;
 `kernel.yama.ptrace_scope>=1`, `--cap-drop ALL`, `no-new-privileges`, read-only filesystem; ideally

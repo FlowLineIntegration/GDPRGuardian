@@ -56,6 +56,36 @@ def test_pdf_hyphenation_is_joined():
     assert _source(text, offsets, start, start + 6) == "Du-\npont"
 
 
+def test_gap_rule_joins_identifier_groups():
+    # Tabulation, blancs doublés, saut de ligne entre deux chiffres : une espace, positions d'origine gardées.
+    # Tab, doubled blanks, line break between two digits: one space, original positions kept.
+    text = "Tél.\t06\t12  34 \t56\r\n78, NIR 1 85 05 78 006\n084 91"
+    norm, offsets = normalize(text)
+    assert norm == "Tél.\t06 12 34 56 78, NIR 1 85 05 78 006 084 91"
+    start = norm.index("06 12")
+    assert _source(text, offsets, start, start + 14) == "06\t12  34 \t56\r\n78"
+    # Inchangés : mots, blanc simple, ligne vide, plus de 4 blancs, sauts entre lettres, ligne MRZ.
+    # Unchanged: words, single blank, blank line, more than 4 blanks, breaks between letters, MRZ line.
+    for kept in ("Nom\tPrénom", "a  b", "12 34", "12\n\n34", "12     34", "Jean\nDupont", "12\nrue",
+                 "IDFRADUPONT<<<<<<<<<<<<<<<<<<<123456\n1234567890123JEAN<<<<<<<<8001019M5",
+                 "1234567890123\n45", "12\r\r\n34", "12\t\r 34"):
+        assert normalize(kept) == (kept, None), kept
+
+
+def test_separator_runs_become_spaces():
+    # « / » en 4 groupes ou plus, « . » en 5 groupes ou plus : espaces, longueur gardée (pas de table de positions).
+    # "/" in 4 groups or more, "." in 5 or more: spaces, length kept (no offset map).
+    text = "Tél 06/12/34/56/78, IBAN FR76.3000.4065.0400.7691.1357.791. NIR 1/85/05/78/006/084/91/"
+    norm, offsets = normalize(text)
+    assert offsets is None
+    assert norm == "Tél 06 12 34 56 78, IBAN FR76 3000 4065 0400 7691 1357 791. NIR 1 85 05 78 006 084 91/"
+    # Inchangés : dates, IPv4, version, groupes sans chiffre ou en minuscules, groupe trop long, mot collé.
+    # Unchanged: dates, IPv4, versions, groups without digit or lower-case, too long a group, glued word.
+    for kept in ("12/03/1992", "193.97.106.210", "v1.2.3.4", "AB/CD/EF/GH", "ab/12/34/56", "1/2/3/4567890",
+                 "x1/2/3/4", "1/2/3/4//", "/1/2/3/4", "S.A.R.L.1.2", "1.2.3.4.5x", "2024/10/26/article"):
+        assert normalize(kept) == (kept, None), kept
+
+
 def test_markdown_bold_is_blanked_in_place():
     # À l'intérieur d'un mot (identifiants, e-mails), rien ne bouge / inside a word, nothing changes.
     text = "**N° client :** 12345, __Jean__ et snake__case, mot**gras**fin"
@@ -64,7 +94,7 @@ def test_markdown_bold_is_blanked_in_place():
     assert norm == "  N° client :   12345,   Jean   et snake__case, mot**gras**fin"
 
 
-@given(st.text(alphabet="ab-\n *_​ㅤé ", max_size=60))
+@given(st.text(alphabet="ab1-\n\r\t *_​ㅤé ", max_size=60))
 def test_offsets_are_increasing_and_in_bounds(text):
     norm, offsets = normalize(text)
     if offsets is None:

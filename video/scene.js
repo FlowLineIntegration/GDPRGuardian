@@ -337,7 +337,10 @@ function fillQ(s) {
     }
     const v = qv(key);
     if (v == null) { ok = false; return ''; }
-    return Number.isInteger(v) ? fmtInt(v) : fmtDec(v);
+    // a per-family rate (f_*_nl, _mr, _pr) always with one decimal, as on the site ("92,0"); other values: an integer,
+    // or one decimal, or two when quality.json has two (an over-masking rate such as 0.07)
+    if (/^f_[a-z]+_(nl|mr|pr)$/.test(key)) return fmtDec(v);
+    return Number.isInteger(v) ? fmtInt(v) : fmtDec(v, Math.min(2, Math.max(1, (String(v).split('.')[1] || '').length)));
   });
   return ok ? out : null;
 }
@@ -818,7 +821,8 @@ function indexState(T) {
     measured, proto, definition: defn,
     value: T.value.replace('{v}', fmtDec(ci)),
     ci: T.ci.replace('{lo}', fmtDec(lo)).replace('{hi}', fmtDec(hi)),
-    guards: T.guards.replace('{mr}', fmtDec(mr)),
+    // the guards line may carry "{q.key}" values (per-family precision, over-masking); without them, "guards_nodata"
+    guards: fillQ(T.guards.replace('{mr}', fmtDec(mr))) ?? (T.guards_nodata ?? '').replace('{mr}', fmtDec(mr)),
   };
 }
 function indexBox(T, I) {
@@ -826,7 +830,7 @@ function indexBox(T, I) {
   const k = hr('p', 'k', T.title);
   const val = I.measured ? hr('p', 'val', I.value) : hr('p', 'val pd', I.pending);
   box.append(k, val);
-  const ic = I.measured ? hr('p', 'ic', I.ci) : null, g = I.measured ? hr('p', 'g', I.guards) : null;
+  const ic = I.measured ? hr('p', 'ic', I.ci) : null, g = I.measured && I.guards ? hr('p', 'g', I.guards) : null;
   if (ic) box.append(ic);
   if (g) box.append(g);
   return { box, k, val, ic, g };

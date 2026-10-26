@@ -6,7 +6,7 @@ import json
 from typing import Any
 
 import pytest
-from tools.corpus.build_boamp import STREET, clean, person_spans, render, sole_trader
+from tools.corpus.build_boamp import STREET, STREET_IN_TOWN, clean, person_spans, render, sole_trader
 
 
 def labelled(value: str) -> list[tuple[str, str]]:
@@ -26,6 +26,11 @@ def labelled(value: str) -> list[tuple[str, str]]:
     ("Direction de la Commande Publique", []),
     ("Hôtel de Ville", []),
     ("https://marches.exemple.fr", []),
+    # Protocole 1.1 : un service n'est pas une personne / protocol 1.1: a service is not a person.
+    ("Groupe Maintenance Essais", []),
+    ("Maintenance Garage", []),
+    ("DGTEST-Direction Ressources Essais", []),
+    ("Jean-Paul ESSAI", [("Jean-Paul ESSAI", "PERSON")]),
 ])
 def test_person_spans(value: str, expected: list[tuple[str, str]]) -> None:
     assert labelled(value) == expected
@@ -34,9 +39,21 @@ def test_person_spans(value: str, expected: list[tuple[str, str]]) -> None:
 @pytest.mark.parametrize(("street", "is_street"), [
     ("12 rue des Essais", True), ("BP 429", True), ("Place du Marché", True),
     ("91108 Testville", False), ("Direction des achats", False),
+    # Protocole 1.1 : boîtes postales collées ou pointées / protocol 1.1: glued or dotted postal boxes.
+    ("BP60120", True), ("CS44416", True), ("C.S.80794", True), ("B.P. 40011", True),
+    ("ABCS99999", False), ("Hôtel du Département", False),
 ])
 def test_street_rule(street: str, is_street: bool) -> None:
     assert bool(STREET.search(street)) is is_street
+
+
+@pytest.mark.parametrize(("town", "is_address"), [
+    ("97122 Rue des Essais", True), ("99000 39 avenue des Tests", True), ("CS70001, 99037 TESTVILLE CEDEX", True),
+    ("99000 Testville", False), ("TESTVILLE CEDEX 2", False), ("COURS", False), ("99420 ISOLA 2000", False),
+])
+def test_street_in_town_fields(town: str, is_address: bool) -> None:
+    """Protocole 1.1 : voie ou boîte postale écrite dans les champs code postal et ville / street in town fields."""
+    assert bool(STREET_IN_TOWN.search(town)) is is_address
 
 
 def row(donnees: dict[str, Any]) -> dict[str, Any]:

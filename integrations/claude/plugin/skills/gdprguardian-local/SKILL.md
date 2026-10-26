@@ -150,6 +150,11 @@ open the original file to investigate an error.
 - **A first barrier.** Automatic, explainable, not exhaustive: contextual details can still allow indirect
   re-identification. It is neither a GDPR certification nor legal advice.
 - **Markdown only.** The result is Markdown; the original layout (DOCX, PDF) is not rebuilt.
+- **Minimum text quality.** The document must hold readable text: scanned pages without a text layer and images
+  are not read. A PDF whose text layer comes from low-quality OCR degrades detection (garbled names can escape it):
+  the local MCP tool `anonymize_file` then adds the warning "Low-quality text (likely OCR): degraded detection, check the result" to
+  `report.warnings`; tell the user and suggest checking the result. A big file may come back as
+  `status: processing` with `retry_after_s`: call `get_anonymized(upload_id)` again after that delay.
 - **Platforms.** Bundled engine for Linux x86_64 and aarch64, Windows x64 and Apple-silicon macOS, Python 3.11 to
   3.14; the fast Rust core where its wheel is bundled (Linux x86_64, Windows x64), the Python reference engine
   elsewhere. On an Intel Mac only text, Word and CSV work (no PDF or Excel wheels): `--check` lists the formats.

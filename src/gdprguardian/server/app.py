@@ -63,6 +63,8 @@ _HTTP_ERROR_CODES = {404: "not_found", 405: "method_not_allowed"}
 # Only these field names come back in a 422 (never a JSON key made up by the client).
 _KNOWN_FIELDS = frozenset({"body", "query", "path", "text", "countries", "profile", "label_language", "filename",
                            "page", "page_chars", "format", "upload_id", "token"})
+_ALLOWED_VALUES = {"profile": "fast | standard | strict", "label_language": "fr | en | auto",
+                   "format": "json | markdown"}
 _DEV_WARNING = ("!!! GDPRGUARDIAN_DEV_NO_AUTH=1 : AUCUNE AUTHENTIFICATION. Usage local uniquement, jamais exposé "
                 "sur un réseau. / NO AUTHENTICATION. Local use only, never expose it on a network. !!!")
 
@@ -266,9 +268,16 @@ def _install_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(RequestValidationError)
     async def validation_error(_: Request, exc: RequestValidationError) -> JSONResponse:
         # Emplacements des champs seulement, jamais les valeurs reçues / field locations only, never input values.
-        fields = sorted({_field_path(error.get("loc", ())) for error in exc.errors()})
-        return JSONResponse({"error": {"code": "invalid_request", "message": "Requête invalide / invalid request",
-                                       "fields": fields}}, status_code=422)
+        errors = exc.errors()
+        fields = sorted({_field_path(error.get("loc", ())) for error in errors})
+        # Valeurs admises des options fermées (tirées du schéma) / allowed values of closed options (from the schema).
+        hints = sorted({f"{loc[-1]}: {_ALLOWED_VALUES[loc[-1]]}" for error in errors
+                        if (loc := tuple(error.get("loc", ()))) and loc[-1] in _ALLOWED_VALUES})
+        body: dict[str, Any] = {"code": "invalid_request", "message": "Requête invalide / invalid request",
+                                "fields": fields}
+        if hints:
+            body["allowed"] = hints
+        return JSONResponse({"error": body}, status_code=422)
 
     @app.exception_handler(StarletteHTTPException)
     async def http_error(_: Request, exc: StarletteHTTPException) -> JSONResponse:

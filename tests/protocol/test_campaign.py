@@ -118,7 +118,40 @@ def test_campaign_matches_in_process_truth(tmp_path: Path, engine_transport: Any
     registration = report["registration"]
     assert len(registration["test_halves_measured_before"]) == len(spec.TEST_HALVES_MEASURED_BEFORE) >= 7
     assert registration["earlier_campaigns"] == list(spec.EARLIER_CAMPAIGNS)
-    assert "campagnes antérieures / earlier campaigns : aucune / none" in text
+    earlier = ", ".join(f"{e['date']} ({e['engine']})" for e in spec.EARLIER_CAMPAIGNS) or "aucune / none"
+    assert f"campagnes antérieures / earlier campaigns : {earlier}." in text
+    # 1.1 : indice « documents normalisés » sur quatre familles, indice « documents difficiles » sur l'équipe rouge,
+    # le reste à part / normalised index on four families, difficult index on the red team, the rest apart.
+    assert report["confidence_index"]["families"] == [f.name for f in spec.FAMILIES]
+    assert report["confidence_index"]["index"] == "normalised" and report["confidence_index"]["target"] == 0.95
+    assert set(report["families_apart"]) == {f.name for f in spec.HARD_FAMILIES + spec.APART_FAMILIES}
+    assert {k for k, v in report["families_apart"].items() if v["index"] == "hard"} == {
+        f.name for f in spec.HARD_FAMILIES}
+    assert report["quality_keys"]["protocol_families"] == len(spec.FAMILIES) == 4
+    hard = report["hard_index"]
+    operators = report["redteam_operators"]
+    scored = sum(report["families_apart"][f.name]["headline"]["scored"] for f in spec.HARD_FAMILIES)
+    passed = sum(report["families_apart"][f.name]["headline"]["passed"] for f in spec.HARD_FAMILIES)
+    assert hard["docs"] == scored == report["quality_keys"]["hard_docs"] > 0
+    assert hard["value"] == passed / scored  # chaque document muté compte une fois / every mutated doc counts once
+    assert hard["ci95"][0] <= hard["value"] <= hard["ci95"][1]
+    assert hard["operators"] == 51 and set(operators) <= {op for f in spec.HARD_FAMILIES for op in f.operators}
+    assert abs(sum(g["weight"] for g in hard["groups"].values()) - 1) < 1e-9
+    keys = report["quality_keys"]
+    assert keys["hard_ci_low"] <= keys["hard_index"] <= keys["hard_ci_high"]
+    assert keys["hard_mention_recall_pct"] is not None
+    assert text.index("## Documents difficiles") > text.index("## Indice de confiance, documents normalisés")
+    assert "europeana_fr" in report["corpora_french_apart"] and "mapa_fr" in report["corpora_french_apart"]
+    assert "europeana_fr" not in report["corpora"] and "mapa_fr" not in report["corpora"]
+    assert report["redteam_operators"]["nbsp"]["group"] == "everyday"
+    assert text.index("## Publiés à part") > text.index("| bodacc_fr |")
+    assert text.index("| europeana_fr |") > text.index("## Publiés à part")
+    # La famille redteam_fr = ses seuls opérateurs du quotidien / redteam_fr = everyday operators only.
+    everyday = sum(row["docs"] for row in report["redteam_operators"].values() if row["group"] == "everyday")
+    assert report["families_apart"]["redteam_fr"]["headline"]["docs"] == everyday
+    assert "redteam_fr" not in report["families"]
+    obfuscation = sum(row["docs"] for row in report["redteam_operators"].values() if row["group"] == "obfuscation")
+    assert report["families_apart"]["redteam_obfuscation_fr"]["headline"]["docs"] == obfuscation
 
 
 def test_resume_gives_the_same_aggregates(tmp_path: Path, engine_transport: Any) -> None:

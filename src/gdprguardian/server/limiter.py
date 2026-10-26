@@ -187,6 +187,13 @@ class Ticket:
     charged: bool = False
     counted: bool = False
     counted_prefix: bool = False
+    # Délestage reporté au moment de prendre un travailleur (MCP : la plupart des appels n'en prennent aucun, comme le
+    # suivi d'un envoi en cours). Shedding deferred to the moment a worker is taken (MCP: most calls take none, such as
+    # polling an upload being processed).
+    deferred_shed: bool = False
+    # Corps reçu, réponse 202 partie, traitement en cours (`mark_processing`) : compté « en traitement ».
+    # Body received, 202 sent, processing (`mark_processing`): counted as "processing".
+    processing: bool = False
     worked: bool = False
     waived: bool = False
     measured: float = 0.0
@@ -353,6 +360,9 @@ class Limiter:
         self._prefixes = _Table(policy.max_keys)
         self._inflight: dict[str, int] = {}
         self._inflight_prefix: dict[int, int] = {}
+        # Envois en traitement après leur 202 (corps déjà reçu) / uploads processing after their 202 (body received).
+        self._processing: dict[str, int] = {}
+        self._processing_prefix: dict[int, int] = {}
         self._lock = threading.Lock()
         self._random = random.Random()
         self._reported_errors = 0
@@ -368,22 +378,105 @@ class Limiter:
         with self._lock:
             return {**self.counters, "overflows": self._clients.overflows + self._prefixes.overflows,
                     "tracked_clients": len(self._clients), "tracked_prefixes": len(self._prefixes),
-                    "in_flight": sum(self._inflight.values())}
+                    "in_flight": sum(self._inflight.values()) + sum(self._processing.values())}
 
     # --- admission ---
 
-    def admit(self, client: Client, *, cheap: bool, content: str | None, size: int) -> Decision:
-        """Décide AVANT la lecture du corps ; erreur interne : admise (fail open) / decides before the body."""
+    def admit(self, client: Client, *, cheap: bool, content: str | None, size: int, shed: bool = True) -> Decision:
+        """Décide AVANT la lecture du corps ; erreur interne : admise (fail open) / decides before the body.
+
+        `shed=False` : pas de délestage sur l'attente estimée ici ; il a lieu si la requête prend un travailleur
+        (`shed_wait`, ticket `deferred_shed`). `shed=False`: no shedding on the estimated wait here; it happens if
+        the request takes a worker.
+        """
         if self.policy.mode == OFF:
             return ALLOW
         try:
             with self._lock:
-                return self._admit(client, cheap, content, size)
+                return self._admit(client, cheap, content, size, shed)
         except Exception:
             self.counters["errors"] += 1
             return ALLOW
 
-    def _admit(self, client: Client, cheap: bool, content: str | None, size: int) -> Decision:
+    def shed_wait(self, ticket: Ticket) -> int | None:
+        """Délestage reporté : Retry-After si l'attente estimée dépasse le plafond, sinon None.
+
+        Deferred shedding: Retry-After when the estimated wait exceeds the cap, else None.
+        """
+        if self.policy.mode == OFF:
+            return None
+        try:
+            with self._lock:
+                client = ticket.client
+                expected = self._estimated_wait(client.principal, ticket.small and not client.local)
+                if expected <= self.policy.max_wait_s:
+                    return None
+                self.counters["shed"] += 1
+                return self._retry_after(expected - self.policy.max_wait_s)
+        except Exception:
+            self.counters["errors"] += 1
+            return None
+
+    def inflight_wait(self, ticket: Ticket) -> int | None:
+        """Plafond de requêtes en vol reporté : Retry-After s'il est dépassé (la requête elle-même exceptée), sinon
+        None. Deferred in-flight cap: Retry-After when exceeded (the request itself aside), else None.
+        """
+        if self.policy.mode == OFF:
+            return None
+        try:
+            with self._lock:
+                client = ticket.client
+                if client.local or client.key is None:
+                    return None
+                if not self._over_inflight(client, own=int(ticket.counted and not ticket.processing),
+                                           own_prefix=int(ticket.counted_prefix and not ticket.processing)):
+                    return None
+                self.counters["limited"] += 1
+                return self._retry_after(max(1.0, self._typical_job_s()))
+        except Exception:
+            self.counters["errors"] += 1
+            return None
+
+    def mark_processing(self, ticket: Ticket | None) -> None:
+        """Corps reçu et réponse 202 partie : la requête passe des places « corps en vol » à « en traitement ».
+
+        Body received and 202 sent: the request moves from the "body in flight" places to the "processing" ones.
+        """
+        if ticket is None or self.policy.mode == OFF:
+            return
+        try:
+            with self._lock:
+                if ticket.processing or not ticket.counted:
+                    return
+                client = ticket.client
+                ticket.processing = True
+                self._release(self._inflight, client.principal)
+                self._processing[client.principal] = self._processing.get(client.principal, 0) + 1
+                if ticket.counted_prefix:
+                    self._release(self._inflight_prefix, client.prefix)
+                    self._processing_prefix[client.prefix] = self._processing_prefix.get(client.prefix, 0) + 1
+        except Exception:
+            self.counters["errors"] += 1
+
+    def _over_inflight(self, client: Client, *, own: int = 0, own_prefix: int = 0, processing: bool = True) -> bool:
+        """Plafonds en vol atteints, hors `own` requêtes déjà comptées ; `processing` : envois en traitement compris.
+
+        In-flight caps reached, minus `own` requests already counted; `processing`: uploads processing included.
+        """
+        policy = self.policy
+        count = self._inflight.get(client.principal, 0) - own
+        if processing:
+            count += self._processing.get(client.principal, 0)
+        if count >= policy.max_running + policy.max_queued:
+            return True
+        if client.prefix is None:
+            return False
+        prefix_count = self._inflight_prefix.get(client.prefix, 0) - own_prefix
+        if processing:
+            prefix_count += self._processing_prefix.get(client.prefix, 0)
+        return prefix_count >= policy.max_inflight_prefix
+
+    def _admit(self, client: Client, cheap: bool, content: str | None, size: int, shed: bool = True) -> Decision:
         policy = self.policy
         now = self._clock()
         enforce = policy.mode == ENFORCE
@@ -401,10 +494,13 @@ class Limiter:
         estimate = min(base * slowness, policy.cost_debt + policy.cost_burst) if content is not None else 0.0
         small = estimate < policy.small_s
         # Plafonds de requêtes en vol (corps compris) : appliqués aussi en dry-run / in-flight caps, dry-run too.
-        if tracked and content is not None and (
-                self._inflight.get(client.principal, 0) >= policy.max_running + policy.max_queued
-                or (client.prefix is not None
-                    and self._inflight_prefix.get(client.prefix, 0) >= policy.max_inflight_prefix)):
+        # Routes à délestage reporté (MCP, création d'envoi) : ici, seules les requêtes dont le corps est en vol
+        # comptent (corps lents bornés) ; les envois en traitement après leur 202 comptent à la prise d'un
+        # travailleur (`inflight_wait`) : suivre un envoi n'est jamais refusé parce que les envois du client sont en
+        # traitement. Deferred-shedding routes: only requests with a body in flight count here (slow bodies stay
+        # bounded); uploads processing after their 202 count when a worker is taken: polling is never refused
+        # because the client's uploads are processing.
+        if tracked and content is not None and self._over_inflight(client, processing=shed):
             status, wait = 429, max(1.0, self._typical_job_s())
         bucket = 0.0
         for row, factor in rows:
@@ -419,7 +515,7 @@ class Limiter:
                 status, wait = 429, bucket
             else:
                 self.counters["dry_run_limited"] += 1  # seaux seulement / buckets only
-        if not status and content is not None:
+        if not status and content is not None and shed:
             # Le principal LOCAL ne prend jamais la place réservée / LOCAL never takes the reserved slot.
             expected = self._estimated_wait(client.principal, small and not client.local)
             if expected > policy.max_wait_s:
@@ -441,7 +537,7 @@ class Limiter:
             ticket = Ticket(client, estimate, small, constrained=True,
                             max_running=policy.local_running if client.local else policy.max_running,
                             max_running_prefix=policy.max_running_prefix, base=base,
-                            charged=bool(rows) and charged)
+                            charged=bool(rows) and charged, deferred_shed=not shed)
             # En dernier : une erreur plus haut ne laisse jamais une place comptée sans fin (fail open).
             # Last: an error above never leaves a counted place that would never end (fail open).
             if not client.local:
@@ -475,10 +571,10 @@ class Limiter:
         client = ticket.client
         if ticket.counted:
             ticket.counted = False
-            self._release(self._inflight, client.principal)
+            self._release(self._processing if ticket.processing else self._inflight, client.principal)
         if ticket.counted_prefix:
             ticket.counted_prefix = False
-            self._release(self._inflight_prefix, client.prefix)
+            self._release(self._processing_prefix if ticket.processing else self._inflight_prefix, client.prefix)
         if not ticket.charged or client.key is None:
             return
         ticket.charged = False

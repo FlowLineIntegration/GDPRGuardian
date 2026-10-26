@@ -29,7 +29,7 @@ _MACROS = {"S": f"{SEP}?", "SEP": SEP, "LB": "(?<![0-9A-Za-z]{2})", "RB": "(?![0
 _MACRO_RE = re.compile(r"\{([A-Z]+)\}")
 _FLAGS = {"i": re.IGNORECASE, "m": re.MULTILINE, "s": re.DOTALL}
 _DEFAULT_SCORE = {"A": 0.95, "B": 0.85, "C": 0.75, "L": 0.8}
-_BOUNDARIES = frozenset({"alnum", "word", "ip", "hex", "phone", "digit", "none"})
+_BOUNDARIES = frozenset({"alnum", "word", "ip", "hex", "phone", "digit", "group", "none"})
 _RECOGNIZER_KEYS = frozenset({
     "id", "entity", "label", "tier", "pattern", "flags", "validator", "group", "boundary", "context",
     "veto", "window", "prefilter", "score", "policy", "invalid",

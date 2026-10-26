@@ -82,9 +82,13 @@ or cannot reach the service.
 
 1. `create_upload(filename=".pdf")` (the extension only is enough), with the options below if needed.
 2. Run **one** of the returned commands, replacing `FILE_PATH` with the file's path: it sends the file from
-   disk. If you have no shell on the user's computer (claude.ai chat), **show that command to the user** so they
-   run it on their own computer, then wait for them to confirm. Showing it to the user is the intended use.
-3. `get_anonymized(upload_id)`, then again with `page=next_page` until `next_page` is null.
+   disk and answers `202` as soon as the file is received. If you have no shell on the user's computer (claude.ai
+   chat), **show that command to the user** so they run it on their own computer, then wait for them to confirm.
+   Showing it to the user is the intended use.
+3. `get_anonymized(upload_id)`. While a big document is processed it returns `status: processing` with its stage,
+   percent and `retry_after_s`: wait that long and call again (never upload the file again). Then call it with
+   `page=next_page` until `next_page` is null. Tell the user about any `report.warnings` (low-quality OCR text,
+   dropped comments or attachments).
 
 The upload URL and the `upload_id` are single-use secrets for this user only: show them to the user when Route B
 needs it, but never write them into a file, a document, a summary or a message meant for anyone else.
@@ -144,7 +148,7 @@ The script prints one line on stderr starting with `gdprguardian:` and exits wit
 | `HTTP 422 encrypted_document` | Ask for an unprotected copy. |
 | `HTTP 422 conversion_timeout` | Document too long to convert in time: split it, or use `gdprguardian-local`. |
 | `HTTP 408 upload_timeout` | The connection is too slow: retry once, then tell the user. |
-| `HTTP 404 not_found` | The upload or the result expired (results live 10 minutes and are wiped once read): run the script again. |
+| `HTTP 404 already_read`, `expired`, `not_found` | Fully read 2 minutes ago, expired (10 minutes after the last read), or unknown: run the script again. |
 | `HTTP 401 unauthorized` | `GDPRGUARDIAN_URL` points to a keyed server: the user must set `GDPRGUARDIAN_API_KEY` (never ask them to paste it). |
 | `GDPRGUARDIAN_URL must use https` | Plain http is only allowed on localhost. |
 
@@ -154,6 +158,10 @@ The script prints one line on stderr starting with `gdprguardian:` and exits wit
   characters per text, a few 10 MB documents in a row then about one every 8 seconds, hundreds of small texts
   per minute; beyond, `429` or `503` with `Retry-After`. Users behind one address (company network, AI
   provider) share one budget.
+- **Minimum text quality.** The document must hold readable text: scanned pages without a text layer and images
+  are not read (a warning says so). A PDF whose text layer comes from low-quality OCR is still processed, with the
+  warning "Low-quality text (likely OCR): degraded detection, check the result": garbled names can escape detection,
+  so tell the user. Only PDFs are checked (pasted text never is).
 - **A third party.** The document travels to the GDPR Guardian service, which keeps nothing, but has no
   processing agreement with the user: hence rule 3, and `gdprguardian-local` for sensitive documents.
 - **French first.** Names and addresses are found through French lexicons and need `FR` in `countries`; names
@@ -173,4 +181,6 @@ n'est conservé, sans contrat de traitement) et attendre son accord ; puis l'env
 `get_anonymized`), et ne travailler que sur le Markdown anonymisé, dont les balises (`[PERSONNE_1]`…) sont
 irréversibles. `--explain` donne la règle et la raison de chaque balise ; `--rules` seulement avec l'accord de
 l'utilisateur. Limites : 50 Mo par fichier, 1 million de caractères par texte, 429 ou 503 avec `Retry-After`
-au-delà ; noms détectés surtout en français ; une première barrière, pas une certification.
+au-delà ; un texte lisible (un PDF d'OCR de mauvaise qualité est traité avec l'avertissement « Texte de mauvaise qualité
+(OCR probable) : détection dégradée, relisez le résultat ») ; noms détectés surtout en français ; une première
+barrière, pas une certification.

@@ -20,6 +20,10 @@ Gold (exact by construction, positions known while rendering):
   repeats of these values elsewhere are added;
 - kept by policy: ORG (organisation names), ORG_ID (SIRET), LOCATION (postal code + city without street), URL of
   organisations is left unlabelled.
+Protocol 1.1 (26 October 2026, docs/PROTOCOLE.md): a postal box glued to its number or written with dots ("BP60120",
+"C.S. 80794") and a street written in the postcode/town fields ("97122 Rue ...") make the party address an ADDRESS;
+a role word joined by a hyphen ("DGEEP-Direction") and "groupe" / "maintenance" stop a contact name (an organisation
+unit is not a person).
 
 Privacy: the output stays in the cache folder outside the repository, for local evaluation only.
 
@@ -109,12 +113,20 @@ ROLE_WORDS = {
     "institut", "hôpital", "hopital", "chu", "ministère", "ministere", "préfecture", "prefecture", "tribunal",
     "greffe", "office", "établissement", "etablissement", "groupement", "société", "societe", "sas", "sarl",
     "association", "fondation", "cnrs", "collège", "lycée", "école", "ecole", "académie", "rectorat", "port",
+    "groupe", "maintenance",
 }
 # Une adresse « postale » a un numéro de voie ou de boîte (pas un code postal seul) ou un type de voie.
 # A street address has a house or box number (not a bare 5-digit postcode) or a street type.
+# Protocole 1.1 : une boîte postale collée à son numéro ou écrite avec des points (« BP60120 », « CS44416 »,
+# « C.S. 80794 ») est une adresse. Protocol 1.1: a postal box glued to its number or written with dots is an address.
+_POSTAL_BOX = r"(?<![^\W\d_])(?:b\.?\s?p|c\.?\s?s)\.?\s?\d"
 STREET = re.compile(r"(?<!\d)\d{1,4}(?!\d)|\b(?:rue|avenue|av|bd|boulevard|place|pl|chemin|route|allée|allee|quai|"
                     r"impasse|cours|square|esplanade|parvis|rond-point|voie|lieu-dit|hameau|zone|za|zi|zac|bp|cs|"
-                    r"parc)\b", re.IGNORECASE)
+                    r"parc)\b|" + _POSTAL_BOX, re.IGNORECASE)
+# Protocole 1.1 : voie écrite dans les champs code postal / ville (« 97122 Rue Ferdinand X ») quand le champ adresse
+# n'en a pas : un type de voie suivi d'un nom. Protocol 1.1: a street written in the postcode/town fields.
+STREET_IN_TOWN = re.compile(r"\b(?:rue|avenue|boulevard|bd|chemin|route|allée|allee|quai|impasse|place|square|"
+                            r"esplanade|parvis|rond-point)\s+\S|" + _POSTAL_BOX, re.IGNORECASE)
 NAME_TOKEN = re.compile(r"^[A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÖØ-öø-ÿ'’.-]*$")
 EMAIL_IN = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 PHONE_IN = re.compile(r"(?:\(\+\d{2}\)\s?|\+\d{2}\s?)?\d{1,2}(?:[\s.-]?\d{2}){4}")
@@ -126,8 +138,8 @@ CIVILITY_WORDS = re.compile(r"^(?:M\.|Mme\.?|Mlle\.?|Mr\.?|MM\.|Mmes|Monsieur|Ma
 # voie ou une boîte postale, jamais sur un simple nombre. Address field outside the party blocks: a street type
 # or a postal box is required, never a bare number.
 STREET_WORD = re.compile(r"\b(?:rue|avenue|av|bd|boulevard|place|pl|chemin|route|allée|allee|quai|impasse|cours|"
-                         r"square|esplanade|parvis|rond-point|voie|lieu-dit|hameau|zone|za|zi|zac|bp|cs|parc)\b",
-                         re.IGNORECASE)
+                         r"square|esplanade|parvis|rond-point|voie|lieu-dit|hameau|zone|za|zi|zac|bp|cs|parc)\b|"
+                         + _POSTAL_BOX, re.IGNORECASE)
 ADDRESS_FIELDS = ("LIEU_OUVERTURE_OFFRES",)
 # Titulaire personne physique écrit « NOM Prénom » sans civilité : deux à trois mots alphabétiques, dont un prénom
 # du fichier Insee (jamais un mot courant), sans mot d'organisation. Sole trader written "SURNAME Given-name"
@@ -222,7 +234,10 @@ def person_spans(value: str) -> list[tuple[int, int, str]]:
         names: list[tuple[int, int]] = []
         for tok in re.finditer(r"\S+", rest):
             word = tok.group(0)
-            if word.lower().strip(".,") in ROLE_WORDS:
+            low = word.lower().strip(".,")
+            # Protocole 1.1 : un nom d'organisation n'est pas une personne ; un mot de rôle collé par un trait
+            # d'union (« DGEEP-Direction ») arrête aussi le nom. Protocol 1.1: a hyphen-joined role word stops it too.
+            if low in ROLE_WORDS or any(len(part) >= 4 and part in ROLE_WORDS for part in low.split("-")):
                 break
             if word.lower() in PARTICLES and names:
                 continue
@@ -288,7 +303,8 @@ class Renderer:
                         if isinstance(obj.get(k), str) and obj.get(k).strip())
         if street or city:
             text = f"{street}, {city}" if street and city else (street or city)
-            tb.line("Adresse : ", text, "ADDRESS" if STREET.search(street) else "LOCATION")
+            address = STREET.search(street) or STREET_IN_TOWN.search(city)
+            tb.line("Adresse : ", text, "ADDRESS" if address else "LOCATION")
         tb.line("Pays : ", obj.get("PAYS"))
         for key, prefix, label in (("TEL", "Tél : ", "PHONE"), ("FAX", "Fax : ", "PHONE"),
                                    ("MEL", "Courriel : ", "EMAIL")):

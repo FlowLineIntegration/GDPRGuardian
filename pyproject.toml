@@ -7,7 +7,7 @@ name = "gdprguardian"
 # Version de référence de toute la publication : `python tools/release.py set X.Y.Z` la recopie partout
 # (noyau Rust, paquet MCP, server.json, plugin, bundle) et `check` refuse tout écart.
 # The release's reference version: `tools/release.py set X.Y.Z` copies it everywhere, `check` refuses any drift.
-version = "1.0.0"
+version = "1.0.1"
 description = "Gardien RGPD : anonymisation irréversible des documents avant l'IA / GDPR Guardian: irreversible anonymisation before AI"
 readme = "README.md"
 license = "MIT"
@@ -29,7 +29,7 @@ dependencies = [
     # Same-version Rust core where the release ships an abi3 wheel; elsewhere the Python engine, same results.
     # `==` seulement : `in` teste une sous-chaîne / `==` only: `in` is a substring test. Windows x64 : « AMD64 »
     # pour CPython, « x86_64 » pour la résolution croisée d'uv (--python-platform) / "x86_64" for uv cross-resolution.
-    "gdprguardian-core==1.0.0; platform_python_implementation == 'CPython' and ((sys_platform == 'win32' and (platform_machine == 'AMD64' or platform_machine == 'x86_64')) or (sys_platform == 'darwin' and (platform_machine == 'x86_64' or platform_machine == 'arm64')) or (sys_platform == 'linux' and (platform_machine == 'x86_64' or platform_machine == 'aarch64')))",
+    "gdprguardian-core==1.0.1; platform_python_implementation == 'CPython' and ((sys_platform == 'win32' and (platform_machine == 'AMD64' or platform_machine == 'x86_64')) or (sys_platform == 'darwin' and (platform_machine == 'x86_64' or platform_machine == 'arm64')) or (sys_platform == 'linux' and (platform_machine == 'x86_64' or platform_machine == 'aarch64')))",
 ]
 
 [project.optional-dependencies]

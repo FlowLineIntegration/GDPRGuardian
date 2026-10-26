@@ -1,6 +1,6 @@
 {
   "name": "gdprguardian",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Anonymisation irréversible des documents avant que Claude les lise, sur votre poste : rien ne quitte la machine. / Irreversible anonymisation of documents before Claude reads them, on your computer: nothing leaves the machine.",
   "author": {
     "name": "Guillaume CLEMENT - Flow Line Intégration"

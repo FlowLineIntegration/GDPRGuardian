@@ -1,10 +1,12 @@
 """Résultats de la campagne : JSON et Markdown, scores seulement / campaign results, scores only.
 
-Chiffres publiés (docs/PROTOCOLE.md, section 6) : indice de confiance et son IC, rappel des mentions directes,
-détail par famille, par corpus, par type d'identifiant, par opérateur d'équipe rouge et par graine, autres langues
-(hors périmètre), témoin négatif Judilibre, garde-fous, et les clés du contrat de qualité du site.
-Published figures: confidence index and CI, direct-mention recall, per family, corpus, identifier type, red-team
-operator and seed, other languages (out of scope), Judilibre negative control, guards, and the site quality keys.
+Chiffres publiés (docs/PROTOCOLE.md, section 6 et « Version 1.1 ») : les deux indices, « documents normalisés »
+(l'indice de confiance principal) et « documents difficiles » (équipe rouge, détail par groupe), chacun avec son IC et
+son rappel des mentions directes ; détail par famille, par corpus, par type d'identifiant, par opérateur d'équipe rouge
+et par graine, autres langues (hors périmètre), témoin négatif Judilibre, garde-fous, et les clés du site.
+Published figures: the two indexes, "normalised documents" (the headline confidence index) and "difficult documents"
+(red team, per-group breakdown), each with its CI and direct-mention recall; per family, corpus, identifier type,
+red-team operator and seed, other languages (out of scope), Judilibre negative control, guards, and the site keys.
 """
 
 from __future__ import annotations
@@ -23,10 +25,21 @@ from tools.protocol import spec
 from tools.protocol.campaign import State
 from tools.protocol.outcomes import REAL_FIELDS, Cell, merge_cells
 from tools.protocol.plan import Plan
-from tools.protocol.stats import bootstrap_index, bootstrap_ratio, family_rates, index_point, wilson
+from tools.protocol.stats import (
+    bootstrap_index,
+    bootstrap_pooled,
+    bootstrap_ratio,
+    family_rates,
+    index_point,
+    pooled_point,
+    wilson,
+)
 
+# Indice « documents normalisés » : clés historiques du site ; indice « documents difficiles » : clés hard_* (1.1).
+# "Normalised documents" index: the site's historical keys; "difficult documents" index: hard_* keys (1.1).
 QUALITY_KEYS = ("confidence_index", "confidence_ci_low", "confidence_ci_high", "mention_recall_pct", "protocol_docs",
                 "protocol_families", "real_corpora", "real_docs", "protocol_date", "protocol_engine")
+HARD_QUALITY_KEYS = ("hard_index", "hard_ci_low", "hard_ci_high", "hard_docs", "hard_mention_recall_pct")
 
 
 def _ratio(num: float, den: float) -> float | None:
@@ -54,8 +67,37 @@ def family_cell(state: State, family: spec.Family, splits: Sequence[str]) -> Cel
     if family.kind == "synthetic":
         return merge_cells(_cells(state, "synthetic_fr"))
     if family.kind == "redteam":
-        return merge_cells(_cells(state, "redteam_fr"))
+        # Seuls les opérateurs de la famille (1.1) / only the family's operators (1.1).
+        keep = {f"op={name}" for name in family.operators}
+        return merge_cells(cell for key, cell in state.cells.items()
+                           if key.partition("/")[0] == "redteam_fr" and key.partition("/")[2] in keep)
     return merge_cells(c for corpus in family.corpora for c in _cells(state, corpus, splits))
+
+
+def operator_group(name: str) -> str | None:
+    """Groupe d'un opérateur d'équipe rouge (spec.REDTEAM_GROUPS) / red-team operator group."""
+    return next((group for group, names in spec.REDTEAM_GROUPS.items() if name in names), None)
+
+
+def family_entry(state: State, family: spec.Family, resamples: int, seed: int) -> tuple[dict[str, Any], Cell, Cell,
+                                                                                     Cell]:
+    """Résumé d'une famille (moitié test, tous, dev) et ses cellules / family summary and its cells."""
+    test_cell = family_cell(state, family, (spec.HEADLINE_SPLIT,))
+    all_cell = family_cell(state, family, ("dev", "test"))
+    dev_cell = family_cell(state, family, ("dev",))
+    entry: dict[str, Any] = {"title_fr": family.title_fr, "title_en": family.title_en, "kind": family.kind,
+                             "corpora": list(family.corpora), "headline": outcome_summary(test_cell)}
+    if family.operators:
+        entry["operators"] = list(family.operators)
+    if family.kind == "real":
+        entry["all_docs"] = outcome_summary(all_cell)
+        entry["dev_half"] = outcome_summary(dev_cell)
+        entry["measures"] = real_measures(test_cell, family.corpora[0] if len(family.corpora) == 1 else family.name,
+                                          resamples, seed)
+        entry["measures_all_docs"] = real_measures(all_cell, family.name, resamples, seed)
+    else:
+        entry["measures"] = synthetic_measures(test_cell)
+    return entry, test_cell, all_cell, dev_cell
 
 
 def _labels(cell: Cell) -> dict[str, Any]:
@@ -199,19 +241,7 @@ def build_report(state: State, plan: Plan, *, standard: bool = False, resamples:
     all_hists = []
     dev_hists = []
     for family in spec.FAMILIES:
-        test_cell = family_cell(state, family, (spec.HEADLINE_SPLIT,))
-        all_cell = family_cell(state, family, ("dev", "test"))
-        dev_cell = family_cell(state, family, ("dev",))
-        entry: dict[str, Any] = {"title_fr": family.title_fr, "title_en": family.title_en, "kind": family.kind,
-                                 "corpora": list(family.corpora), "headline": outcome_summary(test_cell)}
-        if family.kind == "real":
-            entry["all_docs"] = outcome_summary(all_cell)
-            entry["dev_half"] = outcome_summary(dev_cell)
-            entry["measures"] = real_measures(test_cell, family.corpora[0] if len(family.corpora) == 1 else family.name,
-                                              resamples, seed)
-            entry["measures_all_docs"] = real_measures(all_cell, family.name, resamples, seed)
-        else:
-            entry["measures"] = synthetic_measures(test_cell)
+        entry, test_cell, all_cell, dev_cell = family_entry(state, family, resamples, seed)
         families[family.name] = entry
         headline_hists.append(test_cell.hist)
         all_hists.append(all_cell.hist)
@@ -220,10 +250,34 @@ def build_report(state: State, plan: Plan, *, standard: bool = False, resamples:
     intervals = bootstrap_index(headline_hists, resamples, seed)
     all_point, all_recall = index_point(all_hists)
     dev_point, dev_recall = index_point(dev_hists)
+    # Hors de l'indice « documents normalisés », mêmes mesures (1.1) : les groupes de l'équipe rouge, qui font l'indice
+    # « documents difficiles » ("index": "hard"), puis presse ancienne et MAPA FR (dans aucun indice). Une seule section
+    # du résultat, que le site lit déjà (site/tools/protocol_table.py). Outside the normalised index, same measures:
+    # the red-team groups, which make the difficult index, then old press and MAPA FR (in neither index); one results
+    # section, which the site already reads.
+    apart: dict[str, Any] = {}
+    hard_hists = []
+    for family in spec.HARD_FAMILIES:
+        entry, test_cell, _, _ = family_entry(state, family, resamples, seed)
+        apart[family.name] = {**entry, "index": "hard"}
+        hard_hists.append(test_cell.hist)
+    for family in spec.APART_FAMILIES:
+        apart[family.name] = {**family_entry(state, family, resamples, seed)[0], "index": None}
+    hard_point, hard_recall = pooled_point(hard_hists)
+    hard_intervals = bootstrap_pooled(hard_hists, resamples, seed)
+    hard_scored = sum(sum(h.values()) for h in hard_hists)
+    hard_groups = {}
+    for group, name in spec.HARD_GROUP_FAMILY.items():
+        h = apart[name]["headline"]
+        hard_groups[group] = {"family": name, "operators": len(spec.REDTEAM_GROUPS[group]), "scored": h["scored"],
+                              "passed": h["passed"], "weight": _ratio(h["scored"], hard_scored),
+                              "no_leak_rate": h["no_leak_rate"], "no_leak_ci95_wilson": h["no_leak_ci95_wilson"],
+                              "mention_recall": h["mention_recall"]}
 
-    # Périmètre français et hors périmètre publiés séparément : les autres langues ne se mêlent jamais à l'indice.
-    # French scope and out of scope published separately: other languages never mix with the index.
+    # Corpus de l'indice, corpus français publiés à part et autres langues, chacun dans sa section.
+    # Index corpora, French corpora published apart and other languages, each in its own section.
     corpora: dict[str, Any] = {}
+    french_apart: dict[str, Any] = {}
     out_of_scope: dict[str, Any] = {}
     for corpus in spec.REAL_CORPORA:
         if corpus in spec.NEGATIVE_CONTROL:
@@ -236,9 +290,13 @@ def build_report(state: State, plan: Plan, *, standard: bool = False, resamples:
         whole = merge_cells(_cells(state, corpus))
         per_split["all"] = {"outcome": outcome_summary(whole), "measures": real_measures(whole, corpus, resamples,
                                                                                           seed)}
-        target = out_of_scope if corpus in spec.OUT_OF_SCOPE else corpora
-        target[corpus] = {"countries": spec.REAL_CORPORA[corpus],
-                          "scope": "out_of_scope" if corpus in spec.OUT_OF_SCOPE else "french", **per_split}
+        if corpus in spec.OUT_OF_SCOPE:
+            target, scope = out_of_scope, "out_of_scope"
+        elif corpus in spec.INDEX_CORPORA:
+            target, scope = corpora, "french"
+        else:
+            target, scope = french_apart, "french_apart"
+        target[corpus] = {"countries": spec.REAL_CORPORA[corpus], "scope": scope, **per_split}
 
     control = {}
     for corpus in spec.NEGATIVE_CONTROL:
@@ -261,9 +319,9 @@ def build_report(state: State, plan: Plan, *, standard: bool = False, resamples:
                 base = sum(t.mutation_baseline.values())
                 survival = _ratio(sum(t.mutation_survived.values()), base)
             rate, mention_recall = family_rates(cell.hist)
-            operators[key.split("=", 1)[1]] = {"docs": cell.docs, "no_leak_rate": rate,
-                                               "mention_recall": mention_recall, "survival": survival,
-                                               "errors": dict(cell.errors)}
+            name = key.split("=", 1)[1]
+            operators[name] = {"group": operator_group(name), "docs": cell.docs, "no_leak_rate": rate,
+                               "mention_recall": mention_recall, "survival": survival, "errors": dict(cell.errors)}
     seeds = {}
     for key, cell in sorted(state.cells.items()):
         if key.startswith(("synthetic_fr/seed=", "redteam_bases/seed=")):
@@ -286,9 +344,14 @@ def build_report(state: State, plan: Plan, *, standard: bool = False, resamples:
         "real_corpora": sum(1 for c in real_annotated if merge_cells(_cells(state, c)).docs),
         "real_docs": real_docs, "protocol_date": state.started, "protocol_engine": engine_label(state.engine),
     }
+    hard_low, hard_high = hard_intervals["index"] or (None, None)
+    quality.update({"hard_index": _pct(hard_point), "hard_ci_low": _pct(hard_low), "hard_ci_high": _pct(hard_high),
+                    "hard_docs": hard_scored, "hard_mention_recall_pct": _pct(hard_recall)})
     return {
         "protocol": {"version": spec.PROTOCOL_VERSION, "registered": spec.PROTOCOL_REGISTERED,
-                     "definition": "docs/PROTOCOLE.md", "spec": "tools/protocol/spec.py"},
+                     "definition": "docs/PROTOCOLE.md", "spec": "tools/protocol/spec.py",
+                     "use_case": {"fr": spec.USE_CASE[0], "en": spec.USE_CASE[1]},
+                     "previous_versions": [dict(item) for item in spec.PREVIOUS_VERSIONS]},
         "registration": registration_check(state, plan, standard),
         "campaign": {
             "complete": complete, "standard_plan": standard, "date": state.started, "engine": state.engine,
@@ -308,18 +371,37 @@ def build_report(state: State, plan: Plan, *, standard: bool = False, resamples:
                         "countries_french_scope": spec.FRENCH_COUNTRIES},
         },
         "confidence_index": {
+            "index": "normalised", "title_fr": spec.INDEXES["normalised"][0],
+            "title_en": spec.INDEXES["normalised"][1], "target": spec.NORMALISED_TARGET,
             "value": point, "ci95": list(intervals["index"]) if intervals["index"] else None,
             "mention_recall": recall,
             "mention_recall_ci95": list(intervals["mention_recall"]) if intervals["mention_recall"] else None,
-            "families": [f.name for f in spec.FAMILIES], "weights": "equal (1/7 each)",
+            "families": [f.name for f in spec.FAMILIES], "weights": f"equal (1/{len(spec.FAMILIES)} each)",
             "real_split": spec.HEADLINE_SPLIT, "bootstrap": {"resamples": resamples, "seed": seed,
                                                               "method": "stratified by family, multinomial over "
                                                                         "per-document outcomes (exact)"},
         },
+        "hard_index": {
+            "index": "hard", "title_fr": spec.INDEXES["hard"][0], "title_en": spec.INDEXES["hard"][1],
+            "value": hard_point, "ci95": list(hard_intervals["index"]) if hard_intervals["index"] else None,
+            "mention_recall": hard_recall,
+            "mention_recall_ci95": (list(hard_intervals["mention_recall"]) if hard_intervals["mention_recall"]
+                                    else None),
+            "docs": hard_scored, "families": [f.name for f in spec.HARD_FAMILIES],
+            "operators": sum(len(f.operators) for f in spec.HARD_FAMILIES),
+            "weights": "every mutated document counts once (all operators pooled; a group weighs its share of the "
+                       "documents)",
+            "groups": hard_groups,
+            "bootstrap": {"resamples": resamples, "seed": seed,
+                          "method": "stratified by red-team group, multinomial over per-document outcomes (exact); "
+                                    "mutated documents of one base document are not resampled together"},
+        },
         "confidence_index_all_real_docs": {"value": all_point, "mention_recall": all_recall},
         "confidence_index_dev_real_docs": {"value": dev_point, "mention_recall": dev_recall},
         "families": families,
+        "families_apart": apart,
         "corpora": corpora,
+        "corpora_french_apart": french_apart,
         "out_of_scope": out_of_scope,
         "negative_control": control,
         "redteam_operators": operators,
@@ -344,6 +426,19 @@ def _ci(interval: Sequence[float] | None) -> str:
 
 def _short(value: Any) -> str:
     return "—" if not value else str(value).split(":", 1)[-1][:12]
+
+
+def _family_table(rows: Iterable[Mapping[str, Any]]) -> list[str]:
+    lines = ["| Famille / family | Documents notés / scored | Sans fuite / no leak [Wilson 95 %] | Rappel mentions / "
+             "mention recall | Précision / precision | Erreurs / errors |", "|---|---:|---|---|---|---|"]
+    for f in rows:
+        h = f["headline"]
+        m = f.get("measures", {})
+        precision = m.get("precision") if f["kind"] != "real" else m.get("metrics", {}).get("precision")
+        lines.append(f"| {f['title_fr']} / {f['title_en']} | {h['scored']:,} | {_p(h['no_leak_rate'])}"
+                     f"{_ci(h['no_leak_ci95_wilson'])} | {_p(h['mention_recall'])} | {_p(precision)} | "
+                     f"{sum(h['errors'].values())} |")
+    return lines
 
 
 def _corpus_table(rows: Mapping[str, Any]) -> list[str]:
@@ -388,6 +483,22 @@ def to_markdown(report: Mapping[str, Any]) -> str:
         "docs/PROTOCOLE.md). Scores seulement : aucun texte, aucune valeur annotée. "
         "Scores only: no text, no annotated value.",
         "",
+    ]
+    previous = report["protocol"].get("previous_versions") or []
+    if previous:
+        lines += ["Versions précédentes, résultats gardés publiés / previous versions, results kept published : "
+                  + " ; ".join(f"{p.get('version')} : {p.get('confidence_index')} ({p.get('families')} familles / "
+                               f"families, campagne / campaign {p.get('campaign')}, {p.get('results')})"
+                               for p in previous) + ".", ""]
+    earlier = reg.get("earlier_campaigns") or []
+    if earlier:
+        # Dérogation déclarée à la section 3 (données neuves) / declared departure from section 3 (fresh data).
+        lines += ["> **Moitiés `test` non aveugles / test halves not blind** : déjà notées par la campagne "
+                  + ", ".join(f"{e.get('date')} ({e.get('engine')})" for e in earlier)
+                  + ", scores par famille publiés pendant la mise au point du moteur : chiffres des corpus réels "
+                  "optimistes (docs/PROTOCOLE.md, « Version 1.1 ») / already scored by that campaign, per-family "
+                  "scores published while the engine was tuned: real-corpus figures are optimistic.", ""]
+    lines += [
         f"- Campagne / campaign : {'terminée / complete' if c['complete'] else '**INCOMPLÈTE / INCOMPLETE**'} ; "
         f"plan {c['plan_id']} ; {c['docs']:,} documents ; {c['units_done']}/{c['units_planned']} unités ; "
         f"{c['active_seconds']:,} s actives, {c['docs_per_second']} doc/s ; ralenti pour les visiteurs / yielded to "
@@ -410,33 +521,52 @@ def to_markdown(report: Mapping[str, Any]) -> str:
         + (", ".join(f"{e.get('date')} ({e.get('engine')})" for e in reg.get("earlier_campaigns") or [])
            or "aucune / none") + ".",
         "",
-        "## Indice de confiance / confidence index",
+        "Deux indices, même mesure : part des documents dont aucun identifiant direct ne reste lisible (pas un seul "
+        "caractère alphanumérique d'une mention du gold). Les intervalles ne couvrent que le tirage des documents. "
+        "Two indexes, same measure: share of documents in which no direct identifier stays readable (not one "
+        "alphanumeric character of a gold mention). The intervals cover document sampling only.",
         "",
-        f"**{_p(ci['value'])}**{_ci(ci['ci95'])} — part des documents dont aucun identifiant direct ne reste "
-        "lisible (pas un seul caractère alphanumérique d'une mention du gold), moyenne à poids égal des 7 familles du "
-        "périmètre français (moitié test des corpus réels). L'intervalle ne couvre que le tirage des documents. "
-        "Share of documents in which no direct identifier stays readable (not one alphanumeric character of a gold "
-        "mention), equal-weight mean of the 7 French-scope families (test half of the real corpora). The interval "
-        "covers document sampling only.",
+        "## Indice de confiance, documents normalisés / confidence index, normalised documents",
+        "",
+        f"**{_p(ci['value'])}**{_ci(ci['ci95'])} — moyenne à poids égal des {len(ci['families'])} familles "
+        f"(moitié test des corpus réels) ; cible / target ≥ {_p(ci.get('target'), 0)}. Equal-weight mean of the "
+        f"{len(ci['families'])} families (test half of the real corpora).",
         "",
         f"Rappel des mentions directes / direct-mention recall : **{_p(ci['mention_recall'])}**"
         f"{_ci(ci['mention_recall_ci95'])}. Tous les documents réels (dev + test) / all real documents : "
         f"{_p(report['confidence_index_all_real_docs']['value'])} ; moitié dev (règles conçues dessus) / dev half "
         f"(rules designed on it) : {_p(report['confidence_index_dev_real_docs']['value'])}.",
         "",
-        "| Famille / family | Documents notés / scored | Sans fuite / no leak [Wilson 95 %] | Rappel mentions / "
-        "mention recall | Précision / precision | Erreurs / errors |",
-        "|---|---:|---|---|---|---|",
     ]
-    for f in report["families"].values():
-        h = f["headline"]
-        m = f.get("measures", {})
-        precision = m.get("precision") if f["kind"] != "real" else m.get("metrics", {}).get("precision")
-        lines.append(f"| {f['title_fr']} / {f['title_en']} | {h['scored']:,} | {_p(h['no_leak_rate'])}"
-                     f"{_ci(h['no_leak_ci95_wilson'])} | {_p(h['mention_recall'])} | {_p(precision)} | "
-                     f"{sum(h['errors'].values())} |")
-    lines += ["", "## Par corpus réel du périmètre français / per French-scope real corpus (test · dev · all)", ""]
+    lines += _family_table(report["families"].values())
+    lines += ["", "## Par corpus réel de l'indice / per index real corpus (test · dev · all)", ""]
     lines += _corpus_table(report["corpora"])
+    hard = report.get("hard_index") or {}
+    apart_rows = report.get("families_apart") or {}
+    lines += ["", "## Documents difficiles / difficult documents", "",
+              f"**{_p(hard.get('value'))}**{_ci(hard.get('ci95'))} — équipe rouge, {hard.get('operators')} "
+              f"opérateurs, {hard.get('docs') or 0:,} documents mutés notés : chaque document muté compte une fois "
+              "(un groupe pèse sa part des documents), intervalle par bootstrap stratifié par groupe. Red team, "
+              f"{hard.get('operators')} operators: every mutated document counts once (a group weighs its share of "
+              "the documents), interval by a bootstrap stratified by group. Rappel des mentions / mention recall : "
+              f"{_p(hard.get('mention_recall'))}{_ci(hard.get('mention_recall_ci95'))}.", "",
+              "| Groupe / group | Opérateurs | Documents notés / scored | Poids / weight | Sans fuite / no leak "
+              "[Wilson 95 %] | Rappel mentions / mention recall |", "|---|---:|---:|---:|---|---|"]
+    group_titles = {"everyday": "Formats du quotidien abîmés / damaged everyday formats",
+                    "obfuscation": "Déguisements volontaires / deliberate obfuscations",
+                    "ocr": "Bruit d'OCR / OCR noise"}
+    for group, row in (hard.get("groups") or {}).items():
+        lines.append(f"| {group_titles.get(group, group)} | {row['operators']} | {row['scored']:,} | "
+                     f"{_p(row['weight'])} | {_p(row['no_leak_rate'])}{_ci(row['no_leak_ci95_wilson'])} | "
+                     f"{_p(row['mention_recall'])} |")
+    lines += ["", *_family_table(row for row in apart_rows.values() if row.get("index") == "hard")]
+    lines += ["", "## Publiés à part, dans aucun indice / published apart, in neither index", "",
+              "Presse ancienne (OCR de mauvaise qualité : performance dégradée), MAPA FR (textes juridiques de l'UE, "
+              "trop peu de documents). Mêmes mesures. Old press (low-quality OCR: degraded performance), MAPA FR (EU "
+              "legal texts, too few documents). Same measures.", ""]
+    lines += _family_table(row for row in apart_rows.values() if row.get("index") != "hard")
+    if report.get("corpora_french_apart"):
+        lines += ["", *_corpus_table(report["corpora_french_apart"])]
     lines += ["", "## Autres langues, hors périmètre : jamais dans l'indice / other languages, out of scope: never in "
               "the index", "",
               "Mêmes mesures que le périmètre français, publiées à part : elles disent ce que le service fait des "
@@ -450,11 +580,15 @@ def to_markdown(report: Mapping[str, Any]) -> str:
                      f"({'—' if density is None else f'{density:.1f}'} pour 10 000 caractères / per 10,000 chars), "
                      f"{_p(row['docs_with_masked_span'])} des documents avec au moins une zone. {row['note']}")
     lines += ["", "## Équipe rouge par opérateur / red team per operator", "",
-              "| Opérateur | Documents | Sans fuite / no leak | Rappel mentions | Survie / survival |",
-              "|---|---:|---|---|---|"]
+              "Les trois groupes font l'indice « documents difficiles » ; aucun n'est dans l'indice « documents "
+              "normalisés ». The three groups make the difficult-documents index; none is in the normalised one.", "",
+              "| Opérateur | Groupe / group | Documents | Sans fuite / no leak | Rappel mentions | Survie / survival |",
+              "|---|---|---:|---|---|---|"]
+    group_names = {"everyday": "quotidien / everyday", "obfuscation": "déguisement / obfuscation", "ocr": "OCR"}
     for name, row in report["redteam_operators"].items():
-        lines.append(f"| {name} | {row['docs']:,} | {_p(row['no_leak_rate'])} | {_p(row['mention_recall'])} | "
-                     f"{_p(row['survival'])} |")
+        group = group_names.get(row.get("group") or "", "—")
+        lines.append(f"| {name} | {group} | {row['docs']:,} | {_p(row['no_leak_rate'])} | "
+                     f"{_p(row['mention_recall'])} | {_p(row['survival'])} |")
     lines += ["", "## Garde-fous / guards", ""]
     for name, g in report["guards"]["checks"].items():
         bound = f"≤ {_p(g['max'])}" if "max" in g else f"≥ {_p(g['min'])}"
@@ -467,7 +601,8 @@ def to_markdown(report: Mapping[str, Any]) -> str:
 
 def write_report(report: Mapping[str, Any], out_dir: Path) -> tuple[Path, Path]:
     out_dir.mkdir(parents=True, exist_ok=True)
-    stem = f"protocol-{report['campaign']['date']}"
+    # La version est dans le nom : un résultat 1.1 n'écrase jamais protocol-2026-10-26 (1.0) / version in the name.
+    stem = spec.RESULTS_STEM.format(date=report["campaign"]["date"])
     json_path, md_path = out_dir / f"{stem}.json", out_dir / f"{stem}.md"
     json_path.write_text(json.dumps(report, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
     md_path.write_text(to_markdown(report), encoding="utf-8", newline="\n")

@@ -289,6 +289,14 @@ def test_explain_names_the_company_number_rule(native: bool):
     assert reasons(f"Prénom : Paule\nSIREN : {siren}") == [("FR_SIREN", "civil_status_nearby")]
     assert reasons(f"Entrepreneur individuel, SIREN {siren}.") == [("FR_SIREN", "sole_trader")]
     strict = Anonymizer(countries="FR", explain=True, native=native, profile="strict")
+    # Avis sans nom ni personne morale : le numéro est celui d'un entrepreneur individuel / a notice naming no
+    # legal entity: the number is a sole trader's.
+    notice = f"Dépôt de l'état des créances\nn° RCS : {siren} RCS Lyon\nActivité : boulangerie"
+    out = fr.anonymize(notice).text
+    assert siren not in out
+    assert siren in fr.anonymize(notice + "\nDénomination : TESTIVO").text
+    assert siren in fr.anonymize(notice + "\nTESTIVO SARL").text
+    assert siren in fr.anonymize(f"RCS Lyon {siren}\nActivité : boulangerie").text
     explain = strict.anonymize(f"ACME SAS, SIREN {siren}.").report["explain"]
     assert [line["reason"] for line in explain if line["rule"] == "FR_SIREN"] == ["validated_and_keyword"]
 

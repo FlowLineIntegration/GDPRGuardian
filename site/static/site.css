@@ -190,7 +190,7 @@ mark{background:none;color:inherit;padding:.05em .2em;border-radius:2px;white-sp
 /* Instruments: square tiles on hairlines; figures scale with their tile (container units), tabular digits. */
 .rail{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;gap:16px 12px;padding:12px 16px 16px;overflow:auto}
 .g h2,.gh h2{font-size:13.5px;margin-bottom:8px}
-.gl,.gm{grid-column:1/-1}
+.gl,.gc,.gs{grid-column:1/-1}
 .gh{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:0 12px}
 .dot{display:inline-block;width:8px;height:8px;margin-right:8px;border:1.5px solid var(--mu);vertical-align:0}
 [data-state=on] .dot{background:var(--ink);border-color:var(--ink)}
@@ -208,21 +208,31 @@ mark{background:none;color:inherit;padding:.05em .2em;border-radius:2px;white-sp
 .meter{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--line);visibility:hidden}
 .meter.on{visibility:visible}
 .meter i{display:block;height:100%;background:var(--ink2);transform-origin:0 50%;transform:scaleX(0);transition:transform .9s cubic-bezier(.2,.7,.3,1)}
-.gc .t{border:1px solid var(--ink);aspect-ratio:1}
+/* Scores: normalised documents big, difficult documents second; session tiles below them, wide. */
+.gs .t{aspect-ratio:2/1}
+.lede{margin:-2px 0 10px;font-size:12.5px;line-height:1.45;color:var(--ink2)}
+.sc{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:10px}
+.sc .t{aspect-ratio:auto;min-height:150px;border:1px solid var(--line)}
+.sc .s1{border-color:var(--ink)}
+.k{font-size:12.5px;font-weight:600;line-height:1.3}
+.sc .ci-v{margin-top:8px}
+.sc .ci-d{margin-top:auto;padding-top:8px}
+.s2 .ci-v{font-size:clamp(24px,21cqi,64px)}
+.ok{list-style:none;margin:10px 0 0;padding:0;font-size:12.5px;line-height:1.45;color:var(--ink2)}
+.ok li{position:relative;padding:5px 0 5px 14px;border-top:1px solid var(--line)}
+.ok li::before{content:"";position:absolute;left:0;top:calc(5px + .5em);width:6px;height:6px;background:var(--ink)}
 .ci-v{margin-top:auto;font-weight:600;font-size:clamp(30px,27cqi,104px);line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums;white-space:nowrap}
 .ci-v small{font-size:.42em;color:var(--mu);margin-left:.1em;letter-spacing:0}
 .q[data-v="\2014"] .ci-v{font-size:clamp(20px,12cqi,40px);line-height:1.1;letter-spacing:-.015em;white-space:normal}
+@media (min-width:761px){.s2.q[data-v="\2014"] .ci-v{font-size:clamp(17px,12cqi,40px)}}
 .ci-ic{margin-top:6px;font-size:12.5px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--ink2)}
 .ci-d{margin-top:6px;font-size:12px;line-height:1.4;color:var(--ink2)}
-.ci-a{margin-top:6px;font-size:12.5px;align-self:flex-start}
+.ci-a{display:inline-block;margin-top:8px;font-size:12.5px}
 .q .pd{display:none}
 .q[data-v="\2014"] .n{display:none}
 .q[data-v="\2014"] .pd{display:inline}
 .rail .note{margin-top:8px;font-size:12px;color:var(--mu)}
-.rail .mt{font-size:12.5px}
-.rail .mt th,.rail .mt td{padding:4px 0}
-.rail .mt td{font-size:12.5px}
-.sheet .rl>*{color:var(--ink);font-weight:600}
+.rc .sub th{padding-top:14px;font-size:12.5px;color:var(--mu)}
 
 /* Learn-more panels (:target). Wide screens: over the result and the instruments. */
 .pn{display:none}
@@ -289,6 +299,13 @@ blockquote p:first-child{font-size:clamp(19px,1rem + .8vw,24px);line-height:1.3;
 .by{margin-top:8px;font-size:13px;color:var(--mu)}
 .cta{margin-top:18px;padding-top:10px;border-top:2px solid var(--ink)}
 .fine{margin-top:16px;font-size:13px;color:var(--ink2)}
+/* Contained: a long command line or a table scrolls in place instead of widening the page on phones. */
+.rt{max-width:44rem;margin-top:14px;overflow-x:auto;contain:inline-size}
+.rt td+td{padding-left:12px}
+.rt td.w,.rt .pd{white-space:normal}
+.rt td[colspan]{text-align:left}
+.pn>pre{contain:inline-size}
+.pn>.list{max-width:80ch}
 
 /* Files dragged over the page */
 .dz{position:fixed;inset:0;z-index:8;display:none;align-items:center;justify-content:center;padding:24px;background:rgb(255 255 255/.86);pointer-events:none}
@@ -307,13 +324,12 @@ blockquote p:first-child{font-size:clamp(19px,1rem + .8vw,24px);line-height:1.3;
   .ql .z{display:none}
   .ql .s{grid-column:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.65}
   .rail{gap:10px 12px;padding-top:8px}
-  .rail .mt th,.rail .mt td{padding:2px 0}
-  .gc .t{min-height:160px}
+  .sc .t{min-height:120px}
   .t{min-height:84px}
 }
 /* Narrower rails (office laptops, tablets): tiles grow with their text instead of clipping it; the bar keeps one
    line (the privacy pill's second half stays in its panel title). */
-@media (max-width:1699px){.t,.t.w,.gc .t{aspect-ratio:auto;min-height:96px}.gc .t{min-height:180px}}
+@media (max-width:1699px){.t,.t.w,.gs .t{aspect-ratio:auto;min-height:96px}}
 @media (min-width:761px) and (max-width:1439px){.keep span span,.src span,.foot p:first-child span{display:none}}
 @media (min-width:1440px) and (max-width:1599px){:lang(en) .keep span span,:lang(en) .src span{display:none}}
 @media (min-width:761px) and (max-width:1499px){.more a{padding:0 7px}}
@@ -322,8 +338,7 @@ blockquote p:first-child{font-size:clamp(19px,1rem + .8vw,24px);line-height:1.3;
 @media (max-width:1199px){
   .ws{grid-template-columns:minmax(17rem,1fr) minmax(0,1.35fr);grid-template-rows:minmax(560px,calc(100svh - 90px)) auto}
   .rail{grid-area:2/1/3/3;grid-template-columns:repeat(4,minmax(0,1fr))}
-  .gm{grid-column:span 2}
-  .gl{grid-column:1/-1}
+  .gs .tl{grid-template-columns:repeat(4,minmax(0,1fr))}
   .gl .tl{grid-template-columns:repeat(8,minmax(0,1fr))}
   .more{order:3;width:calc(100% + 9px);margin-left:-9px}
   .lang{margin-left:auto}
@@ -346,11 +361,14 @@ blockquote p:first-child{font-size:clamp(19px,1rem + .8vw,24px);line-height:1.3;
   .rep{max-height:none;overflow:visible}
   .ws:has(.pn:target)>.cout{visibility:visible}
   .rail{grid-template-columns:minmax(0,1fr);gap:20px}
-  .gm{grid-column:auto}
-  .t,.t.w,.gc .t{aspect-ratio:auto;min-height:104px}
-  .gc .t{min-height:150px}
+  .gl,.gc,.gs{grid-column:auto}
+  .t,.t.w,.gs .t{aspect-ratio:auto;min-height:104px}
+  .sc{grid-template-columns:minmax(0,1fr)}
+  .sc .t{min-height:0}
+  .gs .tl{grid-template-columns:repeat(2,minmax(0,1fr))}
   .t .v,.t.w .v{font-size:28px}
   .ci-v{font-size:48px}
+  .s2 .ci-v{font-size:36px}
   .q[data-v="\2014"] .ci-v{font-size:28px}
   .gl .tl{grid-template-columns:repeat(2,minmax(0,1fr))}
   .pn:target{order:-1;padding:0 16px 40px}

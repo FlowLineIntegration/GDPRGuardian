@@ -302,7 +302,9 @@ def anonymize(path: Path, env: Mapping[str, str], *, countries: str = "FR", prof
                     time.sleep(_RETICKET_WAIT_S)
                     continue
                 raise Failure(f"HTTP 429 too_many_unread_results: {_BUSY_HINT}", EXIT_BUSY)
-            _check(status, body, (200,), headers)
+            # 202 : fichier reçu, traitement en arrière-plan (200 : ancien service, traitement fini).
+            # 202: file received, processing in the background (200: older service, processing done).
+            _check(status, body, (200, 202), headers)
             return _read_pages(base, upload_id, key, deadline, sink)
         except BaseException:
             # Résultat partiel effacé tout de suite (sinon à l'expiration) / partial result wiped now (else on expiry).
@@ -322,9 +324,15 @@ def _read_pages(base: str, upload_id: str, key: str | None, deadline: float,
         status, headers, body = with_retries(
             lambda url=url: request("GET", url, key, timeout=deadline - time.monotonic()), deadline)
         if status == 202:
+            # Traitement en cours : étape et avancement sur stderr, délai conseillé par le service.
+            # Still processing: stage and progress on stderr, delay advised by the service.
+            progress = _json(body)
             if time.monotonic() > deadline:
                 raise Failure("délai dépassé / timed out")
-            time.sleep(delay)
+            _progress(progress)
+            advised = progress.get("retry_after_s")
+            wait = min(max(float(advised), 0.5), 10.0) if isinstance(advised, (int, float)) else delay
+            time.sleep(min(wait, max(0.0, deadline - time.monotonic())))
             delay = min(delay * 2, 5.0)
             continue
         result = _check(status, body, (200,), headers)
@@ -338,6 +346,20 @@ def _read_pages(base: str, upload_id: str, key: str | None, deadline: float,
         if not next_page:
             return "".join(pages), report
         page = int(next_page)
+
+
+def _progress(progress: Mapping[str, Any]) -> None:
+    """Avancement sur stderr (étape, pages, pourcentage ; aucune donnée du document) / progress on stderr."""
+    stage = progress.get("stage")
+    if not isinstance(stage, str) or not stage.replace("_", "").isalpha():
+        return
+    parts = [stage[:20]]
+    done, total, percent = progress.get("pages_done"), progress.get("pages_total"), progress.get("percent")
+    if isinstance(total, int) and total > 0 and isinstance(done, int):
+        parts.append(f"page {done}/{total}")
+    if isinstance(percent, int):
+        parts.append(f"{percent} %")
+    print(f"gdprguardian: {', '.join(parts)}", file=sys.stderr)
 
 
 class Output:
@@ -505,6 +527,12 @@ def main(argv: list[str] | None = None) -> int:
         # Jamais de trace : l'IA lit stderr / never a traceback, the AI reads stderr (timeout, reset...).
         print(f"gdprguardian: échec / failed ({type(exc).__name__})", file=sys.stderr)
         return EXIT_ERROR
+    # Avertissements du service (textes fixes : OCR de mauvaise qualité, contenus écartés...) toujours signalés.
+    # Service warnings (fixed texts: low-quality OCR, dropped content...) always shown.
+    warnings = report.get("warnings")
+    for warning in warnings if isinstance(warnings, list) else []:
+        if isinstance(warning, str):
+            print(f"gdprguardian: avertissement / warning: {warning[:300]}", file=sys.stderr)
     if args.report or args.explain:
         _report(report)
     return EXIT_OK

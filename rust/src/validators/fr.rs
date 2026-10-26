@@ -185,6 +185,30 @@ pub fn contextual_id(candidate: &str) -> Option<String> {
     None
 }
 
+/// Champ « Tél : … » : les chiffres d'un seul numéro, sinon les détecteurs ordinaires décident ; « (+ » (forme
+/// libre des avis, outre-mer mal formé compris) : 8 à 15 chiffres.
+/// Phone field: one phone's worth of digits, else the ordinary detectors decide; "(+" free form: 8 to 15 digits.
+pub fn phone_field(candidate: &str) -> Option<String> {
+    let digits = pystr::digits(candidate)?;
+    let count = char_len(&digits);
+    let ok = if candidate.starts_with("(+") {
+        // Un seul indicatif, pas de « / » : jamais deux numéros / one country code, no "/": never two numbers.
+        (8..=15).contains(&count) && candidate.matches('+').count() == 1 && !candidate.contains('/')
+    } else if digits.starts_with("00") {
+        (11..=15).contains(&count)
+    } else if digits.starts_with('0') {
+        count == 10
+    } else if digits.starts_with("33") {
+        (10..=13).contains(&count)
+    } else {
+        (9..=13).contains(&count)
+    };
+    if !ok {
+        return None;
+    }
+    contextual_id(candidate)
+}
+
 /// Téléphone français, forme E.164 ; chiffres au sens de `isdigit()`, comme Python.
 /// French phone, E.164 form; digits as `isdigit()` sees them, as in Python.
 pub fn phone(candidate: &str) -> Option<String> {

@@ -77,7 +77,15 @@ pt = ["data de nascimento", "nascido em", "nascida em"]
 fr = ["réunion", "rendez-vous", "rdv", "facture", "devis", "commande", "livraison", "échéance", "paiement",
       "virement", "prélèvement", "émis le", "émise le", "signé le", "signée le", "fait le", "daté du", "datée du",
       "en date du", "courrier du", "lettre du", "mail du", "courriel du", "message du", "envoyé le", "envoyée le",
-      "reçu le", "reçue le", "valable jusqu'au", "séance", "comité", "publié le", "mise à jour"]
+      "reçu le", "reçue le", "valable jusqu'au", "séance", "comité", "publié le", "mise à jour",
+      # Actes et soins datés (tests terrain du 26/10) / dated acts and care (field test, 26 October).
+      "désigné le", "désignée le", "ordonné le", "ordonnée le", "décidé le", "décidée le", "prononcé le",
+      "prononcée le", "rendu le", "rendue le", "conclu le", "conclue le", "hospitalisé le", "hospitalisée le",
+      "hospitalisation", "admis le", "admise le", "admission", "opéré le", "opérée le", "consultation",
+      "consulté le", "consultée le", "embauché le", "embauchée le", "embauche", "engagé le",
+      "engagée le", "licencié le", "licenciée le", "licenciement", "convoqué le", "convoquée le", "convocation",
+      "entretien", "audience", "jugement", "arrêt du", "ordonnance du", "déposé le", "déposée le", "saisi le",
+      "saisie le", "notifié le", "notifiée le", "intervenu le", "intervenue le", "survenu le", "survenue le"]
 en = ["meeting", "appointment", "invoice", "quote", "order", "delivery", "due date", "payment", "issued on",
       "signed on", "dated", "sent on", "received on", "valid until", "published on", "updated on"]
 
@@ -91,8 +99,20 @@ entity = "EMAIL"
 label = "EMAIL"
 tier = "A"
 flags = "i"
-prefilter = ["[at]", "(at)", "{at}", "arobase"]
-pattern = '[\w.%+\-]{1,64}\s?(?:\[at\]|\(at\)|\{at\}|\[arobase\]|\(arobase\)|\sarobase\s)\s?[\w\-]{1,63}(?:\s?(?:\[dot\]|\(dot\)|\{dot\}|\[point\]|\(point\)|\.)\s?[\w\-]{1,63}){1,4}'
+prefilter = ["[at]", "(at)", "{at}", "arobase", "&#64;", "%40"]
+pattern = '[\w.%+\-]{1,64}\s?(?:\[at\]|\(at\)|\{at\}|\[arobase\]|\(arobase\)|\sarobase\s|&#64;|%40)\s?[\w\-]{1,63}(?:\s?(?:\[dot\]|\(dot\)|\{dot\}|\[point\]|\(point\)|\.)\s?[\w\-]{1,63}){1,4}'
+boundary = "word"
+
+# « @ » réel, domaine déguisé (« jean@exemple [dot] fr », « jean@exemple(point)fr ») : au moins un point déguisé.
+# Real "@", disguised domain dots: at least one disguised dot.
+[[recognizer]]
+id = "EMAIL_OBFUSCATED_DOT"
+entity = "EMAIL"
+label = "EMAIL"
+tier = "A"
+flags = "i"
+prefilter = ["[dot]", "(dot)", "{dot}", "[point]", "(point)"]
+pattern = '[\w.%+\-]{1,64}@[\w\-]{1,63}(?:\.[\w\-]{1,63})*(?:\s?(?:\[dot\]|\(dot\)|\{dot\}|\[point\]|\(point\))\s?[\w\-]{1,63}(?:\.[\w\-]{1,63})*){1,4}'
 boundary = "word"
 
 [[recognizer]]
@@ -147,6 +167,20 @@ validator = "intl.card"
 boundary = "alnum"
 context = "card"
 invalid = "context"
+
+# Carte regroupée librement (« 53715 8592 97 2274 2 ») : 16 chiffres, clé de Luhn exigée (comme `CARD`), toute la
+# suite de groupes (borne « group »). Freely regrouped card: 16 digits, Luhn key required, the whole run of groups.
+[[recognizer]]
+id = "CARD_REGROUPED"
+entity = "CARD"
+label = "CARD"
+tier = "A"
+score = 0.9
+prefilter = "digit"
+pattern = '[2-6](?:[ ./\-]?[0-9]){15}'
+validator = "intl.card"
+boundary = "group"
+context = "card"
 
 # Format imprimé 4-4-4-4 : la forme suffit, Luhn ne fait que moduler le score (fautes, OCR).
 # Printed 4-4-4-4 layout: the shape is enough, Luhn only adjusts the score (typos, OCR).

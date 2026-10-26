@@ -8,11 +8,13 @@ from collections import Counter
 
 from tools.protocol.stats import (
     bootstrap_index,
+    bootstrap_pooled,
     bootstrap_ratio,
     family_rates,
     index_point,
     multinomial,
     percentile,
+    pooled_point,
 )
 
 
@@ -77,6 +79,39 @@ def test_bootstrap_matches_naive_document_resampling() -> None:
 def test_bootstrap_is_deterministic() -> None:
     hists = [Counter({(1, 1): 50, (1, 0): 5}), Counter({(3, 2): 4, (3, 3): 9})]
     assert bootstrap_index(hists, 200, 11) == bootstrap_index(hists, 200, 11)
+
+
+def test_pooled_index_counts_every_document_once() -> None:
+    """Indice « documents difficiles » : groupes mis en commun, un groupe pèse sa part des documents (1.1)."""
+    everyday = Counter({(1, 1): 560, (1, 0): 440})
+    obfuscation = Counter({(2, 2): 720, (2, 1): 280})
+    ocr = Counter({(1, 1): 4, (1, 0): 46})
+    point, recall = pooled_point([everyday, obfuscation, ocr])
+    assert point == (560 + 720 + 4) / 2050
+    assert recall == (560 + 2 * 720 + 280 + 4) / (1000 + 2000 + 50)
+    intervals = bootstrap_pooled([everyday, obfuscation, ocr], 400, 3)
+    low, high = intervals["index"]
+    assert low < point < high and high - low < 0.06
+    assert bootstrap_pooled([everyday, obfuscation, ocr], 400, 3) == intervals  # graine fixe / fixed seed
+    # Groupe vide ignoré ; aucun document : pas d'indice / empty group skipped; no document: no index.
+    assert bootstrap_pooled([everyday, Counter()], 50, 1)["index"] is not None
+    assert pooled_point([Counter(), Counter()]) == (None, None)
+    assert bootstrap_pooled([Counter()], 50, 1) == {"index": None, "mention_recall": None}
+
+
+def test_pooled_bootstrap_matches_naive_stratified_resampling() -> None:
+    hist_a = Counter({(1, 1): 300, (1, 0): 300})
+    hist_b = Counter({(1, 1): 90, (1, 0): 10})
+    point, _ = pooled_point([hist_a, hist_b])
+
+    rng = random.Random(9)
+    docs_a = [k == m for (m, k), n in hist_a.items() for _ in range(n)]
+    docs_b = [k == m for (m, k), n in hist_b.items() for _ in range(n)]
+    reference = [(sum(rng.choices(docs_a, k=600)) + sum(rng.choices(docs_b, k=100))) / 700 for _ in range(3000)]
+    low, high = bootstrap_pooled([hist_a, hist_b], 3000, 4)["index"]
+    assert low < point < high
+    assert abs(low - percentile(reference, 2.5)) < 0.01
+    assert abs(high - percentile(reference, 97.5)) < 0.01
 
 
 def test_ratio_interval() -> None:

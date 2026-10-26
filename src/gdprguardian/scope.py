@@ -71,12 +71,14 @@ def native_rules() -> Any:
 
 
 class _Cluster:
-    __slots__ = ("given", "initial", "surname")
+    __slots__ = ("given", "initial", "parts", "surname")
 
-    def __init__(self, surname: bytes, given: bytes | None, initial: bytes | None) -> None:
+    def __init__(self, surname: bytes, given: bytes | None, initial: bytes | None,
+                 parts: list[bytes] | None = None) -> None:
         self.surname = surname
         self.given = given
         self.initial = initial
+        self.parts = parts or []
 
 
 class Scope:
@@ -86,7 +88,7 @@ class Scope:
     Python de référence / forces the reference Python implementation.
     """
 
-    __slots__ = ("_by_given", "_by_surname", "_clusters", "_counters", "_hasher", "_indices", "_key",
+    __slots__ = ("_by_given", "_by_part", "_by_surname", "_clusters", "_counters", "_hasher", "_indices", "_key",
                  "_native_scope", "_reserved", "label_language", "neutral")
 
     def __init__(self, label_language: str = "fr", neutral: bool = False, native: bool = True) -> None:
@@ -107,6 +109,8 @@ class Scope:
         self._clusters: list[_Cluster] = []
         self._by_surname: dict[bytes, list[int]] = {}
         self._by_given: dict[bytes, list[int]] = {}
+        # Parties d'un nom composé (« Kervadec-Moulin » -> « Kervadec », « Moulin ») / parts of a hyphenated surname.
+        self._by_part: dict[bytes, list[int]] = {}
 
     def __enter__(self) -> Scope:
         return self
@@ -140,6 +144,7 @@ class Scope:
         self._clusters.clear()
         self._by_surname.clear()
         self._by_given.clear()
+        self._by_part.clear()
 
     def _digest(self, kind: str, value: str) -> bytes:
         if self._hasher is None or not self._key:
@@ -202,7 +207,12 @@ class Scope:
                 by_given = self._by_given.get(self._digest("g", fold(surname)), [])
                 if len(by_given) == 1:
                     return f"p{by_given[0]}"
-                return f"p{self._new_cluster(s_digest, None, None)}"
+                # « Mme Kervadec » après « Mme Solène Kervadec-Moulin » : une partie d'un seul nom composé.
+                # A part of exactly one hyphenated surname joins that person.
+                by_part = self._by_part.get(s_digest, [])
+                if len(by_part) == 1:
+                    return f"p{by_part[0]}"
+                return f"p{self._new_cluster(s_digest, None, None, surname)}"
             return "s\x1f" + s_digest.hex()
         initial_digest = self._digest("i", fold(given[0]))
         if len(given) == 1:
@@ -213,7 +223,7 @@ class Scope:
             if not matches and len(bare) == 1 and len(candidates) == 1:
                 self._clusters[bare[0]].initial = initial_digest
                 return f"p{bare[0]}"
-            return f"p{self._new_cluster(s_digest, None, initial_digest)}"
+            return f"p{self._new_cluster(s_digest, None, initial_digest, surname)}"
         g_digest = self._digest("g", fold(given))
         for c in candidates:
             if self._clusters[c].given == g_digest:
@@ -230,16 +240,28 @@ class Scope:
             self._by_surname[cluster.surname].remove(alone[0])
             cluster.surname = s_digest
             self._by_surname.setdefault(s_digest, []).append(alone[0])
+            self._set_parts(alone[0], surname)
             return f"p{self._set_given(alone[0], g_digest, initial_digest)}"
-        return f"p{self._new_cluster(s_digest, g_digest, initial_digest)}"
+        return f"p{self._new_cluster(s_digest, g_digest, initial_digest, surname)}"
 
-    def _new_cluster(self, surname: bytes, given: bytes | None, initial: bytes | None) -> int:
+    def _new_cluster(self, surname: bytes, given: bytes | None, initial: bytes | None, text: str) -> int:
         index = len(self._clusters)
         self._clusters.append(_Cluster(surname, given, initial))
         self._by_surname.setdefault(surname, []).append(index)
         if given is not None:
             self._by_given.setdefault(given, []).append(index)
+        self._set_parts(index, text)
         return index
+
+    def _set_parts(self, index: int, surname: str) -> None:
+        """Parties d'au moins 2 lettres d'un nom composé, indexées / parts (2 letters or more) of a hyphenated name."""
+        cluster = self._clusters[index]
+        for part in cluster.parts:
+            self._by_part[part].remove(index)
+        pieces = list(dict.fromkeys(piece for piece in fold(surname).split("-") if len(piece) >= 2))
+        cluster.parts = [self._digest("s", piece) for piece in pieces] if len(pieces) > 1 else []
+        for part in cluster.parts:
+            self._by_part.setdefault(part, []).append(index)
 
     def _set_given(self, index: int, given: bytes, initial: bytes) -> int:
         cluster = self._clusters[index]

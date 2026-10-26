@@ -199,15 +199,21 @@ def test_one_client_cannot_fill_the_result_store(make_client: Callable[..., Test
     client = make_client(**PUBLIC, max_store_chars=1_000_000)
     service = client.app.state.service
     huge = client.post("/v1/uploads", headers=ALICE, json={"filename": "a.txt"}).json()
-    assert client.put(path_of(huge["upload_url"]), headers=ALICE, content=b"x " * 499_990).status_code == 413
+    # Reçu (202), refusé au traitement : l'échec attend le lecteur / received, refused when processed.
+    assert client.put(path_of(huge["upload_url"]), headers=ALICE, content=b"x " * 499_990).status_code == 202
+    assert client.get(path_of(huge["result_url"]), headers=ALICE).status_code == 413
     kept = client.post("/v1/uploads", headers=ALICE, json={"filename": "a.txt"}).json()
-    assert client.put(path_of(kept["upload_url"]), headers=ALICE, content=b"x" * 120_000).status_code == 200
-    second = client.post("/v1/uploads", headers=ALICE, json={"filename": "a.txt"}).json()
-    refused = client.put(path_of(second["upload_url"]), headers=ALICE, content=b"y" * 120_000)
+    assert client.put(path_of(kept["upload_url"]), headers=ALICE, content=b"x" * 120_000).status_code == 202
+    created = client.post("/v1/uploads", headers=ALICE, json={"filename": "a.txt"})
+    assert created.status_code == 201, created.text
+    second = created.json()
+    assert client.put(path_of(second["upload_url"]), headers=ALICE, content=b"y" * 120_000).status_code == 202
+    refused = client.get(path_of(second["result_url"]), headers=ALICE)
     assert refused.status_code == 429 and refused.json()["error"]["code"] == "too_many_unread_results"
     victim = client.post("/v1/uploads", headers=BOB, json={"filename": "a.txt"}).json()
     response = client.put(path_of(victim["upload_url"]), headers=BOB, content=b"Jean Dupont")
-    assert response.status_code == 200 and service.store.stats()["stored_chars"] < 125_000 + 100
+    assert response.status_code == 202 and service.store.stats()["stored_chars"] < 125_000 + 100
+    assert client.get(path_of(victim["result_url"]), headers=BOB).status_code == 200
 
 
 def test_a_shared_connector_does_not_share_its_quota_with_its_users(make_client: Callable[..., TestClient]) -> None:
@@ -222,7 +228,7 @@ def test_a_shared_connector_does_not_share_its_quota_with_its_users(make_client:
     users = [from_ip(f"192.0.2.{n}") for n in range(1, 4)]
     for ticket, user in zip(tickets, users * 2, strict=True):
         response = client.put(path_of(ticket["upload_url"]), headers=user, content=SENSITIVE_TEXT.encode())
-        assert response.status_code == 200
+        assert response.status_code == 202
 
 
 # --- pages tierces (M4) / third-party pages ------------------------------------------------------------------------
@@ -310,7 +316,7 @@ def test_a_put_refused_for_its_output_keeps_its_upload_url(make_client: Callable
         service.budget.release("someone-else", 27 * MB)
     assert busy.status_code == 503 and int(busy.headers["retry-after"]) >= 1
     retry = client.put(path_of(ticket["upload_url"]), headers=ALICE, content=SENSITIVE_TEXT.encode())
-    assert retry.status_code == 200 and service.budget.used == 0
+    assert retry.status_code == 202 and service.budget.used == 0
 
 
 # --- divers / misc -------------------------------------------------------------------------------------------------

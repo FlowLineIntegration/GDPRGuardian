@@ -269,7 +269,10 @@ client ─► en-têtes de sécurité ─► journal (erreurs 5xx seulement) ─
   GCRA au coût en secondes de travailleur (0,5 s/s, rafale 20 s, dette jusqu'à l'échéance du plus long travail,
   préfixe ×2 ; estimation par `Content-Length` multipliée par la lenteur observée du client ou de son préfixe, de 1
   à 100 ; correction par le temps mesuré si un travailleur a servi, sinon l'estimation reste due, sauf refus de
-  capacité 503), 3 requêtes à contenu en vol par client (1 en cours + 2 en attente) et 12 par préfixe, en cours au
+  capacité 503), 3 requêtes à contenu en vol par client (1 en cours + 2 en attente) et 12 par préfixe (un envoi
+  en traitement après son 202 y compte encore, mais `/mcp` et la création d'envoi ne le voient qu'à la prise
+  d'un travailleur, leurs corps en vol restant plafonnés dès l'accueil : suivre un envoi n'est jamais refusé
+  parce que les envois du client sont en traitement), en cours au
   plus la moitié des places non réservées par préfixe, une place réservée aux requêtes estimées sous 0,2 s,
   délestage (503) au-delà de 10 s d'attente estimée ; 100 000 clés par niveau, débordement à la Space-Saving ;
   429/503 + `Retry-After` (aléa de 0 à 20 %) + `RateLimit`/`RateLimit-Policy` ; modes enforce, dry-run (seaux
@@ -282,8 +285,9 @@ client ─► en-têtes de sécurité ─► journal (erreurs 5xx seulement) ─
   par document en DEBUG seulement, réponses 5xx en WARNING, métadonnées seulement.
 - **Isolation des résultats** : chemins synchrones sans aucun stockage ; chemin différé joignable par capacité
   seulement (256 bits, dérivée du jeton par HMAC sous une clé en mémoire, gardée en empreinte, comparée en temps
-  constant, jeton à usage unique, résultat effacé après lecture, même 404 pour faux, expiré, utilisé ou lu, aucune
-  route qui liste) ; `Cache-Control: no-store` partout.
+  constant, jeton à usage unique, résultat effacé après lecture complète et délai de grâce, toujours 404 pour faux,
+  expiré, utilisé ou lu, le motif n'étant dit qu'au détenteur de la capacité, aucune route qui liste) ;
+  `Cache-Control: no-store` partout.
 
 - **Zygote** (Linux) : lancé au démarrage, durci, préchargé une fois (packs, automates, noyau Rust, lexique des
   noms, convertisseurs, moteurs par défaut), à un seul fil ; il crée chaque travailleur par `fork` (mémoire
@@ -370,8 +374,34 @@ client ─► en-têtes de sécurité ─► journal (erreurs 5xx seulement) ─
   1/4 par préfixe (le PUT part de la machine de l'utilisateur, pas d'un connecteur partagé). Une URL d'envoi vaut
   `GDPRGUARDIAN_UPLOAD_TTL_S` ; un envoi reçu n'expire
   pas tant qu'il attend son travailleur (sa requête le termine, résultat ou échec) et son délai de traitement part
-  de l'attribution du travailleur ; le résultat vit `GDPRGUARDIAN_RESULT_TTL_S` au plus, effacé dès sa lecture
-  complète.
+  de l'attribution du travailleur ; chaque lecture repousse l'expiration à `GDPRGUARDIAN_RESULT_TTL_S`, jamais
+  au-delà de 3 durées depuis la publication du résultat (`store.MAX_LIFE_TTLS`, 30 minutes par défaut) ; une fois
+  tout lu (ou l'échec signalé), le résultat reste relisible 120 s (`store.READ_GRACE_S`, réponse perdue), puis il
+  est effacé. Erreurs distinctes, toujours 404 : `already_read`, `expired`, `deleted` (empreinte et motif fermé
+  gardés une heure, au plus 50 000 ; seul le détenteur de la capacité de 256 bits les apprend), `not_found` sinon.
+- **Gros documents sans blocage** (motif des tâches MCP, SEP-1686, fait avec de simples outils pour tous les
+  clients) : le `PUT` répond `202 Accepted` dès le corps reçu (`UploadAcceptedOut` : étape `queued`,
+  `retry_after_s`) ; le traitement continue **dans la même requête ASGI**, après la réponse (tâche de fond
+  Starlette) : même travailleur isolé, même budget mémoire, même ticket du limiteur, mêmes échéances, la requête
+  n'étant pas annulée par le départ du client. La lecture du résultat (`get_anonymized`, `GET /v1/results/…` en
+  202) rend l'étape (`awaiting_upload`, `queued`, `converting`, `anonymising`, `done`, `failed`), les pages faites
+  et le total quand le convertisseur les connaît (PDF), sinon une estimation sur la taille, le pourcentage, le
+  temps écoulé et `retry_after_s`. L'avancement vient du travailleur par des trames `progress` du protocole
+  (`_sandbox.report_progress` : étapes fermées, entiers bornés, 4 096 trames au plus, une toutes les 0,5 s ; forme
+  vérifiée par le parent, sinon le travailleur est tenu pour défaillant). Le MCP local attend 20 s, puis rend
+  l'avancement de la même façon. Sur `/mcp` et `POST /v1/uploads`, le délestage sur l'attente estimée est reporté
+  au moment où l'appel prend vraiment un travailleur (`Ticket.deferred_shed`, `Limiter.shed_wait`) : suivre un envoi
+  en cours n'est jamais refusé parce que le même client occupe un travailleur.
+- **Qualité minimale du texte** (`server/quality.py`, dans le travailleur, sur un échantillon borné du texte
+  converti) : part des mots en minuscules absents des listes du paquet et porteurs d'un 4-gramme de lettres jamais
+  vu, mots d'une ou deux lettres hors mots-outils, jetons mêlant chiffres et lettres, césures cassées. Seuil 0,12,
+  étalonné sur les moitiés « dev » des corpus et vérifié sur les moitiés « test » : aucune fausse alerte sur
+  ParlaMint, Judilibre, MAPA et TAB, 0 à 0,1 % sur BODACC et BOAMP ; presse ancienne signalée pour ses pages les plus
+  dégradées (Europeana 12 à 13 %, HIPE 1,5 à 7 %). Français et anglais seulement. Jamais un refus :
+  l'avertissement va dans `report.warnings`. PDF seulement (le produit ne fait pas d'OCR : un texte d'OCR n'arrive
+  que par la couche texte d'un PDF), jamais un texte collé ni un document bureautique ; l'écriture informatique
+  propre (codes en capitales et chiffres, noms de produits en casse chameau, sigles de deux capitales) n'est pas
+  comptée comme déformée.
 - **Travailleur victime préférée du tueur OOM** (`oom_score_adj` 1000, début de `_sandbox._serve`) : une saturation
   de la mémoire du conteneur coûte une requête, jamais le service.
 - Mesures (16 cœurs, Linux, concurrence 4 sauf mention) :
@@ -455,8 +485,21 @@ as digests, also bound to the key when the upload came with one (public service:
 pending, 40 per creator prefix and 10,000 in all; received and unread, 10 per PUT client and 40 per its prefix;
 characters, 1/8 of the store per PUT client and 1/4 per prefix (the PUT comes from the user's machine, not a shared
 connector); a received upload never expires
-while waiting for its worker, its processing delay starts when the worker is granted, and the result is wiped once
-fully read or after `GDPRGUARDIAN_RESULT_TTL_S`. Workers are the OOM killer's preferred victims (`oom_score_adj`
+while waiting for its worker, its processing delay starts when the worker is granted; each read pushes the expiry to
+`GDPRGUARDIAN_RESULT_TTL_S`, never beyond 3 lifetimes from the result's publication (`store.MAX_LIFE_TTLS`, 30 minutes
+by default); once fully read (or its failure told) the result stays readable for a 120 s grace period
+(a lost answer), then it is wiped; distinct 404 codes `already_read`, `expired`, `deleted` (digest and closed reason
+kept one hour, 50,000 at most, learnt only by the capability holder), else `not_found`. Big documents never block
+(the MCP Tasks pattern, SEP-1686, done with plain tools): the `PUT` answers `202 Accepted` once the body is in, and
+processing continues within the same ASGI request after the answer (same worker isolation, memory budget, limiter
+ticket and deadlines); reading the result returns the stage (`queued`, `converting`, `anonymising`, `done`,
+`failed`), pages done / total when the converter knows them, else a size-based estimate, percent, elapsed time and
+`retry_after_s`, from bounded, shape-checked `progress` frames of the worker protocol. Minimum text quality
+(`server/quality.py`): a degraded-OCR score on a bounded sample of the converted text (French and English), threshold
+0.12 calibrated on the dev halves of the corpora, never a refusal, a warning in `report.warnings`; PDFs only (the
+product does no OCR, so OCR text only arrives as a PDF text layer), never pasted text or office documents, and clean
+IT writing (upper-case codes with digits, camel-case product names, two-capital acronyms) is not counted as garbled. Workers are the OOM
+killer's preferred victims (`oom_score_adj`
 1000). **Public service** (`GDPRGUARDIAN_PUBLIC=1`): no key (keys, for third-party deployments, only as SHA-256
 digests in `GDPRGUARDIAN_API_KEY_SHA256`; plaintext keys in the environment are refused). An entry gate decides
 before any body is read: the client address comes from the trusted header Nginx sets (`X-GG-Client`), removed from
@@ -470,15 +513,18 @@ does not pass for it: exempt from client budgets, two jobs at most, never the re
 GCRA in worker-seconds (0.5 s/s, burst 20 s, debt down to the longest job's deadline, prefix tier ×2; estimate from
 `Content-Length` times the observed slowness of the client or its prefix, 1 to 100; true-up with the measured time
 when a worker was used, else the estimate stays due unless the service refused for capacity, 503); 3 content
-requests in flight per client (1 running + 2 queued) and 12 per prefix, at most half of the non-reserved slots
+requests in flight per client (1 running + 2 queued) and 12 per prefix (an upload processing after its 202 still
+counts, but `/mcp` and upload creation only see it when the call takes a worker, their bodies in flight staying
+capped at the gate, so polling is never refused because the client's uploads are processing), at most half of the
+non-reserved slots
 running per prefix; one slot reserved for requests estimated under 0.2 s; 503 when the estimated wait exceeds 10 s;
 100,000 keys per tier with a Space-Saving-style overflow; 429/503 with jittered `Retry-After` and
 `RateLimit`/`RateLimit-Policy`; enforce, dry-run (buckets only) and off modes; fail open, with an aggregate warning
 at most once a minute; aggregate counters only (`/status`). No access or activity log in production
 (`--log-level warning`): per-request and per-document events at DEBUG only. Legal basis of the transient address
 processing: legitimate interest (GDPR art. 6(1)(f), recital 49) and art. 32. Result isolation: synchronous paths
-store nothing; deferred results are reachable by capability only (same 404 for wrong, expired, used or read; no
-listing route; constant-time comparison); `Cache-Control: no-store` everywhere. Details: `deploy/README.md`. Measurements (16 cores, Linux, concurrency 4 unless stated): a 2 KB text end to end
+store nothing; deferred results are reachable by capability only (always 404 for wrong, expired, used or read, the
+reason told to the capability holder only; no listing route; constant-time comparison); `Cache-Control: no-store` everywhere. Details: `deploy/README.md`. Measurements (16 cores, Linux, concurrency 4 unless stated): a 2 KB text end to end
 p50 5.2 ms, p95 6.6 ms, p99 8.6 ms; sustained 160-260 texts of 2 KB per second at concurrency 8, limited by the
 HTTP front (workers alone handle about 400); 8 simultaneous 10 MB texts in 6.5 s (4.5 s at concurrency 8); 100
 simultaneous 10 MB PDFs all processed in 8.7 s; 100 mixed 10 MB files (DOCX, PDF, XLSX, text) at concurrency 8

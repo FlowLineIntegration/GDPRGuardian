@@ -5,14 +5,14 @@
   },
   "metadata": {
     "description": "Gardien RGPD : anonymisation irréversible des documents avant l'IA, sur le poste ou par le service public / GDPR Guardian: irreversible anonymisation of documents before AI, on your computer or through the public service",
-    "version": "1.0.0"
+    "version": "1.0.1"
   },
   "plugins": [
     {
       "name": "gdprguardian",
       "source": "./integrations/claude/plugin",
       "description": "Version locale : serveur MCP local, skill gdprguardian-local et garde-fou ; rien ne quitte la machine. / Local version: local MCP server, gdprguardian-local skill and guardrail; nothing leaves the machine.",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "author": {
         "name": "Guillaume CLEMENT - Flow Line Intégration"
       },

@@ -39,7 +39,7 @@ même règle : ne jamais lire l'original.
 | **Autres agents** (format Agent Skills) | dossier `gdprguardian-online/` de l'archive | dossier `gdprguardian-local/` de l'archive |
 
 - **Avant la publication sur PyPI** : le plugin `gdprguardian` lance
-  `uvx --from "gdprguardian[local]==1.0.0"`, qui exige le paquet sur PyPI (la marketplace,
+  `uvx --from "gdprguardian[local]==1.0.1"`, qui exige le paquet sur PyPI (la marketplace,
   elle, fonctionne : le dépôt est public). D'ici là, ou si `uv tool install` échoue : téléverser ou dézipper les
   archives de [`skills/`](../../skills/README.md).
 - claude.ai et Claude Desktop : les skills exigent l'exécution de code (Paramètres > Capacités ; pour Team et
@@ -64,7 +64,7 @@ même règle : ne jamais lire l'original.
 ### Plugin Claude local (recommandé pour les documents sensibles)
 
 Prérequis : [uv](https://docs.astral.sh/uv/getting-started/installation/), puis, une fois avec le réseau,
-`uv tool install "gdprguardian[local]==1.0.0"` : le serveur démarre ensuite sans réseau (sans cette étape, `uvx`
+`uv tool install "gdprguardian[local]==1.0.1"` : le serveur démarre ensuite sans réseau (sans cette étape, `uvx`
 revérifie l'index des paquets à chaque démarrage dès que sa copie date de quelques minutes). Le plugin apporte le
 serveur MCP local, la skill `gdprguardian-local` et le hook qui bloque la lecture des documents bruts. Seuls les
 fichiers du dossier autorisé sont acceptés : par défaut `~/GDPRGuardian`, **à créer**. Le serveur local et le hook
@@ -79,7 +79,7 @@ s'affiche sur la sortie d'erreur). Exemple pour VS Code (`.vscode/mcp.json`) :
 
 ```json
 {"servers": {"gdprguardian": {"type": "stdio", "command": "uvx",
-  "args": ["--from", "gdprguardian[local]==1.0.0", "gdprguardian", "mcp", "--stdio", "--allow-dir", "${workspaceFolder}/Documents"]}}}
+  "args": ["--from", "gdprguardian[local]==1.0.1", "gdprguardian", "mcp", "--stdio", "--allow-dir", "${workspaceFolder}/Documents"]}}}
 ```
 
 Claude Desktop (`claude_desktop_config.json`) et Cursor (`mcp.json`) utilisent la clé `mcpServers` ;
@@ -254,7 +254,7 @@ the user (a third-party service, no processing agreement) and getting their agre
   and WSL).
 - **Other agents.** The skill folder from the archive (Agent Skills format).
 - **Before the package is on PyPI**, the `gdprguardian` plugin
-  (`uvx --from "gdprguardian[local]==1.0.0"`) does not work yet (the marketplace itself works: the
+  (`uvx --from "gdprguardian[local]==1.0.1"`) does not work yet (the marketplace itself works: the
   repository is public): upload or unzip the [`skills/`](../../skills/README.md) archives instead,
   which is also the fallback whenever `uv tool install` fails.
 - **Sync.** A plugin or skill added to the claude.ai account also appears in Cowork and, at the next session, in
@@ -271,7 +271,7 @@ available formats. For a dedicated Python environment: `pip install --no-index -
 wheels/requirements.txt` (Linux x86_64, Windows x64) or `python scripts/gdprguardian_local.py --setup --pip` (every
 covered platform). The local plugin carries no wheels (only the archives do): it first uses the local MCP tool
 `anonymize_file`, started by `uvx` (prerequisite: [uv](https://docs.astral.sh/uv/), then once, online,
-`uv tool install "gdprguardian[local]==1.0.0"`; allowed folder `~/GDPRGuardian`, to create; see
+`uv tool install "gdprguardian[local]==1.0.1"`; allowed folder `~/GDPRGuardian`, to create; see
 [`plugin/README.md`](plugin/README.md)). Its local server and hook run in Claude Code and Cowork, not in the claude.ai
 or Claude Desktop chat.
 

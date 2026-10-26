@@ -8,7 +8,7 @@ services:
   gdprguardian:
     # Version vérifiée par install.sh (image, start, verify) ; jamais tirée d'un registre.
     # Version checked by install.sh (image, start, verify); never pulled from a registry.
-    image: gdprguardian:1.0.0
+    image: gdprguardian:1.0.1
     pull_policy: never
     # Journal au niveau « warning » : aucun événement par requête ou par document (pas de journal d'activité), seuls
     # les avertissements et erreurs du service. Log level "warning": no per-request or per-document event (no

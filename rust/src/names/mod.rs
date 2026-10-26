@@ -309,6 +309,7 @@ impl Doc<'_> {
         let labels = if self.text.contains(&':') { self.label_cues() } else { Vec::new() };
         if !labels.is_empty() {
             self.lowercase_fields(&labels, &mut found);
+            self.field_values(&labels, &mut found);
         }
         let mut keys = Keys::default();
         let tokens = self.tokens(&mut keys);

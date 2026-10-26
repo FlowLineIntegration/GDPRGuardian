@@ -852,3 +852,37 @@ sizes) stay linear (growth exponent at most 1.23). No per-document slowdown abov
 line is masked as an address; a capitalised "M. Le Maire" is masked as a name; the dotless initial "M" after a
 surname stays visible; preloading the nine FR+X engines is now cheap (about 17 MiB, 350 ms), an operations
 decision.
+
+## 14. Gold aligné sur le protocole 1.1 (26 octobre 2026) / gold aligned with protocol 1.1
+
+**FR.** Le protocole 1.1 ([`PROTOCOLE.md`](PROTOCOLE.md), section « Version 1.1 ») écrit le périmètre d'une fuite :
+toute adresse postale, tout téléphone, tout courriel et tout autre identifiant direct, quel qu'en soit le titulaire,
+et les noms de personnes physiques ; pas les noms de sociétés ; une ville seule, ou un code postal et une ville sans
+voie ni boîte postale, est un lieu. Contrôle de chaque gold : synthétique, BODACC et ParlaMint-FR conformes ;
+**BOAMP** corrigé dans `build_boamp.py` : (a) boîte postale collée à son numéro ou écrite avec des points
+(« BP60120 », « CS44416 », « C.S.80794 », y compris dans le champ d'identification), ou voie écrite dans les champs
+code postal et ville (« 97122 Rue … ») : l'adresse de la partie devient `ADDRESS` au lieu de `LOCATION` ; (b) un mot
+de rôle collé par un trait d'union (« DGEEP-Direction ») et les mots « groupe », « maintenance » arrêtent un nom de
+contact : un service n'est pas une personne. Repérage préalable sur le corpus entier (compteurs, script hors dépôt) :
+3 `PERSON` contenant un mot d'organisation sur 733, 2 `ORG` commençant par une civilité, 86 `LOCATION` sur 5 399 avec
+un mot de voie ou un numéro hors code postal et CEDEX (la plupart des boîtes postales collées). Reconstruction hors
+ligne depuis les avis bruts du cache : la construction 1.0 refaite à l'identique (SHA-256 `e87658ea3af8b67e…`, octet
+pour octet), puis la 1.1 (SHA-256 `435373ea39a1814a…`, enregistré dans `PROTOCOL-REGISTRATION-1.1.json`) : 3 000
+documents, textes identiques, 42 `ADDRESS` ajoutées, 35 `LOCATION` et 5 `PERSON` retirées, 40 documents touchés (22
+`dev`, 18 `test`). Relecture des 82 zones changées : 0 erreur de libellé ; 5 des
+42 adresses ajoutées couvrent aussi un nom de service écrit dans le champ adresse (bornes trop larges, plus sévères
+pour le moteur ; gardées). Restent non corrigés (comptés comme lieux) : un nom de bâtiment seul avec code postal et
+CEDEX (« Villa … », « Carrefour de l'Agriculture »), une voie étrangère (« …strasse »), une boîte postale collée à un
+mot (« HocquardCS 81004 »).
+
+**EN.** Protocol 1.1 writes down the scope of a leak (every postal address, phone, e-mail and other direct
+identifier, whoever owns it, and natural persons' names; not company names; a town alone, or a postcode and town
+without a street or postal box, is a place). Synthetic, BODACC and ParlaMint-FR conform. **BOAMP** fixed in
+`build_boamp.py`: a postal box glued to its number or written with dots, or a street written in the postcode/town
+fields, makes the party address an `ADDRESS`; a hyphen-joined role word and the words "groupe", "maintenance" stop a
+contact name. Offline rebuild from the cached raw notices: the 1.0 build is reproduced byte for byte (SHA-256
+`e87658ea3af8b67e…`), then 1.1 (SHA-256 `435373ea39a1814a…`, registered in `PROTOCOL-REGISTRATION-1.1.json`):
+3,000 documents, identical texts, 42 `ADDRESS` added, 35 `LOCATION` and 5 `PERSON` removed, 40 documents touched (22
+dev, 18 test). All 82 changed spans reviewed: 0 label error; 5 of the 42 new addresses also cover a service name
+written in the address field (too wide, harsher on the engine; kept). Not fixed (still places): a building name alone
+with postcode and CEDEX, a foreign street ("…strasse"), a postal box glued to a word.

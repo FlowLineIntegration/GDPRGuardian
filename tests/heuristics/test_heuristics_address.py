@@ -42,7 +42,8 @@ POSITIVES = [
     ("Bât. B, Résidence Les Lilas, 5 allée des Roses 13008 Marseille",
      ["Bât. B, Résidence Les Lilas, 5 allée des Roses 13008 Marseille"]),
     ("Le cabinet est au 4 place Bellecour, 69002 Lyon 2e.", ["4 place Bellecour, 69002 Lyon 2e"]),
-    ("Elle est domiciliée rue du Général Leclerc à Rennes.", ["rue du Général Leclerc"]),
+    # Commune connue après la voie, même sans numéro : l'adresse entière / a known town after the street.
+    ("Elle est domiciliée rue du Général Leclerc à Rennes.", ["rue du Général Leclerc à Rennes"]),
     ("Le locataire, demeurant 7 impasse des Tilleuls, a résilié son bail.", ["7 impasse des Tilleuls"]),
     ("Il habite 8 rue du 8 Mai 1945, 01000 Bourg-en-Bresse.", ["8 rue du 8 Mai 1945, 01000 Bourg-en-Bresse"]),
     ("Appartement 12\n3 rue des Lilas\n33000 Bordeaux", ["Appartement 12\n3 rue des Lilas\n33000 Bordeaux"]),
@@ -51,7 +52,8 @@ POSITIVES = [
     # Ligne d'adresse : segments avant le code postal, voie en minuscules ou sans numéro, boîte avec Cedex.
     # Address line: chunks before the postcode, lowercase or unnumbered street, box with Cedex.
     ("Adresse : Rue des prés, 38000 Grenoble", ["Rue des prés, 38000 Grenoble"]),
-    ("Adresse : Gymnase Essai, rue des Essais, 38000 Grenoble", ["rue des Essais, 38000 Grenoble"]),
+    # Champ « Adresse : » (1.0.1) : toute la valeur, bâtiment compris / the whole value, building included.
+    ("Adresse : Gymnase Essai, rue des Essais, 38000 Grenoble", ["Gymnase Essai, rue des Essais, 38000 Grenoble"]),
     ("Adresse : BP 71234 Cedex 02, 49000 ANGERS", ["BP 71234 Cedex 02, 49000 ANGERS"]),
     ("Adresse : CS 41234,, 60200 Compiègne cedex", ["CS 41234,, 60200 Compiègne cedex"]),
     ("Adresse : 18-20 Viaduc Essai, 54000 Nancy Cedex", ["18-20 Viaduc Essai, 54000 Nancy Cedex"]),
@@ -162,7 +164,7 @@ def test_name_line_above_a_town_stays_a_person(fr):
 
 
 @pytest.mark.parametrize(("text", "reason"), [
-    ("Adresse : 3 rue des Essais, 69003 Lyon", "postcode_and_town"),
+    ("Siège : 3 rue des Essais, 69003 Lyon", "postcode_and_town"),
     ("Il habite 6 rue des Essais, Vouziers.", "street_and_number"),
     ("Le colis est au 40 avenue de la Grande Armée 75017.", "street_and_number"),
     ("Nous habitons Petite Route de la Gare.", "street_after_home_word"),
@@ -171,3 +173,27 @@ def test_explain_gives_the_address_rule_reason(text, reason):
     for native in (True, False):
         explain = Anonymizer(countries="FR", explain=True, native=native).anonymize(text).report["explain"]
         assert [(line["rule"], line["reason"]) for line in explain] == [("FR_ADDRESS", reason)], native
+
+
+def test_explain_gives_the_address_field_rule():
+    # Champ « Adresse : » (1.0.1) : toute la valeur de la ligne, une seule règle / the whole line value, one rule.
+    for native in (True, False):
+        explain = Anonymizer(countries="FR", explain=True, native=native).anonymize(
+            "Adresse : 3 rue des Essais, 69003 Lyon").report["explain"]
+        assert [line["rule"] for line in explain] == ["FR_ADDRESS_FIELD"], native
+
+
+@pytest.mark.parametrize("native", [True, False], ids=["native", "python"])
+def test_lone_postal_box_needs_capitals_and_no_year(native: bool) -> None:
+    # Boîte postale seule : en capitales, pas une année ; sous 5 chiffres, un code postal ou CEDEX voisin.
+    # A lone postal box: capitals, not a year; under 5 digits, a nearby postcode or CEDEX.
+    an = Anonymizer(countries="FR", native=native)
+
+    def boxes(text: str) -> list[str]:
+        return [text[s.start:s.end] for s in an.analyze(text).spans if s.entity == "ADDRESS"]
+
+    for text in ("Le budget BP 2024 a été voté, BP 2025 à venir.", "Le compte CS 1500 est soldé.",
+                 "Le compte CS2024 est soldé.", "Référence BP123 du dossier.", "Envoyer en bp 61336 merci."):
+        assert boxes(text) == [], text
+    assert boxes("Écrire au CS61336, merci.") == ["CS61336"]
+    assert "BP 123" not in an.anonymize("Écrire au BP 123, service courrier\nTestville CEDEX").text

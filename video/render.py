@@ -186,7 +186,9 @@ def write_reports(lang: str, fmt: str, facts: dict, info: dict) -> tuple[Path, P
     lines = [facts["transcript_title"], facts["transcript_note"],
              f"{info['timeline']['duration']:.1f} s · {width} x {height} · 30 fps", ""]
     lines += [f"[{row['time']}] {row['text']}" for row in info["transcript"]]
-    tr.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    # Fins de ligne LF partout : l'empreinte citée par le site (?v=) doit être celle du fichier du dépôt.
+    # LF everywhere: the digest the site cites (?v=) must be the repository file's.
+    tr.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
 
     rd = info["readability"]
     rep = OUT / "review" / f"timeline-{lang}{'-social' if fmt == 'social' else ''}.txt"
@@ -201,7 +203,7 @@ def write_reports(lang: str, fmt: str, facts: dict, info: dict) -> tuple[Path, P
     out += ["", "problems:" if rd["problems"] else "problems: none"] + [f"  {p}" for p in rd["problems"]]
     q = info["quality"]
     out += ["", "read from site/data/quality.json: " + ", ".join(f"{k}={q.get(k)!r}" for k in QUALITY_KEYS)]
-    rep.write_text("\n".join(out) + "\n", encoding="utf-8")
+    rep.write_text("\n".join(out) + "\n", encoding="utf-8", newline="\n")
     return tr, rep
 
 

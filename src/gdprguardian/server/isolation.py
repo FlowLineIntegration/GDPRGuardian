@@ -39,6 +39,7 @@ from ..documents import (
     DocumentResult,
     DocumentTooLargeError,
 )
+from . import quality
 from .errors import OUTPUT_TOO_LARGE
 from .options import DEFAULT_COUNTRIES, AnonymizeOptions
 
@@ -258,7 +259,7 @@ class InlineRunner:
 
     def run(self, payload: bytes | bytearray, spec: str, timeout_s: float, max_reply: int,
             cancel: _sandbox.CancelHandle) -> Any:
-        return _sandbox.run_inline(JOB_TARGET, payload, (spec,), max_reply)
+        return _sandbox.run_inline(JOB_TARGET, payload, (spec,), max_reply, cancel.on_progress)
 
 
 class IsolatedRunner:
@@ -332,14 +333,22 @@ def run_job(payload: bytes, spec: str) -> _sandbox.Body | dict[str, str]:
                 raise
             return {"error": INVALID_RULES, "message": _COSTLY_RULES}
         if job["kind"] == "text":
-            result = anonymizer.anonymize(payload.decode("utf-8"))
+            # Texte saisi ou collé : jamais d'avertissement de qualité (il ne vient pas d'un OCR ; e-mails et
+            # tickets techniques le déclencheraient à tort). Typed or pasted text: never a quality warning.
+            text = payload.decode("utf-8")
+            result = anonymizer.anonymize(text)
             _check_output(result.text, max_chars)
             return _sandbox.Body({"report": result.report, "worker": os.getpid(), "cpu_ms": _cpu_ms(started)},
                                  result.text)
         limits = DocumentOptions(max_bytes=job["max_bytes"], timeout_s=job["timeout_s"], sandbox=job["sandbox"],
                                  max_pages=job.get("max_pages", _DEFAULT_PAGES))
-        document = _anonymize_document(payload, job["filename"], anonymizer, limits, max_chars)
+        _sandbox.report_progress("converting")
+        document, score = _anonymize_document(payload, job["filename"], anonymizer, limits, max_chars)
         _check_output(document.markdown, max_chars)
+        if document.kind == "pdf" and _low_quality(score, document.report.get("language")):
+            # Qualité du texte converti, PDF seulement (seule voie d'un texte d'OCR : le produit n'en fait pas),
+            # jamais un refus. Converted text quality, PDF only (the only way an OCR text arrives), never a refusal.
+            document.warnings.append(quality.LOW_QUALITY_WARNING)
         meta = {"kind": document.kind, "pages": document.pages, "warnings": document.warnings,
                 "dropped": document.dropped, "report": document.report, "worker": os.getpid(),
                 "cpu_ms": _cpu_ms(started)}
@@ -354,6 +363,24 @@ def run_job(payload: bytes, spec: str) -> _sandbox.Body | dict[str, str]:
 
 def _cpu_ms(started: float) -> int:
     return max(0, round((time.process_time() - started) * 1000))
+
+
+def _low_quality(score: float | None, language: Any) -> bool:
+    """Texte dégradé (OCR probable), langue couverte par les listes / degraded text, covered language."""
+    return score is not None and score >= quality.THRESHOLD and language in quality.LANGUAGES
+
+
+def _quality(text: str) -> float | None:
+    """Score de qualité, au mieux : une erreur de mesure n'empêche jamais l'anonymisation (MemoryError exceptée).
+
+    Quality score, best effort: a measuring error never prevents the anonymisation (MemoryError aside).
+    """
+    try:
+        return quality.quality_score(text)
+    except MemoryError:
+        raise
+    except Exception:
+        return None
 
 
 def _check_output(text: str, max_chars: Any) -> None:
@@ -373,16 +400,23 @@ class _CappedEngine:
     memory (cyclic HTML and XML trees) is handed back first. Any other attribute is the engine's.
     """
 
-    __slots__ = ("__weakref__", "_collect", "_engine", "_limit")
+    __slots__ = ("__weakref__", "_collect", "_engine", "_limit", "_measure", "quality")
 
-    def __init__(self, engine: Any, limit: int | None, collect: bool) -> None:
+    def __init__(self, engine: Any, limit: int | None, collect: bool, measure: bool = False) -> None:
         self._engine = engine
         self._limit = limit
         self._collect = collect
+        self._measure = measure
+        # Score de qualité du texte converti (OCR dégradé), mesuré avant le moteur, PDF seulement / converted text
+        # quality score, measured before the engine, PDF only.
+        self.quality: float | None = None
 
     def anonymize(self, text: str, *args: Any, **kwargs: Any) -> Any:
         if self._limit is not None and len(text) > self._limit:
             raise DocumentTooLargeError(OUTPUT_TOO_LARGE)
+        _sandbox.report_progress("anonymising")
+        if self._measure:
+            self.quality = _quality(text)
         if self._collect:
             gc.collect()
         return self._engine.anonymize(text, *args, **kwargs)
@@ -392,7 +426,7 @@ class _CappedEngine:
 
 
 def _anonymize_document(payload: bytes, filename: str, anonymizer: Any, limits: DocumentOptions,
-                        max_chars: Any) -> DocumentResult:
+                        max_chars: Any) -> tuple[DocumentResult, float | None]:
     """`documents.anonymize_document` avec le moteur plafonné : texte converti au-delà de `_CONVERTED_SLACK` fois
     `max_chars`, refusé avant le moteur. Les tableurs (même règle d'extension que la façade) gardent le moteur tel
     quel : leur pipeline n'appelle jamais `anonymize` (il anonymise par segments) et garde un cache par moteur. The
@@ -400,10 +434,12 @@ def _anonymize_document(payload: bytes, filename: str, anonymizer: Any, limits: 
     engine. Spreadsheets (the facade's own extension rule) keep the engine as is: their pipeline never calls
     `anonymize` (it works by segments) and keeps a per-engine cache."""
     if PurePath(filename).suffix.lower() in SPREADSHEET_EXTENSIONS:
-        return documents.anonymize_document(payload, filename, anonymizer, limits)
+        return documents.anonymize_document(payload, filename, anonymizer, limits), None
     limit = max_chars * _CONVERTED_SLACK if type(max_chars) is int else None
-    engine = _CappedEngine(anonymizer, limit, collect=len(payload) >= _COLLECT_FROM_BYTES)
-    return documents.anonymize_document(payload, filename, engine, limits)
+    engine = _CappedEngine(anonymizer, limit, collect=len(payload) >= _COLLECT_FROM_BYTES,
+                           measure=PurePath(filename).suffix.lower() == ".pdf")
+    # Score de qualité du texte converti en plus (PDF seulement, None sinon) / converted text quality score too.
+    return documents.anonymize_document(payload, filename, engine, limits), engine.quality
 
 
 def preload() -> None:
@@ -415,6 +451,7 @@ def preload() -> None:
     """
     for countries in (DEFAULT_COUNTRIES, "all"):
         AnonymizeOptions(countries=countries).anonymizer().anonymize(_WARM_UP_TEXT)
+    quality.prepare()
     from ..convert import _dispatch
 
     _dispatch.preload()

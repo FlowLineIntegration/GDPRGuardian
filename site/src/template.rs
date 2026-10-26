@@ -125,20 +125,28 @@ pub fn quality_text(value: &QValue, lang: Lang) -> Option<String> {
 
 /// Valeur « pas encore mesurée » de quality.json, affichée « pas encore mesuré » / "not measured yet" mark.
 pub const PENDING: &str = "\u{2014}";
-/// Clés du protocole public en pourcentage (0 à 100) / public protocol keys in percent.
-pub const PROTOCOL_PERCENT: [&str; 4] = [
+/// Clés du protocole public en pourcentage (0 à 100) : indice « documents normalisés », puis « documents
+/// difficiles » (hard_*, protocole 1.1) / public protocol keys in percent: normalised index, then difficult index.
+pub const PROTOCOL_PERCENT: [&str; 8] = [
     "confidence_index",
     "confidence_ci_low",
     "confidence_ci_high",
     "mention_recall_pct",
+    "hard_index",
+    "hard_ci_low",
+    "hard_ci_high",
+    "hard_mention_recall_pct",
 ];
 /// Clés du protocole public entières / integer public protocol keys.
-pub const PROTOCOL_COUNTS: [&str; 4] = [
+pub const PROTOCOL_COUNTS: [&str; 5] = [
     "protocol_docs",
     "protocol_families",
     "real_corpora",
     "real_docs",
+    "hard_docs",
 ];
+/// Publiées avec l'indice difficile / published with the difficult index.
+const WITH_HARD_INDEX: [&str; 3] = ["hard_ci_low", "hard_ci_high", "hard_docs"];
 /// Publiées avec l'indice : sans elles, l'indice n'est pas lisible / published with the index, which needs them.
 const WITH_INDEX: [&str; 6] = [
     "confidence_ci_low",
@@ -222,6 +230,26 @@ pub fn contract_errors(quality: &BTreeMap<String, QValue>) -> Vec<String> {
             if !(low <= index && index <= high) {
                 errors.push(format!(
                     "intervalle {low}-{high} hors de l'indice {index} / interval does not hold the index"
+                ));
+            }
+        }
+    }
+    if !pending("hard_index") {
+        for key in WITH_HARD_INDEX {
+            if pending(key) {
+                errors.push(format!(
+                    "indice difficile publié sans « {key} » / difficult index published without {key}"
+                ));
+            }
+        }
+        if let (Some(low), Some(index), Some(high)) = (
+            number("hard_ci_low"),
+            number("hard_index"),
+            number("hard_ci_high"),
+        ) {
+            if !(low <= index && index <= high) {
+                errors.push(format!(
+                    "intervalle {low}-{high} hors de l'indice difficile {index} / interval does not hold the difficult index"
                 ));
             }
         }
@@ -460,6 +488,11 @@ mod tests {
             ("real_docs", num("6100")),
             ("protocol_date", QValue::Str("2026-11-02".into())),
             ("protocol_engine", QValue::Str("1.0.0".into())),
+            ("hard_index", num("74.0")),
+            ("hard_ci_low", num("73.5")),
+            ("hard_ci_high", num("74.6")),
+            ("hard_docs", num("548907")),
+            ("hard_mention_recall_pct", num("90.0")),
         ]);
         assert!(
             contract_errors(&published).is_empty(),
@@ -492,6 +525,15 @@ mod tests {
         let mut half = published.clone();
         half.insert("real_docs".to_string(), QValue::Str(PENDING.into()));
         assert_eq!(contract_errors(&half).len(), 1);
+        // Indice difficile seul, ou hors de son intervalle / difficult index alone, or outside its interval.
+        let hard_alone = protocol(&[("hard_index", num("74.0"))]);
+        assert_eq!(contract_errors(&hard_alone).len(), WITH_HARD_INDEX.len());
+        let mut hard_outside = published.clone();
+        hard_outside.insert("hard_ci_low".to_string(), num("75.0"));
+        assert!(contract_errors(&hard_outside)[0].contains("difficult index"));
+        let mut hard_shape = published.clone();
+        hard_shape.insert("hard_docs".to_string(), num("1.5"));
+        assert!(contract_errors(&hard_shape)[0].contains("hard_docs"));
         let mut missing = protocol(&[]);
         missing.remove("protocol_engine");
         assert!(contract_errors(&missing)[0].contains("protocol_engine"));

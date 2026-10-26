@@ -39,6 +39,18 @@ PERSON_CASES = [
     ("Relevé : MBAPPA K", ["MBAPPA K"]),
     # Civilité puis nom à particule capitalisée / honorific then a capitalised particle surname.
     ("M. Le Verger, M. Le Goff et Mme De Testval.", ["Le Verger", "Le Goff", "De Testval"]),
+    # Champs d'état civil d'un avis, avec un champ de prénom : toute la valeur, mot courant ou non / civil-status
+    # fields of a notice with a given-name field: the whole value, dictionary word or not.
+    ("Nom : PANTALON\nPrénom : Chantal, sylvie, lily-rose", ["PANTALON", "Chantal, sylvie, lily-rose"]),
+    ("Nom : ME\nPrénoms : Adama, Ismael", ["ME", "Adama, Ismael"]),
+    ("Nom : Monsieur TESTARD- MOULU (EI)\nPrénom : Jean", ["TESTARD- MOULU", "Jean"]),
+    ("Nom : Le gwenec - ENTREPRENEUR INDIVIDUEL\nPrénom : Paule", ["Le gwenec", "Paule"]),
+    ("Pseudonyme : Testo le Magnifique\nNom : Testix\nPrénom : Jean\nNom commercial : Testo le Magnifique",
+     ["Testo le Magnifique", "Testix", "Jean", "Testo le Magnifique"]),
+    # « M'testa » : un nom à apostrophe, pas la civilité « M » / an apostrophe name, not the honorific "M".
+    ("Nom : M'testa\nPrénom : Jean", ["M'testa", "Jean"]),
+    # Valeur en capitales propagée aussi en casse de titre / a capitals value also propagated in title case.
+    ("Nom : TESTAGAR\nPrénom : Jean\nNom commercial : Testagar Livraisons", ["TESTAGAR", "Jean", "Testagar"]),
 ]
 
 NO_PERSON_CASES = [
@@ -58,6 +70,8 @@ NO_PERSON_CASES = [
     "Nom commercial : Testix Services",
     # « Nom : TESTIX INDUSTRIES » : raison sociale, aussi avant une valeur sans étiquette / a company name.
     "Nom : TESTIX INDUSTRIES",
+    "Nom : TESTIX INDUSTRIES SAS\nPrénom : Jean Dupont SARL",
+    "Nom : Non précisé\nPrénom : -",
     "Signataire : Testivo SAS, Lyon",
     # La commune d'un code postal, même homonyme d'un prénom / the town of a postcode, even a given-name homonym.
     "Code postal : 80300 Albert Cedex",
@@ -84,6 +98,50 @@ def test_real_name_patterns(fr: Anonymizer, text: str, expected: list[str]) -> N
 @pytest.mark.parametrize("text", NO_PERSON_CASES)
 def test_real_non_person_patterns(fr: Anonymizer, text: str) -> None:
     assert [text[s.start:s.end] for s in fr.analyze(text).spans if s.entity == "PERSON"] == []
+
+
+@pytest.mark.parametrize("native", [True, False], ids=["native", "python"])
+def test_professional_partnership_keeps_the_whole_firm_name(native: bool) -> None:
+    an = Anonymizer(countries="FR", native=native)
+    for text in ("Mandataire : la SCP Testard, Moulu et Testix, désignée.",
+                 "Liquidateur : SELARL Pierre Testard & Moulu, mandataires."):
+        assert an.anonymize(text).text == text
+    # Une civilité coupe la firme : la personne reste masquée / a civility breaks the firm: the person stays masked.
+    assert "Moulu" not in an.anonymize("La SCP Testard et M. Paul Moulu sont présents.").text
+    # Un prénom et un nom après la firme : une personne, masquée, et la firme s'arrête là / a given name and a
+    # surname after the firm: a person, masked, and the firm ends there.
+    for text, hidden in (("Liquidateur : SELARL MJ Testa, Jean Testi, mandataire judiciaire", ["Testi"]),
+                         ("Désigne la SCP Testard et Jean Moulu, demeurant 3 rue des Lilas.", ["Moulu"]),
+                         ("Présents : SCP Testard, Jean Moulu, Paul Durand, Anne Petit.",
+                          ["Moulu", "Durand", "Petit"]),
+                         ("SELARL Testa - Paul Testi, 3 rue des Lilas, 69003 Lyon", ["Testi"]),
+                         ("La SELARL Testa & Jean Testi", ["Testi"])):
+        out = an.anonymize(text).text
+        assert not [word for word in hidden if word in out], (text, out)
+
+
+@pytest.mark.parametrize("native", [True, False], ids=["native", "python"])
+def test_field_value_propagates_only_when_safe(native: bool) -> None:
+    # Valeur d'un champ de nom qui est un mot courant, une commune ou un nom ambigu : masquée là, jamais propagée.
+    # A name field value that is a common word, a town or an ambiguous name: masked there, never propagated.
+    an = Anonymizer(countries="FR", native=native)
+    for value, prose in (("LYON", "RCS Lyon, plomberie à Lyon."), ("ROUGE", "Membre de la Croix-Rouge."),
+                         ("LOI", "Selon la loi Macron."), ("BOULANGER", "Activité : boulanger pâtissier."),
+                         ("LA POSTE", "La Poste distribue le courrier.")):
+        out = an.anonymize(f"Prénom : Jean\nNom : {value}\n{prose}").text
+        assert out.endswith(prose), (value, out)
+        assert value not in out.split("\n")[1], (value, out)
+    out = an.anonymize("Nom : TESTAGAR\nPrénom : Jean\nNom commercial : Testagar Livraisons").text
+    assert "Testagar" not in out and "TESTAGAR" not in out
+
+
+@pytest.mark.parametrize("native", [True, False], ids=["native", "python"])
+def test_civility_then_common_word_is_a_surname(native: bool) -> None:
+    an = Anonymizer(countries="FR", native=native)
+    out = an.anonymize("Marie Dupont a cosigné l'amendement de M. Orphelin, puis monsieur Orphelin a parlé.").text
+    assert "Orphelin" not in out
+    kept = "Marie Dupont salue Monsieur Président et Madame Ministre."
+    assert an.anonymize(kept).text == "[PERSONNE_1] salue Monsieur Président et Madame Ministre."
 
 
 def test_particle_surname_is_propagated_whole_with_one_placeholder(fr: Anonymizer) -> None:

@@ -1,9 +1,10 @@
 """Outils texte bas niveau / Low-level text helpers.
 
 Toutes les transformations sont faites en code C (`str.translate`, regex) et préservent la longueur,
-sauf la suppression des caractères invisibles et des césures de fin de ligne, qui produit une table de
-positions. All transforms run in C code and keep the length, except removing invisible characters and
-end-of-line hyphenation, which yields an offset map.
+sauf la suppression des caractères invisibles, des césures de fin de ligne et des blancs en trop entre deux
+groupes d'un identifiant (règle GAP), qui produit une table de positions. All transforms run in C code and
+keep the length, except removing invisible characters, end-of-line hyphenation and extra blanks between two
+groups of an identifier (GAP rule), which yields an offset map.
 
 Ces fonctions sont la référence. `prepare(text, native=True)` en fait autant en un appel Rust, construit
 à partir des tables de ce module (mêmes résultats, prouvés par tests différentiels). These functions are
@@ -16,6 +17,7 @@ import re
 import unicodedata
 from array import array
 from functools import cache
+from itertools import pairwise
 from typing import Any
 
 # Séparateur de groupes de chiffres après normalisation / digit-group separator after normalisation.
@@ -34,6 +36,53 @@ _HYPHEN_BREAK_RE = re.compile(r"-(?<=[^\W\d_]-)[ \t]{0,2}\r?\n[ \t]{0,2}(?=[^\W\
 # sans assertion en tête (3x plus rapide), le contrôle du mot se fait dans `_unbold`.
 # Markdown bold outside a word: replaced by spaces, length kept. No leading assertion (3x faster).
 _EMPHASIS_RE = re.compile(r"[*_]{2,3}")
+# Blancs entre deux groupes d'un identifiant, ramenés à une espace (règle GAP, docs/REGLES.md) : tabulation ou
+# 2 à 4 blancs entre deux alphanumériques ASCII dont un chiffre (« 06\t12 », « 1  85 ») ; un seul saut de ligne
+# entre deux chiffres (« 709\r\n590 »), groupes voisins de 12 caractères au plus (une ligne MRZ reste une ligne).
+# Blanks between two groups of an identifier become one space (GAP rule): a tab or 2 to 4 blanks between two
+# ASCII alphanumerics, one of them a digit; a single line break between two digits, neighbouring groups of at
+# most 12 characters (an MRZ line stays a line).
+_GAP_BLANKS_RE = re.compile(r"[ \t]*(?:\t|  )[ \t]*")
+_GAP_BREAK_RE = re.compile(r"[0-9]([ \t]{0,3}\r?\n[ \t]{0,3})(?=[0-9])")
+_GAP_GROUP = 12
+# Groupes séparés par « / » (4 au moins) ou « . » (5 au moins), chacun de 1 à 6 majuscules ou chiffres dont un
+# chiffre (« 06/12/34/56/78 », « FR76.3000.4065.0400.7691.1357.791 ») : séparateurs -> espaces, longueur gardée.
+# Une date (3 groupes) ou une IPv4 (4 groupes) reste intacte. Groups split by "/" (4 or more) or "." (5 or more),
+# each 1 to 6 capitals or digits with a digit: separators -> spaces, length kept. Dates and IPv4 stay intact.
+_SEP_RUNS = (("/", re.compile(r"(?:[0-9A-Z]{1,6}/){3,}[0-9A-Z]{1,6}")),
+             (".", re.compile(r"(?:[0-9A-Z]{1,6}\.){4,}[0-9A-Z]{1,6}")))
+# Saut de ligne (LF ou CRLF, sans blanc autour) À L'INTÉRIEUR d'un identifiant, règle BREAK (docs/REGLES.md) : un
+# courriel coupé par un client de messagerie (« jean.du⏎pont@x.fr », « jean@exem⏎ple.fr ») ou un IBAN collé
+# (« FR76300…⏎…855 ») sont recollés ; un numéro alphanumérique (« 47CY⏎74524 ») devient deux groupes séparés par une
+# espace. Deux lignes distinctes ne sont jamais recollées : chaque côté doit être un morceau du même identifiant
+# (courriel incomplet d'un côté, complet une fois recollé ; groupes en majuscules et chiffres, chacun avec un chiffre).
+# A line break INSIDE an identifier (BREAK rule): a wrapped e-mail or a pasted IBAN is joined back; an alphanumeric
+# number becomes two space-separated groups. Two separate lines are never joined: each side must be a piece of the
+# same identifier (an e-mail incomplete on one side and complete once joined; capital-and-digit groups, each with
+# a digit).
+_BREAK_RE = re.compile(r"(?<=[0-9A-Za-z._%+@\-])\r?\n(?=[0-9A-Za-z._%+@\-])")
+_EMAIL_PART = frozenset("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz._%+-@")
+_DOMAIN_RE = re.compile(r"[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}")
+_IBAN_HEAD_RE = re.compile(r"[A-Z]{2}[0-9]{2}[0-9A-Z]*")
+_BREAK_GROUP = 12
+_BREAK_LOCAL = 7
+# Lettres espacées d'un PDF copié (« J e a n   D u p o n t », « 0 6   1 2 ») : suite d'au moins trois caractères
+# isolés (lettre, chiffre ou @ . _ - ' + , ( ), sans lettre ni chiffre collé) séparés par une espace, mots séparés
+# par 2 à 4 espaces. Les espaces simples sont retirées, un séparateur de mots devient une espace. Une minuscule
+# suivie d'une majuscule coupe la suite (« à J e a n » : « à » reste un mot). Lue sur le texte d'avant les
+# remplacements GAP et « / » : un saut de ligne coupe toujours la suite. Letter spacing from a copied PDF: runs of
+# at least three single characters separated by one space, words separated by 2 to 4 spaces; single spaces are
+# removed, a word separator becomes one space. A lowercase letter followed by a capital splits the run. Read on the
+# text before the GAP and "/" swaps: a line break always ends the run.
+# Revue du 26/10 : seuls les lettres et chiffres comptent ; un bloc en compte au moins quatre, ou trois pour un mot
+# capitalisé (« Z o é ») ; « il y a l' », « (89330), 4 B Rue » restent tels quels et « 4 à 6 » (chiffre, à/a,
+# chiffre) n'est jamais recollé. Review of 26/10: only letters and digits count; a block holds at least four, or
+# three for a capitalised word; a digit, à/a, digit range is never collapsed.
+_SPACED_RE = re.compile(r"(?<!\w)[\w@.\-'+,()](?: {1,4}[\w@.\-'+,()](?!\w)){2,}")
+# Pré-test bon marché, condition nécessaire d'une suite / cheap pre-check, a necessary condition for a run.
+_SPACED_HINT_RE = re.compile(r" [\w@.\-'+,()] {1,4}[\w@.\-'+,()](?!\w)")
+_SPACED_MIN = 4
+_SPACED_MARKS = "@.-'+,()"
 
 
 def _build_normalize_table() -> dict[int, int]:
@@ -101,6 +150,170 @@ _ASTRAL_NORMALIZE = {cp: target for cp, target in NORMALIZE_TABLE.items() if cp 
 _ASTRAL_RE = re.compile("[\U00010000-\U0010ffff]")
 
 
+_ASCII_ALNUM = frozenset("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
+_ASCII_DIGITS = frozenset("0123456789")
+_ASCII_LETTERS = frozenset("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
+
+
+def _group_longer(text: str, start: int, step: int) -> bool:
+    """Plus de `_GAP_GROUP` alphanumériques ASCII à partir de `start` (vers la gauche si `step` = -1) ?
+
+    More than `_GAP_GROUP` ASCII alphanumerics from `start` (leftwards when `step` is -1)?
+    """
+    i = start if step > 0 else start - 1
+    for _ in range(_GAP_GROUP + 1):
+        if not 0 <= i < len(text) or text[i] not in _ASCII_ALNUM:
+            return False
+        i += step
+    return True
+
+
+def _gaps(text: str) -> list[tuple[int, int]]:
+    """Règle GAP : zones [début, fin) de blancs à ramener à une espace / GAP rule: blank zones to make one space."""
+    gaps: list[tuple[int, int]] = []
+    if "\t" in text or "  " in text:
+        for m in _GAP_BLANKS_RE.finditer(text):
+            start, end = m.span()
+            if end - start > 4 or start == 0 or end == len(text):
+                continue
+            before, after = text[start - 1], text[end]
+            if (before in _ASCII_ALNUM and after in _ASCII_ALNUM
+                    and (before in _ASCII_DIGITS or after in _ASCII_DIGITS)):
+                gaps.append((start, end))
+    if "\n" in text:
+        for m in _GAP_BREAK_RE.finditer(text):
+            start, end = m.span(1)
+            if not _group_longer(text, start, -1) and not _group_longer(text, end, 1):
+                gaps.append((start, end))
+        gaps.sort()
+    return gaps
+
+
+def _token(text: str, start: int, step: int, chars: frozenset[str]) -> tuple[str, bool]:
+    """Suite maximale de `chars` depuis `start` (vers la gauche si `step` = -1) et « mot entier » (pas de lettre
+    ou chiffre au-delà). Maximal run of `chars` from `start` (leftwards when `step` is -1), and whether it is a
+    whole word (no letter or digit beyond it)."""
+    i = start if step > 0 else start - 1
+    while 0 <= i < len(text) and text[i] in chars:
+        i += step
+    whole = not (0 <= i < len(text) and text[i].isalnum())
+    return (text[start:i] if step > 0 else text[i + 1:start]), whole
+
+
+def _email_join(left: str, right: str) -> bool:
+    """Les deux morceaux forment-ils un seul courriel coupé ? / do both pieces make one wrapped e-mail?"""
+    right = right.rstrip(".-")
+    if (left + right).count("@") != 1 or not left or not right:
+        return False
+    if "@" in left:
+        local, _, domain = left.partition("@")
+        return (bool(local) and "@" not in right and _DOMAIN_RE.fullmatch(domain) is None
+                and _DOMAIN_RE.fullmatch(domain + right) is not None)
+    # Le morceau de gauche commence par une lettre : un numéro en fin de ligne (« 06 12 34 56 78⏎jean@… ») n'est
+    # pas collé au courriel. The left piece starts with a letter: a number ending the line is not glued on.
+    local, _, domain = right.partition("@")
+    return (_DOMAIN_RE.fullmatch(domain) is not None and left[0] in _ASCII_LETTERS
+            and (len(left) <= _BREAK_LOCAL or any(c in "._-0123456789" for c in left)))
+
+
+def _iban_complete(group: str) -> bool:
+    """Clé ISO 7064 (mod 97) déjà juste : l'IBAN est entier, la ligne suivante n'en fait pas partie.
+    Key already right: the IBAN is whole, the next line is not part of it."""
+    remainder = 0
+    for ch in group[4:] + group[:4]:
+        for digit in str(int(ch, 36)):
+            remainder = (remainder * 10 + int(digit)) % 97
+    return remainder == 1
+
+
+def _breaks(text: str) -> tuple[list[tuple[int, int]], list[tuple[int, int]]]:
+    """Règle BREAK : (zones à ramener à une espace, zones à retirer) / (zones to make one space, zones to remove)."""
+    gaps: list[tuple[int, int]] = []
+    cuts: list[tuple[int, int]] = []
+    for m in _BREAK_RE.finditer(text):
+        start, end = m.span()
+        left, left_whole = _token(text, start, -1, _EMAIL_PART)
+        right, right_whole = _token(text, end, 1, _EMAIL_PART)
+        if left_whole and right_whole and _email_join(left, right):
+            cuts.append((start, end))
+            continue
+        left, left_whole = _token(text, start, -1, _ASCII_ALNUM)
+        right, right_whole = _token(text, end, 1, _ASCII_ALNUM)
+        if not (left and right and left_whole and right_whole):
+            continue
+        if _IBAN_HEAD_RE.fullmatch(left) and right == right.upper() and any(c in _ASCII_DIGITS for c in right) \
+                and 15 <= len(left) + len(right) <= 34 and not _iban_complete(left):
+            cuts.append((start, end))
+        elif (left[-1] not in _ASCII_DIGITS or right[0] not in _ASCII_DIGITS) \
+                and len(left) <= _BREAK_GROUP and len(right) <= _BREAK_GROUP \
+                and left == left.upper() and right == right.upper() \
+                and any(c in _ASCII_DIGITS for c in left) and any(c in _ASCII_DIGITS for c in right):
+            gaps.append((start, end))
+    return gaps, cuts
+
+
+def _spaced_cuts(text: str) -> list[tuple[int, int]]:
+    """Lettres espacées : zones à retirer (`_SPACED_RE`) / letter spacing: zones to remove."""
+    cuts: list[tuple[int, int]] = []
+    if _SPACED_HINT_RE.search(text) is None:
+        return cuts
+    for m in _SPACED_RE.finditer(text):
+        start, end = m.span()
+        cells = [i for i in range(start, end) if text[i] != " "]
+        last = len(cells) - 1
+        block: list[int] = []
+        for k, cell in enumerate(cells):
+            if (text[cell] in "aà" and 0 < k < last and text[cells[k - 1]] in _ASCII_DIGITS
+                    and text[cells[k + 1]] in _ASCII_DIGITS):
+                _spaced_block(text, block, cuts)  # « 4 à 6 » : l'intervalle reste tel quel / the range stays
+                block = []
+                continue
+            if block and cell - block[-1] == 2 and text[block[-1]].islower() and text[cell].isupper():
+                _spaced_block(text, block, cuts)
+                block = []
+            block.append(cell)
+        _spaced_block(text, block, cuts)
+    return cuts
+
+
+def _spaced_block(text: str, block: list[int], cuts: list[tuple[int, int]]) -> None:
+    letters = sum(text[cell] not in _SPACED_MARKS for cell in block)
+    word = (len(block) == _SPACED_MIN - 1 and text[block[0]].isupper() and text[block[1]].islower()
+            and text[block[2]].islower())  # « Z o é »
+    if letters < _SPACED_MIN and not word:
+        return
+    for prev, cell in pairwise(block):
+        if cell - prev == 2:
+            cuts.append((prev + 1, cell))
+        else:
+            cuts.append((prev + 2, cell))
+
+
+def _sep_runs(text: str) -> list[int]:
+    """Positions des « / » et « . » à remplacer par une espace (`_SEP_RUNS`) / separators to turn into spaces.
+
+    La suite est tout un mot de lettres, chiffres et séparateurs, un séparateur final permis (fin de phrase).
+    The run is a whole word of letters, digits and separators; one trailing separator is allowed.
+    """
+    positions: list[int] = []
+    for sep, regex in _SEP_RUNS:
+        if sep not in text:
+            continue
+        for m in regex.finditer(text):
+            start, end = m.span()
+            if start and (text[start - 1] in _ASCII_ALNUM or text[start - 1] == sep):
+                continue
+            if end < len(text) and (text[end] in _ASCII_ALNUM or (
+                    text[end] == sep and end + 1 < len(text)
+                    and (text[end + 1] in _ASCII_ALNUM or text[end + 1] == sep))):
+                continue
+            value = m.group()
+            if all(any(c in _ASCII_DIGITS for c in group) for group in value.split(sep)):
+                positions.extend(start + i for i, c in enumerate(value) if c == sep)
+    positions.sort()
+    return positions
+
+
 def _unbold(match: re.Match[str]) -> str:
     start, end = match.span()
     text = match.string
@@ -124,11 +337,41 @@ def normalize(text: str) -> tuple[str, array | None]:
             mapped = mapped.translate(_ASTRAL_NORMALIZE)
     if "**" in mapped or "__" in mapped:
         mapped = _EMPHASIS_RE.sub(_unbold, mapped)
+    # Règle GAP : le premier blanc devient une espace, les suivants sont retirés / GAP rule: the first blank
+    # becomes a space, the others are removed.
+    gaps = _gaps(mapped)
+    break_cuts: list[tuple[int, int]] = []
+    if "\n" in mapped:
+        break_gaps, break_cuts = _breaks(mapped)
+        if break_gaps:
+            gaps = sorted(gaps + break_gaps)
+    # Lettres espacées, lues avant les remplacements / letter spacing, read before the swaps.
+    spaced = _spaced_cuts(mapped) if " " in mapped else []
+    swaps = [start for start, _ in gaps if mapped[start] != " "]
+    if "/" in mapped or "." in mapped:
+        swaps = sorted(swaps + _sep_runs(mapped))
+    if swaps:
+        pieces: list[str] = []
+        last = 0
+        for start in swaps:
+            pieces += (mapped[last:start], " ")
+            last = start + 1
+        pieces.append(mapped[last:])
+        mapped = "".join(pieces)
     cuts = [] if mapped.isascii() else [m.span() for m in INVISIBLE_RE.finditer(mapped)]
     if "-" in mapped and "\n" in mapped:
         # « Du-\npont » -> « Dupont » ; « Jean-\nPierre » garde son trait d'union / keeps its hyphen.
         cuts.extend((m.start() if mapped[m.end()].islower() else m.start() + 1, m.end())
                     for m in _HYPHEN_BREAK_RE.finditer(mapped))
+        cuts.sort()
+    if any(end - start > 1 for start, end in gaps):
+        cuts.extend((start + 1, end) for start, end in gaps if end - start > 1)
+        cuts.sort()
+    if break_cuts:
+        cuts.extend(break_cuts)
+        cuts.sort()
+    if spaced:
+        cuts.extend(spaced)
         cuts.sort()
     if not cuts:
         return mapped, None

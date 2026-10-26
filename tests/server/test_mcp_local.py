@@ -54,6 +54,29 @@ async def test_anonymize_allowed_file(server: FastMCP, allowed: Path) -> None:
     assert result.structured_content["deleted"] is True
 
 
+async def test_a_slow_file_returns_the_progress_then_the_pages(server: FastMCP, allowed: Path,
+                                                              monkeypatch: pytest.MonkeyPatch) -> None:
+    # Au-delà de l'attente, l'outil rend l'avancement au lieu de bloquer ; get_anonymized prend le relais.
+    # Past the wait, the tool returns the progress instead of blocking; get_anonymized takes over.
+    import anyio
+
+    from gdprguardian.server import mcp_local
+
+    monkeypatch.setattr(mcp_local, "_LOCAL_WAIT_S", 0.0)
+    async with Client(server) as client:
+        first = await client.call_tool("anonymize_file", {"path": str(allowed / "client.txt")})
+        meta = first.structured_content
+        if meta["page"] is None:
+            assert meta["status"] == "processing" and meta["retry_after_s"] >= 2
+            assert "call get_anonymized" in first.content[0].text
+        for _ in range(500):
+            page = await client.call_tool("get_anonymized", {"upload_id": meta["upload_id"]})
+            if page.structured_content["page"] is not None:
+                break
+            await anyio.sleep(0.01)
+    assert page.structured_content["page"] == 1 and "[NIR_1]" in page.content[0].text
+
+
 async def test_large_file_is_paginated(server: FastMCP, allowed: Path) -> None:
     (allowed / "long.txt").write_text("".join(f"{i} : {i}@exemple.fr\n" for i in range(300)), encoding="utf-8")
     async with Client(server) as client:

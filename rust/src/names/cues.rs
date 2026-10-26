@@ -13,9 +13,9 @@ use super::{
     T_EPONYM, T_EPONYM_DIRECT, T_GREETING, T_HONORIFIC, T_ROLE,
 };
 
-/// Étiquette de champ : (début de la valeur, force, l'étiquette demande-t-elle un nom ?).
-/// Field label: (value start, strength, does the label ask for a name?).
-pub(super) type Label = (usize, i8, bool);
+/// Étiquette de champ : (début de la valeur, force, demande un nom ?, demande un prénom ?).
+/// Field label: (value start, strength, does the label ask for a name?, for a given name?).
+pub(super) type Label = (usize, i8, bool, bool);
 
 /// Positions -> force, dans l'ordre d'insertion (comme un `dict` Python) / insertion-ordered, like a dict.
 #[derive(Default)]
@@ -76,7 +76,7 @@ enum CueKind {
 }
 
 /// Longueur examinée de la valeur d'une étiquette (`_LABEL_VALUE_MAX`) / field value length examined.
-const LABEL_VALUE_MAX: usize = 80;
+pub(super) const LABEL_VALUE_MAX: usize = 80;
 /// Ponctuation retirée autour des mots d'une valeur (`_VALUE_STRIP`) / punctuation stripped around value words.
 const VALUE_STRIP: &str = ",;:()[]\"'«»";
 /// `_VALUE_STOPS` : la valeur propre d'un champ s'arrête avant ces mots / a field's own value stops before them.
@@ -191,7 +191,7 @@ impl Doc<'_> {
             }
             cues.put(text, pos, NEG, false, CueKind::Plain);
         }
-        for &(pos, level, _) in labels {
+        for &(pos, level, ..) in labels {
             cues.put(text, pos, level, true, CueKind::Label);
         }
         cues.signature.sort_unstable();
@@ -236,8 +236,8 @@ impl Doc<'_> {
                 if level != NONE {
                     let value = patterns::after_label(text, pos + 1);
                     if !self.organisation_value(value) {
-                        let asks_name = entry.has(flag::GIVEN_HEADER) || entry.has(flag::SURNAME_HEADER);
-                        labels.push((value, level, asks_name));
+                        let given = entry.has(flag::GIVEN_HEADER);
+                        labels.push((value, level, given || entry.has(flag::SURNAME_HEADER), given));
                     }
                 }
             }

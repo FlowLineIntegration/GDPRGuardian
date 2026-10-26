@@ -114,6 +114,9 @@ fn trim_honorific(chars: &Chars, text: &IndexedText, span: &mut Span) {
         if token_chars == 0 || !chars.is_honorific(segment.get(..token_bytes).unwrap_or("")) {
             return;
         }
+        if segment.get(token_bytes..).unwrap_or("").starts_with(['\'', '’']) {
+            return; // « M'testa », « M’testo » : un nom, pas « M. » / a name, not an honorific
+        }
         let separators =
             segment.get(token_bytes..).unwrap_or("").chars().take_while(|c| matches!(c, '.' | ' ' | '\u{a0}'));
         let rest = token_chars + separators.count();

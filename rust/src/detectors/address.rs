@@ -274,11 +274,17 @@ impl AddressDetector {
                     }
                 }
             }
-            if !tail && street.numbered {
-                end = self.town_after(t, f, end); // « 6 rue des Essais, Vouziers »
+            if !tail {
+                end = self.town_after(t, f, end); // « 6 rue des Essais, Vouziers », « Place du Théâtre, Testville »
             }
             let (score, reason) = if street.numbered { (0.85, STREET_NUMBERED) } else { (0.75, STREET_CUED) };
             spans.push((self.complement(t, street.start), end, score, Some(reason)));
+        }
+        // Boîte postale seule (« CS61336 », « BP 60120, Contact … ») / a lone postal box (`lone_box`).
+        for &(start, end) in &boxes {
+            if lone_box(t.s, start, end) {
+                spans.push((start, end, 0.8, None));
+            }
         }
         Ok(spans)
     }
@@ -887,10 +893,10 @@ impl AddressDetector {
     fn complement_unit_starts(&self, t: Chars, lo: usize, ends: &[bool]) -> Vec<bool> {
         let set = before_blanks(t, lo, ends, 3);
         let set = before_optional(t, lo, &set, |c| matches!(c, ',' | ';' | '–' | '-'));
-        let set = before_blanks(t, lo, &set, 2);
+        let tail = before_blanks(t, lo, &set, 2);
         // `(?:[ \t][\w'’-]{1,20}){0,3}?`
-        let mut repeated = set.clone();
-        let mut layer = set;
+        let mut repeated = tail.clone();
+        let mut layer = tail.clone();
         for _ in 0..3 {
             let tokens = before_tokens(t, lo, &layer);
             layer = (0..tokens.len()).map(|i| t.blank(lo + i) && tokens.get(i + 1) == Some(&true)).collect();
@@ -903,10 +909,11 @@ impl AddressDetector {
         (0..set.len())
             .map(|i| {
                 (lo + i == 0 || !t.word(lo + i - 1))
-                    && self
+                    && (self
                         .complement_words
                         .iter()
                         .any(|w| t.literal_ci(lo + i, w) && set.get(i + w.len()) == Some(&true))
+                        || floor_rank(t, lo, i, &tail))
             })
             .collect()
     }
@@ -1085,6 +1092,19 @@ fn house_number_at(t: Chars, p: usize, suffixes: &[CiPattern]) -> bool {
     if !t.digit(p) || (p > 0 && t.test(p - 1, |c| t.u.is_word(c) || c == '.' || c == ',')) {
         return false;
     }
+    // `(?<!\b[LRDA]\.[ \t])(?<![0-9]-)` : pas un article de code (« L. 1221-3 »), ni la fin d'un intervalle déjà lu
+    // / not a code article number, nor the end of a range.
+    if p >= 2 && t.is(p - 1, '-') && t.digit(p - 2) {
+        return false;
+    }
+    if p >= 3
+        && t.test(p - 1, |c| c == ' ' || c == '\t')
+        && t.is(p - 2, '.')
+        && t.test(p - 3, |c| matches!(c, 'L' | 'R' | 'D' | 'A'))
+        && (p == 3 || !t.test(p - 4, |c| t.u.is_word(c)))
+    {
+        return false;
+    }
     let numbers: Vec<usize> = (1..=t.digits(p, 4)).map(|count| p + count).collect();
     let mut with_suffix = numbers.clone();
     for &x in &numbers {
@@ -1200,6 +1220,30 @@ fn link(t: Chars, a: usize, b: usize) -> bool {
         && after + 1 + s.blanks(after + 1, usize::MAX) == b
 }
 
+/// Littéral insensible à la casse, écrit en minuscules / case-insensitive literal written in lowercase.
+fn literal_lower(t: Chars, at: usize, word: &str) -> bool {
+    word.chars().enumerate().all(|(k, w)| t.test(at + k, |c| c == w || c.to_lowercase().eq(std::iter::once(w))))
+}
+
+/// Étage écrit avec son rang (`_COMPLEMENT`) : `[0-9]{1,2}(?i:er|re|e|[eè]me)[ \t]{1,2}(?i:[ée]tage)` depuis
+/// `lo + i`, jusqu'à une position de `tail`. A floor written with its rank first, up to a position of `tail`.
+fn floor_rank(t: Chars, lo: usize, i: usize, tail: &[bool]) -> bool {
+    let start = lo + i;
+    let digits = t.run(start, 2, |c| c.is_ascii_digit());
+    (1..=digits).any(|d| {
+        ["er", "re", "e", "ème", "eme"].iter().any(|suffix| {
+            let p = start + d;
+            if !literal_lower(t, p, suffix) {
+                return false;
+            }
+            let p = p + suffix.chars().count();
+            (1..=t.blanks(p, 2)).any(|k| {
+                ["étage", "etage"].iter().any(|w| literal_lower(t, p + k, w) && tail.get(p + k + 5 - lo) == Some(&true))
+            })
+        })
+    })
+}
+
 /// Positions d'où `[ \t]{0,max}` mène dans `set` / positions from which `[ \t]{0,max}` leads into `set`.
 fn before_blanks(t: Chars, lo: usize, set: &[bool], max: usize) -> Vec<bool> {
     (0..set.len()).map(|i| (0..=t.blanks(lo + i, max)).any(|j| set.get(i + j) == Some(&true))).collect()
@@ -1289,15 +1333,76 @@ fn trigger_at(f: Chars, p: usize) -> Option<usize> {
     (!f.word(end)).then_some(end)
 }
 
-/// `_TOWN_GAP_RE.match` : `[ \t]{0,2},[ \t]{1,2}` -> fin / end.
+/// `_BOX_ALONE_DIGITS` : chiffres d'une boîte postale masquée seule / digits of a postal box masked alone.
+const BOX_ALONE_DIGITS: usize = 3;
+/// `_BOX_SURE_DIGITS`, `_BOX_NEAR_BEFORE`, `_BOX_NEAR_AFTER`.
+const BOX_SURE_DIGITS: usize = 5;
+const BOX_NEAR_BEFORE: usize = 80;
+const BOX_NEAR_AFTER: usize = 160;
+
+/// `_lone_box` : boîte postale en capitales, 3 chiffres au moins et pas une année ; sous 5 chiffres, un code postal
+/// ou CEDEX sur sa ligne ou la suivante. Capitals, 3 digits or more, not a year; under 5 digits, a nearby
+/// postcode or CEDEX.
+fn lone_box(s: &[char], start: usize, end: usize) -> bool {
+    if !matches!(s.get(start), Some('B' | 'C' | 'T')) {
+        return false;
+    }
+    let digits: Vec<char> = s[start..end].iter().copied().filter(char::is_ascii_digit).collect();
+    if digits.len() < BOX_ALONE_DIGITS || (digits.len() == 4 && matches!(digits[..2], ['1', '9'] | ['2', '0'])) {
+        return false;
+    }
+    if digits.len() >= BOX_SURE_DIGITS {
+        return true;
+    }
+    let floor = start.saturating_sub(BOX_NEAR_BEFORE);
+    let lo = (floor..start).rev().find(|&i| s[i] == '\n').map_or(floor, |i| i + 1);
+    let limit = s.len().min(end + BOX_NEAR_AFTER);
+    let hi = match (end..limit).find(|&i| s[i] == '\n') {
+        None => limit,
+        Some(first) => (first + 1..limit).find(|&i| s[i] == '\n').unwrap_or(limit),
+    };
+    near_postcode(&s[lo..hi.max(lo)])
+}
+
+/// `_BOX_NEAR_RE.search` : 5 chiffres exactement, ou « cedex » / exactly 5 digits, or "cedex".
+fn near_postcode(w: &[char]) -> bool {
+    let mut i = 0;
+    while i < w.len() {
+        if w[i].is_ascii_digit() {
+            let run = w[i..].iter().take_while(|c| c.is_ascii_digit()).count();
+            if run == 5 {
+                return true;
+            }
+            i += run;
+            continue;
+        }
+        if w.len() - i >= 5
+            && matches!(w[i], 'C' | 'c')
+            && matches!(w[i + 1], 'E' | 'e' | 'É' | 'é')
+            && matches!(w[i + 2], 'D' | 'd')
+            && matches!(w[i + 3], 'E' | 'e')
+            && matches!(w[i + 4], 'X' | 'x')
+        {
+            return true;
+        }
+        i += 1;
+    }
+    false
+}
+
+/// `_TOWN_GAP_RE.match` : `[ \t]{0,2},[ \t]{1,2}|[ \t]{1,2}[à–-][ \t]{1,2}` -> fin / end.
 fn town_gap(t: Chars, pos: usize) -> Option<usize> {
     let lead = t.blanks(pos, 3);
-    let comma = pos + lead;
-    if lead > 2 || !t.is(comma, ',') {
+    let sep = pos + lead;
+    if lead > 2 {
         return None;
     }
-    let trail = t.blanks(comma + 1, 2);
-    (trail > 0).then_some(comma + 1 + trail)
+    let comma = t.is(sep, ',');
+    if !comma && (lead == 0 || !(t.is(sep, 'à') || t.is(sep, '–') || t.is(sep, '-'))) {
+        return None;
+    }
+    let trail = t.blanks(sep + 1, 2);
+    (trail > 0).then_some(sep + 1 + trail)
 }
 
 /// `_TOWN_END_RE.match` : `[ \t]{0,2}(?:[\r\n.,;)]|$)`.

@@ -12,7 +12,7 @@ modèle (détails plus bas).
 
 | Élément | Rôle |
 |---|---|
-| `.mcp.json` | Lance le serveur local : `uvx --from "gdprguardian[local]==1.0.0" gdprguardian mcp --stdio --allow-dir <dossier>`. Même logiciel, même version que le service en ligne. |
+| `.mcp.json` | Lance le serveur local : `uvx --from "gdprguardian[local]==1.0.1" gdprguardian mcp --stdio --allow-dir <dossier>`. Même logiciel, même version que le service en ligne. |
 | `skills/gdprguardian-local` | Dit à Claude d'utiliser `anonymize_file`, sans jamais ouvrir l'original ; à défaut, le script de la skill, qui anonymise sur le poste avec le moteur embarqué (roues fournies dans les archives de [`skills/`](../../../skills/README.md), absentes du plugin) ou un Gardien RGPD déjà installé. Jamais de service en ligne sans l'accord de l'utilisateur. |
 | `hooks/hooks.json` | Hook `PreToolUse` : refuse `Read`, `Grep`, `cat`, `Get-Content`, `Import-Csv`… et les outils MCP tiers sur un document brut. |
 
@@ -23,7 +23,7 @@ Version légère, sans rien installer (service public, MCP en HTTP) : le plugin 
 
 - **uv** ([installation](https://docs.astral.sh/uv/getting-started/installation/)), qui installe Python et
   Gardien RGPD.
-- **Une fois, avec le réseau**, dans un terminal : `uv tool install "gdprguardian[local]==1.0.0"` (environ 40 Mo,
+- **Une fois, avec le réseau**, dans un terminal : `uv tool install "gdprguardian[local]==1.0.1"` (environ 40 Mo,
   plus Python si uv doit l'installer). Le serveur démarre ensuite **sans réseau**, et sans dépasser le délai de
   démarrage du client. Sans cette étape, le plugin fonctionne aussi, mais `uvx` télécharge Gardien RGPD au premier
   lancement, puis a besoin du réseau à chaque démarrage dès que sa copie de l'index des paquets (PyPI) date de
@@ -91,7 +91,7 @@ Claude anonymises a document with the `anonymize_file` tool **without ever readi
 the anonymised Markdown (`[PERSONNE_1]`, `[EMAIL_1]`…). Placeholders are irreversible: no mapping table exists.
 **The document never leaves the machine**: only its anonymised Markdown goes to the model (details below).
 
-- **Contents.** `.mcp.json` starts the local server (`uvx --from "gdprguardian[local]==1.0.0" gdprguardian mcp --stdio
+- **Contents.** `.mcp.json` starts the local server (`uvx --from "gdprguardian[local]==1.0.1" gdprguardian mcp --stdio
   --allow-dir <folder>`, the same software and version as the online service); the `gdprguardian-local` skill
   tells Claude to use `anonymize_file` and never open the original, falling back to the skill's script, which
   anonymises on the computer with the bundled engine (wheels shipped in the `skills/` archives, not in the plugin)
@@ -100,7 +100,7 @@ the anonymised Markdown (`[PERSONNE_1]`, `[EMAIL_1]`…). Placeholders are irrev
   readers and third-party MCP tools on raw documents. The light plugin `gdprguardian-online` (online MCP over HTTP,
   nothing to install) lives in [`../plugin-online`](../plugin-online/README.md).
 - **Prerequisite.** [uv](https://docs.astral.sh/uv/getting-started/installation/). Once, with the network, run
-  `uv tool install "gdprguardian[local]==1.0.0"` in a terminal: the server then starts **without any network** and
+  `uv tool install "gdprguardian[local]==1.0.1"` in a terminal: the server then starts **without any network** and
   within the client's start-up timeout. Without this step the plugin still works, but `uvx` downloads GDPR Guardian
   at first start and then needs the network at every start once its copy of the package index (PyPI) is more
   than a few minutes old: offline, the server does not start. After a plugin update, run `uv tool install` again

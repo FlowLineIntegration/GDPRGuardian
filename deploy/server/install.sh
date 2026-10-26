@@ -587,10 +587,22 @@ verify_protocol() {
   result=$(socket_curl -X PUT -H 'Content-Type: application/octet-stream' --data-binary "@$upload" \
     "http://localhost/v1/uploads/$token") || { rm -f "$upload"; fail "PUT de 2 Mo / 2 MB PUT"; }
   rm -f "$upload"
-  case $result in *'"status":"ready"'*) ;; *) fail "envoi de 2 Mo non traité : ${result:0:200}" ;; esac
-  out=$(socket_curl "http://localhost/v1/results/$upload_id?page=1") || fail "lecture du résultat / result read"
+  # 202 « processing » : le traitement suit la réponse ; on suit le résultat jusqu'à la page 1 (60 s au plus).
+  # 202 "processing": processing follows the answer; poll the result until page 1 (60 s at most).
+  case $result in *'"status":"processing"'*) ;; *) fail "envoi de 2 Mo non reçu : ${result:0:200}" ;; esac
+  out=
+  for _ in $(seq 1 60); do
+    out=$(socket_curl "http://localhost/v1/results/$upload_id?page=1") || fail "lecture du résultat / result read"
+    case $out in *'"page":1'*) break ;; esac
+    out=
+    sleep 1
+  done
+  [ -n "$out" ] || fail "résultat non prêt après 60 s / result not ready after 60 s"
   case $out in *'[EMAIL_1]'*) ;; *) fail "résultat sans balise / no placeholder" ;; esac
   case $out in *'@exemple.fr'*|*'06 12 34 56 78'*) fail "résultat non anonymisé / not anonymised" ;; esac
+  # Résultat effacé tout de suite : aucun résultat non lu laissé au client du protocole à chaque déploiement.
+  # Result deleted at once: no unread result left to the protocol client on each deploy.
+  socket_curl -X DELETE -o /dev/null "http://localhost/v1/results/$upload_id" || fail "effacement du résultat / result delete"
   echo "envoi de 2 Mo : aller et retour / 2 MB upload: round trip ok"
   socket_curl -o /dev/null http://localhost/health/deep || fail "sonde profonde / deep probe"
   echo "sonde profonde / deep probe: ok"

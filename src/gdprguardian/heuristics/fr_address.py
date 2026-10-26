@@ -52,8 +52,10 @@ _TOWN_TAIL_RE = re.compile(rf"(?:[ \t-]{{1,2}}(?i:les|le|la|sur|sous|en|lès|lez
 # Code postal seul juste après une voie / bare postcode right after a street.
 _POSTCODE_TAIL_RE = re.compile(r"[ \t]{0,2},?[ \t]{1,2}([0-9]{5})(?![\w]|[.,][0-9])")
 _CAPITAL_WORDS_RE = re.compile(rf"[{UPPER}][^\W\d_'-]{{1,30}}(?:[ '-][{UPPER}][^\W\d_'-]{{1,30}}){{0,3}}")
+# Pas un article de code (« L. 1221-3, R. 111-2 ») / not a code article number (tests terrain / field test).
 _NUMBER_BEFORE_RE = re.compile(
-    r"(?<![\w.,])([0-9]{1,4}(?:[ \t]?(?i:bis|ter|quater|quinquies|[a-h])(?![\w]))?(?:[ \t]?[-/][ \t]?[0-9]{1,4})?)"
+    r"(?<![\w.,])(?<!\b[LRDA]\.[ \t])(?<![0-9]-)"
+    r"([0-9]{1,4}(?:[ \t]?(?i:bis|ter|quater|quinquies|[a-h])(?![\w]))?(?:[ \t]?[-/][ \t]?[0-9]{1,4})?)"
     r"[ \t]{0,2},?[ \t]{0,2}$")
 _NAME_WORD_RE = re.compile(r"[^\W\d_][^\W\d_'’-]{0,30}(?:['’-][^\W\d_]{1,30}){0,4}|[0-9]{1,4}(?:er|e|ème)?(?!\w)")
 _NAME_LOWER_PARTICLES = frozenset({"de", "du", "des", "d", "l", "la", "le", "les", "aux", "au", "en", "sur", "sous",
@@ -83,22 +85,55 @@ _ADDRESS_WORDS = frozenset({t for t in V.STREET_TYPES if " " not in t} - {"cour"
 # Numéro en tête d'un segment, intervalle permis (« 22-24 ») / number leading a chunk, ranges allowed.
 _CHUNK_NUMBER_RE = re.compile(r"[0-9]{1,4}(?:[-/][0-9]{1,4})?(?i:bis|ter|[a-h])?,?")
 _LINE_SEPARATORS = ",–—-"
-# « 6 rue des Essais, VOUZIERS » : commune après une virgule, puis fin de ligne ou ponctuation.
-# Town after a comma, then line end or punctuation.
-_TOWN_GAP_RE = re.compile(r"[ \t]{0,2},[ \t]{1,2}")
+# « 6 rue des Essais, VOUZIERS », « Rue Roger Testa à Jeumont », « Rue X - Lyon » : commune après une virgule, « à »
+# ou un tiret, puis fin de ligne ou ponctuation. Town after a comma, "à" or a dash, then line end or punctuation.
+_TOWN_GAP_RE = re.compile(r"[ \t]{0,2},[ \t]{1,2}|[ \t]{1,2}[à–-][ \t]{1,2}")
 _TOWN_END_RE = re.compile(r"[ \t]{0,2}(?:[\r\n.,;)]|$)")
 _STOP_LOWER = frozenset({"depuis", "pour", "avec", "et", "mais", "où", "qui", "que", "dans", "chez", "ou", "puis",
                          "il", "elle", "je", "nous", "vous", "est", "sont", "a", "ont", "était", "à", "au", "en",
                          "pendant", "car", "donc", "lorsque", "quand", "si", "ne", "pas", "on", "se", "sa", "son"})
 _BOX_RE = re.compile(r"(?<![\w])(?:[Bb]\.?[Pp]\.?|[Cc]\.?[Ss]\.?|[Tt]\.?[Ss]\.?[Aa]\.?|(?i:case postale|boîte postale))"
                      r"[ \t]?[0-9]{1,5}(?![\w])")
+_BOX_ALONE_DIGITS = 3  # boîte postale masquée seule (« CS61336 ») / a postal box masked on its own
+_BOX_SURE_DIGITS = 5  # assez de chiffres pour se passer d'un code postal voisin / enough digits on its own
+_BOX_NEAR_BEFORE = 80  # fenêtre d'un code postal ou CEDEX voisin / window of a nearby postcode or CEDEX
+_BOX_NEAR_AFTER = 160
+_BOX_NEAR_RE = re.compile(r"(?<![0-9])[0-9]{5}(?![0-9])|[Cc][EeÉé][Dd][Ee][Xx]")
+
+
+def _lone_box(text: str, start: int, end: int) -> bool:
+    """Boîte postale masquée seule, hors de toute adresse / a postal box masked on its own, outside any address.
+
+    En capitales (« BP », « CS », « TSA », « Boîte postale », pas « bp »), 3 chiffres au moins et pas une année
+    (« BP 2024 », budget primitif) ; sous 5 chiffres, un code postal ou CEDEX sur sa ligne ou la suivante
+    (« Le compte CS 1500 », « Référence BP123 » restent lisibles). Capitals, 3 digits or more and not a year; under
+    5 digits, a postcode or CEDEX on its line or the next one.
+    """
+    if text[start] not in "BCT":
+        return False
+    digits = "".join(c for c in text[start:end] if c in "0123456789")
+    if len(digits) < _BOX_ALONE_DIGITS or (len(digits) == 4 and digits[:2] in ("19", "20")):
+        return False
+    if len(digits) >= _BOX_SURE_DIGITS:
+        return True
+    lo = text.rfind("\n", max(0, start - _BOX_NEAR_BEFORE), start) + 1
+    if lo == 0:
+        lo = max(0, start - _BOX_NEAR_BEFORE)
+    limit = min(len(text), end + _BOX_NEAR_AFTER)
+    first = text.find("\n", end, limit)
+    hi = limit if first < 0 else text.find("\n", first + 1, limit)
+    if hi < 0:
+        hi = limit
+    return _BOX_NEAR_RE.search(text[lo:hi]) is not None
 _LINK_RE = re.compile(r"[ \t]{0,3}[,;–—-]?[ \t]{0,3}(?:\r?\n[ \t]{0,6}(?:[–—-][ \t]{0,3})?)?")
 # Compléments d'adresse avant la voie : bâtiment, résidence, et zone, parc ou lotissement (« ZAC des Prés - 2 rue … »).
 # Address complements before the street: building, residence, and zone, park or housing estate.
-_COMPLEMENT = (r"(?:(?<![\w])(?i:b[aâ]t(?:iment)?\.?|esc(?:alier)?\.?|appartement|appt?\.?|[ée]tage|entr[ée]e|"
+# L'étage s'écrit aussi avec son rang devant (« 3e étage, », « 1er étage ») / a floor also comes with its rank first.
+_COMPLEMENT = (r"(?:(?<![\w])(?:(?i:b[aâ]t(?:iment)?\.?|esc(?:alier)?\.?|appartement|appt?\.?|[ée]tage|entr[ée]e|"
                r"r[ée]sidence|r[ée]s\.|immeuble|imm\.|tour|bo[iî]te|zac|za|zi|zone|parc|lotissement|domaine|villa|"
                r"h[oô]tel|quartier|hameau|lieu-?dit|espace)[ \t]{0,2}[\w'’-]{1,20}"
-               r"(?:[ \t][\w'’-]{1,20}){0,3}?[ \t]{0,2}[,;–-]?[ \t]{0,3}){1,3}")
+               r"(?:[ \t][\w'’-]{1,20}){0,3}?|[0-9]{1,2}(?i:er|re|e|[eè]me)[ \t]{1,2}(?i:[ée]tage))"
+               r"[ \t]{0,2}[,;–-]?[ \t]{0,3}){1,3}")
 _COMPLEMENT_RE = re.compile(_COMPLEMENT + "$")
 _COMPLEMENT_HINTS = ("bat", "bât", "esc", "app", "tage", "entr", "sidence", "s.", "imm", "tour", "boite", "boîte",
                      "za", "zi", "zone", "parc", "lotissement", "domaine", "villa", "tel", "quartier", "hameau", "dit",
@@ -203,12 +238,18 @@ class FrenchAddressDetector:
                 tail = _POSTCODE_TAIL_RE.match(text, end) if has_digit else None
                 if tail is not None and tail.group(1) in self._lex.postal:
                     end = tail.end()  # « 40 avenue de la Grande Armée 75017 » : code postal sans commune
-                elif numbered:
-                    end = self._town_after(text, ctx.folded, end)  # « 6 rue des Essais, Vouziers »
+                else:
+                    # « 6 rue des Essais, Vouziers », « Adresse : Place du Théâtre, Testville » : voie numérotée ou
+                    # après un indice / numbered or cued street.
+                    end = self._town_after(text, ctx.folded, end)
                 # Raison propre (`explain`) : voie numérotée, ou voie après un mot de domicile, sans commune vérifiée.
                 # Own reason: numbered street, or street after a home word, without a verified town.
                 spans.append(self._span(self._complement(text, start), end, 0.85 if numbered else 0.75,
                                         STREET_NUMBERED if numbered else STREET_CUED))
+        # Boîte postale seule (« CS61336 », « BP 60120, Contact … ») / a lone postal box (`_lone_box`).
+        for start, end in boxes:
+            if _lone_box(text, start, end):
+                spans.append(self._span(start, end, 0.8))
         return spans
 
     def _place_before(self, text: str, pos: int) -> int | None:

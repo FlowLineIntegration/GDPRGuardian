@@ -65,6 +65,7 @@ registry! {
     "fr.siv_plate" => fr::siv_plate,
     "fr.alnum_mixed" => fr::alnum_mixed,
     "fr.contextual_id" => fr::contextual_id,
+    "fr.phone_field" => fr::phone_field,
     "fr.phone" => fr::phone,
     "fr.phone_overseas" => fr::phone_overseas,
     "fr.eori" => fr::eori,

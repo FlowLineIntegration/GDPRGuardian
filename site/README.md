@@ -14,9 +14,11 @@ dit ce qu'il fait (« Gardien RGPD, anonymisation irréversible avant l'IA »). 
 déposer des documents n'importe où dans la page, plusieurs à la fois) et la file de la session ; au centre le
 résultat du document choisi (texte anonymisé, inspection des balises, une ligne par type, explications ; vide, c'est
 la zone de dépôt visible) ; à droite les instruments en blocs carrés (qui grandissent avec leur texte sous 1 700 px
-de large) : votre session (documents, mentions masquées, volume, temps), l'indice de confiance du protocole public,
-en grand, les mesures du jour (textes réels en français d'abord, puis le corpus synthétique) et le service en
-direct (processeur et mémoire affichés toutes les 10 s). Un témoin permanent dit « Aucun document conservé, ni ici
+de large) : d'abord l'indice de confiance du protocole public, en clair (documents normalisés en grand, documents
+difficiles à côté, chacun avec son intervalle, puis trois lignes vérifiables, dont les scans de mauvaise qualité
+publiés à part, et le lien vers le protocole ; le tableau par famille est dans le panneau « Protocole et scores »),
+puis le service en direct (compteurs depuis la mise en ligne ; processeur et mémoire affichés toutes les 10 s) et
+votre session (documents, mentions masquées, volume, temps). Un témoin permanent dit « Aucun document conservé, ni ici
 ni sur le serveur » et mène à la confidentialité.
 « En savoir plus » est un choix : des boutons ouvrent des panneaux (la vidéo de lancement, le défi, l'histoire,
 l'architecture, le protocole et les scores avec les faiblesses, l'usage par MCP public, API et poste local, l'appel
@@ -230,7 +232,23 @@ python site/tools/preview.py                      # http://127.0.0.1:8099/ et /e
 python site/tools/preview.py --force-status 429 --force-times 2   # deux 429 + Retry-After, puis le service
 curl 'http://127.0.0.1:8099/__force?status=422&code=encrypted_document&times=1'   # à chaud (aperçu seulement)
 curl 'http://127.0.0.1:8099/__force?status=0&delay=1.5'                           # plus de forçage, file ralentie
+python site/tools/preview.py --quality COPIE.json # aperçu avec un autre quality.json (copie remplie, essai)
 ```
+
+Après une campagne du protocole public / after a public protocol run (one command: headline keys through
+`tools/protocol/merge_quality.py` with all its refusals, then the per-family table keys of the site, `f_*`, `g_*`,
+`protocol_version`, then the values between the `<!--q:…-->` markers of `README.md`) :
+
+```bash
+python site/tools/protocol_table.py benchmarks/results/protocol-1.1-<date>.json
+python site/tools/protocol_table.py --pending                  # tableau et README à « — » (aucune campagne)
+python site/tools/protocol_table.py --pending --pending-index   # l'indice aussi : « pas encore mesuré »
+```
+
+`merge_quality.py` seul ne suffit pas / alone is not enough: it writes neither `protocol_version` nor the table.
+`preview.py --check` refuses a measured index whose `protocol_version` is not `PROTOCOL_VERSION` of
+`tools/protocol/spec.py` (the version the site text describes), or whose five index-family rates are "—", and names
+the command above.
 
 Essai local / local run:
 

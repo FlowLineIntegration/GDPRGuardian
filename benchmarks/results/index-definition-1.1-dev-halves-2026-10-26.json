@@ -1,0 +1,169 @@
+{
+ "what": "protocol 1.1, two indexes: the frozen 1.0 engine's figures on DEV halves (real corpora) and the development seed 20261024 (synthetic, red team); no test half measured. Scores only.",
+ "date": "2026-10-26",
+ "engine": {
+  "frozen_copy": "src/ before any change of 26 October 2026",
+  "py_tree_sha256_16": "2705f5a61871e723",
+  "pure_python": true
+ },
+ "dev_seed": 20261024,
+ "synthetic_docs": 20000,
+ "redteam_bases": 600,
+ "families": {
+  "synthetic_fr": {
+   "scored": 20000,
+   "passed": 18402,
+   "no_leak": 0.9201,
+   "mention_recall": 0.9843
+  },
+  "bodacc_fr": {
+   "scored": 1358,
+   "passed": 1209,
+   "no_leak": 0.8903,
+   "mention_recall": 0.9748
+  },
+  "boamp_fr": {
+   "scored": 1464,
+   "passed": 892,
+   "no_leak": 0.6093,
+   "mention_recall": 0.9087
+  },
+  "boamp_fr_v11": {
+   "scored": 1465,
+   "passed": 883,
+   "no_leak": 0.6027,
+   "mention_recall": 0.9079
+  },
+  "parlamint_fr": {
+   "scored": 156,
+   "passed": 140,
+   "no_leak": 0.8974,
+   "mention_recall": 0.9818
+  },
+  "redteam_fr_all51": {
+   "scored": 27441,
+   "passed": 17106,
+   "no_leak": 0.6234,
+   "mention_recall": 0.8658
+  },
+  "redteam_fr_everyday": {
+   "scored": 14197,
+   "passed": 7950,
+   "no_leak": 0.56,
+   "mention_recall": 0.8263
+  },
+  "redteam_obfuscation_fr": {
+   "scored": 12647,
+   "passed": 9109,
+   "no_leak": 0.7202,
+   "mention_recall": 0.9154
+  },
+  "redteam_ocr_fr": {
+   "scored": 597,
+   "passed": 47,
+   "no_leak": 0.0787,
+   "mention_recall": 0.7125
+  },
+  "old_press_fr": {
+   "scored": 295,
+   "passed": 70,
+   "no_leak": 0.2373,
+   "mention_recall": 0.57
+  },
+  "mapa_fr": {
+   "scored": 3,
+   "passed": 0,
+   "no_leak": 0.0,
+   "mention_recall": 0.3782
+  }
+ },
+ "indexes": {
+  "1.0": {
+   "families": [
+    "synthetic_fr",
+    "redteam_fr_all51",
+    "bodacc_fr",
+    "boamp_fr",
+    "parlamint_fr",
+    "old_press_fr",
+    "mapa_fr"
+   ],
+   "value": 0.5968,
+   "ci95": [
+    0.5857,
+    0.6076
+   ]
+  },
+  "1.1_first_draft_unregistered": {
+   "families": [
+    "synthetic_fr",
+    "redteam_fr_everyday",
+    "bodacc_fr",
+    "boamp_fr_v11",
+    "parlamint_fr"
+   ],
+   "value": 0.7741,
+   "ci95": [
+    0.7614,
+    0.7848
+   ]
+  },
+  "1.1_normalised": {
+   "families": [
+    "synthetic_fr",
+    "bodacc_fr",
+    "boamp_fr_v11",
+    "parlamint_fr"
+   ],
+   "weights": "equal (1/4 each)",
+   "value": 0.8276,
+   "ci95": [
+    0.8131,
+    0.8413
+   ],
+   "value_with_boamp_gold_1_0": 0.8293,
+   "target": 0.95
+  },
+  "1.1_hard": {
+   "families": [
+    "redteam_fr_everyday",
+    "redteam_obfuscation_fr",
+    "redteam_ocr_fr"
+   ],
+   "weights": "every mutated document counts once (operators pooled)",
+   "value": 0.6234,
+   "ci95": [
+    0.618,
+    0.6288
+   ],
+   "docs": 27441,
+   "group_weights": {
+    "redteam_fr_everyday": 0.5174,
+    "redteam_obfuscation_fr": 0.4609,
+    "redteam_ocr_fr": 0.0218
+   }
+  }
+ },
+ "interval_method": "stratified bootstrap, 2,000 resamples, seed 20261025; 1.1 intervals computed from the per-family pass counts (the index depends only on each document's pass or fail)",
+ "test_halves_recombined_from_published_1_0": {
+  "source": "benchmarks/results/protocol-2026-10-26.json (no new measurement)",
+  "normalised": 0.8388,
+  "hard": 0.637,
+  "hard_docs": 548907,
+  "hard_groups": {
+   "everyday": {
+    "docs": 284081,
+    "no_leak": 0.5719
+   },
+   "obfuscation": {
+    "docs": 252895,
+    "no_leak": 0.7362
+   },
+   "ocr": {
+    "docs": 11931,
+    "no_leak": 0.0857
+   }
+  }
+ },
+ "tools": "scratch scripts devhalf2.py (engine run) and two_indexes.py (recombination), protocol lanes of 26 October 2026"
+}

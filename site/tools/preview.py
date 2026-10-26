@@ -66,19 +66,37 @@ LIVE_NAMES = {"uses_hour", "uses_hour_protocol", "bytes_hour", "docs_total", "do
 # Filled by the public protocol run; until then the literal string "—", which the page shows as "not measured yet"
 # (CSS on data-v), never as a number.
 PENDING_KEYS = {"confidence_index", "confidence_ci_low", "confidence_ci_high", "mention_recall_pct", "protocol_docs",
-                "protocol_families", "real_corpora", "real_docs", "protocol_date", "protocol_engine"}
+                "protocol_families", "real_corpora", "real_docs", "protocol_date", "protocol_engine",
+                "hard_index", "hard_ci_low", "hard_ci_high", "hard_docs", "hard_mention_recall_pct"}
 # Pending keys whose measured value is a string: an ISO date, a version.
 PENDING_STRINGS = {"protocol_date": re.compile(r"\d{4}-\d{2}-\d{2}"),
                    "protocol_engine": re.compile(r"[0-9A-Za-z][0-9A-Za-z.+-]{0,31}")}
+PENDING = "—"
+
+
+def _protocol_table():
+    """site/tools/protocol_table.py, loaded by path (works under python -I, which leaves this folder off sys.path)."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("protocol_table", Path(__file__).resolve().with_name(
+        "protocol_table.py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+# Per-family table of the latest protocol result and its version, written by site/tools/protocol_table.py: a number
+# or "—" (shown as is), protocol_version "1.1"-like or "—".
+TABLE = _protocol_table()
+TABLE_KEYS = set(TABLE.TABLE_KEYS)
+VERSION_KEY = TABLE.VERSION_KEY
 Q_KEYS = {"tests_windows", "tests_linux", "tests_offline_image", "parity_docs", "eval_docs", "eval_mentions",
           "eval_decoys", "redteam_docs", "redteam_operators", "docs_tested", "recall_structured_pct",
           "precision_structured_pct", "recall_direct_pct", "docs_leak_structured_pct", "docs_leak_direct_pct",
           "overmask_pct",
           "ms_per_doc", "mb_per_s", "text_10mb_s", "service_p50_ms", "service_p99_ms", "pdf100_s", "image_mb",
-          "core_mb", "measured_on"} | PENDING_KEYS
-PENDING = "—"
+          "core_mb", "measured_on"} | PENDING_KEYS | set(TABLE.SITE_KEYS)
 # Raw bytes (the daemon serves them Brotli-compressed, about a third of that; gzip size printed as a guide).
-BUDGETS = {"html": 45 * 1024, "css": 32 * 1024, "js": 30 * 1024, "fonts": 90 * 1024, "font_files": 3}
+BUDGETS = {"html": 56 * 1024, "css": 32 * 1024, "js": 30 * 1024, "fonts": 90 * 1024, "font_files": 3}
 SCRIPTS = ("live.js", "cockpit.js")
 # Layout rules that browser checks found missing once; a stylesheet without them is a regression.
 CSS_GUARDS = (
@@ -249,11 +267,48 @@ def render(lang: str, stats: dict, quality: dict) -> str:
     return page
 
 
-def load_quality(sample: dict) -> tuple[dict, str]:
-    """The quality figures the daemon embeds (site/data/quality.json), else the sample's; and their source."""
+def load_quality(sample: dict, path: Path | None = None) -> tuple[dict, str]:
+    """The quality figures the daemon embeds (site/data/quality.json, or --quality FILE), else the sample's; and
+    their source."""
+    if path is not None:
+        return json.loads(path.read_text(encoding="utf-8"), parse_float=Decimal), str(path)
     if QUALITY.is_file():
         return json.loads(QUALITY.read_text(encoding="utf-8"), parse_float=Decimal), "site/data/quality.json"
     return sample["q"], "site/tools/preview-sample.json (site/data/quality.json missing)"
+
+
+# The four index families' no-leak rates and the difficult index, shown in the rail next to the index (protocol 1.1
+# and later).
+INDEX_NL_KEYS = ("f_syn_nl", "f_bod_nl", "f_boa_nl", "f_par_nl", "hard_index")
+GATE_FIX = ("python -I site/tools/protocol_table.py benchmarks/results/protocol-<version>-<date>.json (before the "
+            "campaign: python -I site/tools/protocol_table.py --pending --pending-index)")
+
+
+def site_protocol() -> str | None:
+    """PROTOCOL_VERSION in tools/protocol/spec.py: the protocol the site text describes (read, not imported)."""
+    path = TABLE.ROOT / "tools" / "protocol" / "spec.py"
+    text = path.read_text(encoding="utf-8") if path.is_file() else ""
+    match = re.search(r'^PROTOCOL_VERSION = "(\d+\.\d+)"', text, re.M)
+    return match.group(1) if match else None
+
+
+def version_gate(name: str, q: dict) -> int:
+    """A measured index is shown only with its protocol's table: protocol_version must be the version the site text
+    describes, the four index families' rates and the difficult index filled. Catches merge_quality.py run alone (it does not write
+    protocol_version nor the table) and an earlier version's index left under the new text."""
+    index = q.get("confidence_index", PENDING)
+    if index == PENDING:
+        return 0
+    current, version = site_protocol(), q.get(VERSION_KEY)
+    if current is not None and version != current:
+        print(f"ERROR {name}: index {index} shown under {VERSION_KEY} {version!r}, but the site text describes "
+              f"protocol {current}: run {GATE_FIX}")
+        return 1
+    missing = [key for key in INDEX_NL_KEYS if q.get(key, PENDING) == PENDING]
+    if missing:
+        print(f"ERROR {name}: index {index} shown, but per-family rates pending ({', '.join(missing)}): run {GATE_FIX}")
+        return 1
+    return 0
 
 
 def check(sample: dict, quality: dict, source: str) -> int:
@@ -275,9 +330,23 @@ def check(sample: dict, quality: dict, source: str) -> int:
             elif shape is None and isinstance(value, str):
                 print(f"{name}: {key} must be a number or the pending mark {PENDING!r}, not {value!r}")
                 problems += 1
+        for key in sorted(TABLE_KEYS & q_keys):
+            value = q[key]
+            if value != PENDING and (isinstance(value, (str, bool)) or not 0 <= value <= 1_000_000_000):
+                print(f"{name}: {key} must be a number or the pending mark {PENDING!r}, not {value!r}")
+                problems += 1
+        version = q.get(VERSION_KEY)
+        if version != PENDING and not (isinstance(version, str) and re.fullmatch(r"\d+\.\d+", version)):
+            print(f"{name}: {VERSION_KEY} must be like '1.1' or the pending mark {PENDING!r}, not {version!r}")
+            problems += 1
+        if q is quality:
+            problems += version_gate(name, q)
         pending = sorted(k for k in PENDING_KEYS & q_keys if q[k] == PENDING)
         if pending:
             print(f"{name}: shown as 'not measured yet': {', '.join(pending)}")
+        table_pending = sorted(k for k in TABLE_KEYS & q_keys if q[k] == PENDING)
+        if table_pending:
+            print(f"{name}: protocol table values pending (shown as a dash): {len(table_pending)} of {len(TABLE_KEYS)}")
     pages = {}
     for lang in ("fr", "en"):
         try:
@@ -529,10 +598,14 @@ def main() -> int:
     parser.add_argument("--force-times", type=int, help="force only the next N calls (default: every call)")
     parser.add_argument("--retry-after", type=int, default=7, help="seconds sent with a forced 429 or 503")
     parser.add_argument("--delay", type=float, default=0.0, help="seconds added before each forwarded call")
+    parser.add_argument("--quality", type=Path,
+                        help="another quality.json (e.g. a copy filled by protocol_table.py), default site/data/")
     args = parser.parse_args()
     sample = json.loads(SAMPLE.read_text(encoding="utf-8"), parse_float=Decimal)
     sample["live"] = {k: float(v) if isinstance(v, Decimal) else v for k, v in sample["live"].items()}
-    quality, source = load_quality(sample)
+    for key in TABLE.SITE_KEYS:  # the sample shows no campaign: every table value pending
+        sample["q"].setdefault(key, PENDING)
+    quality, source = load_quality(sample, args.quality)
     if args.check:
         return check(sample, quality, source)
     for lang in ("fr", "en"):  # fail fast on a broken template

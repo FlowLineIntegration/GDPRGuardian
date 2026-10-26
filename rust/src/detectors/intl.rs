@@ -104,10 +104,19 @@ impl EmailDetector {
             p = q + 1;
             after_dots.push(p);
         }
+        // `(?![\w])(?!-[\w-]*\.)` : un tiret suivi d'autre chose qu'un domaine termine l'adresse (« x@y.fr- Lyon »)
+        // / a dash not followed by a domain ends the address.
+        let dash_domain = |at: usize| {
+            let rest = &text[at..];
+            let run: usize = rest.chars().take_while(|&c| label_char(c)).map(char::len_utf8).sum();
+            rest.as_bytes().get(run) == Some(&b'.')
+        };
         after_dots.iter().rev().find_map(|&q| {
             let letters = text.as_bytes()[q..].iter().take(25).take_while(|b| b.is_ascii_alphabetic()).count();
             let end = q + letters;
-            ((2..=24).contains(&letters) && !char_at(text, end).is_some_and(label_char)).then_some(end)
+            let next = char_at(text, end);
+            let open = !next.is_some_and(|c| self.table.is_word(c)) && !(next == Some('-') && dash_domain(end + 1));
+            ((2..=24).contains(&letters) && open).then_some(end)
         })
     }
 }

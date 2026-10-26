@@ -356,7 +356,7 @@ def cmd_merge(args: argparse.Namespace) -> int:
     from tools.protocol.merge_quality import merge
 
     return merge(Path(args.results), Path(args.quality), force_guards=args.force_guards,
-                 allow_scaled=args.allow_scaled)
+                 allow_scaled=args.allow_scaled, site_text_checked=args.site_text_checked)
 
 
 def cmd_crosscheck(args: argparse.Namespace) -> int:
@@ -474,6 +474,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("quality")
     p.add_argument("--force-guards", action="store_true")
     p.add_argument("--allow-scaled", action="store_true", help=argparse.SUPPRESS)
+    p.add_argument("--site-text-checked", action="store_true",
+                   help="texte du site et du README relu pour cette version / site and README text reviewed")
     p.set_defaults(func=cmd_merge)
 
     p = sub.add_parser("labels", help="régénère labels.json depuis le moteur / regenerates labels.json")

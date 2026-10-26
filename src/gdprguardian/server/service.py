@@ -19,6 +19,7 @@ from dataclasses import dataclass, replace
 from functools import cached_property
 from time import perf_counter
 from typing import Any, TypeVar
+from urllib.parse import urlsplit
 
 import anyio
 import anyio.to_thread
@@ -35,9 +36,11 @@ from .errors import (
     InvalidRequest,
     PayloadTooLarge,
     ProcessingTimeout,
+    RateLimited,
     RulesTooCostly,
     ServiceBusy,
     ServiceError,
+    UnsupportedFormat,
     UploadTimeout,
     file_too_large,
     from_document_error,
@@ -166,7 +169,9 @@ class Service:
         return self.scheduler.retry_after()
 
     async def _process(self, principal: str, payload: bytes | bytearray, spec: str, timeout_s: float,
-                       max_reply: int, on_start: Callable[[], None] | None = None) -> tuple[Any, float]:
+                       max_reply: int, on_start: Callable[[], None] | None = None,
+                       on_progress: Callable[[str, int | None, int | None], None] | None = None,
+                       ) -> tuple[Any, float]:
         """Attend son tour (équitable par clé), puis un travailleur traite la requête / waits its turn, then runs.
 
         `on_start` : appelé à l'attribution de la place, avant le travailleur ; une erreur l'annule.
@@ -184,6 +189,18 @@ class Service:
         context = REQUEST.get()
         ticket = context.ticket if context is not None else None
         reservation = context.reservation if context is not None else None
+        if ticket is not None and ticket.deferred_shed:
+            # Délestage et plafond en vol reportés (MCP, création d'envoi) : seulement quand un travailleur est
+            # vraiment demandé. Deferred shedding and in-flight cap (MCP, upload creation): only when a worker is
+            # really needed.
+            retry = self.limiter.inflight_wait(ticket)
+            if retry is not None:
+                ticket.waived = True  # refus avant tout travailleur, estimation rendue / refused before any worker
+                raise RateLimited(retry_after=retry)
+            retry = self.limiter.shed_wait(ticket)
+            if retry is not None:
+                ticket.waived = True  # refus de capacité, avant tout travailleur / capacity refusal, no worker
+                raise ServiceBusy(retry_after=retry)
         queued = perf_counter()
         async with self.scheduler.slot(principal, ticket, timeout_s):
             waited_ms = (perf_counter() - queued) * 1000
@@ -194,7 +211,7 @@ class Service:
                 on_start()
             if ticket is not None:
                 ticket.worked = True
-            cancel = CancelHandle()
+            cancel = CancelHandle(on_progress)
             started = perf_counter()
             value: Any = None
             try:
@@ -271,6 +288,9 @@ class Service:
             except Exception as exc:
                 raise _internal_error(type(exc).__name__.lower(), "text") from None
             report = _strip_internals(outcome.meta["report"])
+            # Toujours une liste ; texte vide signalé / always a list; an empty text is told.
+            report["warnings"] = merged_warnings(report.get("warnings"),
+                                                 [EMPTY_TEXT_WARNING] if not text.strip() else [])
             log_event("text_anonymized", logging.DEBUG, chars=len(text), replaced=report.get("total_replaced"),
                       ms=(perf_counter() - started) * 1000, wait_ms=waited_ms, worker=outcome.worker)
             measure.ok = True
@@ -278,7 +298,9 @@ class Service:
 
     async def anonymize_document(self, data: bytes | bytearray, filename: str, options: AnonymizeOptions,
                                  principal: str, on_start: Callable[[], None] | None = None, *,
-                                 usage: str = FILE) -> DocumentResult:
+                                 usage: str = FILE,
+                                 on_progress: Callable[[str, int | None, int | None], None] | None = None,
+                                 ) -> DocumentResult:
         """`on_start` : voir `_process` (envoi hors bande : départ de son délai) / see `_process`.
 
         `usage` : origine pour le compteur d'usage ; une réussite y donne le format détecté, un échec le format
@@ -297,7 +319,7 @@ class Service:
                 # = the request's: a big workbook is no longer cut at 60 s while its worker may run longer.
                 spec = document_spec(options, name, replace(self._document_options, timeout_s=deadline), cap)
                 value, waited_ms = await self._process(principal, data, spec, deadline, document_reply_limit(cap),
-                                                       on_start)
+                                                       on_start, on_progress)
                 result, worker = decode_document(value)
             except ServiceError:
                 raise  # déjà une erreur de service (envoi supprimé pendant l'attente) / already a service error
@@ -317,6 +339,8 @@ class Service:
             except Exception as exc:
                 raise _internal_error(type(exc).__name__.lower(), "document") from None
             result.report = _strip_internals(result.report)
+            result.warnings = document_warnings(result)
+            result.report["warnings"] = merged_warnings(result.report.get("warnings"), result.warnings)
             log_event("document_anonymized", logging.DEBUG, kind=result.kind, bytes=size, chars=len(result.markdown),
                       replaced=result.report.get("total_replaced"), ms=(perf_counter() - started) * 1000,
                       wait_ms=waited_ms, worker=worker)
@@ -328,18 +352,20 @@ class Service:
 
     def create_upload(self, principal: str, filename: str, options: AnonymizeOptions, *,
                       usage: str = UPLOAD) -> tuple[Job, str]:
-        """Réserve un envoi. Les motifs des règles ne sont compilés qu'au traitement, dans le travailleur : un
-        motif refusé fait échouer l'envoi (422 au PUT, puis à la lecture du résultat). `usage` : origine
-        comptée au traitement (REST ou MCP).
+        """Réserve un envoi. Les routes REST et MCP compilent d'abord les règles (`check_rules`) : un motif refusé
+        l'est dès la création (422), avant que le fichier parte ; un refus au traitement, toujours possible
+        (appel direct), apparaît à la lecture du résultat. `usage` : origine comptée au traitement (REST ou MCP).
 
-        Reserves an upload. Rule patterns are only compiled at processing time, in the worker: a refused pattern
-        fails the upload (422 on the PUT, then when the result is read). `usage`: origin counted at processing.
+        Reserves an upload. The REST and MCP routes compile the rules first (`check_rules`): a refused pattern is
+        refused at creation (422), before the file leaves; a refusal at processing time, still possible (direct
+        call), shows when the result is read. `usage`: origin counted at processing.
 
         Lié au principal s'il vient d'une clé (ou hors requête HTTP : poste local) ; client anonyme du service
         public : la capacité seule donne accès, le quota reste compté pour lui. Bound to the principal when it comes
         from a key (or outside an HTTP request: local computer); anonymous public client: the capability alone
         grants access, the quota still counts for it.
         """
+        check_upload_name(filename)
         context = REQUEST.get()
         bound = context is None or context.client.owner is not None
         # Seule l'extension est conservée, même temporairement / only the extension is kept, even transiently.
@@ -347,6 +373,31 @@ class Service:
                                        quota=_quota(principal))
         log_event("upload_created", logging.DEBUG)
         return job, token
+
+    async def check_rules(self, options: AnonymizeOptions, principal: str) -> None:
+        """Règles de l'organisation compilées tout de suite, dans un travailleur, sur un texte vide : un motif refusé
+        l'est dès la création de l'envoi (422), avant que le fichier parte. Sans règles : rien.
+
+        Organisation rules compiled right away, in a worker, on an empty text: a refused pattern is refused when the
+        upload is created (422), before the file leaves. Without rules: nothing. Aucun compteur d'usage.
+        """
+        if options.rules is None:
+            return
+        cap = self.config.max_output_chars
+        try:
+            value, _ = await self._process(principal, b"", text_spec(options, cap),
+                                           deadline_s(self.config.conversion_timeout_s, 0), text_reply_limit(0, cap))
+            decode_text(value)
+        except ServiceError:
+            raise
+        except JobError as exc:
+            if exc.code == INVALID_RULES:
+                raise _rules_refused(exc.message, "upload") from None
+        except DocumentError as exc:
+            if _crashed(exc):
+                raise RulesTooCostly from None
+        except Exception:
+            return  # le traitement redira l'erreur / processing will report it again
 
     async def receive_upload(self, token: str, principal: str, chunks: AsyncIterable[bytes],
                              declared: int | None = None) -> tuple[Job, DocumentResult]:
@@ -361,6 +412,18 @@ class Service:
         résultat. `declared`: announced size; over the limit, refused at once without reading the body, the failure
         recorded for the result's reader.
         """
+        job, data = await self.accept_upload(token, principal, chunks, declared)
+        result = await self.process_upload(job, data, principal)
+        assert result is not None
+        return job, result
+
+    async def accept_upload(self, token: str, principal: str, chunks: AsyncIterable[bytes],
+                            declared: int | None = None) -> tuple[Job, bytearray]:
+        """Consomme le jeton et lit le corps borné, sans le traiter (voir `receive_upload`).
+
+        Consumes the token and reads the bounded body, without processing it (see `receive_upload`). Le traitement
+        suit avec `process_upload`, éventuellement après la réponse 202 / processing follows, possibly after the 202.
+        """
         context = REQUEST.get()
         reservation = context.reservation if context is not None else None
         # Sortie réservée avant de consommer le jeton : un budget plein répond 503 et l'URL reste valable.
@@ -373,10 +436,6 @@ class Service:
             if declared is not None and declared > self.config.max_upload_bytes:
                 raise file_too_large(self.config.max_upload_bytes)
             data = await self.within_deadline(read_limited(chunks, self.config.max_upload_bytes))
-            # L'attente en file ne compte pas dans le délai de traitement / time queued does not count.
-            result = await self.anonymize_document(data, job.filename, job.options, principal,
-                                                   on_start=lambda: self.store.start(job), usage=job.usage)
-            self.store.complete(job, result)
         except ServiceError as error:
             self.store.fail(job, error)
             raise
@@ -384,7 +443,39 @@ class Service:
             # Client parti ou annulation : l'envoi est perdu / client gone or cancelled: upload lost.
             self.store.fail(job, InvalidRequest("Envoi interrompu / upload interrupted", code="upload_interrupted"))
             raise
-        return job, result
+        self.store.received(job, len(data))
+        return job, data
+
+    async def process_upload(self, job: Job, data: bytearray, principal: str, *,
+                             raise_errors: bool = True) -> DocumentResult | None:
+        """Anonymise un envoi reçu et publie le résultat (ou l'échec) dans le dépôt.
+
+        Anonymises a received upload and publishes the result (or the failure) in the store. `raise_errors=False`
+        (traitement après la réponse 202) : l'échec n'est que noté, le lecteur du résultat le recevra ; une
+        annulation (arrêt du service) est notée puis propagée. After the 202 answer: the failure is only recorded,
+        the result's reader gets it; a cancellation (shutdown) is recorded then propagated.
+        """
+        if not raise_errors:
+            # Après le 202 : la requête n'a plus de corps en vol ; elle compte « en traitement » pour le limiteur, et
+            # le client peut suivre son résultat. After the 202: no body in flight any more; it counts as
+            # "processing" for the limiter, and the client can poll its result.
+            context = REQUEST.get()
+            self.limiter.mark_processing(context.ticket if context is not None else None)
+        try:
+            # L'attente en file ne compte pas dans le délai de traitement / time queued does not count.
+            result = await self.anonymize_document(
+                data, job.filename, job.options, principal, on_start=lambda: self.store.start(job),
+                usage=job.usage, on_progress=lambda stage, done, total: self.store.progress(job, stage, done, total))
+            self.store.complete(job, result)
+        except ServiceError as error:
+            self.store.fail(job, error)
+            if raise_errors:
+                raise
+            return None
+        except BaseException:
+            self.store.fail(job, InvalidRequest("Envoi interrompu / upload interrupted", code="upload_interrupted"))
+            raise
+        return result
 
     def read_result(self, principal: str, upload_id: str, page: int, page_chars: int | None) -> ResultPage:
         page_chars = page_chars or self.config.page_chars
@@ -430,11 +521,33 @@ class Service:
                 "estimated_wait_s": round(scheduler.estimated_wait("", True), 1),
                 "counters": self.limiter.stats()}
 
+    def public_base(self, base_url: str) -> str:
+        """Base des URL rendues : l'hôte qu'a utilisé le client s'il est déclaré exactement dans les hôtes admis
+        (même schéma que l'URL publique), sinon l'URL publique, sinon celle de la requête.
+
+        Base of returned URLs: the host the client used when it is declared exactly among the allowed hosts (same
+        scheme as the public URL), else the public URL, else the request's. Jamais un hôte non déclaré : une URL
+        d'envoi est une capacité / never an undeclared host: an upload URL is a capability.
+        """
+        public = self.config.public_url
+        if not public:
+            return base_url.rstrip("/")
+        try:
+            used = urlsplit(base_url).hostname or ""
+            published = urlsplit(public)
+        except ValueError:
+            return public.rstrip("/")
+        exact = {host.strip().lower() for host in self.config.allowed_hosts if "*" not in host}
+        if used and used.lower() != (published.hostname or "") and used.lower() in exact:
+            port = f":{published.port}" if published.port else ""
+            return f"{published.scheme}://{used.lower()}{port}"
+        return public.rstrip("/")
+
     def upload_url(self, base_url: str, token: str) -> str:
-        return f"{(self.config.public_url or base_url).rstrip('/')}/v1/uploads/{token}"
+        return f"{self.public_base(base_url)}/v1/uploads/{token}"
 
     def result_url(self, base_url: str, upload_id: str) -> str:
-        return f"{(self.config.public_url or base_url).rstrip('/')}/v1/results/{upload_id}"
+        return f"{self.public_base(base_url)}/v1/results/{upload_id}"
 
     # --- catalogue / catalogue ---
 
@@ -485,8 +598,79 @@ def _quota(principal: str) -> Quota:
 
 
 def summarize_report(report: dict[str, Any]) -> dict[str, Any]:
-    """Rapport compact pour un LLM / compact report for an LLM."""
-    return {key: report[key] for key in _SUMMARY_KEYS if key in report}
+    """Rapport compact pour un LLM ; `warnings` toujours une liste / compact report; `warnings` always a list."""
+    summary = {key: report[key] for key in _SUMMARY_KEYS if key in report}
+    summary["warnings"] = merged_warnings(summary.get("warnings"))
+    return summary
+
+
+EMPTY_TEXT_WARNING = "Texte vide : rien à anonymiser / empty text: nothing to anonymise"
+NO_TEXT_WARNING = "Aucun texte extrait / no text extracted"
+# Formats acceptés, cités dans les refus et les descriptions / accepted formats, quoted in refusals and descriptions.
+SUPPORTED_FORMATS = ("PDF (with a text layer), DOCX/DOCM/DOTX, PPTX, ODT/ODP/ODG, RTF, HTML, EML/MHT/MSG, TXT/MD, "
+                     "XLSX/XLSM/XLS/XLSB/ODS, CSV/TSV")
+# Extensions qui ne peuvent pas être converties (images, archives, binaires, médias) : refusées dès la création de
+# l'envoi. Les autres sont reconnues aux octets. Extensions that cannot be converted: refused when the upload is
+# created. Others are recognised from the bytes.
+_UNSUPPORTED_EXTENSIONS = frozenset({
+    ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tif", ".tiff", ".webp", ".heic", ".heif", ".ico", ".svg", ".psd",
+    ".zip", ".7z", ".rar", ".tar", ".gz", ".tgz", ".bz2", ".xz", ".zst", ".cab", ".iso", ".dmg",
+    ".exe", ".dll", ".so", ".dylib", ".bin", ".msi", ".apk", ".jar", ".class", ".pyc", ".o", ".a", ".lib",
+    ".mp3", ".mp4", ".wav", ".avi", ".mov", ".mkv", ".ogg", ".flac", ".m4a", ".webm", ".wmv",
+    ".sqlite", ".db", ".mdb", ".accdb", ".pst", ".ost",
+})
+# Éléments écartés qui méritent un avertissement (contenu non traité) ; les autres (métadonnées, cibles des liens,
+# en-têtes techniques) sont écartés exprès. Dropped items worth a warning (content not processed); the others are
+# dropped on purpose.
+_DROPPED_WARNINGS = {
+    "comments": ("commentaire(s) écarté(s), ni anonymisé(s) ni rendu(s)", "comment(s) dropped, neither anonymised "
+                 "nor returned"),
+    "hidden_text": ("texte(s) masqué(s) écarté(s)", "hidden text item(s) dropped"),
+    "hidden_content": ("contenu(s) masqué(s) écarté(s)", "hidden content item(s) dropped"),
+    "hidden_slides": ("diapositive(s) masquée(s) écartée(s)", "hidden slide(s) dropped"),
+    "speaker_notes": ("note(s) du présentateur écartée(s)", "speaker note(s) dropped"),
+    "tracked_deletions": ("suppression(s) suivie(s) écartée(s)", "tracked deletion(s) dropped"),
+    "attachments": ("pièce(s) jointe(s) non convertie(s) : contenu non traité", "attachment(s) not converted: "
+                    "content not processed"),
+    "embedded_objects": ("objet(s) incorporé(s) non converti(s)", "embedded object(s) not converted"),
+    "images": ("image(s) non analysée(s) : le texte des images n'est pas extrait", "image(s) not analysed: text in "
+               "images is not extracted"),
+}
+
+
+def merged_warnings(*groups: Any) -> list[str]:
+    """Avertissements fusionnés, sans doublon, toujours une liste / merged warnings, no duplicates, always a list."""
+    merged: list[str] = []
+    for group in groups:
+        if isinstance(group, list):
+            merged.extend(item for item in group if isinstance(item, str) and item not in merged)
+    return merged
+
+
+def document_warnings(result: DocumentResult) -> list[str]:
+    """Avertissements de conversion, plus ce qui a été écarté et un résultat vide (textes fixes, nombres seuls).
+
+    Conversion warnings, plus what was dropped and an empty result (fixed texts, numbers only).
+    """
+    extra = []
+    for key, (fr, en) in _DROPPED_WARNINGS.items():
+        count = result.dropped.get(key, 0)
+        if count > 0:
+            extra.append(f"{count} {fr} / {count} {en}")
+    if not result.markdown.strip():
+        extra.append(NO_TEXT_WARNING)
+    return merged_warnings(list(result.warnings), extra)
+
+
+def check_upload_name(filename: str) -> None:
+    """Seule l'extension compte ; un format qui ne peut pas être converti est refusé avant l'envoi (415).
+
+    Only the extension matters; a format that cannot be converted is refused before the upload (415).
+    """
+    suffix = neutral_filename(filename).partition(".")[2]
+    if f".{suffix}".lower() in _UNSUPPORTED_EXTENSIONS:
+        raise UnsupportedFormat(f"Format non pris en charge (.{suffix.lower()[:10]}) ; formats acceptés : "
+                                f"{SUPPORTED_FORMATS} / unsupported format; accepted formats: {SUPPORTED_FORMATS}")
 
 
 def _utf8(text: str) -> bytes | None:

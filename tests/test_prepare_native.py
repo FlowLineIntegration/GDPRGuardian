@@ -144,6 +144,15 @@ def test_corpus_identical():
     "NIR 1 85ㅤ 05 78 006͏ 084️ 91",
     "a­-\nb, a-\n­b, a-​\nb",
     "CRLF\r\nline\r\n**bold**\r\n",
+    # Règle GAP / GAP rule
+    "Tél.\t06\t12  34 \t56\r\n78, NIR 1 85 05 78 006\n084 91, é\t1, 1\té, a\t\tb, 1\t\t\t\t\t2, 1 \t \t2",
+    "IDFRADUPONT<<<<<<<<<<<<<<<<<<<123456\n1234567890123JEAN<<<<<<<<8001019M5\n123456789012\n345678901234",
+    "1\n2\n3, 12\n\n34, 12\r\r\n34, 12\t\r 34, 12   \r\n   34, 12    \n34, \t1\t2\t, 9​\t8, 1-\n2",
+    "Du-\npont 1\n2 **x**\t3 ab­\t4",
+    # Groupes séparés par « / » ou « . » / groups split by "/" or "."
+    "06/12/34/56/78, FR76.3000.4065.0400.7691.1357.791. 1/85/05/78/006/084/91/ 12/03/1992 193.97.106.210",
+    "AB/CD/EF/GH ab/12/34/56 1/2/3/4567890 x1/2/3/4 1/2/3/4// /1/2/3/4 S.A.R.L.1.2 1.2.3.4.5x é1/2/3/4é",
+    "1/2/3/4/5/6/7.8.9.1.2 1.2.3.4.5/6/7/8 1/2/3/4.",
     "\U0001d7ce\U0001d7cf 𝟐𝟑 ٣٤ ０６ １２",
     "x" * 5000 + "-\n" + "y" * 5000,
     _INVISIBLE * 3 + "fin",
@@ -162,7 +171,8 @@ def test_adversarial_unicode_identical(text):
 
 @settings(max_examples=300, deadline=None)
 @given(st.lists(st.sampled_from(["**", "__", "*_", "-\n", "-\r\n", " -\n ", "a", "É", "1", "é", "​",
-                                 "\U000e0020", "ͅ", " ", "\t", "\n"]), max_size=40))
+                                 "\U000e0020", "ͅ", " ", "\t", "\n", "\r", "12", "345", "Z9",
+                                 "1234567890123", "/", ".", "AB", "x"]), max_size=40))
 def test_emphasis_and_hyphen_runs_identical(parts):
     _check("".join(parts))
 

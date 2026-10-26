@@ -40,14 +40,76 @@ def test_full_lifecycle_and_deletion_after_full_read(clock: FakeClock) -> None:
     store.complete(job, result("a" * 2500))
     assert job.filename == ""
     last = store.read(upload_id, "p", 3, 1000)
-    assert last.next_page is None and not last.deleted and last.report is None
+    # Rapport, avertissements et éléments écartés à chaque page / report, warnings and dropped on every page.
+    assert last.next_page is None and not last.deleted and last.report == {"entities": {}}
     first = store.read(upload_id, "p", 1, 1000)
     assert first.report == {"entities": {}} and first.warnings == ["w"] and first.dropped == {"comments": 2}
     middle = store.read(upload_id, "p", 2, 1000)
-    assert middle.deleted and middle.upload_id == upload_id
-    with pytest.raises(NotFound):
+    assert middle.deleted and middle.upload_id == upload_id and middle.expires_in == 120
+    # Délai de grâce : une réponse perdue se relit / grace period: a lost answer can be read again.
+    clock.advance(119)
+    assert store.read(upload_id, "p", 2, 1000).markdown == "a" * 1000
+    clock.advance(2)
+    with pytest.raises(NotFound) as gone:
         store.read(upload_id, "p", 1, 1000)
+    assert gone.value.status == 404 and gone.value.code == "already_read"
     assert store.stats() == {"jobs": 0, "stored_chars": 0}
+
+
+def test_distinct_errors_for_expired_deleted_and_unknown_results(clock: FakeClock) -> None:
+    store = make_store(clock)
+    _expired, expired_token = store.create("p", "a.txt", OPTIONS)
+    deleted, deleted_token = store.create("p", "b.txt", OPTIONS)
+    store.claim(deleted_token, "p")
+    store.complete(deleted, result("abc"))
+    store.delete(result_id(deleted_token), "p")
+    clock.advance(301)
+    codes = {}
+    for name, upload_id in (("expired", result_id(expired_token)), ("deleted", result_id(deleted_token)),
+                            ("unknown", result_id(issue_upload_token()[0]))):
+        with pytest.raises(NotFound) as caught:
+            store.read(upload_id, "p", 1, 1000)
+        codes[name] = (caught.value.status, caught.value.code)
+    assert codes == {"expired": (404, "expired"), "deleted": (404, "deleted"), "unknown": (404, "not_found")}
+    # Une autre clé n'apprend rien / another key learns nothing.
+    with pytest.raises(NotFound) as foreign:
+        store.read(result_id(deleted_token), "intruder", 1, 1000)
+    assert foreign.value.code == "not_found"
+    # Traces oubliées après une heure / traces forgotten after an hour.
+    clock.advance(3601)
+    with pytest.raises(NotFound) as old:
+        store.read(result_id(deleted_token), "p", 1, 1000)
+    assert old.value.code == "not_found"
+
+
+def test_each_read_extends_an_unfinished_result(clock: FakeClock) -> None:
+    store = make_store(clock)
+    job, token = store.create("p", "cv.txt", OPTIONS)
+    store.claim(token, "p")
+    store.complete(job, result("a" * 2500))
+    for page in (1, 2):
+        clock.advance(500)
+        assert store.read(result_id(token), "p", page, 1000).expires_in == 600
+    clock.advance(500)
+    assert store.read(result_id(token), "p", 3, 1000).deleted
+
+
+def test_partial_reads_never_keep_a_result_beyond_three_lifetimes(clock: FakeClock) -> None:
+    # Lire la page 1 toutes les 9 minutes ne garde pas le résultat indéfiniment : 30 minutes au plus depuis sa
+    # publication. Reading page 1 every 9 minutes does not keep the result forever: 30 minutes at most.
+    store = make_store(clock)
+    job, token = store.create("p", "cv.txt", OPTIONS)
+    store.claim(token, "p")
+    store.complete(job, result("a" * 2500))
+    expires = [store.read(result_id(token), "p", 1, 1000).expires_in]
+    for _ in range(3):
+        clock.advance(540)
+        expires.append(store.read(result_id(token), "p", 1, 1000).expires_in)
+    assert expires == [600, 600, 600, 180]  # borne : 1 800 s après la publication / bound: 1,800 s after publication
+    clock.advance(181)
+    with pytest.raises(NotFound) as gone:
+        store.read(result_id(token), "p", 1, 1000)
+    assert gone.value.code == "expired"
 
 
 def test_wrong_used_or_foreign_tokens_get_the_same_answer(clock: FakeClock) -> None:
@@ -80,7 +142,8 @@ def test_unbound_uploads_are_reachable_through_their_capability_only(clock: Fake
     assert store.read(result_id(other_token), "c_creator", 1, 1000).status == "pending"
     view = store.read(result_id(token), "c_third", 1, 1000)
     assert view.markdown == "abc" and view.deleted
-    with pytest.raises(NotFound):  # lu, donc consommé / read, hence consumed
+    clock.advance(121)
+    with pytest.raises(NotFound):  # lu, donc consommé après le délai de grâce / read, consumed after the grace
         store.read(result_id(token), "c_creator", 1, 1000)
 
 
@@ -183,6 +246,10 @@ def test_failure_is_reported_once(clock: FakeClock) -> None:
     with pytest.raises(InvalidRequest) as caught:
         store.read(result_id(token), "p", 1, 1000)
     assert caught.value.code == "upload_interrupted"
+    # Redit pendant le délai de grâce, puis oublié / told again during the grace period, then forgotten.
+    with pytest.raises(InvalidRequest):
+        store.read(result_id(token), "p", 1, 1000)
+    clock.advance(121)
     with pytest.raises(NotFound):
         store.read(result_id(token), "p", 1, 1000)
 

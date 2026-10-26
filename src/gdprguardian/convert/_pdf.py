@@ -24,6 +24,7 @@ import pypdfium2.raw as pdfium_c
 from ..documents import ConvertedDocument, DocumentOptions
 from ._base import Report, Source, corrupt, encrypted, too_large
 from ._markdown import attachment, bullet_list, clip, heading, join_blocks, section
+from ._sandbox import report_progress
 
 _LOCK = threading.Lock()  # pdfium n'est pas sûr entre threads / pdfium is not thread-safe
 _MAX_ITEMS = 10_000
@@ -99,6 +100,8 @@ def _extract(pdf: Any, options: DocumentOptions, report: Report) -> _Extracted:
     comments: list[str] = []
     added: list[str] = []
     for index in range(page_count):
+        # Avancement pour le parent (aucune donnée du document) / progress for the parent (no document data).
+        report_progress("converting", index, page_count)
         try:
             page = pdf[index]
         except pdfium.PdfiumError:
@@ -113,6 +116,7 @@ def _extract(pdf: Any, options: DocumentOptions, report: Report) -> _Extracted:
         finally:
             page.close()
         pages.append(lines)
+    report_progress("converting", page_count, page_count)
     _classify(pages)
 
     blocks: list[str] = []

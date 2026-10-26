@@ -169,6 +169,27 @@ def contextual_id(candidate: str) -> str | None:
     return value.upper() if any(c.isdigit() for c in value) and len(value) >= 4 else None
 
 
+def phone_field(candidate: str) -> str | None:
+    """Champ « Tél : … » : les chiffres d'un seul numéro, sinon les détecteurs ordinaires décident (deux numéros sur
+    la ligne, chiffres de la ligne suivante). Phone field: one phone's worth of digits, else the ordinary detectors
+    decide ("(+" free form of public notices, malformed overseas numbers included: 8 to 15 digits; else "00": 11 to
+    15, "0": 10, "33": 10 to 13, otherwise 9 to 13).
+    """
+    digits = "".join(c for c in candidate if c.isdigit())
+    if candidate.startswith("(+"):
+        # Un seul indicatif, pas de « / » : jamais deux numéros / one country code, no "/": never two numbers.
+        ok = 8 <= len(digits) <= 15 and candidate.count("+") == 1 and "/" not in candidate
+    elif digits.startswith("00"):
+        ok = 11 <= len(digits) <= 15
+    elif digits.startswith("0"):
+        ok = len(digits) == 10
+    elif digits.startswith("33"):
+        ok = 10 <= len(digits) <= 13
+    else:
+        ok = 9 <= len(digits) <= 13
+    return contextual_id(candidate) if ok else None
+
+
 def phone(candidate: str) -> str | None:
     """Téléphone français, forme canonique E.164 / French phone, canonical E.164."""
     digits = "".join(c for c in candidate if c.isdigit())

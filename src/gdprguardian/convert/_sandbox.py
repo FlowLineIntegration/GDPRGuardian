@@ -48,6 +48,7 @@ import sys
 import threading
 import time
 import weakref
+from collections.abc import Callable
 from dataclasses import dataclass, replace
 from functools import cache
 from multiprocessing import reduction
@@ -69,6 +70,14 @@ _ERRORS: dict[str, type[DocumentError]] = {cls.__name__: cls for cls in (
     ConversionTimeoutError)}
 _MAX_ERROR = 1000  # longueur d'un message d'erreur reçu / length of a received error message
 _MAX_REPLY = 1 << 30
+# Avancement : trames bornées en nombre et en taille, étapes fermées, envoi espacé côté travailleur.
+# Progress: frames bounded in number and size, closed stages, spaced out on the worker side.
+PROGRESS_STAGES = frozenset({"converting", "anonymising"})
+_MAX_PROGRESS_FRAMES = 4096
+_MAX_PROGRESS_BYTES = 256
+_PROGRESS_INTERVAL_S = 0.5
+_MAX_PROGRESS_COUNT = 10_000_000
+_progress = threading.local()
 _MAX_CONTROL = 4096  # message de contrôle (prêt, fork, kill) / control message (ready, fork, kill)
 _PARALLEL_STARTS = 4  # démarrages simultanés pour la réserve / concurrent starts for the reserve
 _RETRY_START_S = 1.0  # pause après un démarrage refusé / pause after a refused start
@@ -140,12 +149,15 @@ class CancelHandle:
     Sûr à tout moment : avant l'attribution d'un travailleur, pendant le travail ou après / safe at any time.
     """
 
-    __slots__ = ("_cancelled", "_lock", "_worker")
+    __slots__ = ("_cancelled", "_lock", "_worker", "on_progress")
 
-    def __init__(self) -> None:
+    def __init__(self, on_progress: Callable[[str, int | None, int | None], None] | None = None) -> None:
         self._lock = threading.Lock()
         self._worker: _Worker | None = None
         self._cancelled = False
+        # Avancement rapporté par le travailleur (étape, fait, total), appelé dans le fil de l'appel.
+        # Progress reported by the worker (stage, done, total), called in the calling thread.
+        self.on_progress = on_progress
 
     @property
     def cancelled(self) -> bool:
@@ -206,12 +218,68 @@ def _text(raw: bytes) -> str:
     return text
 
 
-def _read_reply(conn: Connection, max_reply: int) -> list[Any]:
-    """Lit une réponse complète ; « body » : [statut, méta, texte] / reads a whole reply."""
-    reply = _decode(conn.recv_bytes(max_reply), "ok", "body", "error")
+def _read_reply(conn: Connection, max_reply: int,
+                on_progress: Callable[[str, int | None, int | None], None] | None = None) -> list[Any]:
+    """Lit une réponse complète ; « body » : [statut, méta, texte] / reads a whole reply.
+
+    Les trames d'avancement qui la précèdent (bornées, forme vérifiée) vont à `on_progress`.
+    Progress frames before it (bounded, shape checked) go to `on_progress`.
+    """
+    for _ in range(_MAX_PROGRESS_FRAMES + 1):
+        reply = _decode(conn.recv_bytes(max_reply), "ok", "body", "error", "progress")
+        if reply[0] != "progress":
+            break
+        _deliver_progress(reply[1], on_progress)
+    else:
+        raise DocumentError(CRASH_MESSAGE)
     if reply[0] == "body":
         reply.append(_text(conn.recv_bytes(max_reply)))
     return reply
+
+
+def _deliver_progress(value: Any, on_progress: Callable[[str, int | None, int | None], None] | None) -> None:
+    """Trame d'avancement vérifiée : étape fermée, entiers bornés ; sinon le travailleur est tenu pour défaillant.
+
+    Checked progress frame: closed stage, bounded integers; otherwise the worker is deemed faulty.
+    """
+    if not (isinstance(value, list) and len(value) == 3 and value[0] in PROGRESS_STAGES
+            and all(item is None or (type(item) is int and 0 <= item <= _MAX_PROGRESS_COUNT) for item in value[1:])):
+        raise DocumentError(CRASH_MESSAGE)
+    if on_progress is not None:
+        with contextlib.suppress(Exception):  # un suivi défaillant n'arrête pas le travail / never stops the job
+            on_progress(value[0], value[1], value[2])
+
+
+def report_progress(stage: str, done: int | None = None, total: int | None = None) -> None:
+    """Côté travailleur : signale l'étape (et les pages faites / totales) au parent ; sans effet hors d'un appel suivi.
+
+    Worker side: reports the stage (and pages done / total) to the parent; no effect outside a tracked call.
+    Envoi espacé (sauf changement d'étape et dernière page), jamais d'exception / spaced out, never raises.
+    """
+    sink = getattr(_progress, "sink", None)
+    if sink is None or stage not in PROGRESS_STAGES:
+        return
+    now = time.monotonic()
+    last_stage, last_at = getattr(_progress, "last", (None, 0.0))
+    if stage == last_stage and now - last_at < _PROGRESS_INTERVAL_S and (total is None or done != total):
+        return
+    frames = getattr(_progress, "frames", 0)
+    if frames >= _MAX_PROGRESS_FRAMES:
+        return
+    _progress.last = (stage, now)
+    _progress.frames = frames + 1
+    counts = [value if type(value) is int and 0 <= value <= _MAX_PROGRESS_COUNT else None for value in (done, total)]
+    with contextlib.suppress(Exception):
+        sink(stage, counts[0], counts[1])
+
+
+@contextlib.contextmanager
+def _tracking(sink: Callable[[str, int | None, int | None], None] | None) -> Any:
+    _progress.sink, _progress.last, _progress.frames = sink, (None, 0.0), 0
+    try:
+        yield
+    finally:
+        _progress.sink = None
 
 
 def _outcome(reply: list[Any]) -> Any:
@@ -243,12 +311,17 @@ def _execute(target: str, payload: bytes | None, args: tuple[Any, ...]) -> list[
 
 
 def run_inline(target: str, payload: bytes | bytearray | None, args: tuple[Any, ...],
-               max_reply: int = _MAX_REPLY) -> Any:
+               max_reply: int = _MAX_REPLY,
+               on_progress: Callable[[str, int | None, int | None], None] | None = None) -> Any:
     """Même protocole sans processus (tests, intégration) : mêmes trames, mêmes contrôles côté parent.
 
     Same protocol without a process (tests, embedding): same frames, same parent-side checks.
     """
-    frames = _execute(target, None if payload is None else bytes(payload), args)
+    def sink(stage: str, done: int | None, total: int | None) -> None:
+        _deliver_progress([stage, done, total], on_progress)
+
+    with _tracking(sink if on_progress is not None else None):
+        frames = _execute(target, None if payload is None else bytes(payload), args)
     if any(len(frame) > max_reply for frame in frames):
         raise DocumentError(CRASH_MESSAGE)
     reply = _decode(frames[0], "ok", "body", "error")
@@ -314,7 +387,14 @@ def _serve(conn: Connection, settings: _Settings, forked_from: int | None = None
             except (EOFError, OSError):
                 break  # parent disparu : fin du travailleur / parent gone: worker ends
             _limit_posix_cpu(timeout_s)
-            frames = _execute(target, payload, args)
+
+            def sink(stage: str, done: int | None, total: int | None) -> None:
+                frame = _encode(("progress", (stage, done, total)))
+                if len(frame) <= _MAX_PROGRESS_BYTES:
+                    conn.send_bytes(frame)
+
+            with _tracking(sink):
+                frames = _execute(target, payload, args)
             target = args = payload = None  # le document ne survit pas à la réponse / dropped before replying
             for frame in frames:
                 conn.send_bytes(frame)
@@ -722,7 +802,7 @@ class _Worker:
             raise WorkerStartError(START_MESSAGE)
 
     def call(self, target: str, payload: bytes | bytearray | None, args: tuple[Any, ...], timeout_s: float | None,
-             max_reply: int) -> list[Any]:
+             max_reply: int, on_progress: Callable[[str, int | None, int | None], None] | None = None) -> list[Any]:
         self.jobs += 1
         with self.lock:
             if self.cancelled:
@@ -734,7 +814,7 @@ class _Worker:
             self.conn.send((target, args, timeout_s, payload is not None))
             if payload is not None:
                 self.conn.send_bytes(payload)
-            return _read_reply(self.conn, max_reply)
+            return _read_reply(self.conn, max_reply, on_progress)
         except (EOFError, OSError):
             if self.expired:
                 raise ConversionTimeoutError(f"Conversion interrompue après {timeout_s:g} s / conversion timed "
@@ -1067,7 +1147,8 @@ class WorkerPool:
             worker.close()
             raise DocumentError(CANCELLED_MESSAGE)
         try:
-            reply = worker.call(target, payload, args, deadline, max_reply)
+            reply = worker.call(target, payload, args, deadline, max_reply,
+                                cancel.on_progress if cancel is not None else None)
         except BaseException:
             worker.close()
             raise

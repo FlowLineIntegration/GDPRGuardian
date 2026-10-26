@@ -200,6 +200,22 @@ def test_the_service_sheds_when_the_estimated_wait_is_too_long() -> None:
     assert harness.limiter.stats()["shed"] == 1
 
 
+def test_mcp_shedding_waits_until_a_worker_is_needed() -> None:
+    # Suivre un envoi en cours (get_anonymized) ne prend aucun travailleur : jamais délesté à l'entrée ; un appel qui
+    # en prend un (anonymize_text) l'est au moment de le prendre. Polling an upload takes no worker: never shed at the
+    # door; a call that takes one is shed when it does.
+    harness = Harness()
+    client = harness.client("203.0.113.7")
+    harness.queue_wait = 60.0
+    admitted = harness.limiter.admit(client, cheap=True, content=TEXT, size=200, shed=False)
+    assert admitted.status == 0 and admitted.ticket is not None and admitted.ticket.deferred_shed
+    retry = harness.limiter.shed_wait(admitted.ticket)
+    assert retry is not None and 50 <= retry <= 61 and harness.limiter.stats()["shed"] == 1
+    harness.queue_wait = 1.0
+    assert harness.limiter.shed_wait(admitted.ticket) is None
+    harness.done(admitted)
+
+
 def test_the_local_principal_is_exempt_but_capped_and_shed() -> None:
     harness = Harness()
     for _ in range(200):
@@ -338,6 +354,35 @@ def test_pseudonym_rotation_keeps_state_through_the_grace_period() -> None:
 
 
 # --- revue adverse : préfixes, corps lents, coût / adversarial review: prefixes, slow bodies, cost ----------------
+
+
+def test_mcp_polls_pass_while_the_clients_uploads_process() -> None:
+    # Trois envois en traitement après leur 202 occupent les places en vol du client : un quatrième PUT est refusé,
+    # mais un appel MCP (get_anonymized) passe ; s'il demande un travailleur, le plafond s'applique alors.
+    # Three uploads processing after their 202 hold the client's in-flight places: a fourth PUT is refused, an MCP
+    # call (get_anonymized) passes; when it asks for a worker, the cap applies then.
+    harness = Harness()
+    client = harness.client("203.0.113.7")
+    uploads = [harness.file(client, 2 * MB) for _ in range(3)]
+    assert [decision.status for decision in uploads] == [0, 0, 0]
+    # Corps encore en vol : un appel MCP est refusé dès l'accueil (corps lents bornés) / bodies still in flight.
+    assert harness.limiter.admit(client, cheap=True, content=TEXT, size=300, shed=False).status == 429
+    for decision in uploads:
+        harness.limiter.mark_processing(decision.ticket)  # 202 parti / 202 sent
+    assert harness.limiter.stats()["in_flight"] == 3
+    assert harness.file(client, 2 * MB).status == 429
+    poll = harness.limiter.admit(client, cheap=True, content=TEXT, size=300, shed=False)
+    assert poll.status == 0 and poll.ticket is not None
+    assert harness.limiter.inflight_wait(poll.ticket) is not None
+    harness.limiter.finish(poll.ticket)
+    harness.done(uploads[0], measured=0.5)
+    assert harness.limiter.stats()["in_flight"] == 2
+    call = harness.limiter.admit(client, cheap=True, content=TEXT, size=300, shed=False)
+    assert call.ticket is not None and harness.limiter.inflight_wait(call.ticket) is None
+    harness.limiter.finish(call.ticket)
+    for decision in uploads[1:]:
+        harness.done(decision, measured=0.5)
+    assert harness.limiter.stats()["in_flight"] == 0
 
 
 def test_a_prefix_holds_at_most_twelve_requests_in_flight() -> None:

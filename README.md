@@ -14,7 +14,7 @@ Un LLM peut alors résumer, analyser ou comparer le contenu **sans jamais savoir
 Offert gratuitement par [Flow Line Intégration](https://www.flowlineintegration.com/) · conçu par
 [Guillaume CLEMENT](https://www.linkedin.com/in/guillaume-clement-erp-cloud/), CTO Data & IA · Licence MIT.
 Offered free of charge by Flow Line Intégration · designed by Guillaume CLEMENT, CTO Data & AI · MIT licence.
-Version 1.0.0, en phase de recherche et développement / in research and development.
+Version 1.0.1, en phase de recherche et développement / in research and development.
 
 **Vidéo / Video** (muette, 2 min 48 / silent, 2 min 50) : [lancement en français](video/out/gardien-rgpd-lancement-fr.mp4) ·
 [launch in English](video/out/gdpr-guardian-launch-en.mp4) ; sur le site / on the site :
@@ -62,11 +62,20 @@ curl -s https://api.gardienrgpd.fr/v1/anonymize/text -H 'Content-Type: applicati
 ```
 
 - **Aucune clé, aucun compte, aucun cookie.** Traitement en mémoire, un processus neuf par requête, rien
-  n'est conservé ni journalisé ; un résultat différé est effacé dès sa lecture complète ou après 10 minutes.
+  n'est conservé ni journalisé ; un résultat différé est effacé 2 minutes après sa lecture complète, ou 10 minutes
+  après la dernière lecture.
+- **Gros documents** : l'envoi (`PUT`) répond `202` dès le fichier reçu ; le traitement continue et la lecture du
+  résultat (`get_anonymized` ou `GET /v1/results/…`) donne l'étape, l'avancement et `retry_after_s` jusqu'au
+  résultat.
 - **Limites par client**, tenues en mémoire sous un pseudonyme renouvelé chaque jour : quelques documents de
   10 Mo d'affilée puis un toutes les 8 secondes, des centaines de petits textes par minute, 50 Mo au plus par
   fichier et 1 million de caractères par texte ; au-delà, `429` ou `503` avec `Retry-After`. Détails :
   [deploy/README.md](deploy/README.md).
+- **Qualité minimale du texte** : un texte lisible (PDF avec couche texte, Word, courriel…). Les images et les pages
+  numérisées sans couche texte ne sont pas lues (avertissement). Un PDF dont la couche texte vient d'un OCR de
+  mauvaise qualité (mots déformés, césures cassées, symboles parasites) est traité, avec l'avertissement « Texte de
+  mauvaise qualité (OCR probable) : détection dégradée, relisez le résultat » : un nom déformé peut échapper à la
+  détection. Ce contrôle ne porte que sur les PDF (le produit ne fait pas d'OCR) ; jamais sur un texte collé.
 - **Documents très sensibles** (santé, RH, dossier judiciaire, secret professionnel) : sur le service en ligne,
   nous sommes un tiers, sans contrat de traitement ; préférez la **version locale**, où rien ne quitte le poste
   ([docs/LOCAL.md](docs/LOCAL.md)).
@@ -74,7 +83,10 @@ curl -s https://api.gardienrgpd.fr/v1/anonymize/text -H 'Content-Type: applicati
 **EN.** REST and MCP at `https://api.gdprguardian.com` and `https://api.gardienrgpd.fr` (MCP on `/mcp`), **no key, no
 account, no cookie**; in-memory processing, nothing kept or logged; per-client limits (a few 10 MB documents in a
 row, then one every 8 seconds; hundreds of small texts per minute; 50 MB per file; 429 or 503 with `Retry-After`
-beyond). For very sensitive documents, use the local version: nothing leaves your computer.
+beyond). Big documents: the upload answers `202` once received, then reading the result reports the stage, progress
+and `retry_after_s`. Minimum text quality: readable text (scanned pages without a text layer are not read, with a
+warning); a PDF whose text layer comes from low-quality OCR is processed with the warning "Low-quality text (likely
+OCR): degraded detection, check the result" (PDFs only: the product does no OCR; never on pasted text). For very sensitive documents, use the local version: nothing leaves your computer.
 
 ## Skills Claude : légère ou locale / Claude skills: light or local
 
@@ -113,57 +125,75 @@ archive into `~/.claude/skills/`. Details and limits: [`integrations/claude/READ
 
 ## Indice de confiance : nous nous notons en public / confidence index: we rate ourselves in public
 
-**61,8 %** [58,6–66,9] (IC 95 %), campagne du **26 octobre 2026** : 1 019 385 documents passés par le **vrai
-service**, moteur déployé `1.0.0+0c3ff9fc1fb0`. Le protocole a été écrit le 25 octobre, puis enregistré avant le
-lancement : empreintes publiées à 05 h 46 UTC, campagne lancée à 06 h 07
-([PROTOCOL-REGISTRATION.json](PROTOCOL-REGISTRATION.json)). Réserve : les moitiés test des corpus réels avaient déjà
-été mesurées 7 fois pendant la mise au point du moteur (liste publiée : [docs/PROTOCOLE.md](docs/PROTOCOLE.md),
-section 3). C'est la part des documents dont **aucun identifiant direct ne reste lisible** (pas un seul caractère
-alphanumérique d'une mention annotée), moyenne à poids égal de sept familles ; mentions directes entièrement
-masquées : 79,8 % [78,1–82,5]. Sur la moitié dev, qui a servi à régler le moteur, l'indice vaut 59,9 %, et 61,2 % sur
-tous les documents réels. Résultats complets :
-[benchmarks/results/protocol-2026-10-26.md](benchmarks/results/protocol-2026-10-26.md).
+Protocole 1.1 ([docs/PROTOCOLE.md](docs/PROTOCOLE.md)), deux notes. **Documents normalisés**, l'usage visé (cible :
+95 % ou plus) : **<!--q:confidence_index:fr-->—<!--/q--> %**
+[<!--q:confidence_ci_low:fr-->—<!--/q-->–<!--q:confidence_ci_high:fr-->—<!--/q-->] (IC 95 %), <!--q:protocol_docs:fr-->—<!--/q-->
+documents. **Documents difficiles**, toute l'équipe rouge (51 façons de piéger un texte) :
+**<!--q:hard_index:fr-->—<!--/q--> %** [<!--q:hard_ci_low:fr-->—<!--/q-->–<!--q:hard_ci_high:fr-->—<!--/q-->],
+<!--q:hard_docs:fr-->—<!--/q--> documents. Campagne du <!--q:protocol_date:fr-->—<!--/q-->, par le **vrai service**,
+moteur <!--q:protocol_engine:fr-->—<!--/q--> (« — » : pas encore mesuré, ou sans objet). L'usage mesuré : les textes
+qu'une organisation envoie à une IA, de bonne foi (courriels, demandes collées, comptes rendus, courriers RH, contrats,
+factures). Une **fuite**, c'est un seul caractère lisible d'une adresse postale, d'un téléphone, d'un courriel ou d'un
+autre identifiant direct, quel qu'en soit le titulaire, ou du nom d'une personne ; un nom de société (RGPD,
+considérant 14) ou une ville citée comme lieu n'en sont pas. Chaque note est la part des documents sans fuite :
+documents normalisés, calculée par famille puis moyennée à poids égal (le volume n'achète aucun poids) ; documents
+difficiles, chaque document piégé compte une fois. Intervalle à 95 % par rééchantillonnage stratifié (2 000 tirages,
+graine fixe) ; mentions directes entièrement masquées : <!--q:mention_recall_pct:fr-->—<!--/q--> % (normalisés),
+<!--q:hard_mention_recall_pct:fr-->—<!--/q--> % (difficiles). Définition et empreintes publiées avant la campagne
+([PROTOCOL-REGISTRATION-1.1.json](PROTOCOL-REGISTRATION-1.1.json)). Réserve : les moitiés test des corpus réels ne
+sont plus aveugles (déjà notées par la campagne 1.0 et pendant la mise au point du moteur), donc les chiffres réels
+sont optimistes.
+Protocole 1.0, 7 familles dont les plus faibles (sorties de l'indice en 1.1) : 61,8 % [58,6–66,9], résultat gardé publié ([protocol-2026-10-26.md](benchmarks/results/protocol-2026-10-26.md)).
 
-| Famille (corpus réels : moitié test) / family (real corpora: test half) | Documents | Sans fuite / no leak | Mentions masquées / masked | Précision / precision |
+| Famille (corpus réels : moitié test) / family (real corpora: test half) | Documents | Sans fuite / no leak (%) | Mentions masquées / masked (%) | Précision / precision (%) |
 |---|---:|---:|---:|---:|
-| Synthétique FR, 10 graines, leurres / synthetic FR, 10 seeds, decoys | 450 000 | 91,9 % | 98,4 % | 98,8 % |
-| Équipe rouge FR, 51 déguisements / red team FR, 51 disguises | 548 907 | **63,7 %** | 86,7 % | 98,7 % |
-| BODACC | 1 335 | 89,9 % | 97,8 % | 99,1 % |
-| BOAMP | 1 408 | **60,7 %** | 89,6 % | 87,3 % |
-| ParlaMint-FR (gold partiel : borne haute / partial gold: upper bound) | 143 | 93,0 % | 98,5 % | — |
-| Presse ancienne (Europeana + HIPE) / old press | 272 | **16,5 %** | 54,6 % | 75,5 % |
-| MAPA FR | 6 | **16,7 %** | 33,1 % | 47,1 % |
+| *Documents normalisés, l'indice / normalised documents, the index* | | | | |
+| Synthétique FR, 10 graines, leurres / synthetic FR, 10 seeds, decoys | <!--q:f_syn_docs:fr-->—<!--/q--> | <!--q:f_syn_nl:fr-->—<!--/q--> | <!--q:f_syn_mr:fr-->—<!--/q--> | <!--q:f_syn_pr:fr-->—<!--/q--> |
+| BODACC | <!--q:f_bod_docs:fr-->—<!--/q--> | <!--q:f_bod_nl:fr-->—<!--/q--> | <!--q:f_bod_mr:fr-->—<!--/q--> | <!--q:f_bod_pr:fr-->—<!--/q--> |
+| BOAMP | <!--q:f_boa_docs:fr-->—<!--/q--> | <!--q:f_boa_nl:fr-->—<!--/q--> | <!--q:f_boa_mr:fr-->—<!--/q--> | <!--q:f_boa_pr:fr-->—<!--/q--> |
+| ParlaMint-FR (gold partiel : borne haute / partial gold: upper bound) | <!--q:f_par_docs:fr-->—<!--/q--> | <!--q:f_par_nl:fr-->—<!--/q--> | <!--q:f_par_mr:fr-->—<!--/q--> | <!--q:f_par_pr:fr-->—<!--/q--> |
+| *Documents difficiles, la seconde note / difficult documents, the second score* | | | | |
+| Formats du quotidien abîmés (25) / damaged everyday formats (25) | <!--q:f_red_docs:fr-->—<!--/q--> | <!--q:f_red_nl:fr-->—<!--/q--> | <!--q:f_red_mr:fr-->—<!--/q--> | <!--q:f_red_pr:fr-->—<!--/q--> |
+| Déguisements volontaires (25) / deliberate obfuscations (25) | <!--q:f_obf_docs:fr-->—<!--/q--> | <!--q:f_obf_nl:fr-->—<!--/q--> | <!--q:f_obf_mr:fr-->—<!--/q--> | <!--q:f_obf_pr:fr-->—<!--/q--> |
+| Bruit d'OCR / OCR noise | <!--q:f_ocr_docs:fr-->—<!--/q--> | <!--q:f_ocr_nl:fr-->—<!--/q--> | <!--q:f_ocr_mr:fr-->—<!--/q--> | <!--q:f_ocr_pr:fr-->—<!--/q--> |
+| *Publiés à part, hors des deux notes / published apart, outside both scores* | | | | |
+| Presse ancienne, OCR de mauvaise qualité / old press, low-quality OCR | <!--q:f_old_docs:fr-->—<!--/q--> | <!--q:f_old_nl:fr-->—<!--/q--> | <!--q:f_old_mr:fr-->—<!--/q--> | <!--q:f_old_pr:fr-->—<!--/q--> |
+| MAPA FR (6 documents) | <!--q:f_mapa_docs:fr-->—<!--/q--> | <!--q:f_mapa_nl:fr-->—<!--/q--> | <!--q:f_mapa_mr:fr-->—<!--/q--> | <!--q:f_mapa_pr:fr-->—<!--/q--> |
+| Autres langues / other languages (DE, ES, IT, NL, PT, EN) | <!--q:f_oth_docs:fr-->—<!--/q--> | <!--q:f_oth_nl:fr-->—<!--/q--> | <!--q:f_oth_mr:fr-->—<!--/q--> | <!--q:f_oth_pr:fr-->—<!--/q--> |
 
-Nos points faibles, sans détour : la presse ancienne numérisée et les textes juridiques européens (MAPA FR) ne
-sortent sans fuite qu'une fois sur six. Le BOAMP garde une mention lisible dans 4 avis sur 10 (adresses masquées à
-82 %), et près d'un sur deux sur les années 2019 et 2021 (mesure interne hors protocole). Les identifiants déguisés
-font tomber l'équipe rouge à 63,7 % : noms et adresses en minuscules (27 % des documents sans fuite), barres obliques
-ou doubles espaces entre les chiffres, tabulations, confusions d'OCR (4 à 12 %), lettres espacées, e-mails écrits
-« %40 », numéros coupés par un retour à la ligne. Dans 300 décisions de justice (Judilibre, sans annotation),
-environ 3 zones masquées sur 10 le sont à tort (relecture de 120 zones). Hors périmètre, jamais dans l'indice : noms
-allemands, espagnols, italiens, néerlandais, portugais **non détectés** (0 %) ; TAB, arrêts de la CEDH en anglais,
-67,3 % sans fuite. Garde-fous tenus : texte neutre masqué à tort 0,07 %, leurres masqués 3,7 %. Le volume n'achète
-aucun poids : **cinq septièmes de l'indice reposent sur les 3 164 documents notés des moitiés test des corpus réels,
-dont 6 seulement pour MAPA FR** (un document MAPA FR déplace l'indice de 2,4 points). Définitions, garde-fous et
-commandes pour tout rejouer : [docs/PROTOCOLE.md](docs/PROTOCOLE.md).
+Garde-fous / guards (%) : texte neutre masqué à tort / neutral text masked by mistake
+<!--q:g_overmask:fr-->—<!--/q-->, leurres masqués / decoys masked <!--q:g_decoys:fr-->—<!--/q-->. Témoin négatif
+Judilibre (sans annotation) / negative control: <!--q:f_jud_docs:fr-->—<!--/q--> décisions / decisions,
+<!--q:f_jud_spans:fr-->—<!--/q--> zones masquées pour 10 000 caractères / masked spans per 10,000 characters.
+Limites, sans détour : une première barrière, pas une certification ; les fuites qui restent sont surtout dans les
+documents difficiles (retour à la ligne à l'intérieur d'un identifiant, lettres espacées d'un PDF, barres obliques ou
+doubles espaces entre chiffres, RIB écrit champ par champ) et dans les adresses des avis BOAMP ; la conversion des PDF, Word et Excel n'est pas mesurée ;
+par l'API, un pays choisi sans la France ne masque ni noms ni adresses. Résultats bruts datés et historique des
+campagnes, versions précédentes comprises : [benchmarks/results/](benchmarks/results/).
 
-**EN.** **61.8%** [58.6–66.9] (95% CI), run of **26 October 2026**: 1,019,385 documents through the real service, the
-deployed engine `1.0.0+0c3ff9fc1fb0`. The protocol was written on 25 October, then registered before the launch
-(digests published at 05:46 UTC, run started at 06:07). One caveat: the test halves of the real corpora had already
-been measured 7 times while the engine was tuned (list in docs/PROTOCOLE.md, section 3). It is the share of
-documents in which **no direct identifier stays readable** (not one alphanumeric character of an annotated mention),
-the equal-weight mean of seven families; direct mentions fully masked: 79.8% [78.1–82.5]; dev half, used to tune the
-engine, 59.9%; all real documents, 61.2%. Our weak spots, plainly: old digitised newspapers and EU legal texts
-(MAPA FR) come out with no leak only one time in six; BOAMP keeps a readable mention in 4 notices in 10, and in
-nearly one in two for 2019 and 2021 (internal measurement, outside the protocol); disguised identifiers bring the red
-team down to 63.7% (names and addresses in lower case: 27% of documents with no leak; slashes, double spaces, tabs,
-OCR confusions: 4–12%); in 300 court decisions, about 3 masked spans in 10 are wrong (120 checked by hand).
-ParlaMint's 93.0% is an upper bound (it annotates only speakers and listed people). Out of scope, never in the index:
-German, Spanish, Italian, Dutch and Portuguese names are **not detected** (0%); TAB, ECHR judgments in English, 67.3%
-with no leak. Guards held (over-masking 0.07%, decoys masked 3.7%). Volume buys no weight: five sevenths of the index
-rest on the 3,164 scored documents of the real corpora's test halves, only 6 of them MAPA FR (one MAPA FR document
-moves the index by 2.4 points). Full results:
-[benchmarks/results/protocol-2026-10-26.md](benchmarks/results/protocol-2026-10-26.md).
+**EN.** Protocol 1.1, two scores. **Normalised documents**, the intended use (target: 95% or more):
+**<!--q:confidence_index:en-->—<!--/q-->%** [<!--q:confidence_ci_low:en-->—<!--/q-->–<!--q:confidence_ci_high:en-->—<!--/q-->]
+(95% CI), <!--q:protocol_docs:en-->—<!--/q--> documents. **Difficult documents**, the whole red team (51 ways to trap
+a text): **<!--q:hard_index:en-->—<!--/q-->%** [<!--q:hard_ci_low:en-->—<!--/q-->–<!--q:hard_ci_high:en-->—<!--/q-->],
+<!--q:hard_docs:en-->—<!--/q--> documents. Run of <!--q:protocol_date:en-->—<!--/q-->, through the **real service**,
+engine <!--q:protocol_engine:en-->—<!--/q--> ("—": not measured yet, or not applicable). The use case measured: the
+texts an organisation sends to an AI, in good faith (e-mails, pasted requests, minutes, HR letters, contracts,
+invoices). A **leak** is a single readable character of a postal address, a phone number, an e-mail address or another
+direct identifier, whoever it belongs to, or of a person's name; a company name (GDPR, recital 14) or a town named as
+a place is not one. Each score is the share of documents with no leak: normalised documents, computed per family, then
+averaged with equal weight (volume buys no weight); difficult documents, every trapped document counts once. 95%
+interval by stratified resampling (2,000 draws, fixed seed); direct mentions fully masked:
+<!--q:mention_recall_pct:en-->—<!--/q-->% (normalised), <!--q:hard_mention_recall_pct:en-->—<!--/q-->% (difficult).
+Definition and digests published before the run (PROTOCOL-REGISTRATION-1.1.json). Caveat: the test halves of the real
+corpora are no longer blind (scored by the 1.0 run and while the engine was tuned), so the real-corpus figures are
+optimistic.
+Protocol 1.0, 7 families including the weakest (moved out of the index in 1.1): 61.8% [58.6–66.9], result kept published ([protocol-2026-10-26.md](benchmarks/results/protocol-2026-10-26.md)).
+Published apart, outside both scores, with their figures in the table above: old newspapers (low-quality OCR), MAPA FR,
+other languages, and the Judilibre control. Known limits: a first barrier, not a certification; the leaks that remain
+are mostly in the difficult documents (a line break inside an identifier, the spaced-out letters of a PDF, slashes or
+double spaces between digits, French bank details written field by field) and in the addresses of BOAMP notices; the conversion of PDF, Word and Excel files
+is not measured; through the API, a country chosen without France masks neither names nor addresses. Dated raw results
+and the history of runs, earlier versions included: [benchmarks/results/](benchmarks/results/).
 
 ## Démarrage rapide
 

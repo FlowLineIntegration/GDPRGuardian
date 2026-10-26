@@ -200,6 +200,12 @@ changed after the campaign, written into the results, to be disclosed"
       dest="$RESULTS/trial-$(date -u +%Y%m%dT%H%M%SZ)"
       install -d -m 700 "$dest"
     fi
+    # Jamais écraser un résultat déjà là (un autre protocole, le même jour) : refus, rien n'est copié ni archivé.
+    # Never overwrite a result already there (another protocol version, same day): refused, nothing copied or archived.
+    sudo sh -c "for f in '$WORK'/results/protocol-*; do if [ -e '$dest'/\"\${f##*/}\" ]; then \
+echo \"existe déjà / already exists: $dest/\${f##*/}\" >&2; exit 1; fi; done" \
+      || fail "résultat de même nom déjà présent dans $dest : jamais écrasé, déplacer l'ancien d'abord / a result \
+with the same name is already in $dest: never overwritten, move the old one first"
     # Motif développé par root : le dossier de travail n'est lisible que par 10001 / glob expanded as root.
     sudo sh -c "cp '$WORK'/results/protocol-* '$dest'/ && chown $(id -u):$(id -g) '$dest'/protocol-*"
     ls -l "$dest"

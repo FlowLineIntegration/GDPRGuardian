@@ -48,7 +48,7 @@
   },
   "demo": {
     "headline": "Remove the names, keep the meaning.",
-    "label": "real output, version 1.0.0",
+    "label": "real output, version 1.0.1",
     "lines": [
       [["Mr "], ["Jean Dupont", "[PERSON_1]", "p1"], [" · "], ["jean.dupont@example.com", "[EMAIL_1]", "p3"], [" · "], ["06 12 34 56 78", "[PHONE_1]", "p3"]],
       [["IBAN "], ["FR76 3000 6000 0112 3456 7890 189", "[IBAN_1]", "p3"]],
@@ -105,11 +105,11 @@
     "headline": "Tested, measured, published",
     "figures": [
       {"id": "tests", "fig": "{tests}+", "fallback_fig": "4,200+", "label": "automated tests, Windows and Linux"},
-      {"id": "synthetic", "fig": "91.9%", "label": "of 450,000 synthetic documents with no leak"},
-      {"id": "redteam", "fig": "63.7%", "label": "of adversarial documents with no leak, {q.redteam_operators} ways to disguise an identifier", "fallback_label": "of adversarial documents with no leak, 51 ways to disguise an identifier"},
+      {"id": "synthetic", "fig": "{q.f_syn_nl}%", "fallback_fig": "—", "label": "of {q.f_syn_docs} synthetic documents with no leak", "fallback_label": "of synthetic documents with no leak"},
+      {"id": "hard", "fig": "{q.hard_index}%", "fallback_fig": "—", "label": "of difficult documents with no leak: 51 ways to trap a text"},
       {"id": "real", "fig": "{q.real_corpora}", "fallback_fig": "14", "label": "annotated real-text datasets, 6 of them French, {q.real_docs} documents", "fallback_label": "annotated real-text datasets, 6 of them French, 8,178 documents"},
-      {"id": "range", "fig": "16.5–93%", "label": "of real French documents with no leak, by family"},
-      {"id": "bodacc", "fig": "89.9%", "label": "of BODACC notices with no leak, 97.8% of mentions masked"}
+      {"id": "boamp", "fig": "{q.f_boa_nl}%", "fallback_fig": "—", "label": "of BOAMP notices with no leak, {q.f_boa_mr}% of mentions masked", "fallback_label": "of BOAMP notices with no leak"},
+      {"id": "bodacc", "fig": "{q.f_bod_nl}%", "fallback_fig": "—", "label": "of BODACC notices with no leak, {q.f_bod_mr}% of mentions masked", "fallback_label": "of BODACC notices with no leak"}
     ]
   },
   "index": {
@@ -118,15 +118,16 @@
     "pending": "Being measured",
     "value": "{v}%",
     "ci": "95% CI: {lo}–{hi}%",
-    "guards": "Mentions masked:\u00a0{mr}%\u00a0· precision:\u00a099.1%\u00a0BODACC, 87.3%\u00a0BOAMP\u00a0· neutral text masked by mistake:\u00a00.07%",
-    "definition": "Share of documents with no readable direct identifier.",
+    "guards": "Mentions masked: {mr}% · precision: {q.f_bod_pr}% BODACC, {q.f_boa_pr}% BOAMP · neutral text masked by mistake: {q.g_overmask}%",
+    "guards_nodata": "Mentions masked: {mr}%",
+    "definition": "Normalised documents: share with no readable direct identifier, protocol 1.1.",
     "protocol_pending": "Protocol written before measuring: 1,019,385 documents, 8,478 of them real, through the real service.",
-    "protocol_done": "Run of {date}: {docs} documents, protocol written beforehand.",
-    "protocol_done_nodate": "Run of {docs} documents, protocol written beforehand.",
+    "protocol_done": "Run of {date}: {docs} documents, protocol published beforehand.",
+    "protocol_done_nodate": "Run of {docs} documents, protocol published beforehand.",
     "limits_title": "Known limits",
     "limits": [
-      "Old newspapers, MAPA FR: one document in six with no leak.",
-      "BOAMP: 4 notices in 10 keep a readable mention.",
+      "Published apart: deliberate obfuscations, low-quality OCR, MAPA FR.",
+      "Real corpora already seen while tuning: optimistic figures.",
       "German, Spanish, Italian, Dutch, Portuguese names: not detected.",
       "A first barrier, not a GDPR certification."
     ],
@@ -143,7 +144,7 @@
       "<b>Guillaume CLEMENT</b>,\nCTO Data & AI",
       "Design:\n<b>Claude Design</b>"
     ],
-    "licence": "MIT licence · version 1.0.0"
+    "licence": "MIT licence · version 1.0.1"
   },
   "social": {
     "title": {
@@ -174,8 +175,8 @@
     "numbers": {
       "headline": "Measured, published",
       "figures": [
-        {"id": "synthetic", "fig": "91.9%", "label": "of synthetic documents with no leak"},
-        {"id": "weak", "fig": "16.5%", "label": "of old newspapers with no leak: our worst case"}
+        {"id": "synthetic", "fig": "{q.f_syn_nl}%", "fallback_fig": "—", "label": "of synthetic documents with no leak"},
+        {"id": "weak", "fig": "{q.f_old_nl}%", "fallback_fig": "—", "label": "of old newspapers with no leak: low-quality OCR, published apart"}
       ],
       "limits": [
         "German, Spanish, Italian, Dutch, Portuguese names: not detected.",
@@ -183,8 +184,9 @@
       ]
     },
     "index": {
-      "guards": "Mentions masked\u00a0{mr}%\u00a0· precision\u00a099.1%\u00a0BODACC, 87.3%\u00a0BOAMP\u00a0· neutral text masked by mistake\u00a00.07%",
-      "definition": "Share of documents with no readable direct identifier · run of {date}.",
+      "guards": "Mentions masked {mr}% · precision {q.f_bod_pr}% BODACC, {q.f_boa_pr}% BOAMP · neutral text masked by mistake {q.g_overmask}%",
+      "guards_nodata": "Mentions masked {mr}%",
+      "definition": "Normalised documents: share with no readable direct identifier · protocol 1.1, run of {date}.",
       "definition_nodate": "Share of documents with no readable direct identifier.",
       "protocol_pending": null,
       "protocol_done": null,
@@ -208,17 +210,17 @@
     {"figure": "MIT licence; git clone; code published on GitHub", "source": "README.md (MIT); site/templates/index.en.html, legal notice (“code in the public repository”)"},
     {"figure": "Organisation rules passed in the call, never stored; CLT-204518 → [CLIENT_ID_1]; docker compose; issues", "source": "README.md, “Vos règles en plus” (CLIENT_ID rule, “Client CLT-204518” → “Client [CLIENT_ID_1]”, checked with the engine on 26 October 2026); deploy/README.md and deploy/server/compose.yaml; https://github.com/FlowLineIntegration/GDPRGuardian/issues"},
     {"figure": "Automated tests, Windows and Linux: the smaller of the two, rounded down to the hundred, followed by “+”", "source": "site/data/quality.json (tests_windows, tests_linux), read at every render: 4,347 · 4,294 → “4,200+” on 26 October 2026"},
-    {"figure": "91.9% of 450,000 synthetic documents with no leak (social cut: 91.9% of synthetic documents with no leak)", "source": "Public run of 26 October 2026, deployed engine 1.0.0+0c3ff9fc1fb0: benchmarks/results/protocol-2026-10-26.md, family “Synthetic FR (10 seeds, decoys)”: 450,000 documents, no leak 91.9% [91.8–92.0], mention recall 98.4%, precision 98.8%. The same measure (documents with no leak) as the index and the scene’s other percentages"},
-    {"figure": "63.7% of adversarial documents with no leak, 51 ways to disguise an identifier", "source": "Run of 26 October 2026 (protocol-2026-10-26.md), family “Red team FR (51 operators)”: 548,907 documents, no leak 63.7% [63.6–63.8], mention recall 86.7%; the operator count is read from site/data/quality.json (redteam_operators) at every render"},
-    {"figure": "14 annotated real-text datasets, 6 of them French, 8,178 documents", "source": "site/data/quality.json (real_corpora, real_docs), read at every render, keys of the 26 October 2026 run (protocol-2026-10-26.md, “site quality keys”): 14 annotated corpora, 6 in the French scope (BODACC, BOAMP, ParlaMint-FR, Europeana, HIPE NewsEye, MAPA FR) and 8 out of scope (MAPA DE, ES, IT, NL, PT, MEDDOCAN, German LER, TAB), plus the Judilibre negative control (300 decisions, no annotation)"},
-    {"figure": "16.5–93% of real French documents with no leak, by family", "source": "Run of 26 October 2026 (protocol-2026-10-26.md), test half, documents with no leak per real family: old press 16.5%, MAPA FR 16.7%, BOAMP 60.7%, BODACC 89.9%, ParlaMint-FR 93.0% (upper bound: partial gold)"},
-    {"figure": "89.9% of BODACC notices with no leak, 97.8% of mentions masked", "source": "Run of 26 October 2026 (protocol-2026-10-26.md), BODACC family, test half: 1,335 documents, no leak 89.9% [88.2–91.4], mention recall 97.8%, precision 99.1%"},
-    {"figure": "16.5% of old newspapers with no leak, the weakest spot (social cut)", "source": "Run of 26 October 2026 (protocol-2026-10-26.md), family “Old French press (Europeana + HIPE)”, test half: 272 scored documents, no leak 16.5% [12.6–21.4], the lowest of the seven families (MAPA FR 16.7%)"},
-    {"figure": "Confidence index (value, 95% CI, mentions masked, documents, date)", "source": "site/data/quality.json, read at every render (confidence_index, confidence_ci_low, confidence_ci_high, mention_recall_pct, protocol_docs, protocol_date); “Being measured” while any of the first four is missing. Run of 26 October 2026: 61.8% [58.6–66.9], mentions 79.8%. Social cut: the definition and the run’s date on the index card"},
-    {"figure": "Precision 99.1% BODACC, 87.3% BOAMP; neutral text masked by mistake 0.07%", "source": "Guards of the 26 October 2026 run (protocol-2026-10-26.md, “guards”): precision_bodacc_fr 99.13%, precision_boamp_fr 87.26%, overmask_synthetic 0.07%; docs/PROTOCOLE.md § 7 (precision and over-masking are always published next to the index). To be updated by hand in “guards” after a new run"},
-    {"figure": "Protocol written before measuring: 1,019,385 documents, 8,478 of them real, through the real service", "source": "docs/PROTOCOLE.md, summary (“1,019,385 documents, of which 1,010,907 synthetic and 8,478 real”) and header (version 1.0 written on 25 October 2026, before any campaign)"},
-    {"figure": "Limits: old newspapers and MAPA FR, one document in six with no leak; BOAMP, 4 notices in 10 with a readable mention; DE, ES, IT, NL, PT names not detected; first barrier, not a certification", "source": "Run of 26 October 2026 (protocol-2026-10-26.md): old press 16.5%, MAPA FR 16.7% (6 documents) with no leak; BOAMP 60.7% with no leak, so 39.3% of notices with a readable mention; out of scope, MAPA DE, ES, IT, NL, PT and German LER 0.0% of mentions; README.md, “Disclaimer”"},
+    {"figure": "Synthetic documents with no leak (share and count; social cut: the share only)", "source": "Protocol 1.1 run (benchmarks/results/protocol-1.1-<date>.md), family “Synthetic FR (10 seeds, decoys)”; values read from site/data/quality.json (f_syn_nl, f_syn_docs) at every render, written by site/tools/protocol_table.py. The same measure (documents with no leak) as the index and the scene’s other percentages"},
+    {"figure": "Difficult documents with no leak, 51 ways to trap a text", "source": "Protocol 1.1 run, “difficult documents” index: the whole red team, 51 operators in three groups (tools/protocol/spec.py, HARD_FAMILIES; docs/PROTOCOLE.md); site/data/quality.json (hard_index), read at every render"},
+    {"figure": "Annotated real-text datasets, 6 of them French, and their documents", "source": "site/data/quality.json (real_corpora, real_docs), read at every render, keys of the published run: 14 annotated corpora, 6 in the French scope (BODACC, BOAMP, ParlaMint-FR, Europeana, HIPE NewsEye, MAPA FR) and 8 out of scope (MAPA DE, ES, IT, NL, PT, MEDDOCAN, German LER, TAB), plus the Judilibre negative control (no annotation)"},
+    {"figure": "BOAMP notices with no leak and mentions masked", "source": "Protocol 1.1 run, BOAMP family, test half; site/data/quality.json (f_boa_nl, f_boa_mr), read at every render"},
+    {"figure": "BODACC notices with no leak and mentions masked", "source": "Protocol 1.1 run, BODACC family, test half; site/data/quality.json (f_bod_nl, f_bod_mr), read at every render"},
+    {"figure": "Old newspapers with no leak, low-quality OCR, published apart (social cut)", "source": "Protocol 1.1 run, family published apart “Old French press (Europeana + HIPE), low-quality OCR”, test half; site/data/quality.json (f_old_nl), read at every render"},
+    {"figure": "Confidence index (value, 95% CI, mentions masked, documents, date), protocol 1.1", "source": "site/data/quality.json, read at every render (confidence_index, confidence_ci_low, confidence_ci_high, mention_recall_pct, protocol_docs, protocol_date); “Being measured” while any of the first four is missing. Social cut: the definition and the run’s date on the index card"},
+    {"figure": "Precision BODACC and BOAMP; neutral text masked by mistake", "source": "Guards of the protocol 1.1 run (the result’s “guards”): site/data/quality.json (f_bod_pr, f_boa_pr, g_overmask), read at every render; without these keys, only the share of mentions masked shows; docs/PROTOCOLE.md § 7 (precision and over-masking are always published next to the index)"},
+    {"figure": "Protocol written before measuring: 1,019,385 documents, 8,478 of them real, through the real service", "source": "docs/PROTOCOLE.md, summary (“1,019,385 documents, of which 1,010,907 synthetic and 8,478 real”); version 1.1, same campaign plan (section “Version 1.1”, point 5), registered before the run (PROTOCOL-REGISTRATION-1.1.json)"},
+    {"figure": "Limits: published apart, deliberate obfuscations, low-quality OCR, MAPA FR; real corpora already seen, optimistic figures; DE, ES, IT, NL, PT names not detected; first barrier, not a certification", "source": "docs/PROTOCOLE.md, “Version 1.1” (families published apart; test halves not blind: real-corpus figures optimistic); tools/protocol/spec.py (APART_FAMILIES); out of scope, MAPA DE, ES, IT, NL, PT and German LER: 0% of mentions masked in the 1.0 run (benchmarks/results/); README.md, “Disclaimer”"},
     {"figure": "The protocol: gdprguardian.com/#protocol", "source": "site/templates/index.en.html, section id=\"protocol\""},
-    {"figure": "Offered by Flow Line Intégration; Guillaume CLEMENT, CTO Data & AI; Design: Claude Design; MIT licence, version 1.0.0", "source": "site/templates/index.en.html, footer (“CTO Data & AI”) and “Thanks” panel"}
+    {"figure": "Offered by Flow Line Intégration; Guillaume CLEMENT, CTO Data & AI; Design: Claude Design; MIT licence, version 1.0.1","source": "site/templates/index.en.html, footer (“CTO Data & AI”) and “Thanks” panel"}
   ]
 }

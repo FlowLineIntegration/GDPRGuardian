@@ -1,6 +1,6 @@
 # Vidéo de lancement · Launch video
 
-Gardien RGPD / GDPR Guardian 1.0.0. Une vidéo muette sur fond blanc, en français et en anglais, en deux montages :
+Gardien RGPD / GDPR Guardian 1.0.1. Une vidéo muette sur fond blanc, en français et en anglais, en deux montages :
 le **complet** (1920 × 1080, environ 2 min 48 s) et le **court** pour les fils de réseaux sociaux sur téléphone
 (1080 × 1350, environ 1 min 23 s, texte plus gros, moins de mots). Tout sort d’une seule source, par une seule
 commande. A silent video on a white background, in French and English, in two cuts: the **full** one (1920 × 1080,
@@ -46,8 +46,8 @@ une seconde près (`out/review/timeline-en.txt`).
 | 0:54 | 02 · Notre réponse | Six principes : irréversible, cohérent (« une personne, une balise, le plus souvent » : 92,2 % des personnes fictives gardent une seule balise), vérifié, explicable, rapide (2 Ko en moins d’une milliseconde), rien de conservé. |
 | 1:10 | 03 · Trois accès | Schéma : site web, MCP, API REST → Gardien RGPD (un processus neuf par requête) → Markdown anonymisé → votre IA ; les documents disparaissent en entrant dans le moteur et en ressortent balisés. « Par MCP, envoyez le fichier : il ne passe pas par le modèle. Un texte collé est déjà parti. » ; la voie 100 % locale. |
 | 1:32 | 04 · Votre version | `git clone`, « Code publié sur GitHub. », licence MIT, vos règles (exemple réel `CLT-204518` → `[CLIENT_ID_1]`), votre serveur (`docker compose`), contribuer (`/issues`). |
-| 1:45 | 05 · Les mesures | Campagne publique du 26 octobre 2026 (moteur déployé) : tests automatisés (lus dans `quality.json`), 91,9 % des 450 000 documents synthétiques sans fuite, 63,7 % des documents piégés sans fuite (51 façons de déguiser un identifiant), 14 jeux de textes réels annotés, dont 6 français, et 8 178 documents, 16,5 à 93 % des documents réels français sans fuite selon la famille, BODACC 89,9 % sans fuite et 97,8 % des mentions masquées. Les pourcentages sont tous des parts de documents sans fuite, la mesure de l’indice (sauf les 97,8 % de mentions du BODACC). |
-| 2:07 | 05 · Les mesures | L’indice de confiance, 61,8 % [58,6–66,9] (lu dans `quality.json` ; « Mesure en cours » tant qu’il manque), mentions masquées, précision BODACC et BOAMP, texte neutre masqué à tort, la campagne du 26 octobre 2026 et ses 1 019 385 documents, quatre limites (presse ancienne et MAPA FR : un document sur six sans fuite ; BOAMP : 4 avis sur 10 gardent une mention lisible ; noms allemands, espagnols, italiens, néerlandais, portugais non détectés ; une première barrière), `gardienrgpd.fr/#protocole`. |
+| 1:45 | 05 · Les mesures | Campagne publique du protocole 1.1 (moteur déployé), chiffres lus dans `quality.json` : tests automatisés, part des documents synthétiques sans fuite (et leur nombre), part des documents difficiles sans fuite (toute l’équipe rouge, 51 façons de piéger un texte), 14 jeux de textes réels annotés, dont 6 français, et leurs documents, BOAMP puis BODACC sans fuite avec leurs mentions masquées. Les pourcentages sont des parts de documents sans fuite, la mesure de l’indice, sauf ceux des mentions. |
+| 2:07 | 05 · Les mesures | L’indice de confiance, protocole 1.1 (lu dans `quality.json` ; « Mesure en cours » tant qu’il manque), mentions masquées, précision BODACC et BOAMP, texte neutre masqué à tort, la campagne et ses documents, quatre limites (publiés à part : déguisements volontaires, OCR de mauvaise qualité, MAPA FR ; corpus réels déjà vus pendant la mise au point : chiffres optimistes ; noms allemands, espagnols, italiens, néerlandais, portugais non détectés ; une première barrière), `gardienrgpd.fr/#protocole`. |
 | 2:36 | Fin | « Le meilleur outil open source pour le RGPD et l’IA ! À vous de juger. », adresses, dépôt GitHub, « Offert par Flow Line Intégration », « Guillaume CLEMENT, CTO Data & IA », « Conception : Claude Design », licence MIT. |
 
 Chaque titre arrive avec son contenu (0,35 s d’écart) et les scènes s’enchaînent sans image vide : la suivante
@@ -57,8 +57,8 @@ commence 0,4 s avant la fin du fondu de la précédente.
 
 1080 × 1350, texte courant de 42 à 66 px, soit 15 à 24 px sur un téléphone de 390 px de large, contre 7 à 8 px pour
 le montage complet (adresses, commande et mentions de 28 à 40 px). Sept scènes : ouverture, problème, histoire, trois accès (« Par MCP, envoyez le fichier, pas un texte
-collé. »), votre version, mesures et limites (91,9 % des documents synthétiques sans fuite ; 16,5 % de la presse ancienne
-sans fuite, notre pire cas, même mesure ; l’indice de confiance avec son intervalle, sa définition et la date de la
+collé. »), votre version, mesures et limites (part des documents synthétiques sans fuite ; part de la presse ancienne
+sans fuite, OCR de mauvaise qualité publié à part, même mesure ; l’indice de confiance avec son intervalle, sa définition et la date de la
 campagne ; deux limites), fin. Les textes plus courts sont dans la clé `social` de `facts.*.json`.
 
 ### Refaire le rendu
@@ -93,29 +93,28 @@ Durée de rendu mesurée le 26 octobre 2026 sur ce poste (Windows 11, 16 cœurs 
 
 - **tests** : le plus petit de `tests_windows` et `tests_linux`, arrondi à la centaine inférieure, suivi de « + »
   (4 347 et 4 294 aujourd’hui → « 4 200+ ») ;
-- `redteam_operators` (51), `real_corpora` (14), `real_docs` (8 178) ;
+- `real_corpora` (14), `real_docs` (8 178) ;
+- **chiffres par famille du dernier protocole**, écrits par `site/tools/protocol_table.py` (« — » tant qu’ils
+  manquent ; la figure montre alors « — » et son texte sans chiffre) : `f_syn_nl` et `f_syn_docs` (synthétique),
+  `hard_index` (documents difficiles, toute l’équipe rouge), `f_boa_nl`, `f_boa_mr`, `f_bod_nl`, `f_bod_mr` (BOAMP, BODACC),
+  `f_old_nl` (presse ancienne, montage court) ;
 - **indice de confiance** : la valeur ne s’affiche que si `confidence_index`, `confidence_ci_low`,
-  `confidence_ci_high` et `mention_recall_pct` sont tous des nombres (le protocole ne publie l’indice qu’avec son
-  intervalle et à côté de la précision et du sur-masquage de la campagne, écrits dans `index.guards`) ; elle
-  s’affiche alors avec son intervalle, la ligne des garde-fous et « Campagne du 26 octobre 2026 : 1 019 385
-  documents » (`protocol_date` et `protocol_docs`, la date mise en toutes lettres ; sans date, la ligne s’en passe).
-  Sinon : « Mesure en cours ».
+  `confidence_ci_high` et `mention_recall_pct` sont tous des nombres ; elle s’affiche alors avec son intervalle, la
+  ligne des garde-fous (`index.guards` : mentions masquées, précision BODACC `f_bod_pr` et BOAMP `f_boa_pr`, texte
+  neutre masqué à tort `g_overmask` ; sans ces clés, `index.guards_nodata`, les mentions seules) et « Campagne du
+  … : … documents » (`protocol_date` et `protocol_docs`, la date mise en toutes lettres ; sans date, la ligne s’en
+  passe). Sinon : « Mesure en cours ». Le montage court a sa propre ligne de garde-fous, plus courte
+  (`social.index.guards`), et une définition datée (`social.index.definition`, où `{date}` devient la date de la
+  campagne).
 
-Les autres chiffres des mesures viennent de la campagne publique du 26 octobre 2026
-(`benchmarks/results/protocol-2026-10-26.md`) et sont écrits dans `facts.*.json` : 91,9 % des documents
-synthétiques sans fuite, 63,7 % des documents piégés sans fuite, 16,5 à 93 % des documents réels français sans
-fuite selon la famille, BODACC 89,9 % sans fuite (97,8 % des mentions), presse ancienne 16,5 % (montage court),
-BOAMP 4 avis sur 10 avec une mention lisible (limites), et la ligne des
-garde-fous (`index.guards` : mentions masquées lues dans `quality.json`, précision BODACC 99,1 % et BOAMP 87,3 %,
-texte neutre masqué à tort 0,07 %). Le montage court a sa propre ligne de garde-fous, plus courte
-(`social.index.guards`), et une définition datée (`social.index.definition`, où `{date}` devient la date de la
-campagne).
+Dans `facts.*.json`, `{q.clé}` est une valeur de `quality.json` (une ou deux décimales, comme elle y est écrite) ;
+`fallback_fig` et `fallback_label` la remplacent quand elle manque. Aucun chiffre d’une campagne n’y est écrit en dur.
 
 ### Après une nouvelle campagne
 
-Après `python tools/protocol/merge_quality.py …` (docs/PROTOCOLE.md), reporter les chiffres de la nouvelle campagne
-dans `facts.*.json` (figures des mesures, `index.guards`, `social.index.guards`, limites, sources), puis relancer
-`python video/render.py` : les quatre vidéos, leurs affiches et leurs transcriptions se refont. Regarder ensuite
+Lancer `python site/tools/protocol_table.py benchmarks/results/protocol-<version>-<date>.json` (indice, tableau par
+famille du site, README), puis `python video/render.py` : les quatre vidéos, leurs affiches et leurs transcriptions
+se refont avec les nouveaux chiffres. Relire les limites de `index.limits` si le protocole change. Regarder ensuite
 `out/review/timeline-*.txt` (« problems: none », la ligne « read from site/data/quality.json ») et les planches des
 scènes « Testé, mesuré, publié » et « Comment nous nous notons ». Même chose quand `tests_windows` et `tests_linux`
 changent. Le site cite chaque fichier avec son empreinte (`?v=`) : la reporter dans les deux pages après le rendu
@@ -128,10 +127,9 @@ La vidéo dit ce qui est vrai aujourd’hui ; avant de la publier, vérifier :
 - le dépôt `github.com/FlowLineIntegration/GDPRGuardian` est public (`git clone`, `/issues`) ;
 - la voie 100 % locale (plugin Claude, paquet Python) : tant que le paquet n’est pas sur PyPI, le site renvoie
   au guide de la version locale (archives de `skills/`) ;
-- le protocole est « écrit avant la mesure » (vrai depuis le 25 octobre) et ses empreintes ont été publiées avant la
-  campagne (`PROTOCOL-REGISTRATION.json`) ;
-- les chiffres des mesures sont ceux de la campagne du 26 octobre 2026, sur le moteur déployé
-  (`1.0.0+0c3ff9fc1fb0`) ; si un autre moteur est déployé, ils ne valent plus pour lui : nouvelle campagne, puis
+- le protocole 1.1 et ses empreintes ont été publiés avant la campagne (`PROTOCOL-REGISTRATION-1.1.json`) ;
+- les chiffres des mesures sont ceux de la dernière campagne du protocole 1.1, sur le moteur déployé (`protocol_engine`
+  dans `quality.json`) ; si un autre moteur est déployé, ils ne valent plus pour lui : nouvelle campagne, puis
   nouveaux chiffres.
 
 ### Retoucher
@@ -178,11 +176,11 @@ Chaque chiffre affiché a sa source dans la clé `sources` de `facts.fr.json` et
 | Clés de contrôle officielles ; une règle par balise ; 2 Ko en moins d’une milliseconde | `README.md` ; `site/data/quality.json` (`ms_per_doc` 0,56) ; `benchmarks/results/bench-2026-10-26-standard-rules3.md` |
 | Par MCP, le fichier ne passe pas par le modèle ; un texte collé est déjà parti | `site/templates/index.fr.html`, « Utiliser » |
 | `CLT-204518` → `[CLIENT_ID_1]` | `README.md`, « Vos règles en plus », vérifié avec le moteur |
-| Tests, 51, 14 jeux de textes réels annotés, 8 178 documents | `site/data/quality.json`, lu à chaque rendu |
-| 91,9 % (synthétique), 63,7 % (équipe rouge), 16,5 à 93 % (textes réels français, par famille), BODACC 89,9 % et 97,8 %, presse ancienne 16,5 % | campagne du 26 octobre 2026, `benchmarks/results/protocol-2026-10-26.md` |
+| Tests, 14 jeux de textes réels annotés et leurs documents | `site/data/quality.json`, lu à chaque rendu |
+| Synthétique, documents difficiles (toute l’équipe rouge), BOAMP, BODACC (sans fuite, mentions), presse ancienne | dernière campagne du protocole 1.1 (`benchmarks/results/protocol-1.1-<date>.md`), via `site/data/quality.json` (`f_*`, `hard_index`), lu à chaque rendu |
 | Indice de confiance, intervalle, mentions masquées, campagne | `site/data/quality.json`, lu à chaque rendu |
-| Précision BODACC 99,1 %, BOAMP 87,3 % ; texte neutre masqué à tort 0,07 % | garde-fous de la campagne du 26 octobre 2026 |
-| Limites | campagne du 26 octobre 2026 (presse ancienne 16,5 %, MAPA FR 16,7 % ; BOAMP 60,7 % sans fuite ; hors périmètre 0 %) ; `README.md`, « Avertissement » |
+| Précision BODACC, BOAMP ; texte neutre masqué à tort | garde-fous de la même campagne, via `site/data/quality.json` (`f_bod_pr`, `f_boa_pr`, `g_overmask`) |
+| Limites | `docs/PROTOCOLE.md`, « Version 1.1 » (familles publiées à part, moitiés test non aveugles) ; hors périmètre, 0 % des mentions à la campagne 1.0 (`benchmarks/results/`) ; `README.md`, « Avertissement » |
 
 Rien d’autre n’est affirmé : ni hébergement, ni certification, ni nombre d’utilisateurs.
 
@@ -211,15 +209,14 @@ Durations follow the text (see “Reading rule”); English timings are within a
    the file: it never goes through the model. Pasted text has already left.”; the 100% local path.
 5. **Your own version (1:31)**: `git clone`, “Code published on GitHub.”, MIT licence, your
    rules (`CLT-204518` → `[CLIENT_ID_1]`), your server (`docker compose`), contribute (`/issues`).
-6. **The numbers (1:45)**, all from the public run of 26 October 2026 on the deployed engine: tests (from
-   `quality.json`), 91.9% of 450,000 synthetic documents with no leak, 63.7% of adversarial documents with no leak
-   (51 ways to disguise an identifier), 14 annotated real-text datasets, 6 of them French, and 8,178 documents,
-   16.5–93% of real French documents with no leak by family, BODACC 89.9% with no leak and 97.8% of mentions
-   masked; the confidence index, 61.8% [58.6–66.9] (from `quality.json`), the guards, the run and its 1,019,385
-   documents, four known limits (old newspapers and MAPA FR: one document in six with no leak; BOAMP: 4 notices in
-   10 keep a readable mention; German, Spanish, Italian, Dutch, Portuguese names not detected; a first barrier),
-   `gdprguardian.com/#protocol`. Every percentage is a share of documents with no leak, the index’s own measure
-   (except BODACC’s 97.8% of mentions).
+6. **The numbers (1:45)**, all from the latest public run of protocol 1.1 on the deployed engine, read from
+   `quality.json`: tests, the share of synthetic documents with no leak (and their count), the share of difficult
+   documents with no leak (the whole red team, 51 ways to trap a text), 14 annotated real-text datasets, 6 of them French, and their
+   documents, BOAMP then BODACC with no leak and their mentions masked; the confidence index, protocol 1.1, the guards,
+   the run and its documents, four known limits (published apart: deliberate obfuscations, low-quality OCR, MAPA FR;
+   real corpora already seen while tuning: optimistic figures; German, Spanish, Italian, Dutch, Portuguese names not
+   detected; a first barrier), `gdprguardian.com/#protocol`. Every percentage is a share of documents with no leak,
+   the index’s own measure, except the mentions masked.
 7. **Closing (2:38)**: the owner’s line, addresses, GitHub repository, “Offered by Flow Line Intégration”, “Guillaume
    CLEMENT, CTO Data & AI”, “Design: Claude Design”, MIT licence.
 
@@ -227,8 +224,8 @@ Durations follow the text (see “Reading rule”); English timings are within a
 
 1080 × 1350, body text from 42 to 66 px (15 to 24 px on a 390 px wide phone; addresses, command and credits 28 to
 40 px), seven scenes: opening, problem, story,
-three ways in, your own version, numbers with limits (91.9% of synthetic documents with no leak against 16.5% of
-old newspapers, the same measure; the index card with its definition and the run’s date), closing. Its shorter texts
+three ways in, your own version, numbers with limits (the share of synthetic documents with no leak against that of
+old newspapers, low-quality OCR published apart, the same measure; the index card with its definition and the run’s date), closing. Its shorter texts
 live in the `social` key of `facts.*.json`.
 
 ### Re-render
@@ -238,14 +235,16 @@ Then `python video/render.py` (all four videos), or `--lang fr|en|all` and `--fo
 `--check`, `--frame 42.5 60`, `--quality FILE`, `--crf N`, `--tmp DIR` (see the French section).
 
 **What the video reads from `site/data/quality.json`** at every render: the test count (the smaller of
-`tests_windows` and `tests_linux`, rounded down to the hundred, then “+”), `redteam_operators`, `real_corpora`,
-`real_docs`, and the confidence index. The index value shows only when `confidence_index`, `confidence_ci_low`,
-`confidence_ci_high` and `mention_recall_pct` are all numbers, with its
-interval, the guards line and the run (`protocol_date` written out, `protocol_docs`); otherwise “Being measured”.
-The other figures come from the run of 26 October 2026 (`benchmarks/results/protocol-2026-10-26.md`) and are
-written in `facts.*.json`, the guards line included (`index.guards`, and `social.index.guards` for the short cut).
-**After a new run**, update those figures in `facts.*.json`, re-run `python video/render.py`, check
-`out/review/timeline-*.txt` and the contact sheets, then the pages' `?v=` digests and the 4:5 cut's size.
+`tests_windows` and `tests_linux`, rounded down to the hundred, then “+”), `real_corpora`, `real_docs`, the
+per-family figures of the latest protocol written by `site/tools/protocol_table.py` (`f_syn_nl`, `f_syn_docs`,
+`hard_index`, `f_boa_nl`, `f_boa_mr`, `f_bod_nl`, `f_bod_mr`, `f_old_nl`; “—” until measured, and the figure then shows
+“—” with a text without a number), and the confidence index. The index value shows only when `confidence_index`,
+`confidence_ci_low`, `confidence_ci_high` and `mention_recall_pct` are all numbers, with its interval, the guards line
+(`f_bod_pr`, `f_boa_pr`, `g_overmask`; without them `index.guards_nodata`, mentions only) and the run (`protocol_date`
+written out, `protocol_docs`); otherwise “Being measured”. No run figure is hard-coded in `facts.*.json`.
+**After a new run**, run `python site/tools/protocol_table.py benchmarks/results/protocol-<version>-<date>.json`, then
+`python video/render.py`; check `out/review/timeline-*.txt` and the contact sheets, then the pages' `?v=` digests
+and the 4:5 cut's size.
 
 **Before posting**, see the French checklist: the local install available (PyPI), and the figures still those of the
 deployed engine.

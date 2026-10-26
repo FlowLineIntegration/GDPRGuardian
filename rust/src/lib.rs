@@ -160,6 +160,7 @@ fn parse_recognizer(
         Some("hex") => Boundary::Hex,
         Some("phone") => Boundary::Phone,
         Some("digit") => Boundary::Digit,
+        Some("group") => Boundary::Group,
         Some("none") => Boundary::None,
         _ => Boundary::Alnum,
     };

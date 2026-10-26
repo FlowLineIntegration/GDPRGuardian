@@ -1,6 +1,508 @@
 # Protocole public d'auto-évaluation de Gardien RGPD
 
-> **English summary.** GDPR Guardian rates itself under this public protocol, version 1.0, **written on
+## Version 1.1 (26 octobre 2026)
+
+Écrite le **26 octobre 2026**, après la première campagne (protocole 1.0) et **avant toute campagne 1.1**. Le
+résultat 1.0 reste publié tel quel : **61,8 % [58,6–66,9]**, sept familles, moteur `1.0.0+0c3ff9fc1fb0`
+([`benchmarks/results/protocol-2026-10-26.md`](../benchmarks/results/protocol-2026-10-26.md)). Les sections 1 à 15
+plus bas sont le texte de la version 1.0 ; elles restent en vigueur sauf là où cette section dit autre chose. La
+version 1.1 publie **deux indices**, chacun avec son intervalle à 95 % : **« documents normalisés »**, l'indice
+principal (cible : 95 % ou plus), et **« documents difficiles »** (le mieux possible). Ce choix des deux indices a été
+fait le 26 octobre 2026 dans l'après-midi, avant tout enregistrement publié et toute campagne 1.1 ; il remplace un
+premier jet à indice unique (cinq familles), jamais enregistré (tableau plus bas). Les définitions exécutables sont dans
+[`tools/protocol/spec.py`](../tools/protocol/spec.py) (`PROTOCOL_VERSION = "1.1"`, `USE_CASE`, `REDTEAM_EVERYDAY`,
+`REDTEAM_OBFUSCATION`, `REDTEAM_OCR`, `INDEXES`, `NORMALISED_TARGET`, `FAMILIES`, `HARD_FAMILIES`, `APART_FAMILIES`).
+Les résultats 1.1 s'écrivent dans `benchmarks/results/protocol-1.1-<date>.{json,md}` (la version est dans le nom : une
+campagne 1.1 lancée le 26 octobre ne peut pas écraser le fichier 1.0 du même jour, et `run-protocol.sh finish` refuse
+d'écraser un résultat déjà présent).
+
+### Pourquoi une version 1.1
+
+La version 1.0 notait le produit contre tout ce qu'on peut lui envoyer : journaux du XIXe siècle passés à l'OCR,
+identifiants déguisés exprès (alphabets mathématiques, caractères invisibles…), six textes juridiques européens. Le
+responsable du produit, après la première campagne : « On doit s'évaluer pour un usage précis » ; « RGPD ce sont des
+personnes, du coup les noms de sociétés, quel est le problème ? » ; « On masque toutes les adresses, tél. etc. et un
+maximum de noms » ; « On doit imposer une certaine qualité ; on indiquera une performance dégradée sur les documents
+OCR de mauvaise qualité ». La version 1.1 note donc le produit **pour l'usage qu'il vise**, et publie à part, avec
+leurs chiffres, ce qui sort de cet usage. Puis, sur le premier jet de la 1.1, qui gardait dans l'indice l'équipe rouge
+des formats du quotidien : « Les textes piégés ne sont pas représentatifs de l'usage cible : on va donner 2 notes, sur
+documents normalisés, sur documents difficiles. On vise +95 % sur documents normalisés et le mieux possible sur les
+autres. » D'où les deux indices :
+
+- **Documents normalisés** (l'indice principal, clés `confidence_*` du site) : des documents tels qu'ils s'écrivent,
+  sans dégât de copie ni déguisement : courriels, demandes et documents internes du corpus synthétique, et les corpus
+  réels français annotés (avis BODACC et BOAMP, débats ParlaMint-FR ; point 3 plus bas). Moyenne à poids égal (1/4
+  chacune) de quatre familles : synthétique FR, BODACC, BOAMP, ParlaMint-FR (moitié `test` des corpus réels).
+  **Cible : 95 % ou plus.** La cible est un objectif déclaré, pas un garde-fou : le chiffre se publie quel qu'il soit,
+  avec son intervalle.
+- **Documents difficiles** (clés `hard_*` du site) : les documents de l'équipe rouge, **tous ses opérateurs (51)** en
+  trois groupes, publiés un à un : formats du quotidien abîmés par une copie, un retour à la ligne ou une saisie
+  (25 opérateurs) ; déguisements volontaires (25) ; bruit d'OCR (1). **Pondération** : chaque document muté compte
+  une fois (tous les opérateurs mis en commun) ; un opérateur pèse donc le nombre de documents qu'il modifie, et un
+  groupe sa part des documents (sur la moitié `dev` : 51,7 %, 46,1 % et 2,2 %). Intervalle : bootstrap stratifié par
+  groupe (chaque groupe garde son nombre de documents), 2 000 tirages, graine 20261025. Pourquoi ce choix : c'est la
+  mesure de la famille équipe rouge de la version 1.0 (mêmes 51 opérateurs, mêmes documents, même mise en commun),
+  donc comparable d'une version à l'autre ; un poids égal par groupe donnerait à l'unique opérateur d'OCR le poids des
+  25 opérateurs de chacun des deux autres groupes. Le détail par groupe et par opérateur est publié avec l'indice.
+
+Les deux indices utilisent la même mesure (part des documents où rien de ce que le produit promet de masquer ne reste
+lisible, section 5 et point 2 plus bas). Presse ancienne, MAPA FR, autres langues et témoin Judilibre restent publiés
+à part, dans aucun des deux indices.
+
+**Ce choix n'est pas aveugle.** Il est fait avant toute mesure 1.1, mais **après** la publication des chiffres 1.0
+par famille sur ces mêmes moitiés `test` : on savait que la presse ancienne (16,5 %) et MAPA FR (16,7 %) étaient les
+deux familles les plus basses. Sur les moitiés `dev`, même moteur (tableau plus bas), le premier jet faisait passer
+l'indice de 59,7 % à 77,4 %, soit **+17,7 points : +19,1 pour la sortie de la presse ancienne et de MAPA FR, −1,3
+pour l'équipe rouge restreinte aux formats du quotidien, −0,1 pour le gold BOAMP corrigé**. Les deux indices sont
+décidés **après** ce premier jet, donc en sachant que l'équipe rouge du quotidien était la famille la plus basse qu'il
+gardait (56,0 % sur la moitié `dev`, 57,2 % sur la moitié `test` 1.0), et pendant la mise au point du moteur 1.0.1,
+dont des chiffres par famille étaient connus. La sortir de l'indice principal le fait passer, même moteur 1.0, de
+77,4 % à **82,8 %** (**+5,4 points**, soit +23,1 depuis l'indice 1.0) ; elle n'est pas retirée pour autant : elle
+compte, avec les déguisements et l'OCR, dans l'indice « documents difficiles », publié à côté (62,3 % sur la même
+moitié `dev`). Tout le gain de l'indice principal vient donc de familles qui en sortent ; toutes restent publiées,
+avec leurs chiffres.
+
+**Sections 8 et 12 en 1.1.** Ce qu'elles disent des poids vaut pour l'indice 1.0 à sept familles ; pour l'indice
+principal 1.1, cela change, et dans le sens qui l'embellit :
+
+- les deux familles qui **favorisent** l'indice pèsent **la moitié** de l'indice principal au lieu de 2/7 : le
+  synthétique (mêmes gabarits que ceux sur lesquels le moteur a été réglé) et ParlaMint-FR (gold partiel : un nom non
+  annoté ne compte pas comme fuite, son chiffre est une borne haute) ; ParlaMint-FR seule pèse **un quart** au lieu
+  d'un septième, sur 143 documents notés dans la moitié `test` 1.0 ;
+- l'équipe rouge, qui pesait contre l'indice, en sort : « écarter les documents difficiles » (section 8), c'est ce que
+  fait l'indice principal 1.1 ; ils ne sont pas retirés pour autant, ils forment l'indice « documents difficiles »,
+  publié à côté avec son détail par groupe ;
+- poids réel (section 12) : trois quarts de l'indice principal reposent sur les documents notés des moitiés `test` de
+  BODACC, BOAMP et ParlaMint-FR, 2 886 dans la campagne 1.0 (1 335, 1 408 et 143), au lieu de cinq septièmes sur
+  3 164 ;
+- « le volume : poids égal par famille » (section 8) ne vaut que pour l'indice principal : l'indice difficile met
+  tous ses documents en commun, un opérateur y pèse le nombre de documents qu'il modifie.
+
+### Les changements
+
+1. **Un usage précis.** Les textes que les organisations envoient à une IA : courriels (en-têtes, signatures, fils
+   cités), demandes collées dans une conversation, documents internes (comptes rendus, courriers RH, contrats,
+   factures, notes CRM, tickets), en français, en texte ou en fichiers bureautiques, **écrits de bonne foi** (un
+   salarié ne cherche pas à tromper l'outil).
+2. **Ce qu'est une fuite.** Un seul caractère lisible d'une **adresse postale**, d'un **numéro de téléphone**, d'une
+   **adresse électronique** ou d'un **autre identifiant direct** (numéros nationaux, IBAN, cartes, plaques…), **quel
+   qu'en soit le titulaire**, ou du **nom d'une personne physique**. Les **noms de sociétés ne comptent pas**, ni comme
+   fuite ni comme sur-masquage du texte neutre (la précision au caractère publiée compte toujours un nom de société
+   masqué comme un masquage inutile, comme en 1.0). Le moteur garde lisibles la plupart des raisons sociales, **pas
+   toutes** : une société qui porte le nom d'une personne (« SARL DUPONT ») peut être masquée comme une personne
+   (`SARL [PERSONNE_1]`), ce que l'arrêt cité plus bas admet, puisqu'un tel nom identifie une personne physique. Le
+   RGPD protège les personnes
+   physiques ; son considérant 14 dit qu'il « ne couvre pas
+   le traitement des données à caractère personnel qui concernent les personnes morales, et en particulier des
+   entreprises dotées de la personnalité juridique, y compris le nom, la forme juridique et les coordonnées de la
+   personne morale », et la Cour de justice a jugé qu'une personne morale ne peut invoquer la protection des données
+   que si son nom identifie une ou plusieurs personnes physiques (CJUE, 9 novembre 2010, *Volker und Markus Schecke
+   et Eifert*, C-92/09 et C-93/09). Un **entrepreneur individuel est une personne** : son nom, son SIREN et son SIRET
+   comptent. Les **coordonnées** d'une société comptent quand même (adresse, téléphone, courriel) : le moteur ne sait
+   pas à qui elles sont, et la règle du produit est de toutes les masquer (plus strict que le considérant 14). **Une
+   ville nommée seule, comme lieu** (« réunion à Lyon »), **n'est pas une adresse** ; un code postal suivi d'une ville,
+   sans voie ni boîte postale, non plus (c'est un lieu). Une adresse, c'est une voie (numéro, type et nom de voie,
+   complément, bâtiment) ou une boîte postale (BP, CS), avec le code postal et la ville qui la suivent ; un seul
+   caractère lisible de l'ensemble est une fuite. Ces règles étaient déjà celles du gold 1.0 (section 4) ; la 1.1 les
+   écrit et corrige les écarts trouvés (point 4).
+3. **Deux indices au lieu d'un.** **Documents normalisés**, l'indice principal : **quatre familles à poids égal
+   (1/4 chacune)** au lieu de sept : synthétique FR ; BODACC ; BOAMP ; ParlaMint-FR. **Documents difficiles** : l'équipe
+   rouge FR entière, **51 opérateurs en trois groupes**, chaque document muté comptant une fois (pondération et
+   intervalle : plus haut, « Pourquoi une version 1.1 »).
+   - **Formats du quotidien abîmés** (25 opérateurs), ce que produisent Word, Outlook, un PDF copié, un tableur,
+     Windows ou une saisie pressée : retour à la ligne (LF `line_break` ou CRLF `crlf`) **à l'intérieur de
+     l'identifiant** (« 06 12 34⏎56 78 », « 12 rue⏎des Lilas » ; un document entier aux fins de ligne Windows n'est
+     pas en cause, il est masqué comme le même document en LF) ; lettres espacées d'un PDF copié `letter_spacing`
+     (« J e a n ») ; espaces de toutes sortes `nbsp`, `narrow_nbsp`, `thin_space`, `figure_space`,
+     `ideographic_space`, tabulations `tab`, doubles espaces `double_space` ; séparateurs et regroupements de chiffres
+     `dots`, `hyphens`, `slashes`, `compact`, `regroup`, `en_dash_groups`, `nb_hyphen` ; coupure de mots
+     `pdf_hyphenation` et trait d'union conditionnel de Word `soft_hyphen` ; casse `upper`, `lower` et ordre « NOM
+     Prénom » `surname_first` ; accents retirés `strip_accents` et forme de normalisation Unicode décomposée `nfd` ;
+     Markdown `markdown_bold`.
+   - **Déguisements volontaires** (25 opérateurs ; ils ne servent qu'à cacher un identifiant aux machines, hors usage
+     de bonne foi) : alphabets et chiffres de substitution `math_bold`,
+     `fullwidth`, `superscript`, `arabic_indic`, `devanagari` ; sosies d'autres écritures `cyrillic`, `greek` ;
+     caractères invisibles insérés dans la valeur `zero_width_space`, `zero_width_joiner`, `word_joiner`, `bom`,
+     `bidi_mark`, `bidi_isolate`, `tag_chars`, `variation_selector`, `grapheme_joiner`, `hangul_filler` ; courriels
+     maquillés : entité HTML `at_entity`, encodage pour cent `at_percent`, arobase pleine chasse `at_fullwidth`,
+     arobase et point écrits en toutes lettres `at_brackets`, `at_parens`, `arobase`, `dot_brackets`, `dot_point`.
+   - **Bruit d'OCR : performance dégradée** (1 opérateur) : `ocr`, une confusion 0/O, 1/l, 5/S, 8/B.
+   **Publiés à part, avec leurs chiffres, dans aucun des deux indices** :
+   - **presse ancienne** (Europeana + HIPE), **OCR de mauvaise qualité : performance dégradée** ; hors de l'usage
+     visé (des journaux anciens numérisés), elle n'entre pas non plus dans l'indice difficile, où compte pourtant le
+     bruit d'OCR synthétique (`ocr`) : ses 272 documents notés (moitié `test` 1.0) y pèseraient environ 0,05 % des
+     quelque 549 000 documents mis en commun ; l'y mettre ne déplacerait cet indice que de 0,02 point environ ;
+   - **MAPA FR** : des textes juridiques européens (arrêts, actes), hors de l'usage visé ; s'y ajoutent 6 documents
+     notés dans la moitié `test` (un document déplaçait l'indice 1.0 de 2,4 points). La version 1.0 avait gardé MAPA
+     FR malgré ces 6 documents : la 1.1 **revient sur ce choix**, et le déclare. BODACC, BOAMP et ParlaMint-FR ne sont
+     pas non plus des textes envoyés à une IA ; ils restent parce que ce sont les seuls corpus réels français annotés
+     assez grands pour peser (156 à 1 500 documents notés par moitié) et que leurs identifiants (noms, adresses de
+     siège et de contact, téléphones, courriels) sont ceux de l'usage visé ;
+   - inchangés : autres langues (hors périmètre) et témoin négatif Judilibre.
+   Cas limites tranchés (les trois groupes comptent dans le même indice : un classement ne change que le détail par
+   groupe) : le trait d'union conditionnel (inséré par Word) et le trait d'union insécable sont du quotidien ; les
+   espaces idéographique et tabulaire aussi (« espaces de toutes sortes »), bien que rares en français ; les lettres
+   espacées aussi (`tools/eval/mutate.py` les décrit comme un artefact de PDF ; un premier jet de cette version les
+   classait parmi les déguisements, corrigé avant tout enregistrement publié : 0,0 % sans fuite sur la moitié `test`
+   1.0) ; « [at] », « (at) », « arobase », « [dot] », « (point) » sont des déguisements (leur seul but est de cacher
+   une adresse aux robots), même s'ils se voient dans de vrais avis publics. Tous les opérateurs passent toujours par
+   le service : **le plan de campagne, ses empreintes et sa durée ne changent pas**.
+4. **Gold contrôlé contre ce périmètre.** Synthétique : libellés `DIRECT` inchangés (organisations et villes déjà
+   quasi-identifiants, identifiants de sociétés déjà leurres, SIREN et SIRET d'entrepreneurs individuels seulement) ;
+   le générateur couvre courriels avec signature et réponse (« Re: », « -- »), tickets avec message cité
+   (« a écrit : », « > »), comptes rendus, fiches RH, contrats, factures, courriers, tableaux ; il n'a pas de gabarit
+   « note CRM » ni « demande collée dans une conversation » : non ajoutés (changer le générateur change les empreintes
+   enregistrées du plan), limite déclarée. BODACC : personnes physiques, toutes les adresses de voie (siège compris),
+   numéro RCS d'un entrepreneur individuel ; conforme. ParlaMint-FR : orateurs et personnes de la liste du corpus,
+   jamais d'organisation ; conforme (gold partiel, comme en 1.0). **BOAMP : deux écarts corrigés** dans
+   [`tools/corpus/build_boamp.py`](../tools/corpus/build_boamp.py) : (a) une adresse de partie dont la boîte postale
+   est collée à son numéro ou écrite avec des points (« BP60120 », « CS44416 », « C.S.80794 », aussi dans le champ
+   d'identification) ou dont la voie est écrite dans les champs code postal et ville (« 97122 Rue … ») était un
+   simple lieu : c'est une adresse ; (b) un service écrit dans le champ contact (« Groupe Maintenance … »,
+   « DGEEP-Direction … ») était une personne : ce n'en est pas une. Effet sur les 3 000 avis : 42 adresses ajoutées
+   (35 lieux requalifiés, et 7 nouvelles mentions), 5 « personnes » retirées, 40 documents touchés (22 `dev`, 18
+   `test`) ; textes identiques, construction reproductible au bit près (reconstruction 1.0 identique au cache :
+   SHA-256 `e87658ea3af8…`). Relecture de **toutes** les 82 zones changées : 0 erreur de libellé ; 5 des 42 adresses
+   ajoutées couvrent aussi un nom de service écrit dans le champ adresse (le constructeur prend le champ entier, comme
+   en 1.0) : bornes trop larges, donc plus sévères pour le moteur, gardées et déclarées. Les mesures d'erreur du gold
+   de la section 2 (BOAMP 2,1 % [1,0–4,5] des mentions) restent valables pour le reste.
+5. **Ce qui ne change pas** : définition de la lisibilité, de la fuite et des échecs (section 5), indice principal =
+   moyenne à poids égal des familles, bootstrap stratifié (2 000 tirages, graine 20261025), garde-fous (section 7),
+   partition `dev`/`test`, graines et plan de campagne (`spec.REGISTERED_PLAN`, 1 019 385 documents, environ 2 h 15
+   sur le serveur), outil, conteneur, route, options du service. **Restent comparables** entre 1.0 et 1.1 : chaque
+   famille et chaque corpus pris un à un (même mesure, même moitié `test`), sauf BOAMP (gold corrigé : 18 documents
+   `test` sur 1 477) ; l'indice « documents difficiles » se compare à la famille équipe rouge de la 1.0 (mêmes 51
+   opérateurs, mêmes documents, mise en commun identique) ; le détail par opérateur reste publié et comparable.
+   Attention : la clé `redteam_fr` des résultats garde son nom mais couvre **25 opérateurs en 1.1 (formats du
+   quotidien, dans l'indice difficile) et 51 en 1.0** ; comparer cette clé d'un résultat à l'autre compare deux
+   populations (le titre de la famille donne le nombre d'opérateurs) ; le chiffre 1.0 se compare à `hard_index`.
+   Dans le résultat 1.1, les trois groupes de l'équipe rouge sont rangés sous `families_apart` (que le site lit déjà)
+   avec `"index": "hard"`, et l'indice difficile sous `hard_index` (valeur, intervalle, rappel des mentions, détail
+   par groupe). **L'indice principal 1.1 n'est pas comparable à l'indice 1.0** : chaque résultat dit sa version.
+
+### Effet du seul changement de définition (moitiés `dev`, même moteur)
+
+Mesure en processus, le 26 octobre 2026, sur une **copie figée des sources du moteur prise avant toute modification
+de ce jour** (`src/`, empreinte des fichiers Python `2705f5a61871e723`), en Python pur : moitiés `dev` des corpus
+réels (celles qui ont servi à régler les règles) ; pour le synthétique et l'équipe rouge, la graine de développement
+20261024 (20 000 documents, puis 27 441 documents mutés depuis 600 bases), jamais notée par une campagne. Aucune
+moitié `test` n'a été mesurée. Les chiffres des deux indices 1.1 sont calculés depuis les mêmes décomptes par famille
+(nombre de documents notés et sans fuite) : l'indice ne dépend que de l'issue de chaque document, donc ses intervalles
+aussi. Décomptes et chiffres : [`index-definition-1.1-dev-halves-2026-10-26.json`](../benchmarks/results/index-definition-1.1-dev-halves-2026-10-26.json).
+
+| Famille (part des documents sans fuite) | Définition 1.0 | 1.1, documents normalisés | 1.1, documents difficiles (poids) |
+|---|---|---|---|
+| Synthétique FR (20 000 documents) | 92,0 % | 92,0 % | — |
+| BODACC, moitié `dev` (1 358 notés) | 89,0 % | 89,0 % | — |
+| BOAMP, moitié `dev` (1 464 notés ; 1 465 avec le gold 1.1) | 60,9 % | 60,3 % | — |
+| ParlaMint-FR, moitié `dev` (156 notés) | 89,7 % | 89,7 % | — |
+| Équipe rouge FR, 51 opérateurs (27 441 mutés) | 62,3 % | — | 62,3 % (100 %) |
+| · formats du quotidien abîmés, 25 opérateurs (14 197) | dans les 51 | — | 56,0 % (51,7 %) |
+| · déguisements volontaires, 25 opérateurs (12 647) | dans les 51 | — | 72,0 % (46,1 %) |
+| · bruit d'OCR, 1 opérateur (597) | dans les 51 | — | 7,9 % (2,2 %) |
+| Presse ancienne, moitié `dev` (295 notés) | 23,7 % | à part | à part |
+| MAPA FR, moitié `dev` (3 notés) | 0,0 % | à part | à part |
+| **Indice** | **59,7 % [58,6–60,8]**, 7 familles | **82,8 % [81,3–84,1]**, 4 familles | **62,3 % [61,8–62,9]**, 27 441 documents |
+
+L'intervalle 1.0 est étroit ici parce que les 3 documents MAPA FR de la moitié `dev` fuient tous (aucune variance) ;
+sur la moitié `test`, il allait de 58,6 à 66,9. **Indice principal** : de 59,7 % (1.0) à 82,8 % (1.1), **+23,1
+points**, tous venus de familles sorties de l'indice principal : sortie de la presse ancienne et de MAPA FR +19,1,
+équipe rouge restreinte aux formats du quotidien −1,3 et gold BOAMP 1.1 −0,1 (le premier jet), puis sortie de l'équipe rouge vers l'indice difficile +5,4 (le premier
+jet, cinq familles avec l'équipe rouge du quotidien, donnait 77,4 % [76,1–78,5] ; un jet antérieur à 24 opérateurs du
+quotidien, 77,9 % [76,8–79,0]). Avec le gold BOAMP 1.0, l'indice principal serait de 82,9 %. **Indice difficile** :
+62,3 %, exactement la famille équipe rouge de la 1.0 (mêmes opérateurs, mêmes documents, même mise en commun).
+
+Les chiffres BODACC, BOAMP et ParlaMint-FR de la moitié `dev` sont ceux de la campagne du 26 octobre (89,0 %, 60,9 %,
+89,7 %) : la copie figée se comporte comme le moteur de la campagne. Pour mémoire, recombiner les chiffres **déjà
+publiés** de la moitié `test` de la campagne 1.0 (aucune nouvelle mesure) selon les deux indices 1.1 donne : documents
+normalisés (91,9 + 89,9 + 60,7 + 93,0) / 4 ≈ **83,9 %** (BOAMP encore noté sur le gold 1.0) ; documents difficiles
+**63,7 %** sur 548 907 documents mutés, dont formats du quotidien 57,2 % (284 081), déguisements 73,6 % (252 895),
+OCR 8,6 % (11 931). Le seul changement de définition ne mène donc pas à la cible de 95 % : avec le moteur 1.0, il
+manque 11 à 12 points à l'indice principal, et les fuites qui restent sont dans l'usage visé (adresses et téléphones
+BOAMP, 60 % de documents sans fuite ; RIB présenté champ par champ dans le synthétique : 28 756 mentions, rappel
+0 %). Dans l'équipe rouge, un retour à la ligne **à l'intérieur** d'un identifiant, les lettres espacées d'un PDF, les
+barres obliques, doubles espaces et tabulations entre chiffres font l'essentiel des fuites des formats du quotidien.
+
+### Règles de la prochaine campagne
+
+- Les moitiés `test` ne sont plus aveugles : la campagne 1.0 du 26 octobre est listée dans `spec.EARLIER_CAMPAIGNS`
+  (le report vers le site refuse une campagne répétée qui l'omet) et dans `spec.TEST_HALVES_MEASURED_BEFORE`, avec
+  l'évaluation « rules3 » du 26 octobre ([`CORPUS_REELS.md`](CORPUS_REELS.md), section 13). Toute autre mesure d'une
+  moitié `test` faite avant la campagne 1.1 (mise au point du moteur 1.0.1 comprise) s'ajoute à
+  `spec.TEST_HALVES_MEASURED_BEFORE` et au tableau de la section 3, puis on enregistre à nouveau (section 15).
+- **Moitiés `test` non aveugles : une dérogation déclarée à la section 3.** La section 3 dit que, pour une version
+  ultérieure du moteur, l'indice principal devra passer sur des données neuves. La version 1.1 n'en a pas encore : le
+  moteur 1.0.1 est noté sur les **mêmes** moitiés `test`, mesurées au moins neuf fois avant (tableau de la section 3)
+  et dont les scores par famille, publiés, étaient connus pendant sa mise au point. **Les chiffres des corpus réels
+  de la campagne 1.1 sont donc optimistes**, et le résultat le dit à côté de l'indice. Des données neuves (parutions
+  BODACC et BOAMP postérieures au gel du moteur, construites avec les mêmes outils) restent l'engagement pour la
+  version suivante.
+- Le gold BOAMP 1.1 est celui de `build_boamp.py` à cette date ; le paquet des corpus réels de la campagne se
+  construit avec lui (`pack-real` sur le cache reconstruit). Son empreinte est enregistrée : SHA-256 de
+  `boamp_fr.jsonl` 1.1 = `435373ea39a1814a19b5cf4aa97801d955faefeb1753c09182bec56a35cac6f8` (celles des autres
+  fichiers du cache, inchangés, aussi : `PROTOCOL-REGISTRATION-1.1.json`, `real_corpora_sha256`).
+- L'enregistrement 1.1 se publie (dépôt public) **avec ses champs moteur remplis, avant le lancement** ; sans cela,
+  « publié avant le lancement » ne tient pas.
+- Le moteur est gelé et déployé avant l'enregistrement ; le contrôle croisé (section 11) est refait sur lui ; puis
+  `bundle`, `registration --bundle` (empreintes publiées dans `PROTOCOL-REGISTRATION-1.1.json` à la racine du dépôt,
+  avec la liste des changements), essai chronométré sur la moitié `dev`, campagne complète, `finish`, report vers le
+  site. Clés du site : `protocol_families` : 4 ; indice difficile : `hard_index`, `hard_ci_low`, `hard_ci_high`,
+  `hard_docs` (documents mutés notés), `hard_mention_recall_pct` ; détail par groupe : `f_red_*` (formats du
+  quotidien), `f_obf_*`, `f_ocr_*`.
+- Le résultat 1.1 se publie avec ses deux indices côte à côte, l'indice difficile et son détail par groupe aussi
+  visibles que l'indice principal, les familles publiées à part et le rappel du résultat 1.0. Le report vers le site
+  (`merge_quality.py`) refuse un résultat 1.1 sans indice difficile, et **refuse** tant que le site
+  (`site/templates/index.*.html`) ou le `README.md` montrent encore le texte de la version 1.0 (« 7 familles »,
+  « 51 déguisements »…) ou du premier jet 1.1 (« cinq familles », « 1/5 chacune », « restreinte aux 25 »…) hors d'une
+  ligne qui nomme la version 1.0 (« Protocole 1.0 : 61,8 % [58,6–66,9], 7 familles ») ; `--site-text-checked` après
+  relecture. « 51 façons » ou « 51 opérateurs » sont permis : l'indice difficile couvre les 51 opérateurs.
+- Limite de l'intervalle de l'indice difficile : le bootstrap tire les documents mutés un à un, alors que chaque
+  document de base donne jusqu'à 51 documents mutés, dont les issues se ressemblent ; l'intervalle est donc trop
+  étroit (il ne couvre pas la variabilité des documents de base, 12 000 dans la campagne). Limite déclarée, non
+  corrigée en 1.1 (les issues par document de base ne sont pas gardées).
+
+### English version
+
+Written on **26 October 2026**, after the first campaign (protocol 1.0) and **before any 1.1 campaign**. The 1.0
+result stays published as it is: **61.8% [58.6–66.9]**, seven families, engine `1.0.0+0c3ff9fc1fb0`
+(`benchmarks/results/protocol-2026-10-26.md`). Sections 1 to 15 below are the text of version 1.0; they remain in
+force except where this section says otherwise. Version 1.1 publishes **two indexes**, each with its 95% interval:
+**"normalised documents"**, the headline (target: 95% or more), and **"difficult documents"** (as good as possible).
+The two indexes were decided on 26 October 2026 in the afternoon, before any published registration and any 1.1
+campaign; they replace a single-index first draft (five families), never registered (table below). Executable
+definitions: `tools/protocol/spec.py` (`PROTOCOL_VERSION = "1.1"`, `USE_CASE`, `REDTEAM_EVERYDAY`,
+`REDTEAM_OBFUSCATION`, `REDTEAM_OCR`, `INDEXES`, `NORMALISED_TARGET`, `FAMILIES`, `HARD_FAMILIES`, `APART_FAMILIES`).
+The 1.1 results are
+written to `benchmarks/results/protocol-1.1-<date>.{json,md}`: the version is in the name, so a 1.1 campaign run on
+26 October cannot overwrite the 1.0 file of the same day, and `run-protocol.sh finish` refuses to overwrite any result
+already there.
+
+**Why.** Version 1.0 rated the product against anything one could send it: 19th-century newspapers through OCR,
+identifiers disguised on purpose (mathematical alphabets, invisible characters…), six EU legal texts. The product
+owner, after the first campaign: "We must rate ourselves for a precise use"; "GDPR is about people, so company names,
+what is the problem?"; "We mask every address, phone, etc. and as many names as possible"; "We must require a certain
+quality; we will state degraded performance on poor-quality OCR documents". Version 1.1 rates the product **for the
+use it is made for** and publishes apart, with their figures, what falls outside it. Then, on the 1.1 first draft,
+which kept the everyday-format red team in the index: "The trapped texts are not representative of the target use: we
+will give 2 scores, on normalised documents, on difficult documents. We aim for 95%+ on normalised documents and the
+best possible on the others." Hence the two indexes:
+
+- **Normalised documents** (the headline, site keys `confidence_*`): documents as they are written, with no copy
+  damage nor disguise: the synthetic corpus's e-mails, requests and internal documents, and the annotated French real
+  corpora (BODACC and BOAMP notices, ParlaMint-FR debates; item 3 below). Equal-weight mean (1/4 each) of four
+  families: synthetic FR, BODACC, BOAMP, ParlaMint-FR (test half of the real corpora). **Target: 95% or more.** The
+  target is a declared goal, not a guard: the figure is published whatever it is, with its interval.
+- **Difficult documents** (site keys `hard_*`): the red-team documents, **all its operators (51)** in three groups,
+  each published: everyday formats damaged by a copy, a line break or typing (25 operators); deliberate obfuscations
+  (25); OCR noise (1). **Weighting**: every mutated document counts once (all operators pooled); an operator therefore
+  weighs the number of documents it alters, and a group its share of the documents (on the dev half: 51.7%, 46.1% and
+  2.2%). Interval: bootstrap stratified by group (each group keeps its document count), 2,000 resamples, seed
+  20261025. Why: it is the 1.0 red-team family's measure (same 51 operators, same documents, same pooling), so it
+  stays comparable across versions; equal weight per group would give the single OCR operator the weight of the 25
+  operators of either other group. The per-group and per-operator detail is published with the index.
+
+Both indexes use the same measure (share of documents in which nothing the product promises to mask stays readable,
+section 5 and item 2 below). Old press, MAPA FR, other languages and the Judilibre control stay published apart, in
+neither index.
+
+**This choice is not blind.** It is made before any 1.1 measurement, but **after** the 1.0 per-family figures on the
+same test halves were published: old press (16.5%) and MAPA FR (16.7%) were known to be the two lowest families. On
+the dev halves, same engine (below), the first draft moved the index from 59.7% to 77.4%, i.e. **+17.7 points: +19.1
+from moving old press and MAPA FR out, −1.3 from restricting the red team to everyday formats, −0.1 from the corrected
+BOAMP gold**. The two indexes were decided **after** that first draft, hence knowing that the everyday red team was the
+lowest family it kept (56.0% on the dev half, 57.2% on the 1.0 test half), and while engine 1.0.1 was being tuned,
+with some of its per-family figures known. Moving it out of the headline raises it, same 1.0 engine, from 77.4% to
+**82.8%** (**+5.4 points**, +23.1 from the 1.0 index); it is not dropped: with the obfuscations and OCR it counts in
+the "difficult documents" index, published next to it (62.3% on the same dev half). All of the headline's gain thus
+comes from families moved out of it; all stay published, with their figures.
+
+**Sections 8 and 12 under 1.1.** What they say about weights holds for the seven-family 1.0 index; for the 1.1
+headline it changes, and in the direction that flatters it:
+
+- the two families that **favour** the index weigh **half** of the headline instead of 2/7: synthetic (the same
+  templates the engine was tuned on) and ParlaMint-FR (partial gold: an unannotated name does not count as a leak, its
+  figure is an upper bound); ParlaMint-FR alone weighs **a quarter** instead of a seventh, on 143 scored documents in
+  the 1.0 test half;
+- the red team, which weighed against the index, leaves it: "dropping hard documents" (section 8) is what the 1.1
+  headline does; they are not removed, they make the "difficult documents" index, published next to it with its
+  per-group detail;
+- real weight (section 12): three quarters of the headline rest on the scored test-half documents of BODACC, BOAMP and
+  ParlaMint-FR, 2,886 in the 1.0 campaign (1,335, 1,408 and 143), instead of five sevenths on 3,164;
+- "Volume: equal weights" (section 8) holds for the headline only: the difficult index pools all its documents, an
+  operator weighs there the number of documents it alters.
+
+**Changes.** (1) **One use case**: texts organisations send to an AI — e-mails (headers, signatures, quoted threads),
+requests pasted into a chat, internal documents (minutes, HR letters, contracts, invoices, CRM notes, tickets) — in
+French, as text or office files, written in good faith (an employee is not trying to fool the tool).
+
+(2) **Scope of a leak**: one readable character of a postal address, phone number, e-mail address or other direct
+identifier (national numbers, IBAN, cards, plates…), **whoever it belongs to**, or of a natural person's name.
+**Company names do not count**, neither as a leak nor as over-masking of neutral text (the published character
+precision still counts a masked company name as an unneeded mask, as in 1.0). The engine keeps most company names
+readable, **not all**: a company named after a person ("SARL DUPONT") may be masked as a person (`SARL [PERSONNE_1]`),
+which the judgment cited below allows, since such a name identifies a natural person. GDPR recital 14 ("This
+Regulation does not cover the processing of personal data which concerns legal persons and in particular undertakings
+established as legal persons, including the name and the form of the legal person and the contact details of the
+legal person"); CJEU, 9 November 2010, *Volker und Markus Schecke and Eifert*, C-92/09 and C-93/09 (a legal person
+may claim data protection only in so far as its name identifies one or more natural persons). **Sole traders are
+persons**: their name, SIREN and SIRET count. A company's contact details still count (the engine cannot know their
+owner, and the product rule is to mask them all; stricter than recital 14). **A town named alone as a place is not an
+address** ("meeting in Lyon"), nor is a postcode followed by a town without a street or postal box (a place); an
+address is a street (number, street type and name, complement, building) or a postal box (BP, CS) with the postcode
+and town that follow; one readable character of it is a leak. These were already the 1.0 gold's rules (section 4);
+1.1 writes them down and fixes the departures found (item 4).
+
+(3) **Two indexes instead of one.** **Normalised documents**, the headline: **four families, equal weight (1/4
+each)** instead of seven: synthetic FR; BODACC; BOAMP; ParlaMint-FR. **Difficult documents**: the whole French red
+team, **51 operators in three groups**, every mutated document counting once (weighting and interval: above, "Why").
+- **Damaged everyday formats** (25 operators), what Word, Outlook, a copied PDF, a spreadsheet, Windows or hurried
+  typing produce: a line break (LF `line_break` or CRLF `crlf`) **inside the identifier** ("06 12 34⏎56 78", "12
+  rue⏎des Lilas"; a whole document with Windows line endings is not at issue, it is masked like the same document in
+  LF); copied-PDF letter spacing `letter_spacing` ("J e a n"); spaces of all kinds `nbsp`, `narrow_nbsp`,
+  `thin_space`, `figure_space`, `ideographic_space`, tabs `tab`, double spaces `double_space`; digit separators and
+  grouping `dots`, `hyphens`, `slashes`, `compact`, `regroup`, `en_dash_groups`, `nb_hyphen`; hyphenation
+  `pdf_hyphenation` and Word's optional hyphen `soft_hyphen`; case `upper`, `lower` and surname-first order
+  `surname_first`; stripped accents `strip_accents` and decomposed Unicode `nfd`; Markdown `markdown_bold`.
+- **Deliberate obfuscations** (25 operators; their only use is to hide an identifier from machines, outside
+  good-faith use): substitute alphabets and digits `math_bold`, `fullwidth`, `superscript`, `arabic_indic`,
+  `devanagari`; homoglyph scripts `cyrillic`, `greek`; invisible characters inserted in the value `zero_width_space`,
+  `zero_width_joiner`, `word_joiner`, `bom`, `bidi_mark`, `bidi_isolate`, `tag_chars`, `variation_selector`,
+  `grapheme_joiner`, `hangul_filler`; disguised e-mails: HTML entity `at_entity`, percent-encoding `at_percent`,
+  full-width at sign `at_fullwidth`, "at" and "dot" spelled out `at_brackets`, `at_parens`, `arobase`, `dot_brackets`,
+  `dot_point`.
+- **OCR noise: degraded performance** (1 operator): `ocr`, one 0/O, 1/l, 5/S, 8/B confusion.
+
+**Published apart with their figures, in neither index**:
+- **old press** (Europeana + HIPE), **low-quality OCR: degraded performance**; outside the target use (digitised old
+  newspapers), it is not in the difficult index either, where the synthetic OCR noise (`ocr`) does count: its 272
+  scored documents (1.0 test half) would weigh about 0.05% of the some 549,000 pooled documents; putting it in would
+  move that index by about 0.02 points only;
+- **MAPA FR**: EU legal texts (judgments, acts), outside the target use; on top of that, 6 scored test documents (one
+  document moved the 1.0 index by 2.4 points). Version 1.0 kept MAPA FR despite those 6 documents: 1.1 **reverses that
+  choice** and says so. BODACC, BOAMP and ParlaMint-FR are not texts sent to an AI either; they stay because they are
+  the only annotated French real corpora large enough to weigh (156 to 1,500 scored documents per half) and their
+  identifiers (names, head-office and contact addresses, phones, e-mails) are those of the target use;
+- unchanged: other languages (out of scope) and the Judilibre negative control.
+
+Edge cases decided (the three groups count in the same index: a classification only changes the per-group detail):
+Word's optional hyphen and the non-breaking hyphen are everyday; so are the ideographic and figure spaces ("spaces of
+all kinds"), though rare in French; so is letter spacing (`tools/eval/mutate.py` describes it as a PDF artefact; a
+first draft of this version listed it among the obfuscations, corrected before any published registration: 0.0% with
+no leak on the 1.0 test half); "[at]", "(at)", "arobase", "[dot]", "(point)" are obfuscations (their only purpose is to hide an address from robots),
+even though they appear in real public notices. Every operator still goes through the service: **the campaign plan,
+its fingerprints and its duration do not change**.
+
+(4) **Gold checked against this scope.** Synthetic: `DIRECT` labels unchanged (organisations and towns already
+quasi-identifiers, company identifiers already decoys, SIREN and SIRET of sole traders only); the generator covers
+e-mails with signature and reply ("Re:", "--"), tickets with a quoted message ("a écrit :", ">"), minutes, HR
+records, contracts, invoices, letters, tables; it has no "CRM note" or "chat request" template: not added (changing
+the generator changes the registered plan fingerprints), a declared limit. BODACC: natural persons, every street
+address (head office included), a sole trader's RCS number; conforms. ParlaMint-FR: speakers and persons from the
+corpus list, never an organisation; conforms (partial gold, as in 1.0). **BOAMP: two departures fixed** in
+`tools/corpus/build_boamp.py`: (a) a party address whose postal box is glued to its number or written with dots
+("BP60120", "CS44416", "C.S.80794", also in the identification field) or whose street sits in the postcode and town
+fields ("97122 Rue …") was a mere place: it is an address; (b) a service written in the contact field ("Groupe
+Maintenance …", "DGEEP-Direction …") was a person: it is not. On the 3,000 notices: 42 addresses added (35 places
+relabelled, 7 new mentions), 5 "persons" removed, 40 documents touched (22 dev, 18 test); texts identical;
+byte-reproducible build (the 1.0 rebuild is identical to the cache: SHA-256 `e87658ea3af8…`; the 1.1 file:
+`435373ea39a1814a19b5cf4aa97801d955faefeb1753c09182bec56a35cac6f8`, registered). All 82 changed spans reviewed: 0
+label error; 5 of the 42 new addresses also cover a service name written in the address field (the builder takes the
+whole field, as in 1.0): too wide, hence harsher on the engine, kept and disclosed. The section 2 gold-error figures
+(BOAMP 2.1% [1.0–4.5] of mentions) still hold for the rest.
+
+(5) **Unchanged**: readability, leak and failure definitions (section 5), equal-weight mean for the headline,
+stratified bootstrap (2,000 resamples, seed 20261025), guards (section 7), dev/test split, seeds and campaign plan
+(`spec.REGISTERED_PLAN`, 1,019,385 documents, about 2 h 15 on the server), tool, container, route, service options.
+Each family and each corpus remains comparable with 1.0 on its own (same measure, same test half), except BOAMP
+(corrected gold: 18 of 1,477 test documents); the "difficult documents" index compares with the 1.0 red-team family
+(same 51 operators, same documents, same pooling); the per-operator detail stays published and comparable. Note: the
+results key `redteam_fr` keeps its name but covers **25 operators in 1.1 (everyday formats, in the difficult index)
+and 51 in 1.0**; comparing that key across results compares two populations (the family title gives the operator
+count); the 1.0 figure compares with `hard_index`. In the 1.1 result the three red-team groups sit under
+`families_apart` (which the site already reads) with `"index": "hard"`, and the difficult index under `hard_index`
+(value, interval, mention recall, per-group detail). **The 1.1 headline index is not comparable with the 1.0 index**;
+every result names its version.
+
+**Effect of the definition change alone (dev halves, same engine).** In-process measurement on 26 October 2026 on a
+**frozen copy of the engine sources taken before any change of that day** (`src/`, Python-file fingerprint
+`2705f5a61871e723`), pure Python: dev halves of the real corpora (those used to tune the rules); development seed
+20261024 for synthetic and red team (20,000 documents, then 27,441 mutated from 600 bases), never scored by a
+campaign. No test half measured. The two 1.1 indexes are computed from the same per-family counts (documents scored
+and with no leak): the index only depends on each document's outcome, and so do its intervals. Counts and figures:
+`benchmarks/results/index-definition-1.1-dev-halves-2026-10-26.json`.
+
+| Family (share of documents with no leak) | 1.0 definition | 1.1, normalised documents | 1.1, difficult documents (weight) |
+|---|---|---|---|
+| Synthetic FR (20,000 documents) | 92.0% | 92.0% | — |
+| BODACC, dev half (1,358 scored) | 89.0% | 89.0% | — |
+| BOAMP, dev half (1,464 scored; 1,465 with the 1.1 gold) | 60.9% | 60.3% | — |
+| ParlaMint-FR, dev half (156 scored) | 89.7% | 89.7% | — |
+| Red team FR, 51 operators (27,441 mutated) | 62.3% | — | 62.3% (100%) |
+| · damaged everyday formats, 25 operators (14,197) | within the 51 | — | 56.0% (51.7%) |
+| · deliberate obfuscations, 25 operators (12,647) | within the 51 | — | 72.0% (46.1%) |
+| · OCR noise, 1 operator (597) | within the 51 | — | 7.9% (2.2%) |
+| Old press, dev half (295 scored) | 23.7% | apart | apart |
+| MAPA FR, dev half (3 scored) | 0.0% | apart | apart |
+| **Index** | **59.7% [58.6–60.8]**, 7 families | **82.8% [81.3–84.1]**, 4 families | **62.3% [61.8–62.9]**, 27,441 documents |
+
+The 1.0 interval is narrow here because the 3 MAPA FR dev documents all leak (no variance); on the test half it ran
+from 58.6 to 66.9. **Headline**: from 59.7% (1.0) to 82.8% (1.1), **+23.1 points**, all from families moved out of the
+headline: old press and MAPA FR out +19.1, red team restricted to everyday formats −1.3 and 1.1 BOAMP gold −0.1 (the
+first draft), then the red team moved to the difficult index +5.4 (the first draft, five families with the everyday red team, gave 77.4%
+[76.1–78.5]; an earlier draft with 24 everyday operators, 77.9% [76.8–79.0]). With the 1.0 BOAMP gold the headline
+would be 82.9%. **Difficult index**: 62.3%, exactly the 1.0 red-team family (same operators, same documents, same
+pooling).
+
+The BODACC, BOAMP and ParlaMint-FR dev-half figures are those of the 26 October campaign (89.0%, 60.9%, 89.7%): the
+frozen copy behaves like the campaign engine. For the record, recombining the **already published** test-half figures
+of the 1.0 campaign (no new measurement) along the two 1.1 indexes gives: normalised documents (91.9 + 89.9 + 60.7 +
+93.0) / 4 ≈ **83.9%** (BOAMP still on the 1.0 gold); difficult documents **63.7%** over 548,907 mutated documents, of
+which everyday formats 57.2% (284,081), obfuscations 73.6% (252,895), OCR 8.6% (11,931). The definition change alone
+therefore does not reach the 95% target: with the 1.0 engine the headline is 11 to 12 points short, and the remaining
+leaks are inside the target use (BOAMP addresses and phones, 60% of documents with no leak; field-by-field bank details
+in the synthetic corpus: 28,756 mentions, 0% recall). In the red team, a line break **inside** an identifier, PDF
+letter spacing, slashes, double spaces and tabs between digits make most of the everyday-format leaks.
+
+**Next campaign.**
+- The test halves are no longer blind: the 26 October 1.0 campaign is listed in `spec.EARLIER_CAMPAIGNS` (the site
+  merge refuses a repeat campaign that omits it) and in `spec.TEST_HALVES_MEASURED_BEFORE`, with the 26 October
+  "rules3" evaluation (`CORPUS_REELS.md`, section 13). Any other test-half measurement before the 1.1 campaign
+  (engine 1.0.1 tuning included) is added to `spec.TEST_HALVES_MEASURED_BEFORE` and to the section 3 table, then the
+  protocol is registered again (section 15).
+- **Test halves not blind: a declared departure from section 3.** Section 3 says that for a later engine version the
+  headline index must run on fresh data. Version 1.1 has none yet: engine 1.0.1 is rated on the **same** test halves,
+  measured at least nine times before (section 3 table), whose published per-family scores were known while it was
+  tuned. **The real-corpus figures of the 1.1 campaign are therefore optimistic**, and the result says so next to the
+  index. Fresh data (BODACC and BOAMP notices published after the engine freeze, built with the same tools) remains
+  the commitment for the next version.
+- The 1.1 BOAMP gold is `build_boamp.py`'s at this date; the campaign's real-corpus pack is built from it
+  (`pack-real` on the rebuilt cache). Its digest is registered (SHA-256 of the 1.1 `boamp_fr.jsonl` above; the other,
+  unchanged cache files too: `PROTOCOL-REGISTRATION-1.1.json`, `real_corpora_sha256`).
+- The 1.1 registration is published (public repository) **with its engine fields filled, before the launch**;
+  otherwise "published before the launch" does not hold.
+- Engine frozen and deployed before the registration; cross-check (section 11) redone on it; then `bundle`,
+  `registration --bundle` (digests in `PROTOCOL-REGISTRATION-1.1.json` at the repository root, with the list of
+  changes), timed dev-half trial, full campaign, `finish`, merge into the site. Site keys: `protocol_families`: 4;
+  difficult index: `hard_index`, `hard_ci_low`, `hard_ci_high`, `hard_docs` (scored mutated documents),
+  `hard_mention_recall_pct`; per-group detail: `f_red_*` (everyday formats), `f_obf_*`, `f_ocr_*`.
+- The 1.1 result is published with its two indexes side by side, the difficult index and its per-group detail as
+  visible as the headline, the apart families and the 1.0 result next to them. The site merge (`merge_quality.py`)
+  refuses a 1.1 result without the difficult index, and **refuses** while the site (`site/templates/index.*.html`) or
+  `README.md` still show 1.0 text ("7 families", "51 disguises"…) or 1.1 first-draft text ("five families", "1/5
+  each", "restricted to 25 everyday"…) outside a line that names version 1.0 ("Protocol 1.0: 61.8% [58.6–66.9], 7
+  families"); `--site-text-checked` after review. "51 ways" or "51 operators" are allowed: the difficult index covers
+  the 51 operators.
+- Limit of the difficult index's interval: the bootstrap draws mutated documents one by one, whereas each base
+  document yields up to 51 mutated documents with similar outcomes; the interval is therefore too narrow (it does not
+  cover the variability of the base documents, 12,000 in the campaign). A declared limit, not fixed in 1.1 (outcomes
+  per base document are not kept).
+
+---
+
+*Texte de la version 1.0 (25 octobre 2026), en vigueur sauf où la section « Version 1.1 » dit autre chose. Text of
+version 1.0, in force except where the "Version 1.1" section says otherwise.*
+
+> **English summary (version 1.0).** GDPR Guardian rates itself under this public protocol, version 1.0, **written on
 > 25 October 2026, before any campaign, and registered by publishing its digests before the launch** (section 15).
 > The **confidence index** is the share of documents in which **no direct identifier stays readable** (strict: not
 > one alphanumeric character of a gold direct-identifier mention left in the output), computed per corpus family,
@@ -103,6 +605,8 @@ mesure la route texte (`POST /v1/anonymize/text`) et non la conversion des fichi
   | 25 oct. 2026, 21 h 36 à 22 h 20 | mise au point du moteur : évaluation en processus des moitiés `test` et des corpus entiers à chaque itération des règles « rules2 » (quatre fois), et du moteur 1.0.0 sur les corpus entiers (21 h 53) ; la dernière publiée à 22 h 22 (`benchmarks/results/real-rules2-comparison-2026-10-25.{md,json}`, [`CORPUS_REELS.md`](CORPUS_REELS.md) section 12) | rules2 | documents avec fuite stricte (`tools/corpus`) : BODACC 10,1 %, BOAMP 39,4 %, ParlaMint-FR 7,0 %, Europeana 78,9 %, HIPE 98,4 %, MAPA FR 83,3 % ; pas d'indice |
   | 25 oct. 2026, 21 h 42 | audit indépendant de l'outil, plan réduit, corpus réels complets | sources de cet instant | indice 61,2 % [58,1–66,4] ; BODACC 89,4 %, BOAMP 55,5 %, ParlaMint-FR 93,0 %, presse ancienne 16,5 %, MAPA FR 16,7 % (synthétique 91,8 %, équipe rouge 65,5 %) |
   | 25 oct. 2026, 22 h 59 | relecture indépendante de la mise au point du moteur : évaluation en processus des moitiés `test` et des corpus entiers, moteurs 1.0.0 et rules2 (non publiée) | 1.0.0 et rules2 | mêmes chiffres que ceux publiés à 22 h 22 |
+  | 26 oct. 2026 (ajout 1.1) | mise au point du moteur après revue indépendante : évaluation en processus des moitiés `dev` et `test` et des ensembles inédits, rules2 contre rules3 (`benchmarks/results/real-rules3-comparison-2026-10-26.{md,json}`, [`CORPUS_REELS.md`](CORPUS_REELS.md) section 13) | rules2 et rules3 | rappels et fuites par corpus, pas d'indice |
+  | 26 oct. 2026 (ajout 1.1) | **campagne publique 1.0**, publiée (`benchmarks/results/protocol-2026-10-26.md`) | 1.0.0+0c3ff9fc1fb0 | indice 61,8 % [58,6–66,9] ; tous les chiffres par famille, corpus, libellé et opérateur |
 
   Le fichier de comparaison du 25 octobre dit que les moitiés `test` n'ont pas été « regardées » : leurs erreurs n'ont
   pas été lues, mais leurs scores ont été mesurés à chaque itération et publiés ; elles figurent donc ici. Après ces
@@ -115,7 +619,8 @@ mesure la route texte (`POST /v1/anonymize/text`) et non la conversion des fichi
   liste les campagnes antérieures dans `spec.EARLIER_CAMPAIGNS` (nouvelle version datée du protocole), que chaque
   résultat recopie, et le report vers le site refuse une campagne répétée qui omet celle déjà publiée. Pour une
   version ultérieure du moteur, l'indice principal devra passer sur des données neuves, construites avec les mêmes
-  outils sur une période jamais mesurée (par exemple des parutions BODACC et BOAMP postérieures au gel du moteur). Les
+  outils sur une période jamais mesurée (par exemple des parutions BODACC et BOAMP postérieures au gel du moteur)
+  (**1.1 : dérogation déclarée**, le moteur 1.0.1 est noté sur les mêmes moitiés `test`, voir « Version 1.1 »). Les
   ensembles « inédits » BODACC d'août 2026 et BOAMP 2021 ([`CORPUS_REELS.md`](CORPUS_REELS.md), section 12) ont
   déjà été mesurés le 25 octobre : ils ne sont plus aveugles non plus.
 - **Synthétique.** Graines neuves (2026102501 à 2026102510 ; 2026102521 à 2026102530 pour l'équipe rouge). La graine
@@ -206,7 +711,8 @@ seul l'essentiel de la largeur de l'intervalle (environ 95 % de sa variance dans
 - **Enregistrement** : empreintes de l'outil (fichiers `tools/`, `spec.py`, ce texte, paquet, Faker) et
   comparaison du décompte envoyé (documents, empreintes) au décompte enregistré dans `spec.py` (section 15).
 
-Fichiers : `benchmarks/results/protocol-<date>.json` et `.md`. Le site reçoit dix clés (section 10).
+Fichiers : `benchmarks/results/protocol-<date>.json` et `.md` (1.0) ; à partir de la 1.1,
+`protocol-<version>-<date>.json` et `.md` (`spec.RESULTS_STEM`), jamais écrasés. Le site reçoit dix clés (section 10).
 
 ## 7. Garde-fous : l'indice seul pourrait mentir
 
@@ -311,7 +817,7 @@ précision et le sur-masquage sont toujours publiés à côté de l'indice.
   PT ne sont pas préchargés : environ 0,3 s par requête). Le plan complet (1 019 385 documents) demande donc environ
   1 h 20 sur une telle machine. **Sur le serveur, la durée n'est pas mesurée** : avant la campagne, un essai
   chronométré (paquet de la seule moitié `dev`, plan réduit par `GG_PROTOCOL_ARGS`, section 10) donne le débit, d'où
-  la durée du plan complet ; la campagne doit finir avant le redémarrage automatique de 03 h 30 UTC, sinon
+  la durée du plan complet ; la campagne doit finir avant la maintenance du serveur (1 h 45, heure de Paris), sinon
   `GG_PROTOCOL_HOURS` la met en pause propre (par exemple au bout de 3 heures) et `start` la reprend plus tard.
 
 ## 10. Rejouer
@@ -328,7 +834,7 @@ python -m tools.protocol registration --bundle gg-protocol.pyz   # empreintes à
 python -m tools.protocol pack-real --cache DIR --out /dev/shm/gg/real-corpora.jsonl.gz
 python -I gg-protocol.pyz run --socket /run/gdprguardian/app.sock --token-stdin --engine-id IMAGE --work WORK \
        --real /dev/shm/gg/real-corpora.jsonl.gz --wipe-real-when-done < /etc/gdprguardian/local-header
-python tools/protocol/merge_quality.py WORK/results/protocol-<date>.json site/data/quality.json
+python tools/protocol/merge_quality.py WORK/results/protocol-<version>-<date>.json site/data/quality.json
 ```
 
 `IMAGE` est l'image du conteneur du service (`docker inspect -f '{{.Image}}' <conteneur>`). Un service se lance comme
@@ -558,8 +1064,9 @@ and the results and recalled by the merge into the site. Campaign: documents, th
 version, packs, outputs on the probe) and number of engine checks, whether the local token was accepted, plan
 fingerprint, SHA-256 fingerprints of the synthetic, mutated and real documents sent. Registration: the tool's digests
 (`tools/` files, `spec.py`, this text, bundle, Faker) and the comparison of what was sent (documents, digests) with the
-count registered in `spec.py` (section 15). Files: `benchmarks/results/protocol-<date>.json` and `.md`; the site
-receives ten keys (item 10).
+count registered in `spec.py` (section 15). Files: `benchmarks/results/protocol-<date>.json` and `.md` (1.0); from
+1.1 on, `protocol-<version>-<date>.json` and `.md` (`spec.RESULTS_STEM`), never overwritten; the site receives ten
+keys (item 10).
 
 **7. Guards: the index alone could lie.** An engine that masked everything would score 100%. The index is published
 only if, on the same campaign, neutral-text over-masking on the synthetic families is ≤ 2% (0.08% on 25 October),
@@ -654,7 +1161,7 @@ synthetic documents per second, 2.4 ms of client CPU per document; the 8,478 rea
 them for the out-of-scope corpora (the DE, ES, IT, NL, PT engines are not preloaded: about 0.3 s per request). The
 full plan (1,019,385 documents) thus takes about 1 h 20 on such a machine. **On the server the duration is not
 measured**: before the campaign, a timed trial (`dev`-half pack, plan scaled with `GG_PROTOCOL_ARGS`, item 10) gives
-the throughput, hence the full plan's duration; the campaign must end before the 03:30 UTC automatic reboot, otherwise
+the throughput, hence the full plan's duration; the campaign must end before the server maintenance (01:45 Paris time), otherwise
 `GG_PROTOCOL_HOURS` pauses it cleanly (for example after 3 hours) and `start` resumes it later.
 
 **10. Replay.** The commands of section 10 above, from the repository root (Python 3.12+), `DIR` outside the

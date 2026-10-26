@@ -11,6 +11,7 @@ from typing import Annotated, Any, Literal
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, ConfigDict, Field
+from starlette.background import BackgroundTask
 from starlette.exceptions import HTTPException
 
 from .. import __version__
@@ -20,9 +21,8 @@ from .errors import InvalidRequest, ServiceBusy, Unauthorized
 from .middleware import DEEP_HEALTH, PRINCIPAL_STATE_KEY
 from .multipart import read_multipart
 from .options import AnonymizeOptions, LabelLanguage, Profile
-from .pagination import page_bounds
 from .security import result_id
-from .service import Service
+from .service import Service, check_upload_name
 
 _OPTION_FIELDS = frozenset({"countries", "profile", "label_language", "rules", "explain"})
 _RULES_DESCRIPTION = (
@@ -122,18 +122,23 @@ class UploadTicketOut(BaseModel):
     method: Literal["PUT"] = "PUT"
     expires_in: int
     max_bytes: int
-    result_url: str
+    result_url: str = Field(description=(
+        "Route REST du résultat (GET, JSON page par page ; « ?format=markdown » : Markdown brut, sans marqueurs). "
+        "Les clients MCP utilisent get_anonymized. / REST route of the result (GET, JSON pages; '?format=markdown': "
+        "raw Markdown without markers). MCP clients use get_anonymized."))
 
 
-class UploadReceiptOut(BaseModel):
+class UploadAcceptedOut(BaseModel):
+    """Fichier reçu (202) : le traitement continue en arrière-plan / file received (202): processing continues."""
+
     upload_id: str
-    status: str
-    kind: str
-    total_chars: int
-    pages: int
-    page_chars: int
-    expires_in: int
-    result_url: str
+    status: Literal["processing"] = "processing"
+    stage: str = "queued"
+    received_bytes: int
+    retry_after_s: int
+    expires_in: int = Field(description="Durée de vie du résultat après traitement, en secondes / result lifetime "
+                                        "after processing, in seconds")
+    next_step: str
 
 
 class ResultOut(BaseModel):
@@ -145,12 +150,24 @@ class ResultOut(BaseModel):
     next_page: int | None = None
     page_chars: int | None = None
     total_chars: int | None = None
-    deleted: bool = False
+    deleted: bool = Field(False, description="Tout a été lu : effacé à la fin du délai de grâce (expires_in) / fully "
+                                             "read: deleted when the grace period (expires_in) ends")
     kind: str | None = None
     markdown: str | None = None
     report: dict[str, Any] | None = None
-    warnings: list[str] | None = None
-    dropped: dict[str, int] | None = None
+    warnings: list[str] = Field(default_factory=list)
+    dropped: dict[str, int] = Field(default_factory=dict)
+    stage: str | None = None
+    percent: int | None = None
+    pages_done: int | None = None
+    pages_total: int | None = None
+    elapsed_s: int | None = None
+    estimated_remaining_s: int | None = None
+    retry_after_s: int | None = None
+
+
+_PROGRESS_FIELDS = ("stage", "percent", "pages_done", "pages_total", "elapsed_s", "estimated_remaining_s",
+                    "retry_after_s")
 
 
 class PacksOut(BaseModel):
@@ -231,29 +248,41 @@ def build_router(service: Service) -> APIRouter:
 
     @router.post("/v1/uploads", response_model=UploadTicketOut, status_code=201, tags=["uploads"])
     async def create_upload(body: UploadBody, request: Request, principal: Principal) -> UploadTicketOut:
-        _, token = service.create_upload(principal, body.filename, body.options())
+        options = body.options()
+        # Extension et règles vérifiées avant que le fichier parte / extension and rules checked before the file goes.
+        check_upload_name(body.filename)
+        await service.check_rules(options, principal)
+        _, token = service.create_upload(principal, body.filename, options)
         base = str(request.base_url)
         upload_id = result_id(token)  # capacité de lecture, remise au seul demandeur / read capability
         return UploadTicketOut(upload_id=upload_id, upload_url=service.upload_url(base, token),
                                expires_in=int(config.upload_ttl_s), max_bytes=config.max_upload_bytes,
                                result_url=service.result_url(base, upload_id))
 
-    @router.put("/v1/uploads/{token}", response_model=UploadReceiptOut, tags=["uploads"],
+    @router.put("/v1/uploads/{token}", response_model=UploadAcceptedOut, status_code=202, tags=["uploads"],
                 openapi_extra={"requestBody": {"required": True, "content": {"application/octet-stream": {
                     "schema": {"type": "string", "format": "binary"}}}}})
-    async def receive_upload(token: str, request: Request, principal: Principal) -> UploadReceiptOut:
+    async def receive_upload(token: str, request: Request, principal: Principal) -> JSONResponse:
         # Taille annoncée (déjà validée par l'intergiciel des corps) : un fichier trop gros est refusé avant sa
         # lecture. Declared size (already validated by the body middleware): an oversized file is refused unread.
         length = request.headers.get("content-length")
         declared = int(length) if length is not None and length.isascii() and length.isdigit() else None
-        _, result = await service.receive_upload(token, principal, request.stream(), declared)
-        pages = len(page_bounds(result.markdown, config.page_chars)) - 1
+        job, data = await service.accept_upload(token, principal, request.stream(), declared)
         # Recalculée du jeton présenté (le dépôt ne la garde pas) / recomputed from the token (not kept by the store).
         upload_id = result_id(token)
-        return UploadReceiptOut(upload_id=upload_id, status="ready", kind=result.kind,
-                                total_chars=len(result.markdown), pages=pages, page_chars=config.page_chars,
-                                expires_in=int(config.result_ttl_s),
-                                result_url=service.result_url(str(request.base_url), upload_id))
+        retry = 2
+        accepted = UploadAcceptedOut(
+            upload_id=upload_id, received_bytes=len(data), retry_after_s=retry,
+            expires_in=int(config.result_ttl_s),
+            next_step=(f"File received; anonymisation continues in the background. MCP: call "
+                       f"get_anonymized(upload_id='{upload_id}') in {retry} s, again after each retry_after_s, then "
+                       f"with next_page until it is null. REST: GET /v1/results/{upload_id} (202 while processing)."))
+        # 202 dès le corps reçu ; le traitement continue dans la même requête ASGI (mêmes isolement, limites, budget
+        # mémoire et échéances), après la réponse. 202 once the body is in; processing continues within the same ASGI
+        # request (same isolation, limits, memory budget and deadlines), after the answer.
+        return JSONResponse(accepted.model_dump(), status_code=202, headers={"retry-after": str(retry)},
+                            background=BackgroundTask(service.process_upload, job, data, principal,
+                                                      raise_errors=False))
 
     @router.get("/v1/results/{upload_id}", response_model=ResultOut, tags=["uploads"],
                 responses={202: {"description": "Fichier pas encore reçu ou en cours / not received or processing"}})
@@ -266,8 +295,10 @@ def build_router(service: Service) -> APIRouter:
     ) -> Response | ResultOut:
         view = service.read_result(principal, upload_id, page, page_chars)
         if view.page is None:
-            return JSONResponse({"upload_id": view.upload_id, "status": view.status, "expires_in": view.expires_in},
-                                status_code=202, headers={"retry-after": "1"})
+            # Pas encore prêt : étape, avancement et délai conseillé / not ready yet: stage, progress, advised delay.
+            pending = {"upload_id": view.upload_id, "status": view.status, "expires_in": view.expires_in,
+                       **{key: getattr(view, key) for key in _PROGRESS_FIELDS}}
+            return JSONResponse(pending, status_code=202, headers={"retry-after": str(view.retry_after_s or 1)})
         if output == "markdown":
             headers = {"x-gdprguardian-page": str(view.page), "x-gdprguardian-pages": str(view.pages),
                        "x-gdprguardian-next-page": str(view.next_page or ""),

@@ -101,16 +101,18 @@ CONTRACTS: tuple[tuple[str, str, tuple[tuple[str, str, str], ...]], ...] = (
         ("_Cues.inside", "names/mod.rs: inside", "0707d8932871cd5a"),
         ("_native_data", "names/py.rs: PyNameDetector, VOCABULARY", "c7874fccd9817660"),
         ("FrenchNameDetector._detect_native", "names/py.rs: detect; engine/passes.rs: names", "3a0b2c712438fa13"),
-        ("FrenchNameDetector._detect_python", "names/mod.rs: detect", "e028d9b811eabb13"),
+        ("FrenchNameDetector._detect_python", "names/mod.rs: detect", "25e20f2e9f97681e"),
         ("FrenchNameDetector._tokens", "names/tokens.rs: tokens", "e2182dbac5f3bdc9"),
         ("FrenchNameDetector._dotted_forms", "names/tokens.rs: dotted_forms, covers", "ba652b052ed3a2d3"),
         ("FrenchNameDetector._joins", "names/tokens.rs: joins", "cc9fe0aad3bcada8"),
         ("FrenchNameDetector._runs", "names/tokens.rs: runs", "a5139eec53ff552e"),
         ("FrenchNameDetector._split", "names/tokens.rs: split", "f75860f8a57c54c2"),
         ("FrenchNameDetector._merge", "names/tokens.rs: merge", "36bf3e6283bb4448"),
-        ("FrenchNameDetector._cues", "names/cues.rs: cues, put", "b2dd3ed96cb9837a"),
-        ("FrenchNameDetector._label_cues", "names/cues.rs: label_cues", "25aabfd3f6fdc13b"),
-        ("FrenchNameDetector._lowercase_fields", "names/fields.rs: lowercase_fields, field_value", "dbda64e74da46811"),
+        ("FrenchNameDetector._cues", "names/cues.rs: cues, put", "45b1140c476f587b"),
+        ("FrenchNameDetector._label_cues", "names/cues.rs: label_cues", "a9c99d4656143bb0"),
+        ("FrenchNameDetector._lowercase_fields", "names/fields.rs: lowercase_fields, field_value", "f1d2309fb0186fee"),
+        ("FrenchNameDetector._field_values", "names/fields.rs: field_values, trimmed_key", "8bccedcff824af9d"),
+        ("FrenchNameDetector._field_safe", "names/fields.rs: field_safe", "623011ab52c69be2"),
         ("FrenchNameDetector._lowercase_after_cues", "names/fields.rs: lowercase_after_cues", "90215a8124725293"),
         ("FrenchNameDetector._signature_zone", "names/cues.rs: signature_zone", "5afd713e06ba8a39"),
         ("FrenchNameDetector._display_ends", "names/cues.rs: display_ends", "5ce883097d0727a0"),
@@ -123,14 +125,14 @@ CONTRACTS: tuple[tuple[str, str, tuple[tuple[str, str, str], ...]], ...] = (
         ("FrenchNameDetector._marker", "names/decide.rs: marker", "4be293f7b5f21d3b"),
         ("FrenchNameDetector._evidence", "names/decide.rs: evidence", "e8324b22b4ace0ac"),
         ("FrenchNameDetector._score", "names/decide.rs: score", "452a9b87c145dec5"),
-        ("FrenchNameDetector._score_cued", "names/decide.rs: score_cued", "42d42b6083bfde91"),
+        ("FrenchNameDetector._score_cued", "names/decide.rs: score_cued", "e3afd18ce4bfccc3"),
         ("FrenchNameDetector._score_pair", "names/decide.rs: score_pair", "237087eb1d5aa36f"),
         ("FrenchNameDetector._score_single", "names/decide.rs: score_single", "97859255fbbc3986"),
         ("FrenchNameDetector._sentence_start", "names/decide.rs: sentence_start", "dbc3e9b3fff8ac33"),
         ("FrenchNameDetector._line_start", "names/decide.rs: line_start", "3a25c7f3f946ec60"),
         ("FrenchNameDetector._previous_word", "names/decide.rs: previous_word", "8175f1b2eaa19a0c"),
         ("FrenchNameDetector._after_determiner", "names/decide.rs: after_determiner", "e8008aafe7b15f9e"),
-        ("FrenchNameDetector._after_locative", "names/decide.rs: after_locative", "1bc4832d98acff88"),
+        ("FrenchNameDetector._after_locative", "names/decide.rs: after_locative", "7fd7160946d385d5"),
         ("FrenchNameDetector._line_style", "names/decide.rs: line_style", "2c2e783e9f9c206c"),
         ("FrenchNameDetector._span", "names/spans.rs: span", "eb502b5b8efea4ad"),
         ("FrenchNameDetector._canonical", "names/spans.rs: canonical, last_word", "2d84ee6ccd9ce8b0"),
@@ -187,18 +189,24 @@ CONTRACTS: tuple[tuple[str, str, tuple[tuple[str, str, str], ...]], ...] = (
         ("_POSTCODE_TAIL_RE", "detectors/address.rs: postcode_tail", "895b82695deaf336"),
         ("_CAPITAL_WORDS_RE", "detectors/address.rs: capital_words", "53d35c71806abfd9"),
         ("_NUMBER_BEFORE_RE", "detectors/address.rs: number_before, house_number_at, separator_then_end",
-         "8977fc24feb94094"),
+         "968a472403eec33c"),
         ("_NAME_WORD_RE", "detectors/address.rs: name_word, name_word_at", "037ec99fb544f0e5"),
         ("_BOX_RE", "detectors/address.rs: boxes, box_at, dotted_ends, box_number", "bc3330739b0164c6"),
+        ("_BOX_ALONE_DIGITS", "detectors/address.rs: BOX_ALONE_DIGITS", "9084d9e7883c1863"),
+        ("_BOX_SURE_DIGITS", "detectors/address.rs: BOX_SURE_DIGITS", "8101619acb0f71cd"),
+        ("_BOX_NEAR_BEFORE", "detectors/address.rs: BOX_NEAR_BEFORE", "136a684d5960a3ed"),
+        ("_BOX_NEAR_AFTER", "detectors/address.rs: BOX_NEAR_AFTER", "7e1c938a4c64c47b"),
+        ("_BOX_NEAR_RE", "detectors/address.rs: near_postcode", "34fa9c4882585632"),
+        ("_lone_box", "detectors/address.rs: lone_box", "2025234ffd25023f"),
         ("_LINK_RE", "detectors/address.rs: link", "1cd7ea7491c12c9b"),
         ("_COMPLEMENT", "detectors/address.rs: COMPLEMENT_WORDS, COMPLEMENT_TAIL_MAX, complement_unit_starts",
-         "72a30ebc58e96b0b"),
+         "cbc5da7e62bcff62"),
         ("_COMPLEMENT_RE", "detectors/address.rs: complement_starts, COMPLEMENT_UNITS", "ae0805847ca536d5"),
         ("_COMPLEMENT_LINE_RE", "detectors/address.rs: complement_line, COMPLEMENT_LINE_INDENT", "5a56023142cfd50d"),
         ("_TRIGGER_RE", "detectors/address.rs: trigger_at", "1d9b8afbaddba3c4"),
         ("_TYPE_AC", "detectors/address.rs: new, streets", "f5fcf1dd937941aa"),
         ("FrenchAddressDetector.detect", "detectors/address.rs: detect; engine/passes.rs: address", "d4cc89b0d89fb62d"),
-        ("FrenchAddressDetector._spans", "detectors/address.rs: detect", "d8d8429ca9b2d1b7"),
+        ("FrenchAddressDetector._spans", "detectors/address.rs: detect", "8140c376c8cc3e49"),
         ("FrenchAddressDetector._anchors", "detectors/address.rs: anchors", "7531353de98484d8"),
         ("FrenchAddressDetector._commune", "detectors/address.rs: commune, COMMUNE_WINDOW, COMMUNE_TOKENS",
          "34415b9a6b6be796"),
@@ -213,7 +221,7 @@ CONTRACTS: tuple[tuple[str, str, tuple[tuple[str, str, str], ...]], ...] = (
         ("_ADJECTIVE_BEFORE_RE", "detectors/address.rs: adjective_before, ADJECTIVE_WINDOW", "d54d5ab118d97698"),
         ("_HOUSE_NUMBER_RE", "detectors/address.rs: house_number_token", "97d116417d4e8b86"),
         ("_PLACE_WORD_RE", "detectors/address.rs: place_word", "fbc2ea6d8fa388e7"),
-        ("_TOWN_GAP_RE", "detectors/address.rs: town_gap", "bbaaf71c4d1229e4"),
+        ("_TOWN_GAP_RE", "detectors/address.rs: town_gap", "f56eafb6214c13a3"),
         ("_TOWN_END_RE", "detectors/address.rs: town_end_at", "4ad61b4ca2bcd214"),
         ("FrenchAddressDetector._place_before", "detectors/address.rs: place_before, PLACE_SEGMENT_MAX",
          "5109247b528e47ea"),
@@ -282,7 +290,7 @@ CONTRACTS: tuple[tuple[str, str, tuple[tuple[str, str, str], ...]], ...] = (
     )),
     (DETECTORS, "gdprguardian.detectors.intl", (
         ("EmailDetector._local", "detectors/intl.rs: around, LOCAL_WINDOW", "56fcf7349a58a96c"),
-        ("EmailDetector._domain", "detectors/intl.rs: domain_end", "24c9bc804e91b6ce"),
+        ("EmailDetector._domain", "detectors/intl.rs: domain_end", "e0f0db16efe3cbc0"),
         ("EmailDetector._candidates", "detectors/intl.rs: detect, around", "43fa9de5d904c906"),
         ("IbanDetector._anchor", "detectors/intl.rs: iban_anchor", "ddf97bef316ea5e1"),
         ("IbanDetector._candidates", "detectors/intl.rs: IbanDetector", "aa6ad641d3f0eaf7"),
@@ -309,13 +317,36 @@ CONTRACTS: tuple[tuple[str, str, tuple[tuple[str, str, str], ...]], ...] = (
          "c25a915e7b22ea93"),
     )),
     (PREPARE, "gdprguardian._text", (
-        ("normalize", "prepare.rs: normalize_text, cuts, assemble", "081030cf39a7532b"),
+        ("normalize", "prepare.rs: normalize_text, cuts, assemble", "f0895d38e30eb98a"),
         ("fold", "prepare.rs: fold_text; unicode.rs: fold; finalize/chars.rs: folded; names/chars.rs: push_fold",
          "ca89090e445165de"),
         ("prepare", "prepare.rs: prepare_text, prepare_parts", "7b24217f6cbd73ad"),
         ("_unbold", "prepare.rs: unbold", "97f97e9b9882eee0"),
         ("_EMPHASIS_RE", "prepare.rs: unbold, is_emphasis", "c9984bc731b50912"),
         ("_HYPHEN_BREAK_RE", "prepare.rs: hyphen_break_end, cuts", "0aa26983d1c9a439"),
+        ("_gaps", "prepare.rs: gaps, normalize_text", "80321d71f0fe650e"),
+        ("_group_longer", "prepare.rs: group_longer, GAP_GROUP", "801eed8f9e788e20"),
+        ("_GAP_BLANKS_RE", "prepare.rs: gaps", "55f12798d4f65d16"),
+        ("_GAP_BREAK_RE", "prepare.rs: gaps, break_shape", "28fcb63a88c01fe3"),
+        ("_sep_runs", "prepare.rs: sep_runs, normalize_text", "6c40e7c139b9cea8"),
+        ("_SEP_RUNS", "prepare.rs: sep_runs, SEP_RUNS, SEP_GROUP", "2ac32e0d0fd4b595"),
+        ("_breaks", "prepare.rs: breaks, BREAK_GROUP, normalize_text", "190530e3f8011477"),
+        ("_token", "prepare.rs: token", "4a87bede1b8c9f52"),
+        ("_email_join", "prepare.rs: email_join, BREAK_LOCAL", "b557863385576619"),
+        ("_iban_complete", "prepare.rs: iban_complete", "10f9db339df1e453"),
+        ("_BREAK_RE", "prepare.rs: breaks, email_part", "64d83e38944599c3"),
+        ("_DOMAIN_RE", "prepare.rs: domain_ok", "a203904012c70caa"),
+        ("_IBAN_HEAD_RE", "prepare.rs: iban_head", "44e4e79eea32d832"),
+        ("_spaced_cuts", "prepare.rs: spaced_cuts, normalize_text", "39278fb7ad2eaf16"),
+        ("_spaced_block", "prepare.rs: spaced_block", "26c771e6b2b7a19f"),
+        ("_SPACED_RE", "prepare.rs: spaced_cuts, spaced_cell", "82f989ff9c5afea2"),
+        ("_SPACED_MIN", "prepare.rs: spaced_block", "7fa6730d4945a002"),
+        ("_SPACED_HINT_RE", "prepare.rs: spaced_hint", "48df3b9d63bd72de"),
+        ("_SPACED_MARKS", "prepare.rs: spaced_block, spaced_cell", "e971dabeba150001"),
+        ("_ASCII_LETTERS", "prepare.rs: email_join", "9550714eab4fe0b8"),
+        ("_EMAIL_PART", "prepare.rs: email_part", "fbc7206b9d63fc34"),
+        ("_BREAK_GROUP", "prepare.rs: BREAK_GROUP", "dc8bd17100f676e7"),
+        ("_BREAK_LOCAL", "prepare.rs: BREAK_LOCAL", "362cbe23adbe8089"),
     )),
     (UNICODE, "gdprguardian._text", (
         ("_dense_bmp", "unicode.rs: Unicode, new, fold", "e0403a66267247b0"),
@@ -394,15 +425,17 @@ CONTRACTS: tuple[tuple[str, str, tuple[tuple[str, str, str], ...]], ...] = (
         ("DetectionContext._header_context", "scanner.rs: header_context", "0b0f32eb7c889040"),
         ("_check_forced", "lib.rs: scan; scanner.rs: header_context", "a0c46dd83013a280"),
         ("DetectionContext.near", "scanner.rs: near", "7442a0c33d3b4121"),
-        ("DetectionContext.vetoed", "scanner.rs: vetoed", "c9f513bdfe87b788"),
-        ("_boundary_checks", "scanner.rs: left_ok, right_ok, Boundary", "896dab286b4414d5"),
+        ("DetectionContext.vetoed", "scanner.rs: vetoed, VETO_ADJACENT", "9eac4ddb4bce71f9"),
+        ("_boundary_checks", "scanner.rs: left_ok, right_ok, Boundary", "9d3acb9f3ae59abe"),
         ("_SKIP_RUN", "scanner.rs: next_start", "8406a303819d8b94"),
         ("_next_start", "scanner.rs: next_start", "5d0c3ecaf9107690"),
         ("Anonymizer._detect", "scanner.rs: scan; engine/passes.rs: pass, scan", "7aa12c125c268c6c"),
         ("Anonymizer._recognizer_spans", "scanner.rs: scan", "fb4944408328aba6"),
         ("Anonymizer._run", "scanner.rs: run", "6f567f7ac6d62043"),
         ("Anonymizer._personal", "scanner.rs: run, Policy, NATURAL_PERSON_WINDOW, LEGAL_ENTITY_WINDOW",
-         "08cfc08a1bf1a191"),
+         "8fa18fcd5e2decf5"),
+        ("_no_legal_entity", "scanner.rs: no_legal_entity, REGISTER_LABELS, ENTITY_WORDS, ENTITY_FORMS, SHORT_LINE",
+         "63792ef50c341270"),
         ("Anonymizer._civil_status", "scanner.rs: civil_status, near_within", "57f3e49ff2d8736d"),
         ("_line_bounds", "scanner.rs: line_bounds", "4567028b5dff87eb"),
         ("_block_bounds", "scanner.rs: block_bounds", "c783ac27c516a243"),
@@ -465,9 +498,27 @@ CONTRACTS: tuple[tuple[str, str, tuple[tuple[str, str, str], ...]], ...] = (
         ("merge_same_entity", "finalize/resolve.rs: merge_same_entity; finalize/span.rs: py_max", "158bcae96f039c52"),
         ("resolve", "finalize/resolve.rs: resolve", "44dfc83a8912681b"),
         ("_apply_keep", "finalize/resolve.rs: apply_keep", "6ea751725ec78cb6"),
-        ("_trim_honorific", "finalize/resolve.rs: trim_honorific; finalize/chars.rs: is_honorific", "e4da6a10d72637f3"),
-        ("Anonymizer._finalize", "finalize/resolve.rs: filter; finalize/pipeline.rs: finalize", "19e5795c4b03e2a5"),
+        ("_trim_honorific", "finalize/resolve.rs: trim_honorific; finalize/chars.rs: is_honorific", "f6fde15b8a1fcb8e"),
+        ("Anonymizer._finalize", "finalize/resolve.rs: filter; finalize/pipeline.rs: finalize", "32fe81aac013118b"),
         ("Anonymizer._propagate", "finalize/propagate.rs: propagate, sources", "83d32939bb976bd3"),
+        ("_company_named", "finalize/pipeline.rs: company_named, COMPANY_FORMS, COMPANY_SUFFIX_ONLY",
+         "7eca590a87a569f3"),
+        ("_extend_after_civility", "finalize/pipeline.rs: extend_after_civility, civility_before, CIVILITIES",
+         "a3f30be3fa54ef1e"),
+        ("_surname_end", "finalize/pipeline.rs: surname_end", "283885ebe08af5e0"),
+        ("_drop_company_names", "finalize/pipeline.rs: drop_company_names, form_right_before", "570d041c5670d0e3"),
+        ("PARTNERSHIP_FORMS", "finalize/pipeline.rs: PARTNERSHIP_FORMS", "70728ac5af7f36c3"),
+        ("_FIRM_LINK_RE", "finalize/pipeline.rs: firm_link, FIRM_LINKS", "9244256f23c35cb0"),
+        ("_FIRM_BLANKS", "finalize/pipeline.rs: FIRM_BLANKS", "c04a6046592860c9"),
+        ("_civility_surnames", "finalize/pipeline.rs: civility_surnames, PRIORITY_HEURISTIC", "7d8638cacfe3e59d"),
+        ("CIVILITY_WORDS", "finalize/pipeline.rs: CIVILITY_WORDS", "ec5918d0372fd49c"),
+        ("NOT_SURNAMES", "finalize/pipeline.rs: NOT_SURNAMES", "9f3da2ffef9ef753"),
+        ("COMPANY_FORMS", "finalize/pipeline.rs: COMPANY_FORMS", "ba96e46e65385c1f"),
+        ("COMPANY_SUFFIX_FORMS", "finalize/pipeline.rs: COMPANY_SUFFIX_ONLY", "a0ea6840bd85d61d"),
+        ("_COMPANY_BEFORE_RE", "finalize/pipeline.rs: company_named", "4c3a30f82b7e8bc9"),
+        ("_COMPANY_AFTER_RE", "finalize/pipeline.rs: company_named", "f4b2bf5fd4ac3405"),
+        ("_CIVILITY_BEFORE_RE", "finalize/pipeline.rs: civility_before, CIVILITIES", "04cf7a4231486bcb"),
+        ("_TITLE_BEFORE_RE", "finalize/pipeline.rs: titled_before, title_in, TITLES", "28567652bbee6da7"),
         ("Anonymizer._final_spans", "finalize/pipeline.rs: map_offsets; finalize/python.rs: analyze",
          "b0d64f735f0f45f3"),
         ("Anonymizer._segment_spans", "finalize/pipeline.rs: split_segments; finalize/python.rs: analyze_segments",
@@ -487,9 +538,10 @@ CONTRACTS: tuple[tuple[str, str, tuple[tuple[str, str, str], ...]], ...] = (
         ("Scope.reserve", "finalize/scope.rs: reserve", "d1a922083951a300"),
         ("Scope._next_index", "finalize/scope.rs: next_index", "717e191ab20e6275"),
         ("Scope.placeholder", "finalize/scope.rs: placeholder, placeholder_into", "3fbaef248c4361c3"),
-        ("Scope.person_key", "finalize/scope.rs: person_key, person, PersonKey", "3bb928284dca3373"),
-        ("Scope._new_cluster", "finalize/scope.rs: new_cluster", "dbecd7387ebaf322"),
+        ("Scope.person_key", "finalize/scope.rs: person_key, person, PersonKey", "4d87b5fac1c826c4"),
+        ("Scope._new_cluster", "finalize/scope.rs: new_cluster", "86634b8d59b053ea"),
         ("Scope._set_given", "finalize/scope.rs: set_given", "f3106d6d43bb6009"),
+        ("Scope._set_parts", "finalize/scope.rs: set_parts", "97fd15bd94669222"),
         ("_SPACE_RE", "finalize/scope.rs: canonical_into", "69bcb8e34b589b33"),
         ("_canonical", "finalize/scope.rs: canonical_text, canonical_into", "19f78ea3c0ff24b5"),
     )),
@@ -556,6 +608,7 @@ VALIDATORS: tuple[tuple[str, str], ...] = (
     ("fr.siv_plate", "d0bf963468312c12"),
     ("fr.alnum_mixed", "1f703deff4224010"),
     ("fr.contextual_id", "cf8d1ab22d851a6b"),
+    ("fr.phone_field", "86a06843b8e5e533"),
     ("fr.phone", "71a7c64ffda9e57c"),
     ("fr.phone_overseas", "e1c0662ae71e93fc"),
     ("fr.eori", "00da88337abfa473"),
@@ -1039,6 +1092,9 @@ def test_copied_name_constants_equal_their_python_sources() -> None:
                  "AMB_ENTITY"):
         assert _rust_int("names/lexicon.rs", name) == getattr(lexicon, name), name
     assert _rust_int("names/decide.rs", "LINE_WINDOW") == lexicon.LINE_WINDOW
+    # Verbes de lieu, copiés de `_vocab.PLACE_VERBS` (même ordre) / place verbs, same order.
+    vocab = _module("gdprguardian.heuristics._vocab")
+    assert _rust_strings("names/decide.rs", "PLACE_VERBS") == list(vocab.PLACE_VERBS)
 
 
 @pytest.mark.skipif(not RUST.is_dir(), reason="sources Rust absentes / Rust sources missing")
@@ -1059,8 +1115,12 @@ def test_copied_detector_constants_equal_their_python_sources() -> None:
     # équivalents de `re.IGNORECASE` de chaque lettre viennent de la table Unicode partagée, pour toute lettre).
     # Complement keywords: optional parts expanded in Rust, classes kept (case-insensitive pattern; each letter's
     # `re.IGNORECASE` equivalents come from the shared Unicode table, for any letter).
-    keywords = re.match(r"\(\?:\(\?<!\[\\w\]\)\(\?i:(.*?)\)\[ \\t\]\{0,2\}", address._COMPLEMENT)
+    keywords = re.match(r"\(\?:\(\?<!\[\\w\]\)\(\?:\(\?i:(.*?)\)\[ \\t\]\{0,2\}", address._COMPLEMENT)
     assert keywords is not None
+    # Étage avec son rang (« 3e étage ») : seconde branche, jumeau `floor_rank` / floor with its rank: `floor_rank`.
+    assert r"|[0-9]{1,2}(?i:er|re|e|[eè]me)[ \t]{1,2}(?i:[ée]tage))" in address._COMPLEMENT
+    assert _rust_strings("detectors/address.rs", "COMPLEMENT_WORDS") and "fn floor_rank" in (
+        RUST / "detectors/address.rs").read_text(encoding="utf-8")
     complement = _rust_strings("detectors/address.rs", "COMPLEMENT_WORDS")
     rust_words = {w for p in complement for w in _expand(p.replace(".", r"\."))}
     assert rust_words == set(_expand(f"(?:{keywords.group(1)})"))
@@ -1131,6 +1191,7 @@ def test_copied_core_constants_equal_their_python_sources() -> None:
     assert rust_given == given, (f"unicode.rs: GIVEN = {rust_given:#06x} != bits de _text.plane_classes / bits "
                                  f"from _text.plane_classes {given:#06x}")
     assert _rust_int("keywords.rs", "MAX_KEYWORD_LEN") == keywords.MAX_KEYWORD_LEN, "keywords.rs: MAX_KEYWORD_LEN"
+    assert _rust_int("prepare.rs", "GAP_GROUP") == text._GAP_GROUP, "prepare.rs: GAP_GROUP"
     # Identifiant d'entreprise d'une personne physique : fenêtres de l'état civil et de la personne morale.
     # Company number of a natural person: civil-status and legal-entity windows.
     for name in ("NATURAL_PERSON_WINDOW", "LEGAL_ENTITY_WINDOW"):

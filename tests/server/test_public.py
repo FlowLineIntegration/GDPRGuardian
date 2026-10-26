@@ -22,6 +22,7 @@ from server_testkit import (
     NIR,
     PUBLIC,
     SENSITIVE_TEXT,
+    FakeClock,
     from_ip,
     mcp_call,
 )
@@ -196,12 +197,12 @@ def test_status_shows_aggregates_only(public: TestClient) -> None:
 # --- isolation des résultats / result isolation ------------------------------------------------------------------
 
 
-def test_deferred_results_are_reachable_through_their_capability_only(public: TestClient) -> None:
+def test_deferred_results_are_reachable_through_their_capability_only(public: TestClient, clock: FakeClock) -> None:
     tickets = {}
     for name, who in (("alice", ALICE), ("bob", BOB)):
         ticket = public.post("/v1/uploads", headers=who, json={"filename": "a.txt"}).json()
         put = public.put(path_of(ticket["upload_url"]), headers=who, content=f"{name} {NIR}".encode())
-        assert put.status_code == 200 and put.json()["upload_id"] == ticket["upload_id"]
+        assert put.status_code == 202 and put.json()["upload_id"] == ticket["upload_id"]
         tickets[name] = ticket
     assert tickets["alice"]["upload_id"] != tickets["bob"]["upload_id"]
     # Bob ne connaît que sa capacité : énumérer ne donne rien, toujours la même réponse.
@@ -212,18 +213,22 @@ def test_deferred_results_are_reachable_through_their_capability_only(public: Te
     assert len(answers) == 1 and '"not_found"' in answers.pop()
     bob = public.get(path_of(tickets["bob"]["result_url"]), headers=BOB).json()
     assert "bob" in bob["markdown"] and "alice" not in bob["markdown"] and bob["deleted"]
-    # Lu : consommé ; la réponse est celle d'une capacité fausse / read: consumed; same answer as a wrong one.
-    consumed = public.get(path_of(tickets["bob"]["result_url"]), headers=BOB)
-    wrong = public.get("/v1/results/up_" + "b" * 43, headers=BOB)
-    assert consumed.status_code == wrong.status_code == 404 and consumed.json() == wrong.json()
     # L'agent change d'adresse entre ses appels : la capacité suffit / the agent's address changes: capability works.
     alice = public.get(path_of(tickets["alice"]["result_url"]), headers=from_ip("192.0.2.200"))
     assert alice.status_code == 200 and "alice" in alice.json()["markdown"]
+    # Lu puis consommé après le délai de grâce : 404 dont le code (already_read) n'est appris que par le détenteur
+    # de la capacité ; une capacité fausse reste not_found. Read, consumed after the grace period: a 404 whose code
+    # only the capability holder learns; a wrong capability stays not_found.
+    clock.advance(121)
+    consumed = public.get(path_of(tickets["bob"]["result_url"]), headers=BOB)
+    wrong = public.get("/v1/results/up_" + "b" * 43, headers=BOB)
+    assert consumed.status_code == wrong.status_code == 404
+    assert consumed.json()["error"]["code"] == "already_read" and wrong.json()["error"]["code"] == "not_found"
 
 
 def test_a_used_upload_url_answers_like_a_wrong_one(public: TestClient) -> None:
     ticket = public.post("/v1/uploads", headers=ALICE, json={"filename": "a.txt"}).json()
-    assert public.put(path_of(ticket["upload_url"]), headers=ALICE, content=b"x").status_code == 200
+    assert public.put(path_of(ticket["upload_url"]), headers=ALICE, content=b"x").status_code == 202
     again = public.put(path_of(ticket["upload_url"]), headers=BOB, content=b"y")
     wrong = public.put("/v1/uploads/" + secrets.token_urlsafe(32), headers=BOB, content=b"y")
     assert again.status_code == wrong.status_code == 404 and again.json() == wrong.json()
@@ -235,7 +240,7 @@ def test_a_keyed_upload_stays_bound_to_its_key(make_client: Callable[..., TestCl
     client = make_client(**PUBLIC, api_keys=(), api_key_sha256=(KEY_A_SHA256,))
     ticket = client.post("/v1/uploads", headers={**ALICE, **AUTH_A}, json={"filename": "a.txt"}).json()
     assert client.put(path_of(ticket["upload_url"]), headers=BOB, content=b"x").status_code == 404
-    assert client.put(path_of(ticket["upload_url"]), headers={**BOB, **AUTH_A}, content=b"x").status_code == 200
+    assert client.put(path_of(ticket["upload_url"]), headers={**BOB, **AUTH_A}, content=b"x").status_code == 202
     assert client.get(path_of(ticket["result_url"]), headers=ALICE).status_code == 404
     assert client.get(path_of(ticket["result_url"]), headers={**BOB, **AUTH_A}).status_code == 200
 
@@ -256,7 +261,7 @@ def test_mcp_results_need_the_capability_not_the_session(public: TestClient) -> 
         return public.post("/mcp", headers={**MCP_HEADERS, **who}, json=mcp_call(name, arguments)).json()["result"]
 
     ticket = call(ALICE, "create_upload", {"filename": "a.txt"})["structuredContent"]
-    assert public.put(path_of(ticket["upload_url"]), content=SENSITIVE_TEXT.encode()).status_code == 200
+    assert public.put(path_of(ticket["upload_url"]), content=SENSITIVE_TEXT.encode()).status_code == 202
     guess = call(BOB, "get_anonymized", {"upload_id": "up_" + secrets.token_urlsafe(32)})
     assert guess["isError"] is True and "not_found" in guess["content"][0]["text"]
     page = call(ALICE, "get_anonymized", {"upload_id": ticket["upload_id"]})

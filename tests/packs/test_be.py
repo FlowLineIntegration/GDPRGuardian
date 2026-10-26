@@ -282,8 +282,10 @@ def test_belgian_letter_is_fully_anonymised():
     # Même personne, deux écritures : même balise / same person, two spellings: same placeholder.
     assert text.count("[NISS_1]") == 2
     assert "[NISS_2]" in text
+    # Champ « Adresse : » (1.0.1) : toute l'adresse, rue comprise, jusqu'à la fin de phrase.
+    # "Adresse:" field (1.0.1): the whole address, street included, up to the sentence end.
     for placeholder in ("[TEL_1]", "[TEL_2]", "[TEL_3]", "[TEL_4]", "[IBAN_1]", "[CNI_1]", "[PLAQUE_1]",
-                        "[CODE_POSTAL_1]"):
+                        "Adresse : [ADRESSE_1]. Rappel"):
         assert placeholder in text
     assert result.report["irreversible"] is True
 

@@ -51,6 +51,27 @@ def test_same_surname_two_people_stay_distinct(native):
         assert _person(scope, "M. Dupont") not in (jean, marie)
 
 
+def test_part_of_a_hyphenated_surname_joins_that_person(native):
+    # Tests terrain du 26/10 : « Mme Kervadec » après « Mme Solène Kervadec-Moulin » / field test, 26 October.
+    with Scope(native=native) as scope:
+        solene = _person(scope, "Solène Kervadec-Moulin")
+        assert _person(scope, "Mme Kervadec") == solene
+        assert _person(scope, "MOULIN") == solene
+        assert _person(scope, "Mme Kervadec-Moulin") == solene
+        assert _person(scope, "Jean Martin") != solene
+    with Scope(native=native) as scope:
+        # Deux noms composés partagent « Martin » : ambigu, nouvelle personne / two share a part: a new person.
+        first = _person(scope, "Anne Martin-Durand")
+        second = _person(scope, "Paul Martin-Petit")
+        assert _person(scope, "Mme Martin") not in (first, second)
+        assert _person(scope, "Mme Durand") == first
+    with Scope(native=native) as scope:
+        # Un prénom vu seul, puis le nom composé : les parties suivent la personne / parts follow the person.
+        alone = _person(scope, "Hélène")
+        assert _person(scope, "Hélène Le-Gall") == alone
+        assert _person(scope, "Mme Gall") == alone
+
+
 def test_given_name_alone_then_full_name(native):
     with Scope(native=native) as scope:
         alone = _person(scope, "Pierre")

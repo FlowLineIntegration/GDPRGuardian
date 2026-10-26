@@ -89,6 +89,8 @@ def test_isolated_results_are_identical_to_the_in_process_engine(isolated: TestC
         body = isolated.post("/v1/anonymize/text", headers=AUTH_A, json={"text": text}).json()
         expected = reference.anonymize(text)
         report = {key: value for key, value in expected.report.items() if key != "timings_ms"}
+        # Le service donne toujours une liste d'avertissements (vide ici) / the service always gives a warnings list.
+        report["warnings"] = list(report.get("warnings", []))
         assert body["text"] == expected.text and body["report"] == json.loads(json.dumps(report))
 
 
@@ -152,11 +154,10 @@ def test_rules_are_compiled_and_refused_in_the_worker_never_in_the_front(isolate
     response = isolated.post("/v1/anonymize/text", headers=AUTH_A, json={"text": SENSITIVE_TEXT, "rules": hostile})
     assert response.status_code == 422 and response.json()["error"]["code"] == "invalid_request"
     assert "size limit" in response.json()["error"]["message"] and time.perf_counter() - started < 30
+    # Création d'envoi : règles compilées dans un travailleur, refus avant que le fichier parte.
+    # Creating an upload: rules compiled in a worker, refused before the file leaves.
     ticket = isolated.post("/v1/uploads", headers=AUTH_A, json={"filename": "dossier.txt", "rules": hostile})
-    assert ticket.status_code == 201
-    put = isolated.put(ticket.json()["upload_url"].removeprefix("http://testserver"), headers=AUTH_A,
-                       content=SENSITIVE_TEXT.encode())
-    assert put.status_code == 422 and NIR not in put.text
+    assert ticket.status_code == 422 and "size limit" in ticket.json()["error"]["message"]
     tool = isolated.post("/mcp", headers={**MCP_HEADERS, **AUTH_A},
                          json=mcp_call("anonymize_text", {"text": SENSITIVE_TEXT, "rules": hostile})).json()["result"]
     assert tool["isError"] is True and tool["content"][0]["text"].startswith("invalid_request:")
@@ -167,7 +168,7 @@ def test_upload_flow_is_isolated_too(isolated: TestClient) -> None:
     ticket = isolated.post("/v1/uploads", headers=AUTH_A, json={"filename": "dossier.txt"}).json()
     put = isolated.put(ticket["upload_url"].removeprefix("http://testserver"), headers=AUTH_A,
                        content=SENSITIVE_TEXT.encode())
-    assert put.status_code == 200 and put.json()["status"] == "ready"
+    assert put.status_code == 202 and put.json()["status"] == "processing"
     result = isolated.get(ticket["result_url"].removeprefix("http://testserver"), headers=AUTH_A).json()
     assert "[NIR_1]" in result["markdown"] and NIR not in result["markdown"] and result["deleted"] is True
 

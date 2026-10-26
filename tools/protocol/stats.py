@@ -89,6 +89,43 @@ def bootstrap_index(hists: Sequence[Histogram], resamples: int, seed: int,
             "mention_recall": (percentile(recall_draws, tail), percentile(recall_draws, 100 - tail))}
 
 
+def pooled_point(hists: Sequence[Histogram]) -> tuple[float | None, float | None]:
+    """(part sans fuite, rappel des mentions) des documents mis en commun : chaque document compte une fois (indice
+    « documents difficiles », 1.1) / pooled (no-leak share, mention recall): every document counts once."""
+    pooled: dict[tuple[int, int], int] = {}
+    for hist in hists:
+        for cell, n in hist.items():
+            pooled[cell] = pooled.get(cell, 0) + n
+    return family_rates(pooled)
+
+
+def bootstrap_pooled(hists: Sequence[Histogram], resamples: int, seed: int,
+                     level: float = 0.95) -> dict[str, tuple[float, float] | None]:
+    """IC percentile de la part mise en commun, bootstrap stratifié par groupe (chaque groupe garde son nombre de
+    documents, donc son poids) / percentile CI of the pooled share, bootstrap stratified by group (each group keeps its
+    document count, hence its weight). Un groupe vide est ignoré ; aucun document : None / empty group skipped."""
+    cells = [sorted(h.items()) for h in hists if sum(h.values())]
+    if not cells:
+        return {"index": None, "mention_recall": None}
+    rng = random.Random(seed)
+    index_draws: list[float] = []
+    recall_draws: list[float] = []
+    for _ in range(resamples):
+        docs = passed = mentions = masked = 0
+        for items in cells:
+            n = sum(c for _, c in items)
+            counts = multinomial(rng, n, [c for _, c in items])
+            docs += n
+            passed += sum(c for ((m, k), _), c in zip(items, counts, strict=True) if k == m)
+            mentions += sum(m * c for ((m, _), _), c in zip(items, counts, strict=True))
+            masked += sum(k * c for ((_, k), _), c in zip(items, counts, strict=True))
+        index_draws.append(passed / docs)
+        recall_draws.append(masked / mentions if mentions else 0.0)
+    tail = (1 - level) / 2 * 100
+    return {"index": (percentile(index_draws, tail), percentile(index_draws, 100 - tail)),
+            "mention_recall": (percentile(recall_draws, tail), percentile(recall_draws, 100 - tail))}
+
+
 def bootstrap_ratio(pairs: Sequence[tuple[int, int]], resamples: int, seed: int,
                     level: float = 0.95) -> tuple[float, float] | None:
     """IC percentile de Σnum/Σden par documents (corpus réels : précision…) / ratio CI over documents."""

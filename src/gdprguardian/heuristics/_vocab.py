@@ -75,7 +75,8 @@ STRONG_LABELS = _fold_all("""
     requérante | prévenu | prévenue | victime | plaignant | plaignante | locataire | propriétaire | bailleur
     acquéreur | vendeur | vendeuse | acheteur | acheteuse | mandataire | tuteur | tutrice | représentant légal
     personne à contacter | personne de confiance | contact d'urgence | rédigé par | rédigée par | signé par
-    signée par | auteur | autrice | auteurs | signé | signée | signature | soussigné | soussignée
+    signée par | auteur | autrice | auteurs | signé | signée | signature | soussigné | soussignée | pseudonyme
+    nom d'épouse
 """)
 # Étiquettes qui commencent comme une étiquette de personne mais nomment autre chose (« Nom commercial : »).
 # Labels that look like a person label but name something else ("Nom commercial :" is a trade name).
@@ -208,6 +209,12 @@ DETERMINERS = _fold_all("""
 """)
 # Prépositions de lieu (sur le texte d'origine : « à » et « a » diffèrent) / place prepositions (original text).
 LOCATIVES = frozenset({"à", "en", "vers", "depuis", "via", "sur", "dans", "in", "nach", "aus", "bei", "im"})
+# Verbes de lieu (« quitter Lyon », « rejoindre Nantes ») : seulement pour un nom de lieu repris d'une personne
+# trouvée ailleurs dans le texte (test terrain du 26/10 : « Mme Lyon » puis « quitter Lyon ») ; jamais pour un mot
+# seul (« rejoindre Marie » reste masqué). Même liste dans rust/src/names/decide.rs. Place verbs: only for a place
+# name repeated from a person found elsewhere in the text; never for a lone word. Same list in decide.rs.
+PLACE_VERBS = ("quitter", "quitte", "quittent", "quitté", "quittée", "quittera", "rejoindre", "rejoint",
+               "rejoindra", "regagner", "regagne")
 
 # Formes juridiques (casse vérifiée) / legal forms (case checked on the original text).
 LEGAL_FORMS_SUFFIX = (
@@ -301,7 +308,7 @@ GIVEN_HEADERS = _fold_all("""
 """)
 SURNAME_HEADERS = _fold_all("""
     nom | nom de famille | nom d'usage | nom de naissance | last name | lastname | surname | family name
-    nachname | apellido | apellidos | cognome | achternaam
+    nachname | apellido | apellidos | cognome | achternaam | nom marital | nom d'épouse | pseudonyme
 """)
 PERSON_HEADERS = GIVEN_HEADERS | SURNAME_HEADERS | _fold_all("""
     nom complet | nom et prénom | nom et prénoms | nom prénom | prénom nom | identité | name | full name | personne
@@ -323,6 +330,7 @@ PERSON_HEADERS = GIVEN_HEADERS | SURNAME_HEADERS | _fold_all("""
 EMPTY_CELLS = _fold_all("""
     - | -- | — | n/a | na | nc | nd | néant | aucun | aucune | inconnu | inconnue | x | ? | / | oui | non | yes
     no | tbd | tbc | à définir | à préciser | vacant | vacante | tous | toutes | all | none | null
+    non précisé | non précisée | non renseigné | non renseignée | non communiqué | non communiquée
 """)
 
 # Mots courants absents des lexèmes Wikidata (relevé sur des documents administratifs) : jamais un nom inconnu.

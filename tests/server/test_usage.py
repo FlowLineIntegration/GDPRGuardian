@@ -170,7 +170,7 @@ def test_each_anonymisation_sends_one_datagram_without_any_identifier(counted: T
     # REST out-of-band upload: nothing at ticket or read time, one datagram at processing.
     ticket = counted.post("/v1/uploads", headers=AUTH_A, json={"filename": FILE_NAME}).json()
     assert daemon.drain() == []
-    assert counted.put(path_of(ticket["upload_url"]), headers=AUTH_A, content=BODY).status_code == 200
+    assert counted.put(path_of(ticket["upload_url"]), headers=AUTH_A, content=BODY).status_code == 202
     assert only(daemon) == ("upload", "text", len(BODY), True)
     assert counted.get(path_of(ticket["result_url"]), headers=AUTH_A).status_code == 200
     assert daemon.drain() == []
@@ -182,7 +182,7 @@ def test_each_anonymisation_sends_one_datagram_without_any_identifier(counted: T
     assert only(daemon) == ("mcp_text", "text", len(BODY), True)
     ticket = mcp(counted, "create_upload", {"filename": FILE_NAME})["structuredContent"]
     assert daemon.drain() == []
-    assert counted.put(path_of(ticket["upload_url"]), headers=AUTH_A, content=BODY).status_code == 200
+    assert counted.put(path_of(ticket["upload_url"]), headers=AUTH_A, content=BODY).status_code == 202
     assert only(daemon) == ("mcp_file", "text", len(BODY), True)
     assert mcp(counted, "get_anonymized", {"upload_id": ticket["upload_id"]})["isError"] is False
     assert daemon.drain() == []
@@ -210,7 +210,8 @@ def test_failed_anonymisations_are_counted_with_ok_false(counted: TestClient, da
     assert response.status_code == 415
     assert only(daemon) == ("file", "pdf", len(pdf), False)
     ticket = counted.post("/v1/uploads", headers=AUTH_A, json={"filename": "Contrat_Dupont.docx"}).json()
-    assert counted.put(path_of(ticket["upload_url"]), headers=AUTH_A, content=pdf).status_code == 415
+    assert counted.put(path_of(ticket["upload_url"]), headers=AUTH_A, content=pdf).status_code == 202
+    assert counted.get(path_of(ticket["result_url"]), headers=AUTH_A).status_code == 415
     assert only(daemon) == ("upload", "docx", len(pdf), False)
 
     def past_deadline(*_: Any) -> Any:
@@ -442,7 +443,7 @@ def test_requests_succeed_with_a_configured_counter_on_every_platform(make_clien
     response = client.post("/v1/anonymize/file", headers=AUTH_A, files={"file": (FILE_NAME, BODY, "text/plain")})
     assert response.status_code == 200
     ticket = client.post("/v1/uploads", headers=AUTH_A, json={"filename": FILE_NAME}).json()
-    assert client.put(path_of(ticket["upload_url"]), headers=AUTH_A, content=BODY).status_code == 200
+    assert client.put(path_of(ticket["upload_url"]), headers=AUTH_A, content=BODY).status_code == 202
     assert mcp(client, "anonymize_text", {"text": SENSITIVE_TEXT})["isError"] is False
 
 
@@ -497,7 +498,7 @@ def test_requests_from_the_server_itself_are_marked_protocol(make_client: Callab
     assert client.post("/v1/anonymize/text", headers=from_ip("203.0.113.7"),
                        json={"text": SENSITIVE_TEXT}).status_code == 200
     ticket = client.post("/v1/uploads", headers=from_ip("203.0.113.7"), json={"filename": "a.txt"}).json()
-    assert client.put(path_of(ticket["upload_url"]), content=BODY).status_code == 200  # PUT du serveur / local PUT
+    assert client.put(path_of(ticket["upload_url"]), content=BODY).status_code == 202  # PUT du serveur / local PUT
     records = daemon.drain()
     assert [(r["kind"], r["src"]) for r in records] == [("text", "protocol"), ("text", "public"),
                                                         ("upload", "protocol")]

@@ -96,14 +96,17 @@ la campagne, toute mesure des corpus réels se fait sur la seule moitié `dev` (
    durée des 1 019 385 documents), `finish` (résultats dans `results/trial-<date>/`). Effacer `P`.
 6. Campagne : `prepare` à nouveau (`finish` a vidé la mémoire vive), `pack-real` **complet** (sans `--split`),
    copie vers `/dev/shm/gg-protocol/real-corpora.jsonl.gz`, effacer la copie locale ;
-   `GG_PROTOCOL_HOURS=3 bash gg-protocol/run-protocol.sh start`, en évitant le redémarrage automatique de 03 h 30
-   UTC ; `status` jusqu'à `units_done` = `units_planned` ; après une pause, `start` reprend.
+   `GG_PROTOCOL_HOURS=3 bash gg-protocol/run-protocol.sh start`, en évitant la maintenance du serveur (mises à jour
+   de sécurité chaque nuit à 2 h, heure de Paris, 1 h 45 le lundi, avec redémarrage si nécessaire ; redémarrage
+   chaque lundi à 2 h) ; `status` jusqu'à `units_done` = `units_planned` ; après une pause, `start` reprend.
 7. `bash gg-protocol/run-protocol.sh finish` : image vérifiée, résultats copiés dans `gg-protocol/results/`, dossier
    de travail **archivé** (`/var/lib/gg-protocol-<date>-<plan>`), mémoire vive vidée ; un `start` sur une campagne
-   terminée est refusé. Copier `protocol-<date>.{json,md}` dans `benchmarks/results/`.
-8. `python tools/protocol/merge_quality.py benchmarks/results/protocol-<date>.json site/data/quality.json`, puis
-   reconstruire et déployer le site. Tout écart déclaré qu'il rappelle se publie avec l'indice. Une campagne
-   répétée sur les mêmes moitiés `test` liste les précédentes dans `spec.EARLIER_CAMPAIGNS` (sinon refus).
+   terminée est refusé. Copier `protocol-<version>-<date>.{json,md}` dans `benchmarks/results/`.
+8. `python -I site/tools/protocol_table.py benchmarks/results/protocol-<version>-<date>.json` (il appelle
+   `merge_quality.py` puis écrit le tableau par famille, les deux indices et le README), puis
+   `python -I site/tools/preview.py --check`, reconstruire et déployer le site. `merge_quality.py` seul ne suffit
+   pas : `preview.py --check` refuse alors l'indice. Tout écart déclaré qu'il rappelle se publie avec l'indice. Une
+   campagne répétée sur les mêmes moitiés `test` liste les précédentes dans `spec.EARLIER_CAMPAIGNS` (sinon refus).
 
 ### Plus tard : publication publique
 
@@ -172,11 +175,14 @@ workflows (`ci.yml`, `release.yml`) that stay out of the public repository while
   `/dev/shm/gg-protocol/real-corpora.jsonl.gz`, `GG_PROTOCOL_ARGS="--synthetic-docs 3000 --redteam-bases 30"
   run-protocol.sh start`, `status` for the throughput (hence the duration of the 1,019,385 documents), `finish`
   (results in `results/trial-<date>/`); (6) campaign: `prepare` again (`finish` emptied the RAM folder), the **full**
-  pack (no `--split`) copied to the same place, the local copy deleted, `GG_PROTOCOL_HOURS=3 run-protocol.sh start` away from the 03:30 UTC automatic reboot, `status`
+  pack (no `--split`) copied to the same place, the local copy deleted, `GG_PROTOCOL_HOURS=3 run-protocol.sh start` away from the server maintenance (security updates every night at 02:00 Paris time, 01:45 on Mondays, with a reboot if needed; a reboot every Monday at 02:00), `status`
   until `units_done` = `units_planned`, `start` again after a pause; (7) `run-protocol.sh finish` checks the image,
   copies the results, **archives** the work folder (`/var/lib/gg-protocol-<date>-<plan>`) and empties the RAM folder
-  (`start` on a completed campaign is refused); copy `protocol-<date>.{json,md}` into `benchmarks/results/`; (8)
-  `python tools/protocol/merge_quality.py …`, then rebuild and deploy the site; any disclosed departure it recalls is
+  (`start` on a completed campaign is refused); copy `protocol-<version>-<date>.{json,md}` into `benchmarks/results/`;
+  (8) `python -I site/tools/protocol_table.py benchmarks/results/protocol-<version>-<date>.json` (it runs
+  `merge_quality.py`, then writes the per-family table, both indexes and the README), then
+  `python -I site/tools/preview.py --check`, rebuild and deploy the site (`merge_quality.py` alone is not enough:
+  `preview.py --check` then refuses the index); any disclosed departure it recalls is
   published with the index; a repeat campaign on the same `test` halves lists the earlier ones in
   `spec.EARLIER_CAMPAIGNS` (refused otherwise).
 - **Later, public publishing:**

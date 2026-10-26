@@ -31,7 +31,7 @@ Windows et `:` ailleurs ; ou `--allow-dir <dossier>`, répétable, qui la rempla
 directories, separated by `;` on Windows, `:` elsewhere; or `--allow-dir <dir>`, repeatable, which replaces it.
 
 ```bash
-uvx gdprguardian-mcp@1.0.0
+uvx gdprguardian-mcp@1.0.1
 ```
 
 Claude Desktop (`claude_desktop_config.json`), Cursor (`~/.cursor/mcp.json`) :
@@ -41,7 +41,7 @@ Claude Desktop (`claude_desktop_config.json`), Cursor (`~/.cursor/mcp.json`) :
   "mcpServers": {
     "gdprguardian": {
       "command": "uvx",
-      "args": ["gdprguardian-mcp@1.0.0"],
+      "args": ["gdprguardian-mcp@1.0.1"],
       "env": { "GDPRGUARDIAN_ALLOWED_DIRS": "C:\\Users\\moi\\Documents\\Dossiers" }
     }
   }
@@ -51,7 +51,7 @@ Claude Desktop (`claude_desktop_config.json`), Cursor (`~/.cursor/mcp.json`) :
 Claude Code :
 
 ```bash
-claude mcp add --transport stdio --env GDPRGUARDIAN_ALLOWED_DIRS=/home/moi/dossiers gdprguardian -- uvx gdprguardian-mcp@1.0.0
+claude mcp add --transport stdio --env GDPRGUARDIAN_ALLOWED_DIRS=/home/moi/dossiers gdprguardian -- uvx gdprguardian-mcp@1.0.1
 ```
 
 VS Code (`.vscode/mcp.json`) :
@@ -62,7 +62,7 @@ VS Code (`.vscode/mcp.json`) :
     "gdprguardian": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["gdprguardian-mcp@1.0.0"],
+      "args": ["gdprguardian-mcp@1.0.1"],
       "env": { "GDPRGUARDIAN_ALLOWED_DIRS": "${workspaceFolder}" }
     }
   }
@@ -72,7 +72,7 @@ VS Code (`.vscode/mcp.json`) :
 Claude Cowork charge les serveurs locaux déclarés par un plugin : installez le plugin Gardien RGPD (Personnaliser >
 Plugins). / Claude Cowork loads local servers declared by a plugin: install the GDPR Guardian plugin.
 
-Sans uv / without uv : `pip install gdprguardian-mcp==1.0.0`, puis la commande `gdprguardian-mcp`. Une application
+Sans uv / without uv : `pip install gdprguardian-mcp==1.0.1`, puis la commande `gdprguardian-mcp`. Une application
 graphique ne voit pas toujours le PATH du terminal : donnez alors le chemin complet de `uvx` ou de
 `gdprguardian-mcp`. / A desktop app may not see the terminal's PATH: give the full path of `uvx` or `gdprguardian-mcp`.
 
@@ -85,19 +85,19 @@ the index (PyPI) at start-up once its cache is a few minutes old, and fails with
 | Outil / tool | Rôle / role |
 |---|---|
 | `anonymize_file` | lit un fichier autorisé (PDF, Word, Excel, CSV, e-mail…) et renvoie la page 1 du Markdown anonymisé / reads an allowed file, returns page 1 |
-| `get_anonymized` | pages suivantes ; le résultat est effacé une fois lu / next pages; deleted once read |
+| `get_anonymized` | pages suivantes ; le résultat est effacé 2 min après lecture complète / next pages; deleted 2 min after a full read |
 | `anonymize_text` | anonymise un texte / anonymises a text |
 | `list_packs` | packs pays disponibles / available country packs |
 
 ## Pour les plus prudents / for the most cautious
 
-- Installer une fois (`uvx gdprguardian-mcp@1.0.0 --version`), puis lancer avec `--offline` : uv ne contacte plus
+- Installer une fois (`uvx gdprguardian-mcp@1.0.1 --version`), puis lancer avec `--offline` : uv ne contacte plus
   aucun index et démarre depuis son cache (vérifié sans aucune interface réseau). Dans la configuration du client :
-  `"args": ["--offline", "gdprguardian-mcp@1.0.0"]`. / Install once, then start with `--offline`: uv contacts no
+  `"args": ["--offline", "gdprguardian-mcp@1.0.1"]`. / Install once, then start with `--offline`: uv contacts no
   index and starts from its cache (checked with no network interface at all).
-- Ou installer la commande une fois pour toutes : `uv tool install gdprguardian-mcp==1.0.0`, puis donner au client le
+- Ou installer la commande une fois pour toutes : `uv tool install gdprguardian-mcp==1.0.1`, puis donner au client le
   chemin complet de `gdprguardian-mcp` (affiché par `uv tool dir --bin`) ; uv n'intervient plus au lancement. / Or
-  install the command once: `uv tool install gdprguardian-mcp==1.0.0`, then give the client the full path of
+  install the command once: `uv tool install gdprguardian-mcp==1.0.1`, then give the client the full path of
   `gdprguardian-mcp` (shown by `uv tool dir --bin`); uv is no longer involved at start-up.
 - Poste sans Internet : `pip install --no-index --find-links <dossier de roues> gdprguardian-mcp`. / Air-gapped
   computer: install from a folder of wheels.

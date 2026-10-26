@@ -78,35 +78,30 @@
 </section>
 
 <aside class="col rail" aria-label="Instruments">
-<section class="g gs" aria-labelledby="t-ses"><h2 id="t-ses">Your session</h2>
-<dl class="tl">
-<div class="t"><dt>Documents</dt><dd class="v" data-s="docs">0</dd><dd class="u" data-s="docs2">nothing queued</dd></div>
-<div class="t"><dt>Mentions masked</dt><dd class="v" data-s="men">0</dd><dd class="u" data-s="men2">no placeholder</dd></div>
-<div class="t"><dt>Volume sent</dt><dd class="v" data-s="vol">0 B</dd><dd class="u">none of it is kept</dd></div>
-<div class="t"><dt>Time</dt><dd class="v" data-s="time">0 s</dd><dd class="u" data-s="time2">round trips added up</dd></div>
-</dl></section>
-<section class="g gc q" data-v="{{q.confidence_index}}" aria-labelledby="t-ci"><h2 id="t-ci">Confidence index</h2>
-<div class="t ci"><p class="ci-v"><span class="n">{{q.confidence_index}}<small>%</small></span><span class="pd">not measured yet</span></p>
-<p class="ci-ic n">95% CI: {{q.confidence_ci_low}}–{{q.confidence_ci_high}}%</p>
-<p class="ci-d">Share of test documents with no direct identifier left readable<span class="n">: 7 families, {{q.protocol_date}}</span>.<span class="pd"> First run: not started yet.</span></p>
-<a class="ci-a" href="#protocol">The protocol</a></div></section>
-<section class="g gm" aria-labelledby="t-m"><div class="gh"><h2 id="t-m">No leak, per family</h2><p class="live-st">26 October 2026</p></div>
-<table class="sheet mt"><tbody>
-<tr><th scope="row">ParlaMint-FR, debates (upper bound)</th><td>93.0%</td></tr>
-<tr><th scope="row">Synthetic, 450,000 documents</th><td>91.9%</td></tr>
-<tr><th scope="row">BODACC, company notices</th><td>89.9%</td></tr>
-<tr class="rl"><th scope="row">Red team, 51 disguises</th><td>63.7%</td></tr>
-<tr class="rl"><th scope="row">BOAMP, public procurement</th><td>60.7%</td></tr>
-<tr class="rl"><th scope="row">MAPA FR, 6 documents</th><td>16.7%</td></tr>
-<tr class="rl"><th scope="row">Old press</th><td>16.5%</td></tr>
-</tbody></table>
-<p class="note">Their mean is the index. Details and limits: <a href="#protocol">Protocol and scores</a>.</p>
+<section class="g gc" aria-labelledby="t-ci"><div class="gh"><h2 id="t-ci">Confidence index</h2><p class="live-st q" data-v="{{q.protocol_date}}"><span class="n">protocol 1.1 · {{q.protocol_date}}</span><span class="pd">protocol 1.1</span></p></div>
+<p class="lede">Share of documents in which no person’s name, address, phone number, e-mail or other direct identifier stays readable.</p>
+<div class="sc">
+<div class="t s1 q" data-v="{{q.confidence_index}}"><p class="k">Normalised documents</p>
+<p class="ci-v"><span class="n">{{q.confidence_index}}<small>%</small></span><span class="pd">result to come</span></p>
+<p class="ci-ic"><span class="n">95% interval: <span class="nw">{{q.confidence_ci_low}}–{{q.confidence_ci_high}}%</span></span><span class="pd">published when the 1.1 run ends</span></p>
+<p class="ci-d">Texts written normally, with no damage or disguise: e-mails and internal documents (synthetic), real legal notices, public procurement notices and parliamentary debates.</p></div>
+<div class="t s2 q" data-v="{{q.hard_index}}"><p class="k">Difficult documents</p>
+<p class="ci-v"><span class="n">{{q.hard_index}}<small>%</small></span><span class="pd">result to come</span></p>
+<p class="ci-ic"><span class="n">95% interval: <span class="nw">{{q.hard_ci_low}}–{{q.hard_ci_high}}%</span></span><span class="pd">published when the 1.1 run ends</span></p>
+<p class="ci-d">Synthetic texts, damaged or disguised: garbled copy-paste, identifiers split by a line break, deliberate disguises, letters misread by OCR.</p></div>
+</div>
+<ul class="ok">
+<li class="q" data-v="{{q.confidence_index}}"><span class="n">Measured under a public protocol, registered before the run: more than a million documents through the real service, nearly 3,000 of them real annotated documents.</span><span class="pd">A public protocol, registered before the run: more than a million documents go through the real service.</span></li>
+<li>A leading-edge, frugal engine: {{q.ms_per_doc}} ms median per 2 KB document on a single CPU core, no GPU, no LLM. Irreversible: no mapping table.</li>
+<li>Poor-quality scans: degraded performance, measured and published separately.</li>
+</ul>
+<a class="ci-a" href="#protocol">The protocol, in detail</a>
 </section>
 <section class="g gl" aria-labelledby="t-live" data-live-root>
 <div class="gh"><h2 id="t-live"><i class="dot" aria-hidden="true"></i>Live service</h2><p class="live-st" data-live-status data-on="every 2 s" data-off="stream cut, retrying…">snapshot at page load</p></div>
 <dl class="tl">
 <div class="t w"><dt>Last hour</dt><dd class="v" data-live="uses_hour">{{live.uses_hour}}</dd><dd class="u">documents · <span data-live="bytes_hour">{{live.bytes_hour}}</span></dd></div>
-<div class="t w"><dt>Since {{live.since}}</dt><dd class="v" data-live="docs_total">{{live.docs_total}}</dd><dd class="u">documents · <span data-live="bytes_total">{{live.bytes_total}}</span></dd></div>
+<div class="t w"><dt>Since going online on <span class="nw">{{live.since}}</span></dt><dd class="v" data-live="docs_total">{{live.docs_total}}</dd><dd class="u">documents processed · <span data-live="bytes_total">{{live.bytes_total}}</span></dd></div>
 <div class="t"><dt>Visitors, approx.</dt><dd class="v" data-live="visitors_total">{{live.visitors_total}}</dd><dd class="u"><span data-live="visitors_today">{{live.visitors_today}}</span> today</dd></div>
 <div class="t"><dt>CPU</dt><dd class="v"><span data-live="cpu_percent">{{live.cpu_percent}}</span><small>%</small></dd><dd class="u">all cores, 2 s<span class="meter" data-meter="cpu_percent" aria-hidden="true"><i></i></span></dd></div>
 <div class="t"><dt>Memory</dt><dd class="v"><span data-live="ram_percent">{{live.ram_percent}}</span><small>%</small></dd><dd class="u"><span data-live="ram_used">{{live.ram_used}}</span> of <span data-live="ram_total">{{live.ram_total}}</span><span class="meter" data-meter="ram_percent" aria-hidden="true"><i></i></span></dd></div>
@@ -115,12 +110,19 @@
 <p class="vh" aria-live="polite" data-live-say data-tpl="{u} documents processed in the last hour, {v} visitors in total."></p>
 <p class="note">Real figures from the server. Nothing is kept or logged: no document, no IP address; only these totals are counted.</p>
 </section>
+<section class="g gs" aria-labelledby="t-ses"><h2 id="t-ses">Your session</h2>
+<dl class="tl">
+<div class="t"><dt>Documents</dt><dd class="v" data-s="docs">0</dd><dd class="u" data-s="docs2">nothing queued</dd></div>
+<div class="t"><dt>Mentions masked</dt><dd class="v" data-s="men">0</dd><dd class="u" data-s="men2">no placeholder</dd></div>
+<div class="t"><dt>Volume sent</dt><dd class="v" data-s="vol">0 B</dd><dd class="u">none of it is kept</dd></div>
+<div class="t"><dt>Time</dt><dd class="v" data-s="time">0 s</dd><dd class="u" data-s="time2">round trips added up</dd></div>
+</dl></section>
 </aside>
 
 <section class="pn" id="video" aria-labelledby="h-vi"><div class="ph"><p>Video</p><a class="x" href="#workspace">Close</a></div>
 <h2 id="h-vi" tabindex="-1">The launch video</h2>
 <video class="vid" controls preload="none" playsinline poster="/media/gdpr-guardian-launch-en-poster.png?v=b19695e7" src="/media/gdpr-guardian-launch-en.mp4?v=cf7924d3" aria-labelledby="h-vi"></video>
-<p>Silent video: all its text is in the <a href="/media/gdpr-guardian-launch-en-transcript.txt?v=cbab0932" target="_blank" rel="noopener">transcript</a>. Short 4:5 cut for social feeds: <a href="/media/gdpr-guardian-launch-en-social.mp4?v=8fdfbc3c" download>MP4, 4.9 MB</a>.</p>
+<p>Silent video: all its text is in the <a href="/media/gdpr-guardian-launch-en-transcript.txt?v=b7e78eae" target="_blank" rel="noopener">transcript</a>. Short 4:5 cut for social feeds: <a href="/media/gdpr-guardian-launch-en-social.mp4?v=8fdfbc3c" download>MP4, 4.9 MB</a>.</p>
 <p class="fine">The video’s index dates from its rendering; the current figure: <a href="#protocol">Protocol and scores</a>.</p>
 </section>
 
@@ -139,7 +141,7 @@
 <p class="lab">Naive masking</p><p class="txt"><mark class="p0">[NAME]</mark> annoys <mark class="p0">[NAME]</mark>. <mark class="p0">[NAME]</mark> hits <mark class="p0">[NAME]</mark>. <span class="why">Who hit whom? An AI can only guess.</span></p>
 <p class="lab">GDPR Guardian</p><p class="txt"><mark class="p1">[PERSON_1]</mark> annoys <mark class="p2">[PERSON_2]</mark>. <mark class="p2">[PERSON_2]</mark> hits <mark class="p1">[PERSON_1]</mark>. <span class="why">The roles survive, the identities do not.</span></p>
 </div>
-<p>On the workspace’s example, version 1.0.0 turns “Jean Dupont”, “Mr Dupont” and “DUPONT Jean” into one placeholder, <code>[PERSON_1]</code>; “Ms Claire Martin” becomes <code>Ms [PERSON_2]</code>. The title stays, as it helps to follow the text. The invoice number and the amount stay too: they are not personal data.</p>
+<p>On the workspace’s example, version 1.0.1 turns “Jean Dupont”, “Mr Dupont” and “DUPONT Jean” into one placeholder, <code>[PERSON_1]</code>; “Ms Claire Martin” becomes <code>Ms [PERSON_2]</code>. The title stays, as it helps to follow the text. The invoice number and the amount stay too: they are not personal data.</p>
 <p>Not always, though: measured on 26 October on 2,463 fictitious people, the deployed engine gives 92.2% of them a single placeholder; 192 are split across several and 44 share another person’s.</p>
 <p>Each document is anonymised separately, with its own key, destroyed afterwards: <code>[PERSON_1]</code> in one document is not necessarily the same person in another. Later, on the roadmap: processing a set of documents under one code, to keep the same placeholders from one document to the next, still with no way back (the set’s key destroyed at the end).</p>
 </section>
@@ -156,7 +158,7 @@
 <li class="in"><b>Container with no network at all</b>read-only, no privileges.</li>
 <li class="in"><b>Front door and rate limiter</b>the IP address immediately becomes a keyed pseudonym (key renewed every 24 hours), held in memory, never written, forgotten after 10 idle minutes.</li>
 <li class="in hl"><b>A fresh process per request</b>isolated, memory capped, killed at its deadline; it cannot start anything.</li>
-<li class="in"><b>Result</b>in the response, the same way back, nowhere else. Agents’ deferred uploads: readable with a random 256-bit identifier given to the requester alone, deleted once read or after 10 minutes.</li>
+<li class="in"><b>Result</b>in the response, the same way back, nowhere else. Agents’ deferred uploads: readable with a random 256-bit identifier given to the requester alone, deleted 2 min after reading, 30 min at most.</li>
 <li><b>Site daemon</b>a datagram without content (kind, format, size, duration, success, origin) feeds the live figures.</li>
 </ol></div>
 <div><h3>On your computer</h3>
@@ -189,52 +191,48 @@
 
 <section class="pn" id="protocol" aria-labelledby="h-pr"><div class="ph"><p>Protocol and scores</p><a class="x" href="#workspace">Close</a></div>
 <h2 id="h-pr" tabindex="-1">How we grade ourselves</h2>
-<p class="lead">An index is only worth something if anyone can recompute it. Its definition was fixed before the run, and its digests published 21 minutes before the launch; the run went through the real service, and everything is published: corpora, commands, dated raw results, weaknesses included. One caveat: the test halves had already been measured 7 times while the engine was tuned.</p>
-<div class="two">
-<dl class="defs">
-<dt>Confidence index</dt><dd>Share of documents in which no direct identifier stays readable: a single character of an annotated mention left visible, and the document counts as failed. Computed per corpus family, then averaged with equal weight; 95% interval by stratified resampling of documents (2,000 draws, fixed seed).</dd>
-<dt>French scope</dt><dd>Seven families: French synthetic (multi-seed generator, with decoys), red-team mutations, BODACC, BOAMP, ParlaMint-FR, old press (Europeana and HIPE NewsEye, one family), MAPA FR. Volume buys no weight: the 450,000 synthetic documents count as much as the 6 of MAPA FR.</dd>
-<dt>Published separately</dt><dd>Other languages (MAPA DE, ES, IT, NL, PT; MEDDOCAN; German LER; English TAB), at the bottom of the table; Judilibre, the negative control, for precision only.</dd>
-<dt>On the production server</dt><dd>Through its local socket, at low priority: without TLS, nginx or the rate limiter. Its documents count in the usage figures, shown apart.</dd>
-</dl>
-<table class="sheet">
-<caption class="q" data-v="{{q.confidence_index}}"><span class="pd">First run: not started yet; each cell waits for its publication.</span><span class="n">Run of {{q.protocol_date}}, engine {{q.protocol_engine}}.</span></caption>
+<p class="lead">An index is only worth something if anyone can check and recompute it. The results first, then protocol 1.1 point by point, precise enough to judge it and replay it; the reference text is <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/docs/PROTOCOLE.md">PROTOCOLE.md</a>.</p>
+<div class="rt">
+<table class="sheet rc">
+<caption class="q" data-v="{{q.confidence_index}}"><span class="pd">Run 1.1: results published when it ends.</span><span class="n">Protocol {{q.protocol_version}}, run of {{q.protocol_date}}, engine {{q.protocol_engine}}.</span></caption>
+<thead><tr><td></td><th scope="col">Normalised</th><th scope="col">Difficult</th></tr></thead>
 <tbody>
-<tr><th scope="row">Confidence index</th><td class="q" data-v="{{q.confidence_index}}"><span class="n">{{q.confidence_index}}%</span><span class="pd">not measured yet</span></td></tr>
-<tr><th scope="row">95% interval</th><td class="q" data-v="{{q.confidence_ci_low}}"><span class="n">{{q.confidence_ci_low}}–{{q.confidence_ci_high}}%</span><span class="pd">not measured yet</span></td></tr>
-<tr><th scope="row">Direct mentions fully masked</th><td class="q" data-v="{{q.mention_recall_pct}}"><span class="n">{{q.mention_recall_pct}}%</span><span class="pd">not measured yet</span></td></tr>
-<tr><th scope="row">Documents assessed</th><td class="q" data-v="{{q.protocol_docs}}"><span class="n">{{q.protocol_docs}}</span><span class="pd">not measured yet</span></td></tr>
-<tr><th scope="row">Families</th><td class="q" data-v="{{q.protocol_families}}"><span class="n">{{q.protocol_families}}</span><span class="pd">not measured yet</span></td></tr>
-<tr><th scope="row">Real corpora · annotated documents</th><td class="q" data-v="{{q.real_docs}}"><span class="n">{{q.real_corpora}} · {{q.real_docs}}</span><span class="pd">not measured yet</span></td></tr>
+<tr><th scope="row">Confidence index</th><td class="q" data-v="{{q.confidence_index}}"><span class="n">{{q.confidence_index}}%</span><span class="pd">not measured yet</span></td><td class="q" data-v="{{q.hard_index}}"><span class="n">{{q.hard_index}}%</span><span class="pd">not measured yet</span></td></tr>
+<tr><th scope="row">95% interval</th><td class="q" data-v="{{q.confidence_ci_low}}"><span class="n">{{q.confidence_ci_low}}–{{q.confidence_ci_high}}%</span><span class="pd">not measured yet</span></td><td class="q" data-v="{{q.hard_ci_low}}"><span class="n">{{q.hard_ci_low}}–{{q.hard_ci_high}}%</span><span class="pd">not measured yet</span></td></tr>
+<tr><th scope="row">Direct mentions fully masked</th><td class="q" data-v="{{q.mention_recall_pct}}"><span class="n">{{q.mention_recall_pct}}%</span><span class="pd">not measured yet</span></td><td class="q" data-v="{{q.hard_mention_recall_pct}}"><span class="n">{{q.hard_mention_recall_pct}}%</span><span class="pd">not measured yet</span></td></tr>
+<tr><th scope="row">Documents scored</th><td class="w">per family, below</td><td class="q" data-v="{{q.hard_docs}}"><span class="n">{{q.hard_docs}}</span><span class="pd">not measured yet</span></td></tr>
+<tr><th scope="row">Make-up</th><td class="q w" data-v="{{q.protocol_families}}"><span class="n">{{q.protocol_families}} families, equal weight</span><span class="pd">4 families, equal weight</span></td><td class="w">3 groups, pooled</td></tr>
+<tr><th scope="row">Whole run</th><td colspan="2" class="q w" data-v="{{q.protocol_docs}}"><span class="n">{{q.protocol_docs}} documents sent, {{q.real_docs}} of them real annotated documents from {{q.real_corpora}} corpora, both halves and the corpora published apart included</span><span class="pd">not measured yet</span></td></tr>
 </tbody>
 </table>
 </div>
-<h3>Run of 26 October 2026, per family</h3>
-<p class="meta">Test half of the real corpora, deployed engine, standard profile, country FR (other languages: their own; TAB: FR). Dev half, used to tune the engine: 59.9%; all real documents: 61.2%.</p>
+<h3>Per family, protocol 1.1</h3>
 <div class="xs" tabindex="0" role="region" aria-labelledby="c-rc"><table class="sheet rc">
-<caption id="c-rc">The index is the equal-weight mean of the “No leak” column; in bold, our weak spots. ParlaMint annotates only the speakers and listed people: 93.0% is an upper bound. One MAPA FR document moves the index by 2.4 points. Old press: Europeana 21.1%, HIPE 1.6%. Outside the index, precision can be measured on MEDDOCAN only. Guards held: neutral text masked by mistake 0.07%, decoys masked 3.7%. Raw results: <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/benchmarks/results/protocol-2026-10-26.md">protocol-2026-10-26.md</a>.</caption>
-<thead><tr><th scope="col">Family</th><th scope="col">Scored docu­ments</th><th scope="col">No leak</th><th scope="col">Mentions masked</th><th scope="col">Precision</th></tr></thead>
+<caption id="c-rc">Standard profile, country FR (other languages: their own). “—”: not measured yet, or not applicable. ParlaMint annotates only the speakers and the people on its list: an upper bound. Guards (%): neutral text masked by mistake {{q.g_overmask}}, decoys {{q.g_decoys}}. Judilibre: {{q.f_jud_docs}} decisions, {{q.f_jud_spans}} masked spans per 10,000 characters.</caption>
+<thead><tr><th scope="col">Family</th><th scope="col">Scored docu­ments</th><th scope="col">No leak (%)</th><th scope="col">Mentions masked (%)</th><th scope="col">Precision (%)</th></tr></thead>
 <tbody>
-<tr><th scope="row">Synthetic, 10 seeds, with decoys</th><td>450,000</td><td>91.9%</td><td>98.4%</td><td>98.8%</td></tr>
-<tr class="rl"><th scope="row">Red team, 51 disguises</th><td>548,907</td><td>63.7%</td><td>86.7%</td><td>98.7%</td></tr>
-<tr><th scope="row">BODACC, French company notices</th><td>1,335</td><td>89.9%</td><td>97.8%</td><td>99.1%</td></tr>
-<tr class="rl"><th scope="row">BOAMP, French public procurement notices</th><td>1,408</td><td>60.7%</td><td>89.6%</td><td>87.3%</td></tr>
-<tr><th scope="row">ParlaMint-FR, French National Assembly debates</th><td>143</td><td>93.0%</td><td>98.5%</td><td>—</td></tr>
-<tr class="rl"><th scope="row">Old digitised French newspapers</th><td>272</td><td>16.5%</td><td>54.6%</td><td>75.5%</td></tr>
-<tr class="rl"><th scope="row">MAPA FR, EU legal texts in French</th><td>6</td><td>16.7%</td><td>33.1%</td><td>47.1%</td></tr>
-<tr><th scope="row">Outside the index: TAB, ECHR judgments in English</th><td>55</td><td>67.3%</td><td>82.8%</td><td>77.9%</td></tr>
-<tr><th scope="row">Outside the index: German, Spanish, Italian, Dutch, Portuguese</th><td>591</td><td>0%</td><td>0–10.7%</td><td>61.1%</td></tr>
+<tr class="sub"><th scope="rowgroup" colspan="5">Normalised documents, the index</th></tr>
+<tr><th scope="row">Synthetic, 10 seeds, with decoys</th><td>{{q.f_syn_docs}}</td><td>{{q.f_syn_nl}}</td><td>{{q.f_syn_mr}}</td><td>{{q.f_syn_pr}}</td></tr>
+<tr><th scope="row">BODACC, French company notices</th><td>{{q.f_bod_docs}}</td><td>{{q.f_bod_nl}}</td><td>{{q.f_bod_mr}}</td><td>{{q.f_bod_pr}}</td></tr>
+<tr><th scope="row">BOAMP, French procurement notices</th><td>{{q.f_boa_docs}}</td><td>{{q.f_boa_nl}}</td><td>{{q.f_boa_mr}}</td><td>{{q.f_boa_pr}}</td></tr>
+<tr><th scope="row">ParlaMint-FR, National Assembly debates</th><td>{{q.f_par_docs}}</td><td>{{q.f_par_nl}}</td><td>{{q.f_par_mr}}</td><td>{{q.f_par_pr}}</td></tr>
+<tr class="sub"><th scope="rowgroup" colspan="5">Difficult documents, the second score</th></tr>
+<tr><th scope="row">Damaged everyday formats, 25 kinds</th><td>{{q.f_red_docs}}</td><td>{{q.f_red_nl}}</td><td>{{q.f_red_mr}}</td><td>{{q.f_red_pr}}</td></tr>
+<tr><th scope="row">Deliberate obfuscations, 25 kinds</th><td>{{q.f_obf_docs}}</td><td>{{q.f_obf_nl}}</td><td>{{q.f_obf_mr}}</td><td>{{q.f_obf_pr}}</td></tr>
+<tr><th scope="row">OCR noise (0/O, 1/l…)</th><td>{{q.f_ocr_docs}}</td><td>{{q.f_ocr_nl}}</td><td>{{q.f_ocr_mr}}</td><td>{{q.f_ocr_pr}}</td></tr>
+<tr class="sub"><th scope="rowgroup" colspan="5">Published apart, outside both scores</th></tr>
+<tr><th scope="row">Old French newspapers, low-quality OCR</th><td>{{q.f_old_docs}}</td><td>{{q.f_old_nl}}</td><td>{{q.f_old_mr}}</td><td>{{q.f_old_pr}}</td></tr>
+<tr><th scope="row">MAPA FR, EU legal texts in French</th><td>{{q.f_mapa_docs}}</td><td>{{q.f_mapa_nl}}</td><td>{{q.f_mapa_mr}}</td><td>{{q.f_mapa_pr}}</td></tr>
+<tr><th scope="row">Other languages: DE, ES, IT, NL, PT, EN</th><td>{{q.f_oth_docs}}</td><td>{{q.f_oth_nl}}</td><td>{{q.f_oth_mr}}</td><td>{{q.f_oth_pr}}</td></tr>
 </tbody></table></div>
 <div class="two">
-<div class="limits"><h3>Known limits, measured</h3>
+<div class="limits"><h3>Known limits</h3>
 <ul>
-<li>The barrier lowers the risk without removing it, and does much worse on hard real texts: one document in six with no leak for old newspapers and MAPA FR.</li>
-<li>BOAMP, public procurement: 4 notices in 10 keep a readable mention (addresses 82% masked); nearly one in two in 2019 and 2021 (internal measurement, outside the protocol).</li>
-<li>Measurements on text only: the conversion of PDF, Word and Excel files is not measured; a scanned page (an image with no text) is dropped, with no character recognition.</li>
-<li>Through the API, a country chosen without France masks neither names nor addresses: 0% on the real texts of the five other languages.</li>
-<li>Red team: a name or an address in lower case, 27% of documents with no leak; slashes or double spaces between digits, tabs, OCR confusions: 4–12%. Spaced-out letters, digits in superscript or mathematical bold, a disguised <span class="nw">e-mail</span> (“%40”, “[dot]”…): no document without a leak. Broken by a line break, an identifier stays masked only one time in three; French bank details (RIB) written as separate fields are almost never recognised.</li>
-<li>The engine also masks by mistake: precision of 47% on MAPA FR, 76% on old newspapers, 87% on BOAMP; 3.7% of decoys (amounts, references, company identifiers) are masked by mistake; in 300 court decisions, about 3 masked spans in 10 are wrong (120 checked).</li>
-<li>Context (job title, place, date, a rare event) can allow indirect re-identification: no automated detection prevents that.</li>
+<li>A first barrier, which lowers the risk without removing it; not a GDPR certification.</li>
+<li>Leaks found with engine 1.0: a line break inside an identifier, the spaced-out letters of a PDF, slashes or double spaces between digits, the addresses of BOAMP notices, French bank details (RIB) written field by field.</li>
+<li>Text only: the conversion of PDF, Word and Excel files is not measured; a scanned page with no text is dropped.</li>
+<li>Through the API, a country chosen without France masks neither names nor addresses.</li>
+<li>The engine also masks by mistake (Precision column); context (job title, place, date) can allow indirect re-identification.</li>
 </ul></div>
 <table class="sheet">
 <caption>Internal regression set, every release</caption>
@@ -243,11 +241,58 @@
 <tr><th scope="row">Tests in the offline image</th><td>{{q.tests_offline_image}}</td></tr>
 <tr><th scope="row">Rust and Python parity documents, identical outputs</th><td>{{q.parity_docs}}</td></tr>
 <tr><th scope="row">Red team: adversarial documents</th><td>{{q.redteam_docs}}</td></tr>
-<tr><th scope="row">Red team: ways of disguising an identifier</th><td>{{q.redteam_operators}}</td></tr>
+<tr><th scope="row">Red team: mutation operators</th><td>{{q.redteam_operators}}</td></tr>
 </tbody>
 </table>
 </div>
-<p class="fine">The full protocol and the commands to replay everything are published in the <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian">public repository</a>.</p>
+<h3>1. What we measure, and for which use</h3>
+<p>One question: in what share of documents does the service leave at least one direct identifier readable? The intended use, as registered: “texts organisations send to an AI: e-mails (headers, signatures, quoted threads), requests pasted into a chat, internal documents (minutes, HR letters, contracts, invoices, CRM notes, tickets), in French, as text or office files, written in good faith” (an employee is not trying to fool the tool); what the plan does not cover is declared in point 8. Every document in the French scope goes through the service’s text route (<code>POST /v1/anonymize/text</code>) with the default settings: country FR, standard profile, French placeholders. For every scored document, the truth is known (the “gold”).</p>
+<h3>2. What a leak is</h3>
+<p>A document leaks as soon as a single alphanumeric character of a direct-identifier mention stays readable in its place in the output: the last digit of a phone number is enough. Direct identifiers: a natural person’s name, a postal address (street or postal box, with postcode and town), a phone number, an e-mail address and the other direct identifiers (national numbers, IBAN, cards, plates…), whoever they belong to. Not counted: a company name (GDPR, recital 14; CJEU, C-92/09 and C-93/09), a town named as a place, a postcode followed by a town with no street. A sole trader is a person: their name, SIREN and SIRET count.</p>
+<p>The output is aligned on the input; whatever may be visible counts as visible. A document refused, failed, or whose output does not align counts as a leak. Documents with no direct mention are left out of the scores, but counted and published.</p>
+<h3>3. The two scores, and how they are computed</h3>
+<ul class="list">
+<li><b>Normalised documents, the headline score.</b> For each of the four families (synthetic, BODACC, BOAMP, ParlaMint-FR), the share of scored documents with no leak; then an equal-weight average, a quarter each: the number of documents gives no weight. Declared target: 95% or more, a goal and not a condition; the figure is published whatever it is.</li>
+<li><b>Difficult documents, the second score.</b> The same measure over the whole red team, 51 operators in three groups, pooled: every mutated document counts once, so an operator weighs the number of documents it alters (in the 1.0 run, the three groups made 51.8%, 46.1% and 2.2% of the 548,907 mutated documents). It is the measure of the red-team family of protocol 1.0: the two can be compared.</li>
+<li><b>Published with each score.</b> Mention recall (share of direct mentions fully masked); per family, precision (share of masked characters that fall on personal data of the gold).</li>
+<li><b>Guards.</b> An engine that masked everything would score 100%: both scores are published only if, in the same run, neutral text masked by mistake stays at most 2% (synthetic), decoys masked by mistake at most 10%, and precision at least 70% on BODACC and on BOAMP. Overriding this must be declared publicly.</li>
+</ul>
+<h3>4. The corpora</h3>
+<ul class="list">
+<li><b>Synthetic FR.</b> A public generator (Faker 40.43.0, <code>fr_FR</code>), 9 document types, 30 templates, with decoys that must not be masked (amounts, invoice and order numbers, legal references, company identifiers); 10 fresh seeds, 2026102501 to 2026102510, 45,000 documents each; about 6% come from two English templates (a ticket, an e-mail) in a French context. The development seed (20261024) is refused by the code.</li>
+<li><b>Annotated real corpora.</b> BODACC, French company notices naming a natural person, published in September 2026 (2,693 documents); BOAMP, public procurement notices 2022-2023 (3,000); ParlaMint-FR, National Assembly debates (300). Only their <code>test</code> half counts: a fixed split by SHA-256 digest of the document identifier, written on 25 October 2026; rules are tuned on the other half.</li>
+<li><b>Red team.</b> 12,000 base documents (seeds 2026102521 to 2026102530) run through 51 operators: 548,907 mutated documents. Damaged everyday formats, 25: a line break inside an identifier, the spaced-out letters of a copied PDF, spaces, separators, case, accents… Deliberate obfuscations, 25: substitute alphabets, look-alikes from other scripts, invisible characters, disguised e-mail addresses. OCR noise, 1: 0/O, 1/l, 5/S, 8/B confusions.</li>
+<li><b>Published apart, in neither score.</b> Old press (Europeana and HIPE, 655 documents; low-quality OCR: degraded performance); MAPA FR, EU legal texts (12 documents, 6 of them scored in the <code>test</code> half); other languages (MAPA DE, ES, IT, NL, PT, MEDDOCAN, German LER, TAB); and a negative control, Judilibre: 300 decisions already pseudonymised, with no gold, whose masked spans are counted.</li>
+</ul>
+<h3>5. Plan size and interval</h3>
+<p>Registered plan: 1,019,385 documents sent to the service (450,000 synthetic; 12,000 base documents and 548,907 mutated documents of the red team; 8,478 real documents, the corpora published apart and the control included). Its SHA-256 digests are registered: synthetic <code>0b91be78…</code>, red team <code>d984ee1b…</code>.</p>
+<p>95% interval: bootstrap resampling of documents, 2,000 draws, seed 20261025, percentiles 2.5 and 97.5; stratified by family for normalised documents, by group for difficult documents. It only covers the chance of the draw, neither gold errors nor the choice of families; for difficult documents it is too narrow (the variants of one base document are drawn as if independent).</p>
+<h3>6. The run</h3>
+<ul class="list">
+<li><b>Registered beforehand.</b> The digests of the protocol, its specification, the tool, the bundle that runs, the real corpora and the frozen engine (version, packs, outputs on the probe) are published in the public repository before the launch; every result copies them; a bundle changed after it was built is refused.</li>
+<li><b>The real production service</b>, through its local Unix socket, with a local token read on standard input (never passed as an argument nor written by the tool). Visitors come first: the run gives way as soon as someone waits. Its documents count in the live figures of the home screen.</li>
+<li><b>The measuring tool runs in a throwaway container</b> of the service’s exact image: no network, read-only system, no privileges, 2 GB of memory without swap, no core file.</li>
+<li><b>One engine per run.</b> The service image, version, packs and outputs on a fixed probe of 200 documents are checked at the start, every minute, after any restart and at the end; any difference stops everything.</li>
+<li><b>Real corpora in RAM only</b> (<code>/dev/shm</code>, swap off), run first and then wiped. The tool never writes a text: only counters, bits and digests.</li>
+<li><b>To the end.</b> The run goes to completion, with no stopping when the figure looks good and no best attempt kept. An overload (429, 503) is waited for and retried, then pauses the run after 30 minutes on one document; it never counts as a leak.</li>
+</ul>
+<h3>7. What is published</h3>
+<p>Dated raw results, never overwritten (<code>benchmarks/results/protocol-1.1-&lt;date&gt;.json</code> and <code>.md</code>): both scores and their intervals, every family and group, every red-team operator, every seed, the families published apart, the history of earlier measurements of the <code>test</code> halves and declared departures.</p>
+<p>The protocol 1.0 result stays published: 61.8% (95% CI: 58.6–66.9%), 7 families, <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/benchmarks/results/protocol-2026-10-26.md">1.0 result</a>.</p>
+<h3>8. Caveats</h3>
+<ul class="list">
+<li><b>Test halves not blind.</b> Measured at least nine times before, the 1.0 run included, their scores were known while engine 1.0.1 was tuned: real-corpus figures are optimistic. Fresh data is the commitment for the next version.</li>
+<li><b>Real weight.</b> The run sends more than a million documents, but three quarters of the headline score rest on the scored documents of the <code>test</code> halves of BODACC, BOAMP and ParlaMint-FR: 2,886 in the 1.0 run (1,335, 1,408 and 143); ParlaMint-FR alone, a quarter of the score, on 143. These corpora are not texts sent to an AI.</li>
+<li><b>ParlaMint-FR, an upper bound.</b> It annotates only the speakers and the people on its list: a name left unannotated does not count as a leak. With the synthetic family (the same templates the engine was tuned on), these two favourable families weigh half of the headline score.</li>
+<li><b>The choice of the two scores</b> was made on 26 October 2026, before any 1.1 measurement but after the 1.0 per-family figures, while engine 1.0.1 was being tuned, knowing that the everyday red team was the lowest family the first draft kept. On the <code>dev</code> halves, same engine, moving old press, MAPA FR and the red team out of the headline score, with the corrected BOAMP gold (−0.1 point), takes it from 59.7% to 82.8%; all these families stay published.</li>
+<li><b>Not measured.</b> The conversion of files, pasted requests and CRM notes (no template), re-identification through context: see the known limits. Measured BOAMP gold errors: 2.1% of mentions.</li>
+</ul>
+<h3>9. Replay</h3>
+<p>Everything is public: executable definitions (<code>tools/protocol/spec.py</code>), the tool and its tests. From the repository root, with no service:</p>
+<pre tabindex="0"><code>python -m tools.protocol plan --count
+python -m tools.protocol bundle --out gg-protocol.pyz
+python -m tools.protocol registration --bundle gg-protocol.pyz</code></pre>
+<p>The first gives back the plan’s numbers and digests; the other two, the bundle (byte-for-byte reproducible) and the registered digests. Real corpora, the run and the merge into the site: section 10 of <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/docs/PROTOCOLE.md">PROTOCOLE.md</a>; digests published before the run: <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/PROTOCOL-REGISTRATION-1.1.json">1.1 registration</a>; raw results and history: <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/tree/main/benchmarks/results">benchmarks/results</a>.</p>
 </section>
 
 <section class="pn" id="use" aria-labelledby="h-us"><div class="ph"><p>Use it</p><a class="x" href="#workspace">Close</a></div>
@@ -257,7 +302,7 @@
 <div><h3>In Claude, over public MCP, no key</h3>
 <p>Address: <code>https://api.gdprguardian.com/mcp</code> (or <code>api.gardienrgpd.fr/mcp</code>). Claude Code:</p>
 <pre tabindex="0"><code>claude mcp add --transport http gdprguardian https://api.gdprguardian.com/mcp</code></pre>
-<p>claude.ai: add this address as a custom connector. For a file, <code>create_upload</code> gives a command that you run yourself on your computer: the file goes straight to the service, without passing through the model; <code>get_anonymized</code> then reads the result, deleted once read or, unread, after 10 minutes. A text already pasted into the chat has already left: <code>anonymize_text</code> cannot bring it back.</p></div>
+<p>claude.ai: add this address as a custom connector. For a file, <code>create_upload</code> gives a command that you run yourself on your computer: the file goes straight to the service, without passing through the model; <code>get_anonymized</code> then reads the result, deleted 2 min after reading, 30 min at most. A text already pasted into the chat has already left: <code>anonymize_text</code> cannot bring it back.</p></div>
 <div><h3>Through the REST API</h3>
 <pre tabindex="0"><code>curl https://api.gdprguardian.com/v1/anonymize/text \
   -H 'Content-Type: application/json' \
@@ -271,7 +316,8 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 <p>For very sensitive documents: the same software, as a local MCP server or in a container with no network; nothing leaves through GDPR Guardian. Installation: <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/docs/LOCAL.md">local version guide</a>; questions: <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>.</p>
 <h3>Limits of the public service</h3>
 <p>Per client: one request processed at a time and two waiting, about 20 seconds of compute in advance, refilled at 0.5 s per second. Your network (/24 in IPv4, /48 in IPv6) shares a budget twice as large and 12 requests in flight. Beyond that: a 429 and a delay to honour (<code>Retry-After</code>), which this workspace applies by itself while sending one document at a time; a saturated server (estimated wait over 10 s): 503; an upload too slow (15 s, plus 128 KiB per second of body): 408.</p>
-<p>Size: 50 MB per file, one million characters per text; per document, 12.5 million characters of result, 10,000 pages or slides, one million HTML tags (opening and closing), 100,000 Word paragraphs (table cells included). Very dense plain text, CSV or spreadsheets reach that ceiling before 50 MB (around 13 MB of text, 16 MB of CSV, 4 MB of spreadsheet): 413, naming the limit. An illustrated 50 MB document takes a few seconds; each may take 60 s plus 1 s per 250 KB (4 min 30 s at 50 MB).</p></div>
+<p>Size: 50 MB per file, one million characters per text; per document, 12.5 million characters of result, 10,000 pages or slides, one million HTML tags (opening and closing), 100,000 Word paragraphs (table cells included). Very dense plain text, CSV or spreadsheets reach that ceiling before 50 MB (around 13 MB of text, 16 MB of CSV, 4 MB of spreadsheet): 413, naming the limit. An illustrated 50 MB document takes a few seconds; each may take 60 s plus 1 s per 250 KB (4 min 30 s at 50 MB).</p>
+<p>Minimum quality: readable text. Images and scanned pages without a text layer: not read (warning). PDF from low-quality OCR: processed, with the warning “Low-quality text (likely OCR)”.</p></div>
 </div>
 </section>
 
@@ -298,7 +344,7 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 <h2 id="h-le" tabindex="-1">Legal notice</h2>
 <p>Under French law (LCEN). Publisher: <a target="_blank" rel="noopener" href="https://www.flowlineintegration.com/">Flow Line Intégration</a>. Publication director: Guillaume CLEMENT, CTO Data &amp; AI. Contact: <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>.</p>
 <p>Host: OVH SAS, 2 rue Kellermann, 59100 Roubaix, France, phone 1007 (from France).</p>
-<p>GDPR Guardian 1.0.0, MIT licence, code in the <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian">public repository</a>. Software provided as is, without warranty. It is a first automated barrier, explainable and measured: neither a GDPR compliance certification nor legal advice; each controller remains responsible for its own compliance.</p>
+<p>GDPR Guardian 1.0.1, MIT licence, code in the <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian">public repository</a>. Software provided as is, without warranty. It is a first automated barrier, explainable and measured: neither a GDPR compliance certification nor legal advice; each controller remains responsible for its own compliance.</p>
 </section>
 
 <section class="pn" id="privacy" aria-labelledby="h-co"><div class="ph"><p>Privacy</p><a class="x" href="#workspace">Close</a></div>
@@ -314,7 +360,7 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 </section>
 </main>
 <footer class="foot">
-<p>GDPR Guardian 1.0.0 · MIT licence<span>, open code on GitHub</span></p>
+<p>GDPR Guardian 1.0.1 · MIT licence<span>, open code on GitHub</span></p>
 <p>Offered by <a target="_blank" rel="noopener" href="https://www.flowlineintegration.com/">Flow Line Intégration</a> · <a target="_blank" rel="noopener" href="https://www.linkedin.com/in/guillaume-clement-erp-cloud/">Guillaume CLEMENT</a>, CTO Data &amp; AI · <span class="cd">Design: Claude Design</span></p>
 <p><a href="#legal">Legal notice</a><a href="#privacy">Privacy</a><a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/issues/new/choose">Report a problem</a></p>
 </footer>

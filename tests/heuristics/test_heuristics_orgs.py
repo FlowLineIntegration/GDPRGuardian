@@ -46,19 +46,22 @@ def test_physicomorale_company_named_after_a_person_is_masked(fr):
     assert out == "La SARL [ORG_1] et le [ORG_2] sont mandatés."
 
 
-def test_company_that_is_only_a_person_name_is_left_to_the_person_detector(fr):
+def test_company_name_with_a_legal_form_stays_readable_and_the_person_is_masked(fr):
+    # Règle produit du 26/10 : « Dupont SARL » est une personne morale (considérant 14), lisible ; « M. Dupont »
+    # est masqué ; « Jean Dupont EI » (entrepreneur individuel) est une personne. Product rule of 26/10: a company
+    # name with a legal-entity form stays readable; the person and the sole trader are masked.
     out = fr.anonymize("Dupont SARL a livré. M. Dupont a signé. Jean Dupont EI facture.").text
-    assert out == "[PERSONNE_1] SARL a livré. M. [PERSONNE_1] a signé. [PERSONNE_1] EI facture."
+    assert out == "Dupont SARL a livré. M. [PERSONNE_1] a signé. [PERSONNE_1] EI facture."
 
 
 @pytest.mark.parametrize(("text", "expected"), [
-    # Nom de personne ambigu (« Petit », « Blanc ») : le détecteur de personnes seul ne le masquerait pas.
-    # Ambiguous person name: the person detector alone would not mask it.
-    ("Petit SARL a livré la commande.", "[PERSONNE_1] SARL a livré la commande."),
+    # Forme juridique de personne morale juste avant ou après : nom de société, lisible / company name, readable.
+    ("Petit SARL a livré la commande.", "Petit SARL a livré la commande."),
+    ("Blanc SAS et la SARL Martin ont signé.", "Blanc SAS et la SARL Martin ont signé."),
+    # Sans forme juridique collée : nom de personne ambigu, masqué / no legal form next to it: masked as a person.
     ("La société Petit a livré.", "La société [PERSONNE_1] a livré."),
-    ("Blanc SAS et la SARL Martin ont signé.", "[PERSONNE_1] SAS et la SARL [PERSONNE_2] ont signé."),
 ])
-def test_company_that_is_only_an_ambiguous_person_name_is_masked_as_a_person(fr, text, expected):
+def test_company_named_like_a_person(fr, text, expected):
     assert fr.anonymize(text).text == expected
 
 

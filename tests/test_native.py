@@ -28,6 +28,7 @@ _ALPHABETS = {
     "fr.siv_plate": "ABCDISUOW" + _DIGITS + "-",
     "fr.alnum_mixed": _ALNUM,
     "fr.contextual_id": _ALNUM + _SEPARATORS,
+    "fr.phone_field": _DIGITS + "+() ./-",
     "fr.phone": _DIGITS + "+() .",
     "fr.phone_overseas": _DIGITS + "+ ",
     "fr.eori": "FR" + _DIGITS,
