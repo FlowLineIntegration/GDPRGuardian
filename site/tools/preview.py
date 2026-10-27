@@ -107,8 +107,9 @@ Q_KEYS = {"tests_windows", "tests_linux", "tests_offline_image", "parity_docs", 
 # Raw bytes (the daemon serves them Brotli-compressed, about a third of that; gzip size printed as a guide).
 # html 59 -> 63 KB and js 30 -> 34 KB on 2026-10-26: the mode selector (three modes, custom categories, codes to
 # keep) and the per-mode score cards. html 63 -> 66 KB on 2026-10-27 (launch audit): share-preview tags, the
-# publisher's legal identity, the controller and data-subject rights, and the 1.0.2 known limits.
-BUDGETS = {"html": 66 * 1024, "css": 32 * 1024, "js": 34 * 1024, "fonts": 90 * 1024, "font_files": 3}
+# publisher's legal identity, the controller and data-subject rights, and the 1.0.2 known limits. js 34 -> 35 KB
+# the same day: live.js falls back to /api/stats when an HTTPS filter (antivirus, AdGuard) cuts the event stream.
+BUDGETS = {"html": 66 * 1024, "css": 32 * 1024, "js": 35 * 1024, "fonts": 90 * 1024, "font_files": 3}
 SCRIPTS = ("live.js", "cockpit.js")
 # Layout rules that browser checks found missing once; a stylesheet without them is a regression.
 CSS_GUARDS = (

@@ -1,9 +1,10 @@
 /* Live instruments: /api/live (Server-Sent Events, "stats" every 2 s, closed while the tab is hidden). Formats match
-   the daemon's (fr-FR / en-GB; sizes in base 1024, one decimal from 1 Ko / 1 KB). No storage, no cookie. */
+   the daemon's (fr-FR / en-GB; sizes in base 1024, one decimal from 1 Ko / 1 KB). No storage, no cookie.
+   Cut shown after 12 s without news only; two short streams (HTTPS filters) switch to /api/stats every 5 s. */
 (function () {
 "use strict";
 var d = document, fr = d.documentElement.lang === "fr", els = d.querySelectorAll("[data-live]");
-if (!els.length || !window.EventSource) return;
+if (!els.length || !window.EventSource || !window.fetch) return;
 var nf = function (o) { return new Intl.NumberFormat(fr ? "fr-FR" : "en-GB", o).format; };
 var n0 = nf({ maximumFractionDigits: 0 }), n1 = nf({ minimumFractionDigits: 1, maximumFractionDigits: 1 });
 var U = fr ? ["o", "Ko", "Mo", "Go", "To"] : ["B", "KB", "MB", "GB", "TB"];
@@ -15,6 +16,7 @@ function bytes(b) {
 var F = { bytes_hour: bytes, bytes_total: bytes, ram_used: bytes, ram_total: bytes, cpu_percent: n1, ram_percent: n1 };
 var root = d.querySelector("[data-live-root]"), st = d.querySelector("[data-live-status]");
 var say = d.querySelector("[data-live-say]"), es = null, retry = 0, last = 0, seen = "", calm = 0;
+var opened = 0, short = 0, poll = 0, quiet = 0;
 // Processor and memory move all the time: shown every 10 s, not at each event, to spare the corner of the eye.
 var SLOW = { cpu_percent: 1, ram_percent: 1, ram_used: 1 };
 function state(on) {
@@ -49,20 +51,48 @@ function apply(j) {
     say.textContent = say.getAttribute("data-tpl").replace("{u}", n0(v.uses_hour)).replace("{v}", n0(v.visitors_total));
   }
 }
+// 12 s without news: "reconnecting"; a stream still open but silent (buffered by a filter) gives way to /api/stats.
+function off() { state(false); if (es) { short = 2; stop(); connect(); } }
+function fresh(j) {
+  apply(j);
+  state(true);
+  retry = 0;
+  clearTimeout(quiet);
+  quiet = setTimeout(off, 12e3);
+}
+function stop() {
+  if (es) { es.close(); es = null; }
+  clearInterval(poll);
+  poll = 0;
+}
+function read() {
+  if (d.hidden) return;
+  fetch("/api/stats", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) { if (j) fresh(j); }, function () { /* next try in 5 s */ });
+}
 function connect() {
-  if (es || d.hidden) return;
+  if (es || poll || d.hidden) return;
+  if (short >= 2) { read(); poll = setInterval(read, 5e3); return; }
   es = new EventSource("/api/live");
+  opened = Date.now();
   es.addEventListener("stats", function (e) {
-    try { apply(JSON.parse(e.data)); state(true); retry = 0; } catch (_) { /* malformed event: ignored */ }
+    try { fresh(JSON.parse(e.data)); } catch (_) { /* malformed event: ignored */ }
   });
   es.onerror = function () {
-    state(false);
+    var age = Date.now() - opened;
+    if (age >= 6e4) short = 0;
+    else if (age < 2e4 && ++short >= 2) { stop(); connect(); return; }
+    opened = Date.now();
     if (es && es.readyState === 2) { es = null; setTimeout(connect, Math.min(6e4, 5000 * ++retry)); }
   };
 }
-d.addEventListener("visibilitychange", function () {
-  if (!d.hidden) connect();
-  else if (es) { es.close(); es = null; }
-});
-connect();
+// Hidden: nothing open, no count-down; shown: 12 s for news before "reconnecting".
+function show() {
+  clearTimeout(quiet);
+  if (d.hidden) return stop();
+  quiet = setTimeout(off, 12e3);
+  connect();
+}
+d.addEventListener("visibilitychange", show);
+show();
 })();

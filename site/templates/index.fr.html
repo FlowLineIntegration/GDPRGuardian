@@ -45,18 +45,18 @@
 <form class="in" id="ck" aria-labelledby="t-in" novalidate>
 <div class="hd"><h2 id="t-in">Entrée</h2><button type="button" class="lk" data-ex="M. Jean Dupont (jean.dupont@exemple.fr, 06 12 34 56 78), NIR 1 85 05 78 006 084 91, IBAN FR76 3000 6000 0112 3456 7890 189. M. Dupont rappellera Mme Claire Martin. DUPONT Jean réglera la facture n° 2026-0042 de 1 234,56 euros.">Exemple</button></div>
 <fieldset class="md"><legend>Façon de travailler</legend>
-<label><input type="radio" name="mode" value="fort" checked><span><b>Fort (recommandé)</b> on masque tout ce qu’on peut, codes compris</span><span class="mn q" data-v="{{q.fort_index}}"><span class="n">anonymisation {{q.fort_index}} % · codes utiles perdus {{q.fort_code_loss}} %</span><span class="pd">anonymisation — · codes utiles perdus —</span></span></label>
-<label><input type="radio" name="mode" value="essentiel"><span><b>Essentiel</b> ce que prouve une clé, un format ou un libellé ; codes produit lisibles</span><span class="mn q" data-v="{{q.ess_index}}"><span class="n">anonymisation {{q.ess_index}} % · codes utiles perdus {{q.ess_code_loss}} %</span><span class="pd">anonymisation — · codes utiles perdus —</span></span></label>
-<label><input type="radio" name="mode" value="personnalise"><span><b>Personnalisé</b> le fort, catégories et codes au choix</span><span class="mn">chiffres selon vos choix</span></label>
+<label><input type="radio" name="mode" value="fort" checked><span><b>Fort (recommandé)</b> tout ce qu’on peut, codes compris</span><span class="mn q" data-v="{{q.fort_index}}"><span class="n">anonymisation {{q.fort_index}} % · codes perdus {{q.fort_code_loss}} %</span><span class="pd">anonymisation — · codes perdus —</span></span></label>
+<label><input type="radio" name="mode" value="essentiel"><span><b>Essentiel</b> codes, boîtes partagées et pseudonymes @ lisibles</span><span class="mn q" data-v="{{q.ess_index}}"><span class="n">anonymisation {{q.ess_index}} % · codes perdus {{q.ess_code_loss}} %</span><span class="pd">anonymisation — · codes perdus —</span></span></label>
+<label><input type="radio" name="mode" value="personnalise"><span><b>Personnalisé</b> le fort, catégories et codes au choix</span></label>
 </fieldset>
 <div class="cu" data-r="cu" hidden>
-<fieldset class="cats" data-r="cats"><legend>Masqués (décochez pour laisser en clair ; les secrets le restent toujours)</legend></fieldset>
+<fieldset class="cats" data-r="cats"><legend>À masquer (les secrets, toujours)</legend></fieldset>
 <label class="kl" for="ck-k">Codes à conserver</label>
 <input id="ck-k" name="keep" autocomplete="off" spellcheck="false" placeholder="SKU-###### LOT-@@@@-###" aria-describedby="ck-kh ck-ke">
-<p class="kh" id="ck-kh"># = un chiffre, @ = une lettre, le reste tel quel, avec au moins une lettre ou un chiffre fixe ; un espace entre deux codes. Ils restent lisibles.</p>
+<p class="kh" id="ck-kh"># un chiffre · @ une lettre · un espace entre deux codes</p>
 <p class="ke" id="ck-ke" data-r="kerr" aria-live="polite"></p>
 </div>
-<p class="hint q msrc" data-v="{{q.modes_source}}">Trois modes, pour que chacun l’utilise comme bon lui semble. Le fort protège le plus ; l’essentiel garde lisibles les codes utiles (commande, facture, produit). <span class="n">Chiffres : {{q.modes_source}}<span class="m-i"> (données de mise au point, pas le protocole public)</span>, {{q.modes_date}}.</span><span class="pd">Chiffres : à venir.</span></p>
+<p class="hint q msrc" data-v="{{q.modes_source}}"><span class="n">Chiffres : <span class="m-i">mesure interne, optimistes</span><span class="m-p">protocole public 1.2</span>, {{q.modes_date}}.</span><span class="pd">Chiffres : à venir.</span></p>
 <label class="vh" for="ck-t">Texte à anonymiser</label>
 <textarea id="ck-t" name="text" spellcheck="false" autocomplete="off" placeholder="Collez ou tapez un texte. Des documents ? Déposez-les n’importe où dans la page, plusieurs à la fois."></textarea>
 <fieldset class="opts"><legend class="vh">Réglages</legend>
@@ -65,18 +65,17 @@
 </fieldset>
 <p class="hint" data-r="hint" hidden>Hors de France, seuls les identifiants du pays sont vérifiés et les noms passent par les lexiques français : textes juridiques de cinq pays (DE, ES, IT, NL, PT), 23 à 42 % des noms masqués, 78 à 89 % des documents avec fuite (mesure interne hors protocole).</p>
 <div class="go"><button class="btn" type="submit" data-r="go" disabled>Anonymiser</button><input class="vh" type="file" id="ck-f" multiple accept=".pdf,.docx,.docm,.dotx,.dotm,.xlsx,.xlsm,.xlsb,.xls,.pptx,.pptm,.ppsx,.potx,.odt,.ott,.fodt,.ods,.odp,.otp,.fodp,.odg,.rtf,.eml,.mht,.mhtml,.msg,.html,.htm,.xhtml,.csv,.tsv,.txt,.text,.md,.markdown"><label class="btn2" for="ck-f">Ajouter des documents</label></div>
-<p class="keys" data-r="keys">Ctrl + Entrée anonymiser · Ctrl + Maj + C copier · Ctrl + S télécharger · Échap vider la saisie</p>
-<p class="fmts">PDF, Word, Excel, PowerPoint, OpenDocument, RTF, e-mail, HTML, CSV, texte · 50&nbsp;Mo par document · seule l’extension du nom part avec le fichier</p>
-<p class="fmts">Envoyé chiffré à notre serveur en France, traité en mémoire, rien n’en reste après la réponse ; nous restons un tiers, sans contrat de sous-traitance. Pour ne rien envoyer : la <a href="#utiliser">version locale</a>.</p>
+<p class="keys vh" data-r="keys">Ctrl + Entrée anonymiser · Ctrl + Maj + C copier · Ctrl + S télécharger · Échap vider la saisie</p>
+<p class="fmts">Envoyé à notre serveur en France (nous sommes un tiers), traité en mémoire, rien n’en est gardé. Pour ne rien envoyer : la <a href="#utiliser">version locale</a>.</p>
 <p class="st" data-r="st" role="status"></p>
 <noscript><p class="nojs">Le poste de travail a besoin de JavaScript. Sans lui : l’API ou le serveur MCP, voir <a href="#utiliser">Utiliser</a>.</p></noscript>
 </form>
 <section class="qu" aria-labelledby="t-q">
 <div class="hd"><h2 id="t-q">File de la session <span class="n0" data-r="qn"></span></h2><div class="acts"><button type="button" class="lk" data-r="zip" disabled>Tout télécharger (.zip)</button><button type="button" class="lk" data-r="clear">Tout effacer</button><button type="button" class="lk" data-r="stop" disabled>Annuler l’envoi</button></div></div>
-<p class="sep">Chaque document est anonymisé séparément : [PERSONNE_1] d’un document n’est pas forcément celle d’un autre.</p>
+<p class="sep">Chaque document est anonymisé à part : ses balises ne valent que pour lui.</p>
 <div class="hold" data-r="hold" hidden><p></p><button type="button" class="btn2 sm" data-r="resume">Reprendre</button></div>
 <ol class="ql" data-r="ql" aria-label="Documents de la session"></ol>
-<p class="qe" data-r="qe">Vide. Les documents partent un par un, dans l’ordre ; rien ne reste après la fermeture de l’onglet.</p>
+<p class="qe" data-r="qe">Vide.</p>
 </section>
 </div>
 
@@ -84,7 +83,7 @@
 <div class="hd"><h2 id="t-out">Résultat</h2><p class="what" data-r="what"></p><div class="acts"><button type="button" class="lk" data-r="redo" hidden>Relancer</button><button type="button" class="lk" data-r="orig" hidden>Reprendre le texte</button><button type="button" class="lk" data-r="rm" hidden>Retirer</button><button type="button" class="lk" data-r="copy" disabled>Copier</button><button type="button" class="btn2 sm" data-r="dl" disabled>Télécharger le .md</button></div></div>
 <div class="ban" data-r="ban" hidden><p><b></b> <span></span></p><code></code></div>
 <div class="res" data-r="res" tabindex="0" role="region" aria-label="Texte anonymisé">
-<div class="empty"><label class="drop" for="ck-f"><b>Déposez vos documents ici</b>ou n’importe où dans la page, plusieurs à la fois ; ou cliquez pour les choisir. Chacun devient une ligne de la file.</label><div class="demo"><p>Le texte anonymisé s’affiche ici, balises cohérentes :</p><p class="s1"><mark class="p1">[PERSONNE_1]</mark> embête <mark class="p2">[PERSONNE_2]</mark>. <mark class="p2">[PERSONNE_2]</mark> frappe <mark class="p1">[PERSONNE_1]</mark>.</p><p>Les rôles survivent, les identités non. <a href="#histoire">L’histoire</a></p></div></div>
+<div class="empty"><label class="drop" for="ck-f"><b>Déposez vos documents ici</b>ou cliquez pour les choisir · PDF, Word, Excel, PowerPoint, e-mail, HTML, CSV, texte · 50&nbsp;Mo au plus</label><div class="demo"><p>Le résultat s’affiche ici :</p><p class="s1"><mark class="p1">[PERSONNE_1]</mark> embête <mark class="p2">[PERSONNE_2]</mark>. <mark class="p2">[PERSONNE_2]</mark> frappe <mark class="p1">[PERSONNE_1]</mark>.</p><p>Les rôles survivent, les identités non, sans retour possible.</p></div></div>
 </div>
 <div class="rep" data-r="rep" hidden>
 <p class="insp" data-r="insp"></p>
@@ -96,42 +95,36 @@
 </section>
 
 <aside class="col rail" aria-label="Instruments">
-<section class="g gc" aria-labelledby="t-ci"><div class="gh"><h2 id="t-ci">Notes par mode</h2><p class="live-st">premier niveau</p></div>
-<p class="lede">Gardien RGPD est un filtre de premier niveau : il masque les identifiants directs. Le sens (santé, opinions, recoupements) n’est pas traité ici : avec nos skills, un modèle léger de votre IA relit ensuite le texte anonymisé ; un étage LLM gouverné est à l’étude. <a href="#defi">Les niveaux</a>.</p>
+<section class="g gc" aria-labelledby="t-ci"><div class="gh"><h2 id="t-ci">Notes par mode</h2><p class="live-st msrc" data-v="{{q.modes_source}}"><span class="m-i">mesure interne</span><span class="m-p">protocole 1.2</span></p></div>
 <div class="sc">
 <div class="t s1 q" data-v="{{q.fort_index}}"><p class="k">Fort <span>(recommandé)</span></p>
 <p class="ci-v"><span class="n">{{q.fort_index}}<small> %</small></span><span class="pd">—</span></p>
-<p class="ci-ic">anonymisation<span class="n">, intervalle à 95 % : <span class="nw">{{q.fort_ci_low}} – {{q.fort_ci_high}} %</span></span></p>
+<p class="ci-ic" title="part des documents sans aucun identifiant direct lisible ; plus haut, mieux">anonymisation<span class="n"> <span class="nw" title="intervalle de confiance à 95 %"><span class="vh">intervalle de confiance à 95 % : </span>[{{q.fort_ci_low}}–{{q.fort_ci_high}}]</span></span></p>
 <p class="ci-w"><span class="n">{{q.fort_code_loss}}<small> %</small></span><span class="pd">—</span></p>
-<p class="ci-ic">codes utiles perdus</p>
+<p class="ci-ic" title="part des numéros qui ne désignent personne (commande, facture, produit) masqués quand même ; plus bas, mieux">codes utiles perdus</p>
 <p class="ci-d q" data-v="{{q.fort_hard_index}}">Documents difficiles : <span class="n">{{q.fort_hard_index}} %</span><span class="pd">à venir</span></p></div>
 <div class="t s2 q" data-v="{{q.ess_index}}"><p class="k">Essentiel</p>
 <p class="ci-v"><span class="n">{{q.ess_index}}<small> %</small></span><span class="pd">—</span></p>
-<p class="ci-ic">anonymisation<span class="n">, intervalle à 95 % : <span class="nw">{{q.ess_ci_low}} – {{q.ess_ci_high}} %</span></span></p>
+<p class="ci-ic" title="part des documents sans aucun identifiant direct lisible ; plus haut, mieux">anonymisation<span class="n"> <span class="nw" title="intervalle de confiance à 95 %"><span class="vh">intervalle de confiance à 95 % : </span>[{{q.ess_ci_low}}–{{q.ess_ci_high}}]</span></span></p>
 <p class="ci-w"><span class="n">{{q.ess_code_loss}}<small> %</small></span><span class="pd">—</span></p>
-<p class="ci-ic">codes utiles perdus</p>
+<p class="ci-ic" title="part des numéros qui ne désignent personne (commande, facture, produit) masqués quand même ; plus bas, mieux">codes utiles perdus</p>
 <p class="ci-d q" data-v="{{q.ess_hard_index}}">Documents difficiles : <span class="n">{{q.ess_hard_index}} %</span><span class="pd">à venir</span></p></div>
 </div>
-<p class="note msrc q" data-v="{{q.modes_source}}"><span class="n">Source : {{q.modes_source}}, {{q.modes_date}}, moteur {{q.modes_engine}}<span class="m-i"> ; pas encore le protocole public ; données ayant servi à régler le moteur : chiffres optimistes</span>.</span><span class="pd">Notes par mode : mesure à venir, sur le moteur 1.0.2.</span></p>
-<p class="note">Anonymisation : part des documents où aucun identifiant direct ne reste lisible ; plus haut, mieux. Codes utiles perdus : part des numéros qui ne désignent personne (commande, facture, produit, ticket, lot) que le filtre masque quand même, mesurée sur nos documents synthétiques ; plus bas, mieux.</p>
-<ul class="ok">
-<li class="q" data-v="{{q.confidence_index}}"><span class="n">Résultat public : protocole {{q.protocol_version}} · moteur {{q.protocol_engine}} (réglage unique, d’avant les modes ; pas directement comparable aux notes par mode), {{q.confidence_index}} % des documents normalisés et {{q.hard_index}} % des difficiles sans fuite ; plus d’un million de documents passés par le vrai service.</span><span class="pd">Protocole public, enregistré avant la campagne : plus d’un million de documents passent par le vrai service.</span></li>
-<li>Un moteur sobre : {{q.ms_per_doc}} ms en médiane par document de 2 Ko, sur un seul cœur, sans GPU ni LLM. Irréversible : aucune table de correspondance.</li>
-</ul>
-<a class="ci-a" href="#protocole">Le protocole, en détail</a>
+<p class="note msrc q" data-v="{{q.modes_source}}"><span class="n" title="moteur {{q.modes_engine}}">Mesure du {{q.modes_date}}<span class="m-i"> sur nos données de réglage, avant le protocole public : chiffres optimistes</span>.</span><span class="pd">Notes par mode : mesure à venir, sur le moteur 1.0.2.</span></p>
+<p class="note msrc" data-v="{{q.modes_source}}"><span class="q" data-v="{{q.confidence_index}}"><span class="n">Résultat public, protocole {{q.protocol_version}}<span title="moteur {{q.protocol_engine}}"> (réglage unique, d’avant les modes)</span> : {{q.confidence_index}} % des documents normalisés et {{q.hard_index}} % des difficiles sans fuite.</span><span class="pd">Protocole public, enregistré avant sa campagne.</span></span> <a href="#protocole">Le protocole</a></p>
 </section>
 <section class="g gl" aria-labelledby="t-live" data-live-root>
-<div class="gh"><h2 id="t-live"><i class="dot" aria-hidden="true"></i>Service en direct</h2><p class="live-st" data-live-status data-on="toutes les 2 s" data-off="flux coupé, nouvel essai…">relevé au chargement</p></div>
+<div class="gh"><h2 id="t-live"><i class="dot" aria-hidden="true"></i>Service en direct</h2><p class="live-st" data-live-status data-on="en direct" data-off="reconnexion…">relevé au chargement</p></div>
 <dl class="tl">
 <div class="t w"><dt>Dernière heure</dt><dd class="v" data-live="uses_hour">{{live.uses_hour}}</dd><dd class="u">documents · <span data-live="bytes_hour">{{live.bytes_hour}}</span></dd></div>
-<div class="t w"><dt>Depuis la mise en ligne, le <span class="nw">{{live.since}}</span></dt><dd class="v" data-live="docs_total">{{live.docs_total}}</dd><dd class="u">documents brassés · <span data-live="bytes_total">{{live.bytes_total}}</span></dd></div>
-<div class="t"><dt>Visiteurs, approx.</dt><dd class="v" data-live="visitors_total">{{live.visitors_total}}</dd><dd class="u"><span data-live="visitors_today">{{live.visitors_today}}</span> aujourd’hui</dd></div>
-<div class="t"><dt>Processeur</dt><dd class="v"><span data-live="cpu_percent">{{live.cpu_percent}}</span><small>%</small></dd><dd class="u">tous cœurs, 2 s<span class="meter" data-meter="cpu_percent" aria-hidden="true"><i></i></span></dd></div>
-<div class="t"><dt>Mémoire</dt><dd class="v"><span data-live="ram_percent">{{live.ram_percent}}</span><small>%</small></dd><dd class="u"><span data-live="ram_used">{{live.ram_used}}</span> sur <span data-live="ram_total">{{live.ram_total}}</span><span class="meter" data-meter="ram_percent" aria-hidden="true"><i></i></span></dd></div>
-<div class="t"><dt>Votre requête</dt><dd class="v"><span data-r="lat">—</span><small data-r="latu"></small></dd><dd class="u" data-r="lats">aucune encore, mesurée ici</dd></div>
+<div class="t w"><dt>Depuis le <span class="nw">{{live.since}}</span></dt><dd class="v" data-live="docs_total">{{live.docs_total}}</dd><dd class="u">documents · <span data-live="bytes_total">{{live.bytes_total}}</span></dd></div>
+<div class="t"><dt>Visiteurs ≈<span class="vh"> (nombre approché)</span></dt><dd class="v" data-live="visitors_total">{{live.visitors_total}}</dd><dd class="u"><span data-live="visitors_today">{{live.visitors_today}}</span> aujourd’hui</dd></div>
+<div class="t"><dt>Processeur</dt><dd class="v"><span data-live="cpu_percent">{{live.cpu_percent}}</span><small>%</small></dd><dd class="u"><span class="meter" data-meter="cpu_percent" aria-hidden="true"><i></i></span></dd></div>
+<div class="t"><dt>Mémoire</dt><dd class="v"><span data-live="ram_percent">{{live.ram_percent}}</span><small>%</small></dd><dd class="u"><span class="meter" data-meter="ram_percent" aria-hidden="true"><i></i></span></dd></div>
+<div class="t"><dt>Votre requête</dt><dd class="v"><span data-r="lat">—</span><small data-r="latu"></small></dd><dd class="u" data-r="lats">votre dernier envoi</dd></div>
 </dl>
 <p class="vh" aria-live="polite" data-live-say data-tpl="{u} documents traités dans la dernière heure, {v} visiteurs au total."></p>
-<p class="note">Chiffres réels du serveur. Rien n’est écrit sur disque ni journalisé : ni document, ni adresse IP (gardée en mémoire quelques minutes contre les abus, voir <a href="#confidentialite">Confidentialité</a>) ; seuls ces totaux sont tenus.</p>
+<p class="note">Chiffres réels du serveur. Seuls ces totaux sont enregistrés : ni document, ni adresse IP, aucun journal.</p>
 </section>
 <section class="g gs" aria-labelledby="t-ses"><h2 id="t-ses">Votre session</h2>
 <dl class="tl">

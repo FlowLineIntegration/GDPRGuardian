@@ -95,7 +95,7 @@ textarea{display:block;width:100%;height:clamp(96px,15svh,240px);resize:vertical
 /* Once the session has documents, the queue gets the room: shortcuts, formats, the third-party line and the strict
    hint fold away (the formats are repeated in the 415 message; the privacy pill and panel stay). The input keeps its
    height: nothing moves under the caret. */
-.cin:has(.ql li) :is(.keys,.fmts,.hint:not([data-r])){display:none}
+.cin:has(.ql li) :is(.keys,.fmts,.hint:not([data-r],.msrc)){display:none}
 textarea:focus-visible{outline:1px solid var(--ink);outline-offset:-1px;border-color:var(--ink)}
 textarea::placeholder{color:var(--mu);opacity:1;font-family:var(--sans);font-size:13.5px}
 .opts{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin:10px 0 0;padding:0;border:0;min-width:0}
@@ -135,6 +135,8 @@ select{min-height:30px;font:400 13px var(--sans);color:var(--ink);background:var
 /* Queue actions on their own line, "Annuler l’envoi" last and its place kept: nothing moves when it shows. */
 .qu .acts{flex-basis:100%;margin-left:0}
 .sep{font-size:12px;line-height:1.45;color:var(--mu);margin:-4px 0 8px}
+/* File vide : rien à montrer, la saisie garde la place / empty queue: nothing to show, the input keeps the room */
+.qu:has(.ql:empty){display:none}
 .ql{flex:1;min-height:0;overflow:auto;list-style:none;margin:0;padding:0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
 .ql li{border-bottom:1px solid var(--line)}
 .ql button{display:grid;grid-template-columns:2.4em minmax(0,1fr) auto;column-gap:6px;width:100%;padding:5px 8px 6px 0;border:0;background:none;color:inherit;font:inherit;line-height:1.4;text-align:left;cursor:pointer}

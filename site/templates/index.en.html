@@ -45,18 +45,18 @@
 <form class="in" id="ck" aria-labelledby="t-in" novalidate>
 <div class="hd"><h2 id="t-in">Input</h2><button type="button" class="lk" data-ex="Mr Jean Dupont (jean.dupont@example.com, 06 12 34 56 78), NIR 1 85 05 78 006 084 91, IBAN FR76 3000 6000 0112 3456 7890 189. Mr Dupont will call Ms Claire Martin back. DUPONT Jean will pay invoice no. 2026-0042 for EUR 1,234.56.">Example</button></div>
 <fieldset class="md"><legend>How you work</legend>
-<label><input type="radio" name="mode" value="fort" checked><span><b>Strong (recommended)</b> masks everything it can, codes included</span><span class="mn q" data-v="{{q.fort_index}}"><span class="n">anonymisation {{q.fort_index}}% · useful codes lost {{q.fort_code_loss}}%</span><span class="pd">anonymisation — · useful codes lost —</span></span></label>
-<label><input type="radio" name="mode" value="essentiel"><span><b>Essential</b> what a check digit, a format or a label proves; product codes readable</span><span class="mn q" data-v="{{q.ess_index}}"><span class="n">anonymisation {{q.ess_index}}% · useful codes lost {{q.ess_code_loss}}%</span><span class="pd">anonymisation — · useful codes lost —</span></span></label>
-<label><input type="radio" name="mode" value="personnalise"><span><b>Custom</b> strong, with categories and codes of your choice</span><span class="mn">figures depend on your choices</span></label>
+<label><input type="radio" name="mode" value="fort" checked><span><b>Strong (recommended)</b> everything it can, codes included</span><span class="mn q" data-v="{{q.fort_index}}"><span class="n">anonymisation {{q.fort_index}}% · codes lost {{q.fort_code_loss}}%</span><span class="pd">anonymisation — · codes lost —</span></span></label>
+<label><input type="radio" name="mode" value="essentiel"><span><b>Essential</b> codes, shared mailboxes and @handles stay readable</span><span class="mn q" data-v="{{q.ess_index}}"><span class="n">anonymisation {{q.ess_index}}% · codes lost {{q.ess_code_loss}}%</span><span class="pd">anonymisation — · codes lost —</span></span></label>
+<label><input type="radio" name="mode" value="personnalise"><span><b>Custom</b> strong, with categories and codes of your choice</span></label>
 </fieldset>
 <div class="cu" data-r="cu" hidden>
-<fieldset class="cats" data-r="cats"><legend>Masked (untick to leave in clear; secrets always stay masked)</legend></fieldset>
+<fieldset class="cats" data-r="cats"><legend>To mask (secrets, always)</legend></fieldset>
 <label class="kl" for="ck-k">Codes to keep</label>
 <input id="ck-k" name="keep" autocomplete="off" spellcheck="false" placeholder="SKU-###### LOT-@@@@-###" aria-describedby="ck-kh ck-ke">
-<p class="kh" id="ck-kh"># = one digit, @ = one letter, anything else as written, with at least one fixed letter or digit; a space between two codes. They stay readable.</p>
+<p class="kh" id="ck-kh"># one digit · @ one letter · a space between two codes</p>
 <p class="ke" id="ck-ke" data-r="kerr" aria-live="polite"></p>
 </div>
-<p class="hint q msrc" data-v="{{q.modes_source}}">Three modes, so that everyone can use it as they see fit. Strong protects the most; essential keeps useful codes (order, invoice, product) readable. <span class="n">Figures: <span class="m-i">internal measurement, dev half (tuning data, not the public protocol)</span><span class="m-p">public protocol 1.2</span>, {{q.modes_date}}.</span><span class="pd">Figures: to come.</span></p>
+<p class="hint q msrc" data-v="{{q.modes_source}}"><span class="n">Figures: <span class="m-i">internal measurement, optimistic</span><span class="m-p">public protocol 1.2</span>, {{q.modes_date}}.</span><span class="pd">Figures: to come.</span></p>
 <label class="vh" for="ck-t">Text to anonymise</label>
 <textarea id="ck-t" name="text" spellcheck="false" autocomplete="off" placeholder="Paste or type a text. Documents? Drop them anywhere on the page, several at once."></textarea>
 <fieldset class="opts"><legend class="vh">Settings</legend>
@@ -65,18 +65,17 @@
 </fieldset>
 <p class="hint" data-r="hint" hidden>Outside France, only the country’s identifiers are verified and names go through the French lexicons: on legal texts from five countries (DE, ES, IT, NL, PT), 23–42% of names masked, 78–89% of documents with a leak (internal measurement, outside the protocol).</p>
 <div class="go"><button class="btn" type="submit" data-r="go" disabled>Anonymise</button><input class="vh" type="file" id="ck-f" multiple accept=".pdf,.docx,.docm,.dotx,.dotm,.xlsx,.xlsm,.xlsb,.xls,.pptx,.pptm,.ppsx,.potx,.odt,.ott,.fodt,.ods,.odp,.otp,.fodp,.odg,.rtf,.eml,.mht,.mhtml,.msg,.html,.htm,.xhtml,.csv,.tsv,.txt,.text,.md,.markdown"><label class="btn2" for="ck-f">Add documents</label></div>
-<p class="keys" data-r="keys">Ctrl + Enter anonymise · Ctrl + Shift + C copy · Ctrl + S download · Esc clear the input</p>
-<p class="fmts">PDF, Word, Excel, PowerPoint, OpenDocument, RTF, e-mail, HTML, CSV, text · 50&nbsp;MB per document · only the file name’s extension travels with the file</p>
-<p class="fmts">Sent encrypted to our server in France, processed in memory, nothing of it remains after the response; we are still a third party, with no processing agreement. To send nothing: the <a href="#use">local version</a>.</p>
+<p class="keys vh" data-r="keys">Ctrl + Enter anonymise · Ctrl + Shift + C copy · Ctrl + S download · Esc clear the input</p>
+<p class="fmts">Sent to our server in France (we are a third party), processed in memory, nothing of it is kept. To send nothing: the <a href="#use">local version</a>.</p>
 <p class="st" data-r="st" role="status"></p>
 <noscript><p class="nojs">The workspace needs JavaScript. Without it: the API or the MCP server, see <a href="#use">Use it</a>.</p></noscript>
 </form>
 <section class="qu" aria-labelledby="t-q">
 <div class="hd"><h2 id="t-q">Session queue <span class="n0" data-r="qn"></span></h2><div class="acts"><button type="button" class="lk" data-r="zip" disabled>Download all (.zip)</button><button type="button" class="lk" data-r="clear">Clear everything</button><button type="button" class="lk" data-r="stop" disabled>Cancel the upload</button></div></div>
-<p class="sep">Each document is anonymised separately: [PERSON_1] in one document is not necessarily [PERSON_1] in another.</p>
+<p class="sep">Each document is anonymised on its own: its placeholders apply to it alone.</p>
 <div class="hold" data-r="hold" hidden><p></p><button type="button" class="btn2 sm" data-r="resume">Resume</button></div>
 <ol class="ql" data-r="ql" aria-label="Documents of the session"></ol>
-<p class="qe" data-r="qe">Empty. Documents go one at a time, in order; nothing remains once the tab is closed.</p>
+<p class="qe" data-r="qe">Empty.</p>
 </section>
 </div>
 
@@ -84,7 +83,7 @@
 <div class="hd"><h2 id="t-out">Result</h2><p class="what" data-r="what"></p><div class="acts"><button type="button" class="lk" data-r="redo" hidden>Run again</button><button type="button" class="lk" data-r="orig" hidden>Edit the text</button><button type="button" class="lk" data-r="rm" hidden>Remove</button><button type="button" class="lk" data-r="copy" disabled>Copy</button><button type="button" class="btn2 sm" data-r="dl" disabled>Download the .md</button></div></div>
 <div class="ban" data-r="ban" hidden><p><b></b> <span></span></p><code></code></div>
 <div class="res" data-r="res" tabindex="0" role="region" aria-label="Anonymised text">
-<div class="empty"><label class="drop" for="ck-f"><b>Drop your documents here</b>or anywhere on the page, several at once; or click to choose them. Each one becomes a row of the queue.</label><div class="demo"><p>The anonymised text shows here, with consistent placeholders:</p><p class="s1"><mark class="p1">[PERSON_1]</mark> annoys <mark class="p2">[PERSON_2]</mark>. <mark class="p2">[PERSON_2]</mark> hits <mark class="p1">[PERSON_1]</mark>.</p><p>The roles survive, the identities do not. <a href="#story">The story</a></p></div></div>
+<div class="empty"><label class="drop" for="ck-f"><b>Drop your documents here</b>or click to choose them · PDF, Word, Excel, PowerPoint, e-mail, HTML, CSV, text · 50&nbsp;MB at most</label><div class="demo"><p>The result shows here:</p><p class="s1"><mark class="p1">[PERSON_1]</mark> annoys <mark class="p2">[PERSON_2]</mark>. <mark class="p2">[PERSON_2]</mark> hits <mark class="p1">[PERSON_1]</mark>.</p><p>The roles survive, the identities do not, with no way back.</p></div></div>
 </div>
 <div class="rep" data-r="rep" hidden>
 <p class="insp" data-r="insp"></p>
@@ -96,42 +95,36 @@
 </section>
 
 <aside class="col rail" aria-label="Instruments">
-<section class="g gc" aria-labelledby="t-ci"><div class="gh"><h2 id="t-ci">Scores per mode</h2><p class="live-st">first level</p></div>
-<p class="lede">GDPR Guardian is a first-level filter: it masks direct identifiers. Meaning (health, opinions, cross-checks) is not handled here: with our skills, a light model of your AI then rereads the anonymised text; a governed LLM stage is under study. <a href="#challenge">The levels</a>.</p>
+<section class="g gc" aria-labelledby="t-ci"><div class="gh"><h2 id="t-ci">Scores per mode</h2><p class="live-st msrc" data-v="{{q.modes_source}}"><span class="m-i">internal measurement</span><span class="m-p">protocol 1.2</span></p></div>
 <div class="sc">
 <div class="t s1 q" data-v="{{q.fort_index}}"><p class="k">Strong <span>(recommended)</span></p>
 <p class="ci-v"><span class="n">{{q.fort_index}}<small>%</small></span><span class="pd">—</span></p>
-<p class="ci-ic">anonymisation<span class="n">, 95% interval: <span class="nw">{{q.fort_ci_low}}–{{q.fort_ci_high}}%</span></span></p>
+<p class="ci-ic" title="share of documents with no readable direct identifier; higher is better">anonymisation<span class="n"> <span class="nw" title="95% confidence interval"><span class="vh">95% confidence interval: </span>[{{q.fort_ci_low}}–{{q.fort_ci_high}}]</span></span></p>
 <p class="ci-w"><span class="n">{{q.fort_code_loss}}<small>%</small></span><span class="pd">—</span></p>
-<p class="ci-ic">useful codes lost</p>
+<p class="ci-ic" title="share of numbers that designate nobody (order, invoice, product) masked anyway; lower is better">useful codes lost</p>
 <p class="ci-d q" data-v="{{q.fort_hard_index}}">Difficult documents: <span class="n">{{q.fort_hard_index}}%</span><span class="pd">to come</span></p></div>
 <div class="t s2 q" data-v="{{q.ess_index}}"><p class="k">Essential</p>
 <p class="ci-v"><span class="n">{{q.ess_index}}<small>%</small></span><span class="pd">—</span></p>
-<p class="ci-ic">anonymisation<span class="n">, 95% interval: <span class="nw">{{q.ess_ci_low}}–{{q.ess_ci_high}}%</span></span></p>
+<p class="ci-ic" title="share of documents with no readable direct identifier; higher is better">anonymisation<span class="n"> <span class="nw" title="95% confidence interval"><span class="vh">95% confidence interval: </span>[{{q.ess_ci_low}}–{{q.ess_ci_high}}]</span></span></p>
 <p class="ci-w"><span class="n">{{q.ess_code_loss}}<small>%</small></span><span class="pd">—</span></p>
-<p class="ci-ic">useful codes lost</p>
+<p class="ci-ic" title="share of numbers that designate nobody (order, invoice, product) masked anyway; lower is better">useful codes lost</p>
 <p class="ci-d q" data-v="{{q.ess_hard_index}}">Difficult documents: <span class="n">{{q.ess_hard_index}}%</span><span class="pd">to come</span></p></div>
 </div>
-<p class="note msrc q" data-v="{{q.modes_source}}"><span class="n">Source: <span class="m-i">internal measurement, dev half</span><span class="m-p">public protocol 1.2</span>, {{q.modes_date}}, engine {{q.modes_engine}}<span class="m-i">; not yet the public protocol; data used to tune the engine: optimistic figures</span>.</span><span class="pd">Scores per mode: measurement to come, on engine 1.0.2.</span></p>
-<p class="note">Anonymisation: the share of documents in which no direct identifier stays readable; higher is better. Useful codes lost: the share of numbers that designate nobody (order, invoice, product, ticket, lot) that the filter masks anyway, measured on our synthetic documents; lower is better.</p>
-<ul class="ok">
-<li class="q" data-v="{{q.confidence_index}}"><span class="n">Public result: protocol {{q.protocol_version}} · engine {{q.protocol_engine}} (single setting, before modes; not directly comparable with the per-mode scores), {{q.confidence_index}}% of normalised and {{q.hard_index}}% of difficult documents without a leak; more than a million documents through the real service.</span><span class="pd">A public protocol, registered before the run: more than a million documents go through the real service.</span></li>
-<li>A frugal engine: {{q.ms_per_doc}} ms median per 2 KB document on a single CPU core, no GPU, no LLM. Irreversible: no mapping table.</li>
-</ul>
-<a class="ci-a" href="#protocol">The protocol, in detail</a>
+<p class="note msrc q" data-v="{{q.modes_source}}"><span class="n" title="engine {{q.modes_engine}}">Measured on {{q.modes_date}}<span class="m-i"> on our tuning data, before the public protocol: optimistic figures</span>.</span><span class="pd">Scores per mode: measurement to come, on engine 1.0.2.</span></p>
+<p class="note msrc" data-v="{{q.modes_source}}"><span class="q" data-v="{{q.confidence_index}}"><span class="n">Public result, protocol {{q.protocol_version}}<span title="engine {{q.protocol_engine}}"> (single setting, before modes)</span>: {{q.confidence_index}}% of normalised and {{q.hard_index}}% of difficult documents without a leak.</span><span class="pd">A public protocol, registered before its run.</span></span> <a href="#protocol">The protocol</a></p>
 </section>
 <section class="g gl" aria-labelledby="t-live" data-live-root>
-<div class="gh"><h2 id="t-live"><i class="dot" aria-hidden="true"></i>Live service</h2><p class="live-st" data-live-status data-on="every 2 s" data-off="stream cut, retrying…">snapshot at page load</p></div>
+<div class="gh"><h2 id="t-live"><i class="dot" aria-hidden="true"></i>Live service</h2><p class="live-st" data-live-status data-on="live" data-off="reconnecting…">snapshot at page load</p></div>
 <dl class="tl">
 <div class="t w"><dt>Last hour</dt><dd class="v" data-live="uses_hour">{{live.uses_hour}}</dd><dd class="u">documents · <span data-live="bytes_hour">{{live.bytes_hour}}</span></dd></div>
-<div class="t w"><dt>Since going online on <span class="nw">{{live.since}}</span></dt><dd class="v" data-live="docs_total">{{live.docs_total}}</dd><dd class="u">documents processed · <span data-live="bytes_total">{{live.bytes_total}}</span></dd></div>
-<div class="t"><dt>Visitors, approx.</dt><dd class="v" data-live="visitors_total">{{live.visitors_total}}</dd><dd class="u"><span data-live="visitors_today">{{live.visitors_today}}</span> today</dd></div>
-<div class="t"><dt>CPU</dt><dd class="v"><span data-live="cpu_percent">{{live.cpu_percent}}</span><small>%</small></dd><dd class="u">all cores, 2 s<span class="meter" data-meter="cpu_percent" aria-hidden="true"><i></i></span></dd></div>
-<div class="t"><dt>Memory</dt><dd class="v"><span data-live="ram_percent">{{live.ram_percent}}</span><small>%</small></dd><dd class="u"><span data-live="ram_used">{{live.ram_used}}</span> of <span data-live="ram_total">{{live.ram_total}}</span><span class="meter" data-meter="ram_percent" aria-hidden="true"><i></i></span></dd></div>
-<div class="t"><dt>Your request</dt><dd class="v"><span data-r="lat">—</span><small data-r="latu"></small></dd><dd class="u" data-r="lats">none yet, measured here</dd></div>
+<div class="t w"><dt>Since <span class="nw">{{live.since}}</span></dt><dd class="v" data-live="docs_total">{{live.docs_total}}</dd><dd class="u">documents · <span data-live="bytes_total">{{live.bytes_total}}</span></dd></div>
+<div class="t"><dt>Visitors ≈<span class="vh"> (approximate)</span></dt><dd class="v" data-live="visitors_total">{{live.visitors_total}}</dd><dd class="u"><span data-live="visitors_today">{{live.visitors_today}}</span> today</dd></div>
+<div class="t"><dt>CPU</dt><dd class="v"><span data-live="cpu_percent">{{live.cpu_percent}}</span><small>%</small></dd><dd class="u"><span class="meter" data-meter="cpu_percent" aria-hidden="true"><i></i></span></dd></div>
+<div class="t"><dt>Memory</dt><dd class="v"><span data-live="ram_percent">{{live.ram_percent}}</span><small>%</small></dd><dd class="u"><span class="meter" data-meter="ram_percent" aria-hidden="true"><i></i></span></dd></div>
+<div class="t"><dt>Your request</dt><dd class="v"><span data-r="lat">—</span><small data-r="latu"></small></dd><dd class="u" data-r="lats">your last request</dd></div>
 </dl>
 <p class="vh" aria-live="polite" data-live-say data-tpl="{u} documents processed in the last hour, {v} visitors in total."></p>
-<p class="note">Real figures from the server. Nothing is written to disk or logged: no document, no IP address (held in memory for a few minutes against abuse, see <a href="#privacy">Privacy</a>); only these totals are counted.</p>
+<p class="note">Real figures from the server. Only these totals are saved: no document, no IP address, no log.</p>
 </section>
 <section class="g gs" aria-labelledby="t-ses"><h2 id="t-ses">Your session</h2>
 <dl class="tl">
