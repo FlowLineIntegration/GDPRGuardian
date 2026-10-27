@@ -144,16 +144,18 @@ impl IbanDetector {
         let mut found = Vec::new();
         let mut cursor = CharCursor::new(text);
         let mut s = 0;
-        // L'ancre commence par une majuscule ASCII : on saute de l'une à l'autre / the anchor starts with a capital.
-        let next_capital = |from: usize| b.get(from..)?.iter().position(u8::is_ascii_uppercase).map(|i| from + i);
-        while let Some(start) = next_capital(s) {
+        // L'ancre commence par une lettre ASCII (pays en majuscules, ou tout en minuscules) : on saute de l'une à
+        // l'autre. The anchor starts with an ASCII letter (capitals, or all lowercase): jump from one to the next.
+        let next_letter = |from: usize| b.get(from..)?.iter().position(u8::is_ascii_alphabetic).map(|i| from + i);
+        while let Some(start) = next_letter(s) {
             let Some(anchor_end) = iban_anchor(b, start) else {
                 s = start + 1;
                 continue;
             };
             s = anchor_end;
-            let country = &text[start..start + 2];
-            let Some(&expected) = self.lengths.get(country) else {
+            let upper = b[start].is_ascii_uppercase();
+            let country = text[start..start + 2].to_ascii_uppercase();
+            let Some(&expected) = self.lengths.get(country.as_str()) else {
                 continue;
             };
             let check = &text[anchor_end - 2..anchor_end];
@@ -186,18 +188,22 @@ impl IbanDetector {
             if validators::mod97_10_ok(&format!("{bban}{country}{check}")) {
                 found.push((start_char, end_char, Some(format!("{country}{check}{bban}")), false));
             } else {
-                found.push((start_char, end_char, None, printed_in_fours(&text[start..end])));
+                // En minuscules, la mise en page seule ne suffit pas / in lowercase, the layout alone is not enough.
+                found.push((start_char, end_char, None, upper && printed_in_fours(&text[start..end])));
             }
         }
         found
     }
 }
 
-/// `(?<![A-Za-z0-9])([A-Z]{2}) ?([0-9]{2})(?=[ \-]?[A-Za-z0-9])` en `s` -> fin de l'ancre / anchor end.
+/// `(?<![A-Za-z0-9])([A-Z]{2}|[a-z]{2}) ?([0-9]{2})(?=[ \-]?[A-Za-z0-9])` en `s` -> fin de l'ancre / anchor end.
 fn iban_anchor(b: &[u8], s: usize) -> Option<usize> {
     let alnum = |i: usize| b.get(i).is_some_and(u8::is_ascii_alphanumeric);
     let digit = |i: usize| b.get(i).is_some_and(u8::is_ascii_digit);
-    if (s > 0 && alnum(s - 1)) || !(b.get(s)?.is_ascii_uppercase() && b.get(s + 1)?.is_ascii_uppercase()) {
+    let (first, second) = (*b.get(s)?, *b.get(s + 1)?);
+    let same_case = (first.is_ascii_uppercase() && second.is_ascii_uppercase())
+        || (first.is_ascii_lowercase() && second.is_ascii_lowercase());
+    if (s > 0 && alnum(s - 1)) || !same_case {
         return None;
     }
     let mut i = s + 2;
@@ -345,5 +351,7 @@ mod tests {
         assert!(!printed_in_fours("FR7630006000011234567890189"));
         assert_eq!(iban_anchor(b"FR76 3000", 0), Some(4));
         assert_eq!(iban_anchor(b"xFR76 3000", 1), None);
+        assert_eq!(iban_anchor(b"fr76 3000", 0), Some(4));
+        assert_eq!(iban_anchor(b"Fr76 3000", 0), None);
     }
 }

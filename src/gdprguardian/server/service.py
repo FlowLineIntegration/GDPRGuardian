@@ -32,6 +32,7 @@ from .admission import FairScheduler, MemoryBudget
 from .clients import REQUEST, ClientIdentifier, Pseudonymizer
 from .config import MAX_PAGE_CHARS, MIN_PAGE_CHARS, MULTIPART_ENVELOPE_BYTES, ServerConfig
 from .errors import (
+    UPLOAD_INTERRUPTED_MESSAGE,
     ConverterUnavailable,
     InvalidRequest,
     PayloadTooLarge,
@@ -70,8 +71,8 @@ from .usage import FILE, PUBLIC, TEXT, UPLOAD, UsageReporter, usage_format
 T = TypeVar("T")
 # Champs du rapport utiles à un LLM (le reste coûte des jetons) ; les avertissements du moteur (« noms détectés par
 # les lexiques français seulement ») en font partie. Report fields useful to an LLM; engine warnings included.
-_SUMMARY_KEYS = ("entities", "total_replaced", "kept_by_policy", "countries", "language", "irreversible", "notice",
-                 "warnings", "rules", "explain")
+_SUMMARY_KEYS = ("entities", "total_replaced", "kept_by_policy", "countries", "language", "mode", "disable",
+                 "left_in_clear_by_mode", "irreversible", "notice", "warnings", "rules", "explain")
 # Fils d'attente au-delà des places : un travailleur tué rend sa place avant que son fil ne finisse.
 # Waiting threads beyond the slots: a killed worker frees its slot before its thread ends.
 _SPARE_THREADS = 8
@@ -441,7 +442,7 @@ class Service:
             raise
         except BaseException:
             # Client parti ou annulation : l'envoi est perdu / client gone or cancelled: upload lost.
-            self.store.fail(job, InvalidRequest("Envoi interrompu / upload interrupted", code="upload_interrupted"))
+            self.store.fail(job, InvalidRequest(UPLOAD_INTERRUPTED_MESSAGE, code="upload_interrupted"))
             raise
         self.store.received(job, len(data))
         return job, data
@@ -473,7 +474,7 @@ class Service:
                 raise
             return None
         except BaseException:
-            self.store.fail(job, InvalidRequest("Envoi interrompu / upload interrupted", code="upload_interrupted"))
+            self.store.fail(job, InvalidRequest(UPLOAD_INTERRUPTED_MESSAGE, code="upload_interrupted"))
             raise
         return result
 

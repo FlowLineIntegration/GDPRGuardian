@@ -35,6 +35,9 @@ impl Doc<'_> {
                 self.row_spans(&row, found, zones, confirmed);
             }
         }
+        for row in self.csv_rows() {
+            self.row_spans(&row, found, zones, confirmed);
+        }
         for &(start, end) in person_rows {
             self.row_spans(&[(start, end, Role::Full)], found, zones, confirmed);
         }
@@ -130,6 +133,52 @@ impl Doc<'_> {
                 pos = row_end + 1;
             }
             consumed = pos;
+        }
+        rows
+    }
+
+    /// `_csv_rows` : lignes des tableaux CSV et TSV dont l'en-tête désigne des personnes (1.0.2) ; en-tête replié,
+    /// « _ » changé en espace / rows of CSV and TSV person tables; header folded, "_" as a space.
+    fn csv_rows(&self) -> Vec<Vec<Cell>> {
+        let (det, text) = (self.det, &self.text);
+        let mut rows = Vec::new();
+        let mut header: Vec<char> = Vec::new();
+        for table in crate::text::delimited_tables(text, |c| det.chars.is_space(c)) {
+            let Some((head, body)) = table.split_first() else {
+                continue;
+            };
+            let roles: Vec<Role> = head
+                .iter()
+                .map(|&(s, e)| {
+                    header.clear();
+                    det.chars.push_fold(&text[s..e], &mut header);
+                    let label: Vec<char> =
+                        strip_chars(&header, " *_`\"").iter().map(|&c| if c == '_' { ' ' } else { c }).collect();
+                    let label = det.vocab.get(&label);
+                    if label.has(flag::GIVEN_HEADER) {
+                        Role::Given
+                    } else if label.has(flag::SURNAME_HEADER) {
+                        Role::Surname
+                    } else if label.has(flag::PERSON_HEADER) {
+                        Role::Full
+                    } else {
+                        Role::None
+                    }
+                })
+                .collect();
+            if roles.iter().all(|&r| r == Role::None) {
+                continue;
+            }
+            for cells in body {
+                rows.push(
+                    cells
+                        .iter()
+                        .zip(roles.iter())
+                        .filter(|(_, &role)| role != Role::None)
+                        .map(|(&(s, e), &role)| (s, e, role))
+                        .collect(),
+                );
+            }
         }
         rows
     }

@@ -49,8 +49,10 @@ def test_company_ids_policy():
 
 
 def test_weak_checksum_needs_context(anonymizer_fr):
-    # Un nombre Luhn-valide de 9 chiffres sans contexte n'est pas un SIREN / no context, no SIREN.
-    assert "732829320" in anonymizer_fr.anonymize("Commande 732829320 expédiée.").text
+    # Un nombre Luhn-valide de 9 chiffres sans contexte n'est pas un SIREN / no context, no SIREN. Depuis 1.0.2, le
+    # nombre après « Commande » est masqué en identifiant (filtre fort), jamais en SIREN / since 1.0.2 the number
+    # after "Commande" is masked as a plain identifier (strong filter), never as a SIREN.
+    assert anonymizer_fr.anonymize("Commande 732829320 expédiée.").text == "Commande [IDENTIFIANT_1] expédiée."
     strict = Anonymizer(countries="FR", profile="strict").anonymize("Commande 732829320 expédiée.")
     assert "732829320" not in strict.text
 
@@ -58,7 +60,9 @@ def test_weak_checksum_needs_context(anonymizer_fr):
 def test_context_only_identifiers():
     a = Anonymizer(countries="FR")
     assert "[PASSEPORT_1]" in a.anonymize("Passeport n° 12AB34567").text
-    assert "12AB34567" in a.anonymize("Référence produit 12AB34567").text
+    # Sans mot-clé, pas un passeport ; depuis 1.0.2, un code masqué en identifiant (filtre fort, `ID_CODE`).
+    # No keyword, no passport; since 1.0.2 a code masked as a plain identifier (strong filter).
+    assert a.anonymize("Référence produit 12AB34567").text == "Référence produit [IDENTIFIANT_1]"
 
 
 def test_obfuscation_is_defeated(anonymizer):
@@ -145,13 +149,18 @@ def test_segments_with_forced_header_context(anonymizer_fr):
     assert "FR:siret" in groups
     per_cell, _ = anonymizer_fr.analyze_segments([value, value], [groups, frozenset()])
     assert [s.label for s in per_cell[0]] == ["SIRET"]
-    assert per_cell[1] == []
+    # Sans l'en-tête, pas un SIRET ; depuis 1.0.2, une suite nue de 14 chiffres (`ID_LONG_NUMBER`).
+    # Without the header, no SIRET; since 1.0.2, a bare run of 14 digits.
+    assert [s.source for s in per_cell[1]] == ["ID_LONG_NUMBER"]
 
 
 def test_markdown_table_header_is_context_for_its_column(anonymizer_fr):
     # L'en-tête « Date de naissance » vaut pour toute la colonne, même loin ; pas pour les autres colonnes.
     # The "Date de naissance" header covers its whole column, however far; not the other columns.
-    rows = "".join(f"| Agent {i} | {i % 28 + 1:02d}/04/1990 | 1{i % 9}/05/2024 |\n" for i in range(15))
+    # Dates d'arrivée toutes différentes : depuis 1.0.2, une date égale à une date de naissance (même prise par
+    # proximité de l'en-tête) est masquée partout (propagation des valeurs, compromis accepté). Arrival dates all
+    # differ: since 1.0.2 a date equal to a birth date is masked everywhere (value propagation, accepted trade).
+    rows = "".join(f"| Agent {i} | {i % 28 + 1:02d}/04/1990 | {i + 10}/05/2024 |\n" for i in range(15))
     text = "| Nom | Date de naissance | Arrivée |\n|:---|:---:|---|\n" + rows + "\nRéunion le 12/06/2024."
     lines = anonymizer_fr.anonymize(text).text.splitlines()
     assert all("/04/1990" not in line for line in lines)
@@ -215,9 +224,10 @@ def test_wrong_key_is_masked_next_to_an_explicit_keyword(anonymizer_fr):
     result = anonymizer_fr.anonymize(f"Numéro {typo_nir}, compte {typo_iban}, la carte 4720 7547 3548 6438.")
     assert result.text == "Numéro [NIR_1], compte [IBAN_1], la carte [CARTE_1]."
     assert anonymizer_fr.anonymize(f"Voir {typo_iban}.").text == "Voir [IBAN_1]."
-    # Forme compacte, clé fausse, sans mot-clé : pas un identifiant / compact, wrong key, no keyword: kept.
+    # Forme compacte, clé fausse, sans mot-clé : pas un NIR ; depuis 1.0.2, une suite nue de 15 chiffres masquée en
+    # identifiant (filtre fort). Compact, wrong key, no keyword: no NIR; since 1.0.2 a bare long run, an identifier.
     compact = typo_nir.replace(" ", "")
-    assert compact in anonymizer_fr.anonymize(f"Référence {compact}.").text
+    assert anonymizer_fr.anonymize(f"Référence {compact}.").text == "Référence [IDENTIFIANT_1]."
 
 
 def test_conversion_artefacts_do_not_hide_values(anonymizer_fr):

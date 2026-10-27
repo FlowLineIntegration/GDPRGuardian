@@ -10,7 +10,7 @@ no cookie, no tracker, no third-party resource, no request log.
 ## La page : un poste de travail / the page: a workspace
 
 Le site est l'outil. Premier écran, plein écran en paysage, sans page de présentation à traverser ; un titre `h1`
-dit ce qu'il fait (« Gardien RGPD, anonymisation irréversible avant l'IA »). À gauche la saisie (coller, taper, ou
+dit ce qu'il fait (« Gardien RGPD, filtre de premier niveau avant l'IA »). À gauche la saisie (coller, taper, ou
 déposer des documents n'importe où dans la page, plusieurs à la fois) et la file de la session ; au centre le
 résultat du document choisi (texte anonymisé, inspection des balises, une ligne par type, explications ; vide, c'est
 la zone de dépôt visible) ; à droite les instruments en blocs carrés (qui grandissent avec leur texte sous 1 700 px
@@ -22,7 +22,7 @@ votre session (documents, mentions masquées, volume, temps). Un témoin permane
 ni sur le serveur » et mène à la confidentialité.
 « En savoir plus » est un choix : des boutons ouvrent des panneaux (la vidéo de lancement, le défi, l'histoire,
 l'architecture, le protocole et les scores avec les faiblesses, l'usage par MCP public, API et poste local, l'appel
-aux établissements publics, les remerciements, les mentions légales, la confidentialité). Signature : « Conception :
+aux écoles, universités et établissements publics, les remerciements, les mentions légales, la confidentialité). Signature : « Conception :
 Claude Design ».
 
 **Vidéo** (`#video`) : `<video controls preload="none" playsinline>` de la langue de la page, son affiche, le lien

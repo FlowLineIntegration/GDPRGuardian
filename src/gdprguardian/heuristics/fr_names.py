@@ -20,7 +20,7 @@ from typing import Any
 import ahocorasick_rs
 
 from .. import _native
-from .._text import fold
+from .._text import _tab_row, delimited_tables, fold
 from ..types import PRIORITY_HEURISTIC, Span
 from . import _vocab as V
 from ._compose import composed_view
@@ -64,6 +64,8 @@ NEG, NONE, WEAK, MEDIUM, STRONG = -1, 0, 1, 2, 3
 
 # Drapeaux des déclencheurs / trigger flags.
 T_HONORIFIC, T_GREETING, T_CLOSING, T_ROLE, T_EPONYM, T_EPONYM_DIRECT = 1, 2, 4, 8, 16, 32
+# Civilité d'une personne vivante (1.0.2) : n'hérite pas d'un éponyme / a living person's civility: no eponym chain.
+T_CIVILITY = 64
 
 _PARTICLES = r"(?:de|du|des|van|von|der|den|di|da|del|della|dos|das|do|ben|bin|ibn|al|el|y|zu|ter|ten|le|la)"
 _SPACE_GAP_RE = re.compile(rf"[ \t]{{1,2}}(?:{_PARTICLES}[ \t]{{1,2}}){{0,2}}(?:[dl]')?")
@@ -96,6 +98,22 @@ _HYPHEN_WRAP_RE = re.compile(r"-[ \t]{0,2}\r?\n[ \t]{0,2}")
 # Valeur en minuscules d'un champ (« Nom : dupont ») / lowercase field value.
 _FIELD_WORD_RE = re.compile(r"[^\W\d_]{2,30}(?:['-][^\W\d_]{1,30}){0,3}")
 _FIELD_GAP_RE = re.compile(r"[ \t]{1,2}")
+# Paire prénom nom en minuscules sans indice (« rdv avec sophie martin », 1.0.2) : lettres minuscules latines,
+# deux mots séparés par un blanc, ni partie d'adresse e-mail, d'URL ou de mot composé. Lowercase given name and
+# surname with no cue: Latin lowercase letters, two words one blank apart, not inside an e-mail, URL or compound.
+_LOWER_LETTERS = "a-zß-öø-ÿœ"
+_LOWER_WORD = rf"[{_LOWER_LETTERS}]{{2,30}}(?:-[{_LOWER_LETTERS}]{{2,30}})?"
+_LOWER_PAIR_RE = re.compile(rf"(?<![\w'’.@/-])({_LOWER_WORD})(?=[ \t]({_LOWER_WORD})(?![\w'’@-]))")
+# Prénom seul en minuscules après une préposition forte (1.0.2, troisième tour) / lone given name after a preposition.
+_PREPOSITION_NAME_RE = re.compile(rf"(?<![\w'’.@/-])(?:par|avec|chez|pour|à)[ \t]({_LOWER_WORD})(?![\w'’@-])")
+# Prénom_Nom dans un nom de fichier (« CV_Nadia_Haddad.pdf », 1.0.2) : deux segments capitalisés latins liés par
+# « _ ». Given_Surname inside a file name: two capitalised Latin segments joined by an underscore.
+_FILE_UPPER = "A-ZÀ-ÖØ-Þ"
+_FILE_PAIR_RE = re.compile(
+    rf"(?<![^\W_])([{_FILE_UPPER}][{_LOWER_LETTERS}]{{1,30}})_([{_FILE_UPPER}][{_LOWER_LETTERS}]{{1,30}})(?![^\W_])")
+# Nom homonyme d'un mot courant (« martin ») après un prénom sans indice : au moins 4 096 porteurs.
+# A surname that is also a common word, after a given name with no cue: at least 4,096 bearers.
+PAIR_HOMONYM_MIN = 12
 _FIELD_END_RE = re.compile(rf"[ \t]{{0,2}}(?:[\r\n,;|()\[\]/]|$)|[ \t]{{2}}|[ \t](?=[{UPPER}])")
 _NAME_CELL_RE = re.compile(r"[^\W\d_](?:[^\W\d_'. -]|[ '.-](?=[^\W\d_ ])){0,58}\.?")
 _NUMBER_AFTER_RE = re.compile(r"[ \t]{1,2}(?:[0-9]|[IVXLCDM]{1,6}\b)")
@@ -115,7 +133,11 @@ _DOTTED_FORMS = sorted({f for f in V.LEGAL_FORMS_SUFFIX if "." in f})
 _DOTTED_AC = ahocorasick_rs.AhoCorasick(_DOTTED_FORMS, matchkind=ahocorasick_rs.MatchKind.LeftmostLongest)
 # Formes verbales fréquentes après un sujet, aussi présentes comme noms dans les lexèmes / frequent verb forms.
 _AUXILIARIES = frozenset({"a", "est", "etait", "sera", "serait", "fut", "va", "vont", "fait", "dit", "peut", "doit",
-                          "avait", "aura", "sait", "veut", "part", "reste", "passe", "porte", "pense", "travaille"})
+                          "avait", "aura", "sait", "veut", "part", "reste", "passe", "porte", "pense", "travaille",
+                          # 1.0.2 : verbes après un rôle (« le juge devra statuer ») / verbs after a role word.
+                          "devra", "devait", "devrait", "pourra", "pourrait", "doivent", "peuvent", "sont", "ont",
+                          "signe", "demande", "confirme", "conteste", "refuse", "accepte", "propose", "souhaite",
+                          "estime", "indique", "declare", "explique", "vient", "prend", "reprend"})
 # « Saint Quentin », « SAINT GERMAIN » sans trait d'union : un lieu ou un saint, comme « Saint-Quentin ».
 # Hyphenless saint names: a place or a saint, like "Saint-Quentin".
 _SAINT_WORDS = frozenset({"saint", "sainte", "st", "ste"})
@@ -281,7 +303,8 @@ class _Triggers:
     def __init__(self) -> None:
         flags: dict[str, int] = {}
         for words, flag in ((V.HONORIFICS, T_HONORIFIC), (V.GREETINGS, T_GREETING), (V.CLOSINGS, T_CLOSING),
-                            (V.ROLES, T_ROLE), (V.EPONYMS, T_EPONYM), (V.EPONYMS_DIRECT, T_EPONYM_DIRECT)):
+                            (V.ROLES, T_ROLE), (V.EPONYMS, T_EPONYM), (V.EPONYMS_DIRECT, T_EPONYM_DIRECT),
+                            (V.CIVILITIES & V.HONORIFICS, T_CIVILITY)):
             for word in words:
                 flags[word] = flags.get(word, 0) | flag
         self.patterns = list(flags)
@@ -323,15 +346,17 @@ def _native_data() -> dict[str, Any]:
                              strict=True)),
         "dotted_forms": _DOTTED_FORMS,
         "text_sets": {"saint_prefixes": list(SAINT_PREFIXES), "verb_tails": list(_VERB_TAILS),
-                      "skip_back": "".join(sorted(_SKIP_BACK)), "sentence_end": "".join(sorted(_SENTENCE_END))},
+                      "skip_back": "".join(sorted(_SKIP_BACK)), "sentence_end": "".join(sorted(_SENTENCE_END)),
+                      "accented_words": sorted(V.ACCENTED_WORDS)},
         "constants": {
             "GIVEN_MASK": GIVEN_MASK, "SURNAME_SHIFT": SURNAME_SHIFT, "AMB_SHIFT": AMB_SHIFT, "RANK_MASK": RANK_MASK,
             "AMB_NONE": AMB_NONE, "AMB_WORD": AMB_WORD, "AMB_STRONG": AMB_STRONG, "AMB_ENTITY": AMB_ENTITY,
             "T_HONORIFIC": T_HONORIFIC, "T_GREETING": T_GREETING, "T_CLOSING": T_CLOSING, "T_ROLE": T_ROLE,
-            "T_EPONYM": T_EPONYM, "T_EPONYM_DIRECT": T_EPONYM_DIRECT, "GIVEN_ALONE_MIN": GIVEN_ALONE_MIN,
+            "T_EPONYM": T_EPONYM, "T_EPONYM_DIRECT": T_EPONYM_DIRECT, "T_CIVILITY": T_CIVILITY,
+            "GIVEN_ALONE_MIN": GIVEN_ALONE_MIN,
             "SURNAME_ALONE_MIN": SURNAME_ALONE_MIN, "GIVEN_START_MIN": GIVEN_START_MIN,
             "COMMUNE_SURNAME_MIN": COMMUNE_SURNAME_MIN, "_ENTITY_GIVEN_MIN": _ENTITY_GIVEN_MIN,
-            "CAPS_ALONE_MIN": CAPS_ALONE_MIN, "MAX_RUN": MAX_RUN,
+            "CAPS_ALONE_MIN": CAPS_ALONE_MIN, "PAIR_HOMONYM_MIN": PAIR_HOMONYM_MIN, "MAX_RUN": MAX_RUN,
         },
     }
 
@@ -418,6 +443,10 @@ class FrenchNameDetector:
         tokens = self._tokens(text, ctx.folded)
         cues = self._cues(ctx, strong_zones, labels)
         spans.extend(self._lowercase_after_cues(text, cues, spans))
+        spans.extend(self._lowercase_pairs(text, spans))
+        spans.extend(self._lowercase_after_prepositions(text, spans))
+        if "_" in text:
+            spans.extend(self._file_name_people(text, spans))
         if tokens:
             if "@" in text:
                 confirmed |= self._email_names(ctx)
@@ -452,6 +481,9 @@ class FrenchNameDetector:
                 kind, code = K_COMMON, 0  # « S.p.A. », « B.V. » : forme juridique, pas des initiales
             elif key == "n" and text[end:end + 1] == "°":
                 kind, code = K_COMMON, 0  # « AVENANT N° 2 » : signe de numéro, pas une initiale / a number sign
+            elif text[end:end + 1] in ("-", "_") and text[end + 1:end + 2].isdigit():
+                # « Jean Dupont CLT-204518 » : tête d'un code, jamais un nom (1.0.2) / the head of a code, never a name
+                kind, code = K_COMMON, 0
             elif end - start == 1 and text[end:end + 1] == "." and key not in V.STOP:
                 kind, code = K_INITIAL, 0  # « A. Lambert » : initiale, même si « a » est un mot / an initial
             else:
@@ -522,6 +554,8 @@ class FrenchNameDetector:
                     and not right.given and text[left.start - 1:left.start] == " ")
         if _SPACE_GAP_RE.fullmatch(gap) is None:
             return False
+        if "\t" in gap and _tab_row(text, left.end):
+            return False  # colonnes d'un tableau TSV : deux cellules, pas un nom (1.0.2) / TSV columns: two cells
         if not gap.strip(" \t"):
             return True
         # Après une particule vient un nom de famille (« de Gaulle »), pas un prénom ni un lieu (« de Simon »,
@@ -656,18 +690,24 @@ class FrenchNameDetector:
             if (trig.check_left[index] and start > 0 and (folded[start - 1].isalnum() or folded[start - 1] == "-")) \
                     or (trig.check_right[index] and end < length and (folded[end].isalnum() or folded[end] == "-")):
                 continue
+            # « Pont-l'Abbé. Montant facturé » : article élidé lié par un trait d'union, un lieu, pas une civilité
+            # (1.0.2, fort et essentiel). An elided article bound by a hyphen: a place, never an honorific.
+            if trig.check_left[index] and start >= 3 and folded[start - 1] in "'’" and folded[start - 3] == "-":
+                continue
             flags = trig.flags[index]
             if flags & T_HONORIFIC and trig.patterns[index] in V.CASE_SENSITIVE_HONORIFICS \
                     and not text[start].isupper():
-                flags &= ~T_HONORIFIC
+                flags &= ~(T_HONORIFIC | T_CIVILITY)
             if flags & (T_EPONYM | T_EPONYM_DIRECT | T_ROLE) and end - start > 1 and text[start:end].isupper():
                 flags &= ~(T_EPONYM | T_EPONYM_DIRECT | T_ROLE)  # « VALLÉE Nath » : nom en capitales / caps surname
             if flags & T_CLOSING:
                 zone = self._signature_zone(text, end)
                 if zone is not None:
                     signature.append(zone)
-            if flags & T_EPONYM or start in negative:
-                # « rue du Docteur Roux » : l'éponyme se transmet à la civilité suivante / eponym chains on.
+            if flags & T_EPONYM or (start in negative and not flags & T_CIVILITY):
+                # « rue du Docteur Roux » : l'éponyme se transmet au titre suivant / eponym chains on to a title.
+                # « l'arrêt maladie de M. Jean Dupont » : une civilité désigne la personne (1.0.2) / a civility
+                # names the person concerned and takes the honorific branch below.
                 after = _AFTER_EPONYM_RE.match(text, end)
                 if after is not None:
                     negative.add(after.end())
@@ -903,7 +943,9 @@ class FrenchNameDetector:
             while m is not None and len(words) < 3:
                 key = fold(m.group())
                 code = lex.code(key)
-                if code is None or key in V.FUNCTION or key in V.STOP:
+                # « Le salarié doit être convoqué » : un verbe après un rôle n'est jamais un nom (1.0.2).
+                # A verb after a role word is never a name.
+                if code is None or key in V.FUNCTION or key in V.STOP or key in _AUXILIARIES:
                     break
                 if words:
                     # Après un prénom retenu, un nom connu suffit, même homonyme (« guillaume martin »).
@@ -924,6 +966,100 @@ class FrenchNameDetector:
             value = " ".join(dict.fromkeys(text[w[0]:w[1]] for w in (given, surname)))
             spans.append(Span(words[0][0], words[-1][1], "PERSON", "PERSON", self.id, 0.8, PRIORITY_HEURISTIC,
                               value, True, propagate=True))
+        return spans
+
+    def _lowercase_after_prepositions(self, text: str, taken: list[Span]) -> list[Span]:
+        """« prise en charge par mathéo », « rdv avec chloé » : prénom seul en minuscules après « par », « avec »,
+        « chez », « pour » ou « à » (1.0.2, troisième tour, fort et essentiel).
+
+        A lone lowercase given name after a strong preposition. Same test as the first word of `_lowercase_pairs`:
+        a given name with no other reading (not a word, not a town, not ambiguous, more given name than surname, at
+        least 512 births), never a function word, a stop word, a particle or an auxiliary.
+        """
+        lex = self._lex
+        covered = sorted((s.start, s.end) for s in taken)
+        spans: list[Span] = []
+        for m in _PREPOSITION_NAME_RE.finditer(text):
+            key = fold(m.group(1))
+            code = lex.code(key)
+            if (code is None or ambiguity(code) != AMB_NONE or given_rank(code) < GIVEN_ALONE_MIN
+                    or given_rank(code) <= surname_rank(code) or key in lex.words or key in lex.communes
+                    or key in V.FUNCTION or key in V.STOP or key in V.PARTICLES or key in _AUXILIARIES):
+                continue
+            start, end = m.start(1), m.end(1)
+            if _Cues.inside(covered, start, end):
+                continue
+            spans.append(Span(start, end, "PERSON", "PERSON", self.id, 0.8, PRIORITY_HEURISTIC, m.group(1), True,
+                              propagate=True))
+        return spans
+
+    def _lowercase_pairs(self, text: str, taken: list[Span]) -> list[Span]:
+        """« rdv avec sophie martin », « merci à sandrine lacroix » : prénom puis nom en minuscules, sans indice.
+
+        Lowercase given name then surname with no cue (quick requests, chats), 1.0.2, modes fort and essentiel.
+        The first word is a given name with no other reading (not a word, not a town, more given name than
+        surname, at least 512 births); the second a surname of at least 256 bearers, or 4,096 when it is also a
+        common word (« martin »); neither is a function word, a stop word, a particle or an auxiliary.
+        """
+        lex = self._lex
+        covered = sorted((s.start, s.end) for s in taken)
+        spans: list[Span] = []
+
+        def common(key: str) -> bool:
+            return key in V.FUNCTION or key in V.STOP or key in V.PARTICLES or key in _AUXILIARIES
+
+        for m in _LOWER_PAIR_RE.finditer(text):
+            first = fold(m.group(1))
+            code1 = lex.code(first)
+            if (code1 is None or ambiguity(code1) != AMB_NONE or given_rank(code1) < GIVEN_ALONE_MIN
+                    or given_rank(code1) <= surname_rank(code1) or first in lex.words or first in lex.communes
+                    or common(first)):
+                continue
+            second = fold(m.group(2))
+            code2 = lex.code(second)
+            if code2 is None or surname_rank(code2) < SURNAME_ALONE_MIN or second in lex.words or common(second):
+                continue
+            amb = ambiguity(code2)
+            if not (amb == AMB_NONE or (amb == AMB_WORD and surname_rank(code2) >= PAIR_HOMONYM_MIN)):
+                continue
+            start, end = m.start(1), m.end(2)
+            if _Cues.inside(covered, start, end):
+                continue
+            given, surname = (m.start(1), m.end(1), code1), (m.start(2), m.end(2), code2)
+            if _given_bias(code2) > _given_bias(code1):
+                given, surname = surname, given
+            value = " ".join(dict.fromkeys(text[w[0]:w[1]] for w in (given, surname)))
+            spans.append(Span(start, end, "PERSON", "PERSON", self.id, 0.8, PRIORITY_HEURISTIC, value, True,
+                              propagate=amb == AMB_NONE))
+        return spans
+
+    def _file_name_people(self, text: str, taken: list[Span]) -> list[Span]:
+        """« CV_Nadia_Haddad.pdf », « passeport_Karim_Idrissi.jpg » : Prénom_Nom dans un nom de fichier.
+
+        Given_Surname inside a file name (1.0.2, modes fort and essentiel). The first segment is a given name with
+        no other reading (at least 512 births, more given name than surname); the second a known name that is not
+        an entity, or an unknown word that is not a common word.
+        """
+        lex = self._lex
+        covered = sorted((s.start, s.end) for s in taken)
+        spans: list[Span] = []
+        for m in _FILE_PAIR_RE.finditer(text):
+            first, second = fold(m.group(1)), fold(m.group(2))
+            code1, code2 = lex.code(first), lex.code(second)
+            if (code1 is None or ambiguity(code1) != AMB_NONE or given_rank(code1) < GIVEN_ALONE_MIN
+                    or given_rank(code1) <= surname_rank(code1) or first in V.STOP):
+                continue
+            if second in V.STOP or second in V.FUNCTION or (
+                    ambiguity(code2) == AMB_ENTITY if code2 is not None else second in lex.words):
+                continue
+            if _Cues.inside(covered, m.start(), m.end()):
+                continue
+            given, surname = (m.start(1), m.end(1), code1), (m.start(2), m.end(2), code2)
+            if _given_bias(code2) > _given_bias(code1):
+                given, surname = surname, given
+            value = " ".join(dict.fromkeys(text[w[0]:w[1]] for w in (given, surname)))
+            spans.append(Span(m.start(), m.end(), "PERSON", "PERSON", self.id, 0.8, PRIORITY_HEURISTIC, value,
+                              True, propagate=code2 is not None and ambiguity(code2) == AMB_NONE))
         return spans
 
     @staticmethod
@@ -994,6 +1130,8 @@ class FrenchNameDetector:
         if "|" in text and "---" in text:
             for row in self._table_rows(text):
                 self._row_spans(text, row, spans, zones, confirmed)
+        for row in self._csv_rows(text):
+            self._row_spans(text, row, spans, zones, confirmed)
         for start, end in self._person_rows(ctx):
             self._row_spans(text, [(start, end, "full")], spans, zones, confirmed)
         return spans, zones, confirmed
@@ -1039,6 +1177,24 @@ class FrenchNameDetector:
                 rows.append([(s, e, roles[k]) for k, (s, e) in enumerate(cells) if k < len(roles) and roles[k]])
                 pos = line_end + 1
             consumed = pos
+        return rows
+
+    def _csv_rows(self, text: str) -> list[list[tuple[int, int, str]]]:
+        """Lignes des tableaux CSV et TSV dont l'en-tête désigne des personnes (1.0.2, `delimited_tables`) ; un en-tête
+        est lu replié, « _ » changé en espace (« nom_famille »). Rows of CSV and TSV person tables; a header is read
+        folded, "_" as a space.
+        """
+        rows: list[list[tuple[int, int, str]]] = []
+        for table in delimited_tables(text):
+            roles = []
+            for s, e in table[0]:
+                label = fold(text[s:e]).strip(" *_`\"").replace("_", " ")
+                roles.append("given" if label in V.GIVEN_HEADERS else "surname" if label in V.SURNAME_HEADERS
+                             else "full" if label in V.PERSON_HEADERS else "")
+            if not any(roles):
+                continue
+            rows.extend([(s, e, roles[k]) for k, (s, e) in enumerate(cells) if k < len(roles) and roles[k]]
+                        for cells in table[1:])
         return rows
 
     def _row_spans(self, text: str, row: list[tuple[int, int, str]], spans: list[Span],
@@ -1282,8 +1438,10 @@ class FrenchNameDetector:
         commune = e.key.replace("-", " ") in self._lex.communes  # « Doignies », « Levallois-Perret »
         if self._after_locative(text, e.start) and (e.amb != AMB_NONE or commune):
             return 0.0  # « à Albert », « en Lorraine »
-        if commune and not e.given and e.surname < COMMUNE_SURNAME_MIN:
-            return 0.0  # nom rare homonyme d'une commune (« Doignies ») : un indice est exigé / needs a cue
+        # Nom rare homonyme d'une commune (« Doignies »), ou prénom trop rare pour valoir seul (« chantier de
+        # Briec », 1.0.2) : un indice est exigé. A rare commune homonym, or a too rare given name, needs a cue.
+        if commune and e.given < GIVEN_ALONE_MIN and e.surname < COMMUNE_SURNAME_MIN:
+            return 0.0
         if e.amb == AMB_NONE:
             return 0.8
         # Mot ambigu seul : seul un prénom passe sans indice (« j'ai vu Pierre »), jamais un nom-mot (« de Coupe »,

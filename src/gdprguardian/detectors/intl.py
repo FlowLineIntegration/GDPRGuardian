@@ -12,6 +12,7 @@ use: `Settings(native=False)` never touches the core.
 from __future__ import annotations
 
 import re
+import unicodedata
 from collections.abc import Iterator
 from functools import cache, cached_property, partial
 from typing import Any
@@ -119,7 +120,10 @@ class IbanDetector:
     """
 
     id = "INTL_IBAN"
-    _anchor = re.compile(r"(?<![A-Za-z0-9])([A-Z]{2}) ?([0-9]{2})(?=[ \-]?[A-Za-z0-9])")
+    # Pays en majuscules ou tout en minuscules (« iban : fr76 3000 … », test terrain 2) ; en minuscules, la mise en
+    # page par quatre ne suffit pas : clé juste ou mot-clé exigés. Country in capitals or all lowercase (field test
+    # 2); in lowercase the printed layout alone is not enough: a right key or a keyword is required.
+    _anchor = re.compile(r"(?<![A-Za-z0-9])([A-Z]{2}|[a-z]{2}) ?([0-9]{2})(?=[ \-]?[A-Za-z0-9])")
     _window = (48, 16)  # mot-clé avant, après / keyword before, after
 
     def __init__(self, pack: Any) -> None:
@@ -185,7 +189,7 @@ class IbanDetector:
             if mod97_10_ok(bban + country + m.group(2)):
                 yield m.start(), end, country + m.group(2) + bban, False
             else:
-                yield m.start(), end, None, _printed_in_fours(text[m.start():end])
+                yield m.start(), end, None, m.group(1).isupper() and _printed_in_fours(text[m.start():end])
 
 
 def _printed_in_fours(raw: str) -> bool:
@@ -326,3 +330,122 @@ class InternationalPhoneDetector:
         """Moteur fusionné : candidats en Rust, validation par `value` / fused engine: Rust candidates, `value`."""
         return {"kind": "phone", "prototype": self._span(0, 0, None, 0.0, 0), "prefilters": list(self._prefilters),
                 "value": self.value}
+
+
+def _fold_word(word: str) -> str:
+    """Minuscules sans accents / lowercase without accents."""
+    decomposed = unicodedata.normalize("NFKD", word.lower())
+    return "".join(c for c in decomposed if not unicodedata.combining(c))
+
+
+class PersonalSiteDetector:
+    """Site personnel dont l'hôte reprend le nom d'une personne citée dans le même texte (1.0.2, item J).
+
+    Personal website whose host repeats the name of a person quoted in the same text (« Kevin Lambert …
+    https://kevinlambert.fr », « kevin-lambert.fr », « klambert.fr » ; « Jean Dupont … jdupont.blog »). Le nom vient
+    du texte lui-même : deux ou trois mots consécutifs à majuscule (« Kevin Lambert », « LAMBERT Kevin »), joints
+    dans les deux ordres, ou l'initiale du premier collée au dernier ; l'hôte (sans « www. » ni domaine de premier
+    niveau, sans « - », « . » ni « _ ») doit en être une forme exacte de 6 lettres ou plus, le nom étant cité à 2 000
+    caractères au plus de l'adresse. Rien n'est gardé entre deux
+    textes. Sans nom cité, un site reste lisible (« https://www.service-public.fr »). Jumeau Rust dans le moteur
+    fusionné (`native_plan`, voie perf), sinon Python. Modes fort et essentiel (le nom de la personne est masqué
+    dans les deux). The name comes from the text itself; the host must be an exact form of it, 6 letters or more;
+    nothing is kept across texts. Rust twin in the fused engine, else Python. Modes fort and essentiel.
+    """
+
+    id = "URL_PERSONAL_NAME"
+    _url = re.compile(
+        r"(?<![\w@.\-/])(?:https?://)?(?:www\.)?(?P<host>[a-z0-9](?:[a-z0-9.\-_]{0,60}[a-z0-9])?)"
+        r"\.(?:fr|com|net|org|eu|me|io|info|blog|site|online|page|dev|be|ch|ca|pro|name)"
+        r"(?:/[\w.\-%~/]{0,100})?(?<![.,;:)])(?![\w@\-])", re.IGNORECASE)
+    _tld = re.compile(r"\.(?:fr|com|net|org|eu|me|io|info|blog|site|online|page|dev|be|ch|ca|pro|name)",
+                      re.IGNORECASE)
+    _word = re.compile(r"[^\W\d_]{2,}")
+    _run = re.compile(r"(?<![^\W\d_])[A-ZÀ-ÖØ-ÞŒ][^\W\d_]+(?:[ \- ][A-ZÀ-ÖØ-ÞŒ][^\W\d_]+)+")
+    _reach = 2000
+    _prefilters = ("http", "www.", ".fr", ".com", ".net", ".org", ".eu", ".me", ".io", ".info", ".blog", ".site",
+                   ".online", ".page", ".dev", ".be", ".ch", ".ca", ".pro", ".name")
+
+    def __init__(self, pack: Any) -> None:
+        self.pack = pack
+
+    def detect(self, ctx: Any) -> list[Span]:
+        if not ctx.has(self._prefilters):
+            return []
+        text = ctx.text
+        candidates = [(m.start(), m.end(), re.sub(r"[.\-_]", "", m.group("host").lower()))
+                      for m in self._urls(text)]
+        candidates = [c for c in candidates if len(c[2]) >= 6]
+        if not candidates:
+            return []
+        # Le nom est cherché à 2 000 caractères au plus de l'adresse (fenêtres fusionnées : chaque caractère lu une
+        # fois au plus, coût linéaire). The name is searched within 2,000 characters of the address (merged windows).
+        windows: list[list[int]] = []
+        for start, end, _ in candidates:
+            lo, hi = max(0, start - self._reach), min(len(text), end + self._reach)
+            if windows and lo <= windows[-1][1]:
+                windows[-1][1] = max(windows[-1][1], hi)
+            else:
+                windows.append([lo, hi])
+        forms = [(lo, hi, self._name_forms(text[lo:hi])) for lo, hi in windows]
+        spans = []
+        for start, end, host in candidates:
+            names = next(f for lo, hi, f in forms if lo <= start and end <= hi)
+            if host in names:
+                spans.append(self._span(start, end, host))
+        return spans
+
+    def _span(self, start: int, end: int, host: str | None) -> Span:
+        return Span(start, end, "URL", "URL", self.id, 0.9, PRIORITY_STRUCTURAL, host, reason="personal_site_name")
+
+    def native_plan(self) -> dict[str, Any] | None:
+        """Moteur fusionné : jumeau `rust/src/detectors/personal_site.rs` (voie perf), si le noyau le porte ; le repli
+        des mots non ASCII reste `_fold_word`. Fused engine: the Rust twin, when the core carries it; non-ASCII words
+        are folded by `_fold_word`."""
+        core = _native.core()
+        if core is None or not getattr(core, "personal_site_twin", False):
+            return None
+        return {"kind": "personal_site", "prototype": self._span(0, 0, None), "prefilters": list(self._prefilters),
+                "fold": _fold_word}
+
+    def _urls(self, text: str) -> Iterator[re.Match[str]]:
+        """`_url.finditer(text)`, mais seulement sur les lignes qui portent un domaine de premier niveau connu.
+
+        Same matches as `_url.finditer(text)`, scanning only the lines holding a known top-level domain: no match
+        crosses a line break (no class of `_url` takes "\\n"), the look-behind sees the real previous character, and at
+        the line's end the look-ahead sees the end of the string where the real text has "\\n", which it refuses too.
+        Coût de la jonction 1.0.2 : BOAMP lisait chaque mot ; seules ces lignes le sont désormais.
+        """
+        lines: list[tuple[int, int]] = []
+        for hit in self._tld.finditer(text):
+            if lines and hit.start() < lines[-1][1]:
+                continue
+            end = text.find("\n", hit.end())
+            lines.append((text.rfind("\n", 0, hit.start()) + 1, len(text) if end < 0 else end))
+        for start, end in lines:
+            yield from self._url.finditer(text, start, end)
+
+    def _name_forms(self, text: str) -> set[str]:
+        """Formes collées des noms cités (mots consécutifs à majuscule) / glued forms of the quoted names.
+
+        Une suite de noms : deux mots à majuscule ou plus, séparés par une espace ou un trait d'union, sur une ligne.
+        A run of names: two capitalised words or more, separated by a space or a hyphen, on one line.
+        """
+        forms: set[str] = set()
+        folded: dict[str, str] = {}  # cet appel seulement (voie perf) / this call only
+        for m in self._run.finditer(text):
+            run = []
+            for w in self._word.findall(m.group()):
+                if w not in folded:
+                    # ASCII : NFKD ne change rien, aucun diacritique / ASCII: NFKD is the identity, no diacritic.
+                    folded[w] = w.lower() if w.isascii() else _fold_word(w)
+                run.append(folded[w])
+            for i in range(1, len(run)):
+                for size in (2, 3):
+                    if i + 1 >= size:
+                        parts = run[i + 1 - size:i + 1]
+                        forms.add("".join(parts))
+                        forms.add("".join(reversed(parts)))
+                        forms.add(parts[0][0] + "".join(parts[1:]))
+                        forms.add(parts[-1][0] + "".join(parts[:-1]))
+        return {f for f in forms if len(f) >= 6}

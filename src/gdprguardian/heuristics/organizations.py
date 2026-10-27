@@ -203,6 +203,13 @@ class OrganizationDetector:
             if not words or (len(words) == 1 and (fold(words[0]) in V.ORG_KEYWORDS or fold(words[0]) in V.FUNCTION)):
                 continue  # « la Société », « le Groupe » : mot d'introduction seul / cue word alone
             person, only_person, safe = self._person_content(words)
+            if not sole and mode == "auto" and not ctx.strict and _formal(text, start, end, words) and not (
+                    self._ei_groups and ctx.near(self._ei_groups, start, end, 200, 200)):
+                # Forme juridique de société (pas EI/EIRL) : la raison sociale entière reste lisible, même si elle
+                # contient un nom de personne (1.0.2, « SARL DUPONT BÂTIMENT », « Clinique Jules Verne SAS »).
+                # A company legal form (not a sole trader): the whole company name stays readable.
+                spans.append(self._org_span(start, end, False))
+                continue
             if only_person:
                 # « Dupont SARL », « la SARL Petit » : la raison sociale n'est qu'un nom de personne, masqué comme
                 # tel (même balise que « M. Dupont »). The company name is only a person name: a PERSON span.
@@ -262,6 +269,39 @@ class OrganizationDetector:
         only = person and all(names) and len(keys) <= 4 and fold(words[0]) not in V.PARTICLES
         safe = all(c is not None and ambiguity(c) == AMB_NONE for c in codes)
         return person, only, safe
+
+
+def _is_form(word: str) -> bool:
+    """Forme juridique de société (pas EI/EIRL), majuscule en tête (« SAS », « GmbH », pas « sa »).
+
+    A company legal form (not a sole trader), starting with a capital letter.
+    """
+    return word[:1].isupper() and fold(word).replace(".", "") in V.COMPANY_FORM_KEYS
+
+
+def _formal(text: str, start: int, end: int, words: list[str]) -> bool:
+    """La raison sociale porte une forme juridique de société : dans ses mots, juste avant ou juste après.
+
+    The company name carries a company legal form: among its words, right before it or right after it
+    (spaces and tabs, and one comma after: « Hôtellerie des Alpes SAS », « SARL DUPONT BÂTIMENT »).
+    """
+    if any(_is_form(w) for w in words):
+        return True
+    i = start
+    while i > 0 and text[i - 1] in " \t" and start - i < 2:
+        i -= 1
+    j = i
+    while j > 0 and not text[j - 1].isspace() and i - j < 12:
+        j -= 1  # mot précédent, borné / previous word, bounded
+    if i < start and j < i and _is_form(text[j:i]):
+        return True
+    k = end
+    while k < len(text) and text[k] in " \t," and k - end < 3:
+        k += 1
+    m = k
+    while m < len(text) and not text[m].isspace() and text[m] not in ",;)" and m - k < 12:
+        m += 1
+    return end < k and k < m and _is_form(text[k:m].rstrip("."))
 
 
 def _bounded(text: str, start: int, end: int) -> bool:

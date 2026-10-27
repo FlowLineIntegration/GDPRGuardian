@@ -6,6 +6,32 @@
 Un seul logiciel, deux noms : **Gardien RGPD** en français, **GDPR Guardian** en anglais.
 One piece of software, two names: **Gardien RGPD** in French, **GDPR Guardian** in English.
 
+**Un filtre de premier niveau.** Des règles, des clés de contrôle, des indices de contexte et les règles de
+votre organisation masquent les identifiants directs (noms, coordonnées, numéros, adresses IP, dates de
+naissance…) avant que le texte n'atteigne une IA : toujours de la même façon, avec une raison nommée pour
+chaque balise, sans retour possible. Ce qui dépend du sens (santé, opinions, infractions : RGPD, art. 9 et 10 ;
+indices recoupés) revient au niveau suivant : la prochaine étape du projet est un étage LLM gouverné, sans date
+annoncée. Les scores publiés mesurent le premier niveau seul. Trois modes, mêmes noms sur l'API, le MCP et le
+site : fort (par défaut, on masque tout ce qu'on peut), essentiel, personnalisé.
+En pratique, deux étapes : branché sur les IA du quotidien (MCP, skills Claude, API), le Gardien reçoit chaque
+document d'abord, puis un modèle léger de votre IA lit le seul texte anonymisé pour signaler ou masquer, au
+mieux, ce qui dépend du sens ; pas parfait, mais pragmatique (notre appréciation : cette seconde étape n'est pas
+mesurée). Une école, une université ou une institution publique qui reprendrait ce sujet, pour le bien de toute
+la collectivité, serait la bienvenue : le code est ouvert (MIT), le protocole public.
+
+**A first-level filter.** Rules, check digits, context cues and your organisation's own rules mask direct
+identifiers (names, contact details, numbers, IP addresses, dates of birth…) before the text reaches an AI: the
+same way every time, with a named reason for every placeholder, and no way back. What depends on meaning
+(health, opinions, offences: GDPR Art. 9 and 10; cross-checked clues) is left to the next level: the project's
+next step is a governed LLM stage, with no date announced. The published scores measure the first level only.
+Three modes, same names on the API, the MCP and the site: fort (strong, the default: masks everything it can),
+essentiel (essential), personnalise (custom).
+In practice, two steps: plugged into everyday AIs (MCP, Claude skills, API), the Guardian receives every
+document first, then a light model of your own AI reads the anonymised text only, to flag or mask what depends
+on meaning, on a best-effort basis; not perfect, but pragmatic (our assessment: this second step is not
+measured). A school, university or public institution taking up this subject, for the good of the whole
+community, would be most welcome: the code is open (MIT), the protocol public.
+
 Gardien RGPD retire les données personnelles d'un document (noms, identifiants nationaux, coordonnées
 bancaires, téléphones, adresses, secrets…) **de façon irréversible**, tout en conservant le sens :
 chaque personne devient `[PERSONNE_1]`, `[PERSONNE_2]`… de manière cohérente dans tout le document.
@@ -109,6 +135,9 @@ et la légère n'envoie un document qu'après l'accord de l'utilisateur.
 - Explications sur demande (règle et raison de chaque balise, jamais la valeur), limites et mode d'emploi :
   [`integrations/claude/README.md`](integrations/claude/README.md). Dans claude.ai, un fichier joint à la
   conversation est déjà parti chez Anthropic : pour qu'il ne quitte pas le poste, Claude Code ou Cowork.
+- Ensuite, sauf si la tâche en a besoin, un modèle léger de l'IA de l'utilisateur masque dans une copie les données
+  sensibles restantes (RGPD, art. 9 et 10 : `[SANTE_1]`…) : une passe probabiliste, non mesurée, hors des garanties
+  déterministes.
 
 **EN.** Claude **never opens the document**: it has it anonymised, then reads only the anonymised Markdown. Two
 skills, as ready-to-upload archives in [`skills/`](skills/README.md); installed together, **the local one comes
@@ -121,25 +150,27 @@ Apple-silicon macOS; plugin `gdprguardian` (local MCP server and guardrail) for 
 `gdprguardian` package on PyPI. claude.ai and Claude Desktop: Customize > Plugins > Add > Add marketplace, then the
 plugin's Connectors tab, or Customize > Skills > "+" > Create skill > Upload a skill (code execution on); Claude
 Code: `claude plugin marketplace add FlowLineIntegration/GDPRGuardian`, then install either plugin, or unzip an
-archive into `~/.claude/skills/`. Details and limits: [`integrations/claude/README.md`](integrations/claude/README.md).
+archive into `~/.claude/skills/`. Then, unless the task needs them, a light model of the user's own AI masks the
+remaining sensitive data (GDPR art. 9 and 10: `[SANTE_1]`...) in a copy: a probabilistic pass, not measured, outside
+the deterministic guarantees. Details and limits: [`integrations/claude/README.md`](integrations/claude/README.md).
 
 ## Indice de confiance : nous nous notons en public / confidence index: we rate ourselves in public
 
 Protocole 1.1 ([docs/PROTOCOLE.md](docs/PROTOCOLE.md)), deux notes. **Documents normalisés**, l'usage visé (cible :
-95 % ou plus) : **<!--q:confidence_index:fr-->—<!--/q--> %**
-[<!--q:confidence_ci_low:fr-->—<!--/q-->–<!--q:confidence_ci_high:fr-->—<!--/q-->] (IC 95 %), <!--q:protocol_docs:fr-->—<!--/q-->
+95 % ou plus) : **<!--q:confidence_index:fr-->96,9<!--/q--> %**
+[<!--q:confidence_ci_low:fr-->96,2<!--/q-->–<!--q:confidence_ci_high:fr-->97,6<!--/q-->] (IC 95 %), <!--q:protocol_docs:fr-->1 019 385<!--/q-->
 documents. **Documents difficiles**, toute l'équipe rouge (51 façons de piéger un texte) :
-**<!--q:hard_index:fr-->—<!--/q--> %** [<!--q:hard_ci_low:fr-->—<!--/q-->–<!--q:hard_ci_high:fr-->—<!--/q-->],
-<!--q:hard_docs:fr-->—<!--/q--> documents. Campagne du <!--q:protocol_date:fr-->—<!--/q-->, par le **vrai service**,
-moteur <!--q:protocol_engine:fr-->—<!--/q--> (« — » : pas encore mesuré, ou sans objet). L'usage mesuré : les textes
+**<!--q:hard_index:fr-->84,0<!--/q--> %** [<!--q:hard_ci_low:fr-->83,9<!--/q-->–<!--q:hard_ci_high:fr-->84,1<!--/q-->],
+<!--q:hard_docs:fr-->548 907<!--/q--> documents. Campagne du <!--q:protocol_date:fr-->26 octobre 2026<!--/q-->, par le **vrai service**,
+moteur <!--q:protocol_engine:fr-->1.0.1+4bb5c465425e<!--/q--> (« — » : pas encore mesuré, ou sans objet). L'usage mesuré : les textes
 qu'une organisation envoie à une IA, de bonne foi (courriels, demandes collées, comptes rendus, courriers RH, contrats,
 factures). Une **fuite**, c'est un seul caractère lisible d'une adresse postale, d'un téléphone, d'un courriel ou d'un
 autre identifiant direct, quel qu'en soit le titulaire, ou du nom d'une personne ; un nom de société (RGPD,
 considérant 14) ou une ville citée comme lieu n'en sont pas. Chaque note est la part des documents sans fuite :
 documents normalisés, calculée par famille puis moyennée à poids égal (le volume n'achète aucun poids) ; documents
 difficiles, chaque document piégé compte une fois. Intervalle à 95 % par rééchantillonnage stratifié (2 000 tirages,
-graine fixe) ; mentions directes entièrement masquées : <!--q:mention_recall_pct:fr-->—<!--/q--> % (normalisés),
-<!--q:hard_mention_recall_pct:fr-->—<!--/q--> % (difficiles). Définition et empreintes publiées avant la campagne
+graine fixe) ; mentions directes entièrement masquées : <!--q:mention_recall_pct:fr-->99,3<!--/q--> % (normalisés),
+<!--q:hard_mention_recall_pct:fr-->95,0<!--/q--> % (difficiles). Définition et empreintes publiées avant la campagne
 ([PROTOCOL-REGISTRATION-1.1.json](PROTOCOL-REGISTRATION-1.1.json)). Réserve : les moitiés test des corpus réels ne
 sont plus aveugles (déjà notées par la campagne 1.0 et pendant la mise au point du moteur), donc les chiffres réels
 sont optimistes.
@@ -148,23 +179,23 @@ Protocole 1.0, 7 familles dont les plus faibles (sorties de l'indice en 1.1) : 6
 | Famille (corpus réels : moitié test) / family (real corpora: test half) | Documents | Sans fuite / no leak (%) | Mentions masquées / masked (%) | Précision / precision (%) |
 |---|---:|---:|---:|---:|
 | *Documents normalisés, l'indice / normalised documents, the index* | | | | |
-| Synthétique FR, 10 graines, leurres / synthetic FR, 10 seeds, decoys | <!--q:f_syn_docs:fr-->—<!--/q--> | <!--q:f_syn_nl:fr-->—<!--/q--> | <!--q:f_syn_mr:fr-->—<!--/q--> | <!--q:f_syn_pr:fr-->—<!--/q--> |
-| BODACC | <!--q:f_bod_docs:fr-->—<!--/q--> | <!--q:f_bod_nl:fr-->—<!--/q--> | <!--q:f_bod_mr:fr-->—<!--/q--> | <!--q:f_bod_pr:fr-->—<!--/q--> |
-| BOAMP | <!--q:f_boa_docs:fr-->—<!--/q--> | <!--q:f_boa_nl:fr-->—<!--/q--> | <!--q:f_boa_mr:fr-->—<!--/q--> | <!--q:f_boa_pr:fr-->—<!--/q--> |
-| ParlaMint-FR (gold partiel : borne haute / partial gold: upper bound) | <!--q:f_par_docs:fr-->—<!--/q--> | <!--q:f_par_nl:fr-->—<!--/q--> | <!--q:f_par_mr:fr-->—<!--/q--> | <!--q:f_par_pr:fr-->—<!--/q--> |
+| Synthétique FR, 10 graines, leurres / synthetic FR, 10 seeds, decoys | <!--q:f_syn_docs:fr-->450 000<!--/q--> | <!--q:f_syn_nl:fr-->97,2<!--/q--> | <!--q:f_syn_mr:fr-->99,6<!--/q--> | <!--q:f_syn_pr:fr-->98,8<!--/q--> |
+| BODACC | <!--q:f_bod_docs:fr-->1 335<!--/q--> | <!--q:f_bod_nl:fr-->97,5<!--/q--> | <!--q:f_bod_mr:fr-->99,5<!--/q--> | <!--q:f_bod_pr:fr-->99,2<!--/q--> |
+| BOAMP | <!--q:f_boa_docs:fr-->1 408<!--/q--> | <!--q:f_boa_nl:fr-->95,1<!--/q--> | <!--q:f_boa_mr:fr-->98,3<!--/q--> | <!--q:f_boa_pr:fr-->87,7<!--/q--> |
+| ParlaMint-FR (gold partiel : borne haute / partial gold: upper bound) | <!--q:f_par_docs:fr-->143<!--/q--> | <!--q:f_par_nl:fr-->97,9<!--/q--> | <!--q:f_par_mr:fr-->99,8<!--/q--> | <!--q:f_par_pr:fr-->—<!--/q--> |
 | *Documents difficiles, la seconde note / difficult documents, the second score* | | | | |
-| Formats du quotidien abîmés (25) / damaged everyday formats (25) | <!--q:f_red_docs:fr-->—<!--/q--> | <!--q:f_red_nl:fr-->—<!--/q--> | <!--q:f_red_mr:fr-->—<!--/q--> | <!--q:f_red_pr:fr-->—<!--/q--> |
-| Déguisements volontaires (25) / deliberate obfuscations (25) | <!--q:f_obf_docs:fr-->—<!--/q--> | <!--q:f_obf_nl:fr-->—<!--/q--> | <!--q:f_obf_mr:fr-->—<!--/q--> | <!--q:f_obf_pr:fr-->—<!--/q--> |
-| Bruit d'OCR / OCR noise | <!--q:f_ocr_docs:fr-->—<!--/q--> | <!--q:f_ocr_nl:fr-->—<!--/q--> | <!--q:f_ocr_mr:fr-->—<!--/q--> | <!--q:f_ocr_pr:fr-->—<!--/q--> |
+| Formats du quotidien abîmés (25) / damaged everyday formats (25) | <!--q:f_red_docs:fr-->284 081<!--/q--> | <!--q:f_red_nl:fr-->84,9<!--/q--> | <!--q:f_red_mr:fr-->96,5<!--/q--> | <!--q:f_red_pr:fr-->98,8<!--/q--> |
+| Déguisements volontaires (25) / deliberate obfuscations (25) | <!--q:f_obf_docs:fr-->252 895<!--/q--> | <!--q:f_obf_nl:fr-->86,6<!--/q--> | <!--q:f_obf_mr:fr-->94,5<!--/q--> | <!--q:f_obf_pr:fr-->98,8<!--/q--> |
+| Bruit d'OCR / OCR noise | <!--q:f_ocr_docs:fr-->11 931<!--/q--> | <!--q:f_ocr_nl:fr-->9,2<!--/q--> | <!--q:f_ocr_mr:fr-->72,8<!--/q--> | <!--q:f_ocr_pr:fr-->98,6<!--/q--> |
 | *Publiés à part, hors des deux notes / published apart, outside both scores* | | | | |
-| Presse ancienne, OCR de mauvaise qualité / old press, low-quality OCR | <!--q:f_old_docs:fr-->—<!--/q--> | <!--q:f_old_nl:fr-->—<!--/q--> | <!--q:f_old_mr:fr-->—<!--/q--> | <!--q:f_old_pr:fr-->—<!--/q--> |
-| MAPA FR (6 documents) | <!--q:f_mapa_docs:fr-->—<!--/q--> | <!--q:f_mapa_nl:fr-->—<!--/q--> | <!--q:f_mapa_mr:fr-->—<!--/q--> | <!--q:f_mapa_pr:fr-->—<!--/q--> |
-| Autres langues / other languages (DE, ES, IT, NL, PT, EN) | <!--q:f_oth_docs:fr-->—<!--/q--> | <!--q:f_oth_nl:fr-->—<!--/q--> | <!--q:f_oth_mr:fr-->—<!--/q--> | <!--q:f_oth_pr:fr-->—<!--/q--> |
+| Presse ancienne, OCR de mauvaise qualité / old press, low-quality OCR | <!--q:f_old_docs:fr-->272<!--/q--> | <!--q:f_old_nl:fr-->17,3<!--/q--> | <!--q:f_old_mr:fr-->55,2<!--/q--> | <!--q:f_old_pr:fr-->75,5<!--/q--> |
+| MAPA FR (6 documents) | <!--q:f_mapa_docs:fr-->6<!--/q--> | <!--q:f_mapa_nl:fr-->16,7<!--/q--> | <!--q:f_mapa_mr:fr-->33,1<!--/q--> | <!--q:f_mapa_pr:fr-->46,8<!--/q--> |
+| Autres langues / other languages (DE, ES, IT, NL, PT, EN) | <!--q:f_oth_docs:fr-->646<!--/q--> | <!--q:f_oth_nl:fr-->5,7<!--/q--> | <!--q:f_oth_mr:fr-->14,0<!--/q--> | <!--q:f_oth_pr:fr-->—<!--/q--> |
 
 Garde-fous / guards (%) : texte neutre masqué à tort / neutral text masked by mistake
-<!--q:g_overmask:fr-->—<!--/q-->, leurres masqués / decoys masked <!--q:g_decoys:fr-->—<!--/q-->. Témoin négatif
-Judilibre (sans annotation) / negative control: <!--q:f_jud_docs:fr-->—<!--/q--> décisions / decisions,
-<!--q:f_jud_spans:fr-->—<!--/q--> zones masquées pour 10 000 caractères / masked spans per 10,000 characters.
+<!--q:g_overmask:fr-->0,07<!--/q-->, leurres masqués / decoys masked <!--q:g_decoys:fr-->3,7<!--/q-->. Témoin négatif
+Judilibre (sans annotation) / negative control: <!--q:f_jud_docs:fr-->300<!--/q--> décisions / decisions,
+<!--q:f_jud_spans:fr-->11,5<!--/q--> zones masquées pour 10 000 caractères / masked spans per 10,000 characters.
 Limites, sans détour : une première barrière, pas une certification ; les fuites qui restent sont surtout dans les
 documents difficiles (retour à la ligne à l'intérieur d'un identifiant, lettres espacées d'un PDF, barres obliques ou
 doubles espaces entre chiffres, RIB écrit champ par champ) et dans les adresses des avis BOAMP ; la conversion des PDF, Word et Excel n'est pas mesurée ;
@@ -172,18 +203,18 @@ par l'API, un pays choisi sans la France ne masque ni noms ni adresses. Résulta
 campagnes, versions précédentes comprises : [benchmarks/results/](benchmarks/results/).
 
 **EN.** Protocol 1.1, two scores. **Normalised documents**, the intended use (target: 95% or more):
-**<!--q:confidence_index:en-->—<!--/q-->%** [<!--q:confidence_ci_low:en-->—<!--/q-->–<!--q:confidence_ci_high:en-->—<!--/q-->]
-(95% CI), <!--q:protocol_docs:en-->—<!--/q--> documents. **Difficult documents**, the whole red team (51 ways to trap
-a text): **<!--q:hard_index:en-->—<!--/q-->%** [<!--q:hard_ci_low:en-->—<!--/q-->–<!--q:hard_ci_high:en-->—<!--/q-->],
-<!--q:hard_docs:en-->—<!--/q--> documents. Run of <!--q:protocol_date:en-->—<!--/q-->, through the **real service**,
-engine <!--q:protocol_engine:en-->—<!--/q--> ("—": not measured yet, or not applicable). The use case measured: the
+**<!--q:confidence_index:en-->96.9<!--/q-->%** [<!--q:confidence_ci_low:en-->96.2<!--/q-->–<!--q:confidence_ci_high:en-->97.6<!--/q-->]
+(95% CI), <!--q:protocol_docs:en-->1,019,385<!--/q--> documents. **Difficult documents**, the whole red team (51 ways to trap
+a text): **<!--q:hard_index:en-->84.0<!--/q-->%** [<!--q:hard_ci_low:en-->83.9<!--/q-->–<!--q:hard_ci_high:en-->84.1<!--/q-->],
+<!--q:hard_docs:en-->548,907<!--/q--> documents. Run of <!--q:protocol_date:en-->26 October 2026<!--/q-->, through the **real service**,
+engine <!--q:protocol_engine:en-->1.0.1+4bb5c465425e<!--/q--> ("—": not measured yet, or not applicable). The use case measured: the
 texts an organisation sends to an AI, in good faith (e-mails, pasted requests, minutes, HR letters, contracts,
 invoices). A **leak** is a single readable character of a postal address, a phone number, an e-mail address or another
 direct identifier, whoever it belongs to, or of a person's name; a company name (GDPR, recital 14) or a town named as
 a place is not one. Each score is the share of documents with no leak: normalised documents, computed per family, then
 averaged with equal weight (volume buys no weight); difficult documents, every trapped document counts once. 95%
 interval by stratified resampling (2,000 draws, fixed seed); direct mentions fully masked:
-<!--q:mention_recall_pct:en-->—<!--/q-->% (normalised), <!--q:hard_mention_recall_pct:en-->—<!--/q-->% (difficult).
+<!--q:mention_recall_pct:en-->99.3<!--/q-->% (normalised), <!--q:hard_mention_recall_pct:en-->95.0<!--/q-->% (difficult).
 Definition and digests published before the run (PROTOCOL-REGISTRATION-1.1.json). Caveat: the test halves of the real
 corpora are no longer blind (scored by the 1.0 run and while the engine was tuned), so the real-corpus figures are
 optimistic.

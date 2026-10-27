@@ -89,7 +89,7 @@ code,pre,kbd{font-family:var(--mono);font-size:.92em}
 [data-r=stop]:disabled{visibility:hidden}
 
 /* Input column: input above, session queue below */
-.cin{display:grid;grid-template-rows:auto minmax(0,1fr);overflow:hidden}
+.cin{display:grid;grid-template-rows:auto minmax(0,1fr);overflow:hidden auto}
 .in{padding:12px 16px 10px;border-bottom:1px solid var(--line)}
 textarea{display:block;width:100%;height:clamp(96px,15svh,240px);resize:vertical;margin:0;padding:10px 12px;border:1px solid var(--field);border-radius:0;background:var(--well);color:var(--ink);font:400 13px/1.65 var(--mono)}
 /* Once the session has documents, the queue gets the room: shortcuts, formats, the third-party line and the strict
@@ -101,14 +101,6 @@ textarea::placeholder{color:var(--mu);opacity:1;font-family:var(--sans);font-siz
 .opts{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin:10px 0 0;padding:0;border:0;min-width:0}
 .sel{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink2)}
 select{min-height:30px;font:400 13px var(--sans);color:var(--ink);background:var(--pane);border:1px solid var(--field);border-radius:0;padding:0 6px;max-width:12.5rem}
-.seg{display:inline-flex;align-items:center;margin:0;padding:0;border:0;min-width:0}
-.seg legend{float:left;margin-right:8px;padding:0;font-size:13px;color:var(--ink2)}
-.seg label{position:relative}
-.seg input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
-.seg span{display:flex;align-items:center;min-height:30px;padding:0 10px;border:1px solid var(--field);font:400 12.5px var(--mono);cursor:pointer}
-.seg label+label span{margin-left:-1px}
-.seg input:checked+span{background:var(--ink);border-color:var(--ink);color:var(--pane)}
-.seg input:focus-visible+span{outline:2px solid var(--sig);outline-offset:2px}
 .chk{display:inline-flex;align-items:center;gap:7px;min-height:30px;font-size:13px;color:var(--ink2);cursor:pointer}
 .chk input{width:15px;height:15px;margin:0;accent-color:var(--ink)}
 .hint,.fmts,.keys{margin-top:6px;font-size:12px;line-height:1.45;color:var(--mu)}
@@ -117,6 +109,27 @@ select{min-height:30px;font:400 13px var(--sans);color:var(--ink);background:var
 .keys{color:var(--ink2)}
 .st{min-height:1.5em;margin-top:6px;font-size:13px;color:var(--ink)}
 .nojs{margin-top:8px;font-weight:600}
+/* Modes: a radio group above the input, one row per mode with its plain line and its two scores; the custom
+   mode opens its categories and the codes to keep. */
+.md{display:grid;gap:4px;margin:10px 0 8px;padding:0;border:0;min-width:0}
+.md legend{padding:0;margin-bottom:4px;font-size:13px;color:var(--ink2)}
+.md label{position:relative;display:block;padding:5px 8px 6px 30px;border:1px solid var(--line);font-size:12.5px;line-height:1.4;color:var(--ink2);cursor:pointer}
+.md label:has(:checked){border-color:var(--ink);box-shadow:inset 3px 0 0 var(--ink)}
+.md input{position:absolute;left:9px;top:8px;width:15px;height:15px;margin:0;accent-color:var(--ink)}
+.md input:focus-visible,.cats input:focus-visible{outline:2px solid var(--sig);outline-offset:2px}
+.md b{color:var(--ink);font-weight:600;margin-right:4px}
+.mn{display:block;font:400 11.5px/1.45 var(--mono);color:var(--mu);font-variant-numeric:tabular-nums}
+.cu{margin:0 0 8px;padding:8px 10px;border:1px solid var(--line)}
+.cats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 10px;margin:0;padding:0;border:0;min-width:0}
+.cats legend{padding:0;margin-bottom:4px;font-size:12px;color:var(--ink2)}
+.cats .chk{min-height:24px;font-size:12.5px}
+.kl{display:block;margin-top:8px;font-size:13px;color:var(--ink2)}
+#ck-k{display:block;width:100%;min-height:32px;margin-top:4px;padding:0 8px;border:1px solid var(--field);border-radius:0;background:var(--well);color:var(--ink);font:400 13px var(--mono)}
+#ck-k:focus-visible{outline:2px solid var(--sig);outline-offset:1px}
+#ck-k[aria-invalid=true]{border-color:var(--sig)}
+.kh,.ke{margin-top:4px;font-size:12px;line-height:1.4;color:var(--mu)}
+.ke{color:var(--sig)}
+.ke:empty{display:none}
 
 .qu{display:flex;flex-direction:column;min-height:0;padding:10px 16px 0}
 /* Queue actions on their own line, "Annuler l’envoi" last and its place kept: nothing moves when it shows. */
@@ -208,23 +221,26 @@ mark{background:none;color:inherit;padding:.05em .2em;border-radius:2px;white-sp
 .meter{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--line);visibility:hidden}
 .meter.on{visibility:visible}
 .meter i{display:block;height:100%;background:var(--ink2);transform-origin:0 50%;transform:scaleX(0);transition:transform .9s cubic-bezier(.2,.7,.3,1)}
-/* Scores: normalised documents big, difficult documents second; session tiles below them, wide. */
+/* Scores: one card per mode, anonymisation big, useful codes lost second; source under them. */
 .gs .t{aspect-ratio:2/1}
 .lede{margin:-2px 0 10px;font-size:12.5px;line-height:1.45;color:var(--ink2)}
-.sc{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:10px}
+.sc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .sc .t{aspect-ratio:auto;min-height:150px;border:1px solid var(--line)}
 .sc .s1{border-color:var(--ink)}
 .k{font-size:12.5px;font-weight:600;line-height:1.3}
 .sc .ci-v{margin-top:8px}
 .sc .ci-d{margin-top:auto;padding-top:8px}
-.s2 .ci-v{font-size:clamp(24px,21cqi,64px)}
+.ci-w{margin-top:10px;font-weight:600;font-size:clamp(20px,17cqi,44px);line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ci-w small{font-size:.5em;color:var(--mu);margin-left:.1em}
+.k span{font-weight:400;color:var(--mu)}
+.m-p,.msrc[data-v="protocole 1.2"] .m-i{display:none}
+.msrc[data-v="protocole 1.2"] .m-p{display:inline}
 .ok{list-style:none;margin:10px 0 0;padding:0;font-size:12.5px;line-height:1.45;color:var(--ink2)}
 .ok li{position:relative;padding:5px 0 5px 14px;border-top:1px solid var(--line)}
 .ok li::before{content:"";position:absolute;left:0;top:calc(5px + .5em);width:6px;height:6px;background:var(--ink)}
 .ci-v{margin-top:auto;font-weight:600;font-size:clamp(30px,27cqi,104px);line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums;white-space:nowrap}
 .ci-v small{font-size:.42em;color:var(--mu);margin-left:.1em;letter-spacing:0}
 .q[data-v="\2014"] .ci-v{font-size:clamp(20px,12cqi,40px);line-height:1.1;letter-spacing:-.015em;white-space:normal}
-@media (min-width:761px){.s2.q[data-v="\2014"] .ci-v{font-size:clamp(17px,12cqi,40px)}}
 .ci-ic{margin-top:6px;font-size:12.5px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--ink2)}
 .ci-d{margin-top:6px;font-size:12px;line-height:1.4;color:var(--ink2)}
 .ci-a{display:inline-block;margin-top:8px;font-size:12.5px}
@@ -296,6 +312,7 @@ mark{background:none;color:inherit;padding:.05em .2em;border-radius:2px;white-sp
 pre{max-width:100%;margin:10px 0;padding:10px 12px;border:1px solid var(--line);background:var(--well);font-size:12.5px;line-height:1.6;overflow-x:auto;white-space:pre}
 blockquote{margin:12px 0 18px;padding-left:16px;border-left:3px solid var(--ink)}
 blockquote p:first-child{font-size:clamp(19px,1rem + .8vw,24px);line-height:1.3;font-weight:600;letter-spacing:-.01em;max-width:34ch}
+blockquote p+p{margin-top:8px}
 .by{margin-top:8px;font-size:13px;color:var(--mu)}
 .cta{margin-top:18px;padding-top:10px;border-top:2px solid var(--ink)}
 .fine{margin-top:16px;font-size:13px;color:var(--ink2)}
@@ -368,7 +385,7 @@ blockquote p:first-child{font-size:clamp(19px,1rem + .8vw,24px);line-height:1.3;
   .gs .tl{grid-template-columns:repeat(2,minmax(0,1fr))}
   .t .v,.t.w .v{font-size:28px}
   .ci-v{font-size:48px}
-  .s2 .ci-v{font-size:36px}
+  .ci-w{font-size:30px}
   .q[data-v="\2014"] .ci-v{font-size:28px}
   .gl .tl{grid-template-columns:repeat(2,minmax(0,1fr))}
   .pn:target{order:-1;padding:0 16px 40px}
@@ -379,9 +396,9 @@ blockquote p:first-child{font-size:clamp(19px,1rem + .8vw,24px);line-height:1.3;
   .figs{grid-template-columns:repeat(2,minmax(0,1fr))}
   .keys{display:none}
 }
-@media (pointer:coarse){.lk,.chk,select,.seg span,.more a,.x{min-height:44px}.btn2.sm{min-height:44px}}
+@media (pointer:coarse){.lk,.chk,.cats .chk,#ck-k,select,.more a,.x{min-height:44px}.btn2.sm{min-height:44px}}
 /* Without JavaScript: only what works stays (the panels, the live figures, the API and MCP pointers). */
-@media (scripting:none){.go,[data-ex],.keys,.acts,.qu,.st,textarea,.opts,.hint,.fmts,.drop,.gs,.t:has([data-r=lat]){display:none}}
+@media (scripting:none){.go,[data-ex],.keys,.acts,.qu,.st,textarea,.opts,.md,.cu,.hint,.fmts,.drop,.gs,.t:has([data-r=lat]){display:none}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
 @media (forced-colors:active){mark,.xp .tg{border:1px solid CanvasText}.out mark.on,.xp tr.on .tg{border-width:3px}.meter i{background:CanvasText}.ql [aria-current=true]{outline:2px solid Highlight}}
 @media print{.bar,.rail,.qu,.in,.acts,.skip,.foot,.pn{display:none!important}.app,.ws{display:block;height:auto}.res{border:0;overflow:visible}body{background:#fff;color:#000}}

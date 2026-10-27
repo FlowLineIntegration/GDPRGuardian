@@ -44,16 +44,21 @@ class EngineTransport:
         self.restart_after = restart_after
         self.accepted = 0
         self.engines: dict[Any, Any] = {}
+        self.options_seen: set[tuple[str, ...]] = set()   # noms des options reçues / option names received
+        self.mode_calls: dict[str, int] = {}               # anonymisations par mode / anonymisations per mode
         self._lock = threading.Lock()
 
-    def _engine(self, countries: Any) -> Any:
+    def _engine(self, countries: Any, mode: str | None = None) -> Any:
         from gdprguardian import Anonymizer
 
         key = countries if isinstance(countries, str) else tuple(countries)
-        if key not in self.engines:
-            self.engines[key] = Anonymizer(countries=tuple(key.split(",")) if "," in key or key.isupper() else key,
-                                           profile="standard", label_language="fr")
-        return self.engines[key]
+        setting = {"mode": mode} if mode else {"profile": "standard"}  # 1.2 : « mode » ; 1.1 : « profile »
+        with self._lock:
+            if (key, mode) not in self.engines:
+                self.engines[(key, mode)] = Anonymizer(
+                    countries=tuple(key.split(",")) if "," in key or key.isupper() else key, label_language="fr",
+                    **setting)
+            return self.engines[(key, mode)]
 
     def request(self, method: str, path: str, body: bytes | None = None) -> tuple[int, Mapping[str, str], bytes]:
         if path == "/health":
@@ -83,15 +88,19 @@ class EngineTransport:
                 self.accepted = 1  # nouveau processus : compteurs repartis de zéro / new process, counters reset
             switched = self.switch_after is not None and self.calls > self.switch_after
         payload = json.loads(body)
+        with self._lock:
+            self.options_seen.add(tuple(sorted(k for k in payload if k != "text")))
+            if payload.get("mode"):
+                self.mode_calls[payload["mode"]] = self.mode_calls.get(payload["mode"], 0) + 1
         if switched:  # autre moteur : ne masque plus rien / another engine: masks nothing any more
             return 200, {}, json.dumps({"text": payload["text"], "report": {}}, ensure_ascii=False).encode()
-        result = self._engine(payload.get("countries", "FR")).anonymize(payload["text"])
+        result = self._engine(payload.get("countries", "FR"), payload.get("mode")).anonymize(payload["text"])
         return 200, {}, json.dumps({"text": result.text, "report": {}}, ensure_ascii=False).encode()
 
     def close(self) -> None:
         pass
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def engine_transport() -> type[EngineTransport]:
     return EngineTransport

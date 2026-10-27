@@ -69,7 +69,12 @@ fr = ["allocataire", "n° allocataire", "numéro allocataire", "caf", "msa"]
 fr = ["france travail", "pôle emploi", "pole emploi", "identifiant france travail", "demandeur d'emploi"]
 [context.plate]
 fr = ["immatriculation", "immatriculé", "plaque", "véhicule", "carte grise", "certificat d'immatriculation",
-      "siv", "voiture", "avis de contravention"]
+      "siv", "voiture", "avis de contravention", "immatriculations", "immatriculée", "plaques", "véhicules",
+      "voitures", "flotte", "parc automobile", "camion", "camionnette", "utilitaire", "moto", "scooter"]
+# Numéro de série du véhicule (VIN) / vehicle identification number cues.
+[context.vin]
+fr = ["vin", "n° vin", "numéro vin", "numéro de série", "n° de série", "numéro d'identification du véhicule",
+      "châssis", "n° de châssis", "numéro de châssis"]
 # Indices d'entreprise individuelle (SIREN = donnée personnelle) / sole-trader cues.
 [context.ei]
 fr = ["entrepreneur individuel", "entreprise individuelle", "ei", "micro-entrepreneur", "micro entrepreneur",
@@ -79,7 +84,15 @@ fr = ["entrepreneur individuel", "entreprise individuelle", "ei", "micro-entrepr
 # it names its holder (a company has neither a given name nor a birth date).
 [context.natural_person]
 fr = ["prénom", "prénoms", "nom d'usage", "nom de naissance", "nom marital", "né le", "née le", "né(e) le",
-      "date de naissance", "lieu de naissance"]
+      "date de naissance", "lieu de naissance",
+      # 1.0.2, test terrain 2 (item I) : la personne qui exerce en son nom, sur la ligne du numéro (« Il exploite en
+      # nom propre (SIRET …) », « Hervé Clément, artisan, SIRET … », « Dr Anne Mercier, médecin libéral, SIRET … »).
+      # Field test 2: the person trading in their own name, on the number's line.
+      "en nom propre", "à son nom", "artisan", "artisane", "libéral", "libérale", "libéraux", "monsieur", "madame",
+      "mme", "mlle", "dr", "docteur", "maître", "infirmier libéral", "infirmière libérale",
+      # 1.0.2, second tour (item I) : civilité abrégée sur la ligne du dessus (« M. Hervé Clément ⏎ SIRET … »).
+      # Abbreviated civility on the line above. Modes fort et essentiel.
+      "m.", "mr"]
 # Personne morale tout près du numéro (« la société X SAS, SIRET … », « Employeur : X, SIRET … ») : l'état civil
 # voisin est celui d'un autre. A legal entity right next to the number: nearby civil status belongs to someone else.
 [context.legal_entity]
@@ -165,6 +178,22 @@ policy = "company"
 pattern = 'FR[ ./\-]?[0-9A-HJ-NP-Z][ ./\-]?[0-9A-HJ-NP-Z](?:[ ./\-]?[0-9]){9}'
 flags = "i"
 validator = "fr.tva"
+boundary = "alnum"
+
+# 1.0.2 (item M, test terrain 2) : TVA belge citée dans un texte français (« TVA : BE 0403.170.701 ») : jumeau de
+# `BE_VAT` (même libellé, même valide), pour qu'elle ne devienne jamais un [TEL] quand le pack BE n'est pas actif.
+# Politique « entreprise », comme toute TVA. Modes fort et essentiel. A Belgian VAT number quoted in a French text: twin
+# of `BE_VAT`, so it never becomes a [TEL] when the BE pack is off. Company policy, like any VAT number.
+[[recognizer]]
+id = "FR_VAT_BE"
+entity = "VAT"
+label = "BE_BCE"
+tier = "A"
+policy = "company"
+prefilter = "digit"
+pattern = 'BE{S}(?:\(0\){S})?[0-9]{3,4}{S}[0-9]{3}{S}[0-9]{3}(?![^\W_])'
+flags = "i"
+validator = "be.enterprise_number"
 boundary = "alnum"
 
 [[recognizer]]
@@ -275,16 +304,58 @@ validator = "fr.phone"
 boundary = "alnum"
 context = "phone"
 
+# Filtre fort 1.0.2 : dix chiffres collés conformes au plan de numérotation, masqués sans mot-clé (raison
+# `phone_numbering_plan`). Strong filter 1.0.2: ten glued digits that fit the numbering plan, masked with no keyword.
 [[recognizer]]
 id = "FR_PHONE_COMPACT"
 entity = "PHONE"
 label = "PHONE"
-tier = "B"
+tier = "A"
 prefilter = "digit"
 pattern = '0[1-589][0-9]{8}'
 validator = "fr.phone"
 boundary = "alnum"
 context = "phone"
+
+# Indicatif entre parenthèses ou groupements libres après +33 (« (+33) 7 10 02 19 76 », « +33 701 20 01 57 »,
+# « (0033) 6 12 34 56 78 ») : l'indicatif suffit, sans mot-clé. Country code in brackets or free grouping after +33:
+# the country code is enough, no keyword needed.
+[[recognizer]]
+id = "FR_PHONE_INTL_LOOSE"
+entity = "PHONE"
+label = "PHONE"
+tier = "A"
+prefilter = "33"
+pattern = '(?:\((?:\+|00)[ ]?33\)|(?:\+|00)33|\+[ ]33)[ ./\-]{0,2}(?:\(0\)[ ./\-]?)?[1-9](?:[ ./\-]?[0-9]){8}'
+validator = "fr.phone"
+boundary = "group"
+
+# Numéro aux chiffres en partie masqués (« 06 xx xx 22 67 », « 06.XX.XX.22.67 ») : un groupe masqué et un groupe en
+# chiffres au moins. Partly masked number: at least one masked group and one group in digits.
+[[recognizer]]
+id = "FR_PHONE_MASKED"
+entity = "PHONE"
+label = "PHONE"
+tier = "A"
+prefilter = ["xx", "**"]
+# Motif développé (premier groupe masqué ou en chiffres), sans look-ahead interne : il tourne dans le noyau Rust.
+# Expanded pattern (first group masked or in digits), no inner look-ahead: it runs in the Rust core.
+pattern = '0[1-9](?:[ .\-]?(?:[xX]{2}|\*\*)(?:[ .\-]?[0-9]{2}(?:[ .\-]?(?:[0-9]{2}|[xX]{2}|\*\*)){2}|[ .\-]?(?:[xX]{2}|\*\*)[ .\-]?[0-9]{2}[ .\-]?(?:[0-9]{2}|[xX]{2}|\*\*)|(?:[ .\-]?(?:[xX]{2}|\*\*)){2}[ .\-]?[0-9]{2})|[ .\-]?[0-9]{2}(?:[ .\-]?(?:[xX]{2}|\*\*)(?:[ .\-]?(?:[0-9]{2}|[xX]{2}|\*\*)){2}|[ .\-]?[0-9]{2}[ .\-]?(?:[xX]{2}|\*\*)[ .\-]?(?:[0-9]{2}|[xX]{2}|\*\*)|(?:[ .\-]?[0-9]{2}){2}[ .\-]?(?:[xX]{2}|\*\*)))'
+boundary = "phone"
+
+# Fin d'un numéro (« le numéro finissant par 59 65 », « la ligne en …24 71 ») : mot de téléphone à 30 caractères au
+# plus avant l'indice de fin (raison `phone_fragment`). End of a number: a phone word at most 30 characters before
+# the ending cue.
+[[recognizer]]
+id = "FR_PHONE_FRAGMENT"
+entity = "PHONE"
+label = "PHONE"
+tier = "A"
+flags = "i"
+prefilter = ["finissant", "terminant", "finit par", "ligne en", "derniers chiffres", "fin du", "fin de"]
+pattern = '''(?<!\w)(?:(?:num[ée]ro|ligne|t[ée]l(?:[ée]phone)?|portable|mobile)[^\n]{0,30}?(?:finissant[ \t]par|se[ \t]terminant[ \t]par|terminant[ \t]par|qui[ \t]finit[ \t]par|ligne[ \t]en|les[ \t](?:deux|quatre)[ \t]derniers[ \t]chiffres(?:[ \t]sont)?)|ligne[ \t]en|fin[ \t]d(?:u|e[ \t](?:son|sa|leur|ce))[ \t](?:num[ée]ro|t[ée]l[ée]phone|portable|mobile))[ \t]{0,3}:?[ \t]{0,3}(?:…|\.\.\.|xx)?[ \t]{0,2}(?P<v>[0-9]{2}(?:[ .][0-9]{2}){1,2}|[0-9]{2,6})(?![0-9A-Za-z])'''
+group = "v"
+boundary = "none"
 
 [[recognizer]]
 id = "FR_PHONE_OVERSEAS"
@@ -307,6 +378,7 @@ prefilter = "digit"
 pattern = '[0-9](?:[ ./\-]?[0-9]){3}(?:[ ./\-]?[0-9A-Z]){3}(?:[ ./\-]?[0-9]){5}'
 boundary = "group"
 context = "cni"
+veto = "passport"
 
 [[recognizer]]
 id = "FR_CNI"
@@ -318,6 +390,9 @@ pattern = '[0-9A-Z](?:[ ./\-]?[0-9A-Z]){8}'
 validator = "fr.alnum_mixed"
 boundary = "group"
 context = "cni"
+# 1.0.2 (item M) : « passeport » plus proche que « carte d'identité » : c'est un passeport, pas une CNI.
+# The nearest cue wins: "passeport" closer than "carte d'identité" makes it a passport.
+veto = "passport"
 
 [[recognizer]]
 id = "FR_PASSPORT"
@@ -378,8 +453,10 @@ entity = "HEALTH_ID"
 label = "ADELI"
 tier = "C"
 prefilter = "digit"
-pattern = '(?:[0-9]{2}|2[AB])[0-9]{7}'
-boundary = "alnum"
+# 1.0.2 (item H) : groupes libres comme sur une ordonnance (« n° ADELI : 75 99 1234 5 », « n° AM 29 1 23456 7 »).
+# Free grouping as printed on a prescription.
+pattern = '(?:[0-9]{2}|2[AB])(?:[ ./\-]?[0-9]){7}'
+boundary = "group"
 context = "adeli"
 
 [[recognizer]]
@@ -429,7 +506,9 @@ id = "FR_PLATE_SIV"
 entity = "PLATE"
 label = "PLATE"
 tier = "A"
+# 1.0.2 (item H) : en minuscules aussi (« ab-123-cd ») / lowercase too. Modes fort et essentiel.
 pattern = '[A-HJ-NP-TV-Z]{2}-[0-9]{3}-[A-HJ-NP-TV-Z]{2}'
+flags = "i"
 validator = "fr.siv_plate"
 boundary = "alnum"
 
@@ -439,6 +518,7 @@ entity = "PLATE"
 label = "PLATE"
 tier = "C"
 pattern = '[A-HJ-NP-TV-Z][ ./\-]?[A-HJ-NP-TV-Z](?:[ ./\-]?[0-9]){3}(?:[ ./\-]?[A-HJ-NP-TV-Z]){2}'
+flags = "i"
 validator = "fr.siv_plate"
 boundary = "group"
 context = "plate"
@@ -452,6 +532,52 @@ pattern = '[0-9](?:[ ./\-]?[0-9]){0,3}(?:[ ./\-]?[A-HJ-NP-TV-Z]){1,3}[ ./\-]?(?:
 boundary = "group"
 context = "plate"
 
+# 1.0.2, second tour (item H, test terrain 2) : plaque SIV écrite sans séparateur (« AB123CD », « ab123cd ») ou en
+# majuscules séparées par des espaces (« AB 123 CD ») : la forme suffit, sans indice de véhicule (étiquette PLAQUE, pas
+# IDENTIFIANT). En minuscules espacées (« ab 123 cd »), l'indice reste exigé (`FR_PLATE_SIV_LOOSE`) : ce pourrait être
+# des mots. Modes fort et essentiel (format reconnu). SIV plate written glued or as spaced capitals: the shape is
+# enough, labelled PLATE; spaced lowercase still needs a vehicle cue.
+[[recognizer]]
+id = "FR_PLATE_SIV_GLUED"
+entity = "PLATE"
+label = "PLATE"
+tier = "A"
+prefilter = "digit"
+pattern = '(?i:[A-HJ-NP-TV-Z]{2}[0-9]{3}[A-HJ-NP-TV-Z]{2})|[A-HJ-NP-TV-Z]{2} [0-9]{3} [A-HJ-NP-TV-Z]{2}'
+validator = "fr.siv_plate"
+boundary = "alnum"
+
+# 1.0.2, second tour (item H) : ancien format FNI en majuscules, sans indice, comme élément d'une liste (« Liste :
+# 1234 AB 75, 567 XY 29 », « - 1234 AB 75 ») : en tête de ligne (puce comprise) ou après « : », « ; », « , » ou « ( » ;
+# 3 ou 4 chiffres, 2 ou 3 lettres, un département ; jamais suivi d'une unité, d'une taxe ou d'une monnaie (« 1500 HT
+# 20 % », « 1250 EUR 30 jours »), ni après un autre mot (« Article 1234 CE 75 », « Version 2024 RC 12 »). Sans
+# look-behind ni look-ahead interne : le noyau Rust compile le motif. Modes fort et essentiel (format reconnu).
+# Old FNI plate in capitals without a cue, as a list item (line start or after ":", ";", "," or "("); never a unit,
+# tax or currency, never after another word.
+[[recognizer]]
+id = "FR_PLATE_FNI_BARE"
+entity = "PLATE"
+label = "PLATE"
+tier = "A"
+prefilter = "digit"
+group = "v"
+pattern = '(?:^|[\n:;,(\t•*\-])[ \t]{0,3}(?P<v>[0-9]{3,4} [A-HJ-NP-TV-Z]{2,3} (?:0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6]))(?![0-9A-Za-z%€$])(?![ \t]?(?:%|€|\$|ans?|km|kg|h|min|jours?|mois|heures?|ht|ttc)(?![A-Za-z]))'
+boundary = "none"
+
+# 1.0.2 (item H, test terrain 2) : numéro de série du véhicule (VIN, 17 caractères sans I, O ni Q, lettres et chiffres)
+# près de son indice ou d'un indice de véhicule. Modes fort et essentiel. Vehicle identification number near its cue or
+# a vehicle cue.
+[[recognizer]]
+id = "FR_VIN"
+entity = "VEHICLE_ID"
+label = "ID"
+tier = "C"
+prefilter = "digit"
+pattern = '[A-HJ-NPR-Z0-9]{17}'
+validator = "fr.alnum_mixed"
+boundary = "alnum"
+context = ["vin", "plate"]
+
 [[recognizer]]
 id = "FR_CONTEXTUAL_ID"
 entity = "ID"
@@ -459,7 +585,10 @@ label = "ID"
 tier = "A"
 score = 0.9
 flags = "i"
-pattern = '''(?:n[°o]\.?|num[ée]ro|r[ée]f(?:[ée]rence)?\.?|id(?:entifiant)?)\s{0,3}(?:de\s{1,3}|d'\s{0,2}|du\s{1,3})?(?:client|contrat|dossier|patient|ipp|nda|s[ée]jour|adh[ée]rent|police|sinistre|abonn[ée]|pdl|prm|pce|compteur|b[ée]n[ée]ficiaire|assur[ée]|employ[ée]|salari[ée]|matricule|badge)\s{0,3}[:#°]?\s{0,3}(?P<v>[A-Z0-9][A-Z0-9\-/.]{3,24}(?: [0-9]{3,6}){0,3}|[0-9]{2,3}(?: [0-9]{3}){2,3})'''
+# 1.0.2 (item H) : la valeur finit sur une lettre ou un chiffre (« IPP 887766. » garde son point) et prend ses
+# groupes suivants entiers (« dossier MDPH 2026-0045 » : une seule zone). The value ends on a letter or digit (the
+# sentence full stop stays) and takes its following groups whole (one span).
+pattern = '''(?:n[°o]\.?|num[ée]ro|r[ée]f(?:[ée]rence)?\.?|id(?:entifiant)?)\s{0,3}(?:de\s{1,3}|d'\s{0,2}|du\s{1,3})?(?:client|contrat|dossier|patient|ipp|nda|s[ée]jour|adh[ée]rent|police|sinistre|abonn[ée]|pdl|prm|pce|compteur|b[ée]n[ée]ficiaire|assur[ée]|employ[ée]|salari[ée]|matricule|badge)\s{0,3}[:#°]?\s{0,3}(?P<v>[A-Z0-9][A-Z0-9\-/.]{2,23}[A-Z0-9](?: [0-9]{3,6}(?:[\-/.][0-9]{1,8}){0,3}){0,3}|[0-9]{2,3}(?: [0-9]{3}){2,3})'''
 group = "v"
 validator = "fr.contextual_id"
 boundary = "none"
@@ -480,6 +609,38 @@ pattern = '(?<!\w)rpps\s{0,3}(?:n[°o]\.?\s{0,3})?[:#°]?\s{0,3}(?P<v>[0-9](?:[ 
 group = "v"
 boundary = "none"
 
+# 1.0.2 (item H, test terrain 2) : numéro d'inscription à un ordre professionnel (« N° Ordre 75/12345 », « n° d'ordre
+# des médecins : 75 12345 », « inscrit à l'Ordre sous le n° 29/4567 ») : identifiant direct du praticien. Modes fort
+# et essentiel (libellé explicite). Registration number with a professional order: the practitioner's direct
+# identifier. Modes fort and essentiel (explicit label).
+[[recognizer]]
+id = "FR_ORDER_NUMBER"
+entity = "HEALTH_ID"
+label = "ID"
+tier = "A"
+score = 0.9
+flags = "i"
+prefilter = "ordre"
+pattern = '''(?<!\w)(?:(?:n[°o]\.?|num[ée]ro)[ \t]{0,3}(?:d'[ \t]{0,2}|de[ \t]{1,3}l'[ \t]{0,2})?(?:inscription[ \t]{1,3}(?:[àa][ \t]{1,3}l'[ \t]{0,2}|au[ \t]{1,3}tableau[ \t]{1,3}de[ \t]{1,3}l'[ \t]{0,2})?)?ordre|ordre[ \t]{1,3}n[°o]\.?|inscrite?[ \t]{1,3}[àa][ \t]{1,3}l'[ \t]{0,2}ordre[ \t]{1,3}sous[ \t]{1,3}le[ \t]{1,3}(?:n[°o]\.?|num[ée]ro))(?:[ \t]{1,3}des[ \t]{1,3}[a-zé\-]{4,24})?[ \t]{0,3}[:#°]?[ \t]{0,3}(?P<v>[0-9]{1,4}(?:[ ./\-]?[0-9]){3,11})(?![0-9A-Za-z])(?![.,/\-][0-9])'''
+group = "v"
+validator = "fr.contextual_id"
+boundary = "none"
+
+# 1.0.2 (item M) : IBAN tronqué ou partiel juste après son libellé (« IBAN : FR76 3000 6000 1112 ») : masqué en IBAN,
+# jamais en carte. Pays en majuscules ou en minuscules. Modes fort et essentiel (libellé explicite). A truncated IBAN
+# right after its label: masked as an IBAN, never as a card.
+[[recognizer]]
+id = "FR_IBAN_LABELLED"
+entity = "IBAN"
+label = "IBAN"
+tier = "A"
+score = 0.9
+flags = "i"
+prefilter = ["iban", "rib"]
+pattern = '''(?<!\w)(?:iban|rib)[ \t]{0,3}(?:n[°o]\.?[ \t]{0,3})?[:#]?[ \t]{0,3}(?P<v>[A-Z]{2}[ \t]?[0-9]{2}(?:[ \-]?[0-9A-Z]{4}){1,7}(?:[ \-]?[0-9A-Z]{1,3})?)(?![0-9A-Za-z])'''
+group = "v"
+boundary = "none"
+
 [[recognizer]]
 id = "FR_LABELLED_ID"
 entity = "ID"
@@ -488,9 +649,91 @@ tier = "A"
 score = 0.9
 flags = "i"
 prefilter = ["matricule", "ipp", "nda", "contrat", "client", "patient", "dossier", "adherent", "sinistre", "police"]
-pattern = '''(?<!\w)(?:matricule|ipp|nda|(?:contrat|client|patient|dossier|adh[ée]rent|sinistre|police)\s{1,3}(?:n[°o]\.?|num[ée]ro))\s{0,3}[:#°]?\s{0,3}(?P<v>[A-Z0-9][A-Z0-9\-/.]{3,24}(?: [0-9]{3,6}){0,3}|[0-9]{2,3}(?: [0-9]{3}){2,3})'''
+pattern = '''(?<!\w)(?:matricule|ipp|nda|(?:contrat|client|patient|dossier|adh[ée]rent|sinistre|police)\s{1,3}(?:n[°o]\.?|num[ée]ro))\s{0,3}[:#°]?\s{0,3}(?P<v>[A-Z0-9][A-Z0-9\-/.]{2,23}[A-Z0-9](?: [0-9]{3,6}(?:[\-/.][0-9]{1,8}){0,3}){0,3}|[0-9]{2,3}(?: [0-9]{3}){2,3})'''
 group = "v"
 validator = "fr.contextual_id"
+boundary = "none"
+
+# Filtre fort 1.0.2 : nombre nu de 4 chiffres ou plus juste après un libellé (« dossier 696936 », « ticket 4471 »,
+# « n° client 4471203 », « commande n° 20512 », « salarié : 7781 »). Choix du propriétaire : tout numéro après un
+# libellé est masqué, factures et commandes comprises ; jamais un montant (« facture 1500 € », « 1234,56 »).
+# « n° » ou « numéro » seuls ne comptent qu'en tête de ligne (`FR_LABELLED_NUMBER_START`) : après un autre mot, ils
+# numérotent ce mot (« Annonce n° 3151 », « Lot n° 23 », « Bodacc A n° 20260169 »). Sans look-behind interne : les
+# deux motifs tournent dans le noyau Rust. Alone, "n°" counts only at a line start; no inner look-behind: both
+# patterns run in the Rust core.
+# Strong filter 1.0.2: a bare number of 4 digits or more right after a label (owner's choice: invoices and orders
+# too); never an amount.
+# 1.0.2, second tour (item H, test terrain 2) : la valeur prend ses groupes suivants entiers (« dossier 2026-0045 »,
+# « n° 4970 1012 3456 7899 » : une seule zone, jamais « [IDENTIFIANT_1] 1012 3456 7899 ») et un sigle peut séparer le
+# libellé du numéro (« dossier MDPH n° 2026-0045 ») ; jamais une date ISO ni une plage d'années (« 2024-03-15 »,
+# « 2024-2025 » : le validateur `fr.contextual_id` refuse les dates et les plages d'années), ni une heure
+# (« 1234 12:30 »). Look-behind en tête et look-ahead en fin seulement : le noyau Rust compile le motif. Une valeur en
+# groupes courts compte aussi (« client 987 654 321 »,
+# « Client 12/345/678 », deux groupes au moins), jamais une date (« dossier 12/03/2024 ») ni une quantité (« commande
+# 25 000 pièces », « 1200 heures »). Libellés ajoutés : « abonné », « badge », « id » (« référence » n'en est pas un :
+# « Référence 3056 9309 0259 04 » reste lisible sans mot-clé de carte, tests/test_engine.py). Modes
+# fort et essentiel (libellé explicite). The value takes its following groups whole (short groups too, two at least)
+# and an acronym may sit between the label and the number; never a date, a year range, a time or a quantity.
+[[recognizer]]
+id = "FR_LABELLED_NUMBER"
+entity = "ID"
+label = "ID"
+tier = "A"
+score = 0.9
+flags = "i"
+prefilter = ["client", "salari", "employ", "personne", "dossier", "matricule", "nefici", "auteur", "utilisateur",
+             "identifiant", "adh", "assur", "patient", "contrat", "ticket", "commande", "facture", "incident",
+             "clamation", "demande", "login", "abonn", "badge", "id"]
+pattern = '''(?<!\w)(?:clients?|salari[ée]e?s?|employ[ée]e?s?|personnes?|dossiers?|matricules?|b[ée]n[ée]ficiaires?|auteurs?|compte[ \t]utilisateur|utilisateur|identifiant|adh[ée]rents?|assur[ée]e?s?|patients?|contrats?|tickets?|commandes?|factures?|incidents?|r[ée]clamations?|demandes?|login|abonn[ée]e?s?|badges?|id)(?:[ \t]{1,3}(?-i:[A-Z]{2,6})(?:[ \t]{1,3}(?:n[°o]\.?|num[ée]ro|#))?[ \t]{0,3}[:#°]?[ \t]{1,3}|(?:[ \t]{1,3}(?:n[°o]\.?|num[ée]ro|#))?[ \t]{0,3}[:#°]?[ \t]{0,3})(?P<v>[0-9]{4,20}(?:[ \t\-/][0-9]{2,8}){0,4}|[0-9]{2,3}(?:[ \t\-/][0-9]{2,8}){1,4})(?![0-9A-Za-z])(?![.,/\-:h][0-9])(?![\-_][A-Za-z]|_[0-9])(?![ \t]{1,3}(?:pi[eè]ces?|unit[ée]s?|articles?|exemplaires?|colis|kg|km|heures?|jours?|mois|ans|semaines?)(?!\w))(?![ \t  ]?(?:€|\$|£|%|[km]€|eur|euros?|usd|ht|ttc)(?![a-z]))'''
+group = "v"
+validator = "fr.contextual_id"
+boundary = "none"
+
+# Troisième tour (revue du 26/10) : la valeur ne s'arrête jamais au milieu d'un jeton (« identifiant
+# 12345678-1234-4000-a000-… » : l'UUID entier revient à sa règle, jamais « [IDENTIFIANT_1]-a000-… »). The value never
+# stops inside a token: a UUID goes whole to its own rule.
+# « n° » ou « numéro » seuls, en tête de ligne seulement / alone, at a line start only.
+[[recognizer]]
+id = "FR_LABELLED_NUMBER_START"
+entity = "ID"
+label = "ID"
+tier = "A"
+score = 0.9
+flags = "i"
+prefilter = ["n°", "no ", "no.", "num"]
+pattern = '''(?<![^\n])[ \t]{0,3}(?:n[°o]\.?|num[ée]ro)[ \t]{0,3}[:#°]?[ \t]{0,3}(?P<v>[0-9]{4,20}(?:[ \t\-/][0-9]{2,8}){0,4}|[0-9]{2,3}(?:[ \t\-/][0-9]{2,8}){1,4})(?![0-9A-Za-z])(?![.,/\-:h][0-9])(?![\-_][A-Za-z]|_[0-9])(?![ \t]?(?:€|\$|£|%|[km]€|eur|euros?|usd|ht|ttc)(?![a-z]))(?![ \t]{1,3}(?:pi[eè]ces?|unit[ée]s?|articles?|exemplaires?|colis|kg|km|heures?|jours?|mois|ans|semaines?)(?!\w))'''
+group = "v"
+validator = "fr.contextual_id"
+boundary = "none"
+
+# Pseudonyme après son indice (« alias « Tigrou44 » », « pseudo : lune_noire ») : un mot entre guillemets, ou un mot
+# seul qui porte un chiffre, « _ » ou une majuscule après sa première lettre (un mot simplement capitalisé reste au
+# détecteur de noms : « Pseudonyme : Testo le Magnifique »). « dit » n'en est pas un : « il a dit « oui » » est une
+# citation. Pseudonym after its cue: a quoted word, or a single word holding a digit, "_" or a capital after its
+# first letter (a plainly capitalised word is left to the name detector). "dit" is not a cue: it is a quotation.
+# Sans guillemets, jamais en tête de ligne : le champ « Pseudonyme : … » d'un avis reste au détecteur de noms, qui
+# propage sa valeur (« Nom commercial : … »). Unquoted, never at a line start: the "Pseudonyme : …" field of a notice
+# stays with the name detector, which propagates its value.
+[[recognizer]]
+id = "FR_PSEUDONYM_QUOTED"
+entity = "HANDLE"
+label = "HANDLE"
+tier = "A"
+flags = "i"
+prefilter = ["alias", "pseudo", "surnomm", "sous le nom de", "gamertag"]
+pattern = '''(?<!\w)(?:alias|pseudo(?:nyme)?|surnomm[ée]e?|connue?[ \t]sous[ \t]le[ \t]nom[ \t]de|gamertag)[ \t]{0,3}:?[ \t]{0,3}(?:«[ \t]?|["“'])(?P<v>\w(?:[\w.\-]{0,38}\w)?)'''
+group = "v"
+boundary = "none"
+
+[[recognizer]]
+id = "FR_PSEUDONYM"
+entity = "HANDLE"
+label = "HANDLE"
+tier = "A"
+flags = "i"
+prefilter = ["alias", "pseudo", "surnomm", "sous le nom de", "gamertag"]
+pattern = '''(?<=[^\w\n])(?:alias|pseudo(?:nyme)?|surnomm[ée]e?|connue?[ \t]sous[ \t]le[ \t]nom[ \t]de|gamertag)(?:[ \t]{1,3}:?|[ \t]{0,3}:)[ \t]{0,3}(?P<v>(?-i:[0-9_][\w.\-]{0,38}|\w[\w.\-]{0,37}[A-Z0-9_])(?:[\w.\-]{0,38}\w)?)'''
+group = "v"
 boundary = "none"
 
 # Champ « Adresse : … » en début de ligne : toute la valeur de la ligne, quel que soit le titulaire (règle produit du
@@ -513,7 +756,10 @@ tier = "A"
 score = 0.9
 flags = "i"
 prefilter = "adresse"
-pattern = '''(?<![^\n])adresse(?:[ \t]+(?:postale|personnelle|d[eu][ \t]+[^\W\d_]{3,20}|d'[^\W\d_]{3,20}))?[ \t]{0,3}:[ \t]{0,3}(?P<v>(?:[^\W\d_]|[0-9]{1,4}[^\n:;0-9])[^\n:;]*?[0-9]{5}[ \t]+[^\W\d_]{2,}(?:[ \t,'’-]+[^\W\d_]{2,})*(?:[ \t]*\([^\n():;]*\))?|[^\W\d_][^\n:;0-9]*[0-9](?:[^\n:;]*[^\W_]\)?)?|[0-9]{1,4}[^\n:;0-9](?:[^\n:;]*[^\W_]\)?)?)(?:\.[ \t]+[^\W\d_][^\n]*|[^\w\n:;]{0,5}(?:;[^\n]*)?)(?=\n|\Z)'''
+# Fix 1.0.2 (revue d'intégrité) : la valeur ne contient jamais « [ » ni « ] », pour ne jamais couper une étiquette
+# déjà posée (« Adresse : voir [EMAIL_1]. » restait « [ADRESSE_1]]. »). The value never holds "[" or "]", so an
+# existing tag is never cut.
+pattern = '''(?<![^\n])adresse(?:[ \t]+(?:postale|personnelle|d[eu][ \t]+[^\W\d_]{3,20}|d'[^\W\d_]{3,20}))?[ \t]{0,3}:[ \t]{0,3}(?P<v>(?:[^\W\d_]|[0-9]{1,4}[^\n:;0-9\[\]])[^\n:;\[\]]*?[0-9]{5}[ \t]+[^\W\d_]{2,}(?:[ \t,'’-]+[^\W\d_]{2,})*(?:[ \t]*\([^\n():;\[\]]*\))?|[^\W\d_][^\n:;0-9\[\]]*[0-9](?:[^\n:;\[\]]*[^\W_]\)?)?|[0-9]{1,4}[^\n:;0-9\[\]](?:[^\n:;\[\]]*[^\W_]\)?)?)(?:\.[ \t]+[^\W\d_][^\n]*|[^\w\n:;]{0,5}(?:;[^\n]*)?)(?=\n|\Z)'''
 group = "v"
 boundary = "none"
 
@@ -596,6 +842,9 @@ tier = "C"
 flags = "i"
 prefilter = "digit"
 pattern = '(?:1er|0?[1-9]|[12][0-9]|3[01])\s{1,3}(?:janvier|f[ée]vrier|mars|avril|mai|juin|juillet|ao[uû]t|septembre|octobre|novembre|d[ée]cembre)\s{1,3}(?:18|19|20)[0-9]{2}'
+# Valeur ISO (« 1985-03-12 ») : la même date écrite autrement garde la même balise (1.0.2).
+# ISO value: the same date written another way keeps the same tag (1.0.2).
+validator = "intl.calendar_date"
 boundary = "alnum"
 context = "INTL:dob"
 veto = "INTL:other_date"
@@ -609,4 +858,52 @@ tier = "A"
 flags = "i"
 pattern = 'n(?<![^\W\d_]n)[ée]e?s?(?:\(e\))?\s{1,3}le\s{1,3}(?P<v>(?:1er|0?[1-9]|[12][0-9]|3[01])\s{1,3}(?:janvier|f[ée]vrier|mars|avril|mai|juin|juillet|ao[uû]t|septembre|octobre|novembre|d[ée]cembre)\s{1,3}(?:18|19|20)[0-9]{2})'
 group = "v"
+validator = "intl.calendar_date"
+boundary = "none"
+
+# 1.0.2, troisième tour (dates) : mois abrégés (« 12 jui. 1979 », « 1er janv. 1990 », « 4 févr. 1981 ») et année
+# sur deux chiffres (« 3 mars 85 ») après un indice de naissance ; valeur ISO (« jui. », juin ou juillet : date
+# repliée, sans ISO). Même liaison à la première date que `FR_BIRTH_DATE_WORDS`. Modes fort, essentiel,
+# personnalisé (catégorie dates_naissance). Third round (dates): abbreviated months and two-digit years after a
+# birth cue; ISO value ("jui.", June or July: folded date, no ISO); first-date binding.
+[[recognizer]]
+id = "FR_BIRTH_DATE_ABBR"
+entity = "BIRTH_DATE"
+label = "BIRTH_DATE"
+tier = "C"
+flags = "i"
+prefilter = "digit"
+pattern = '(?:1er|0?[1-9]|[12][0-9]|3[01])\s{1,3}(?:(?:janv|f[ée]vr?|avr|juil|sept|oct|nov|d[ée]c)\.?\s{1,3}(?:(?:18|19|20)[0-9]{2}|[0-9]{2})|jui\.\s{1,3}(?:(?:18|19|20)[0-9]{2}|[0-9]{2})|(?:janvier|f[ée]vrier|mars|avril|mai|juin|juillet|ao[uû]t|septembre|octobre|novembre|d[ée]cembre)\s{1,3}[0-9]{2})'
+validator = "intl.calendar_date"
+boundary = "alnum"
+context = "INTL:dob"
+veto = "INTL:other_date"
+window = [80, 4]
+
+# Nom de naissance entre « née » et la date (« née Leclerc le 21 janvier 1972 », « née Leclerc le 21/01/1972 ») :
+# un à trois mots à majuscule, puis « le » et la date (toutes formes). Niveau A, sans fenêtre : la date suit.
+# Birth name between "née" and the date: one to three capitalised words, then "le" and the date (every form).
+[[recognizer]]
+id = "FR_BIRTH_DATE_MAIDEN"
+entity = "BIRTH_DATE"
+label = "BIRTH_DATE"
+tier = "A"
+pattern = '''(?<![^\W\d_])[Nn][ée]e(?:\s{1,3}[A-ZÀ-ÖØ-Þ](?:[^\W\d_]|['’-])*){1,3},?\s{1,3}le\s{1,3}(?P<v>(?:0?[1-9]|[12][0-9]|3[01])[/.\-](?:0?[1-9]|1[0-2])[/.\-](?:(?:18|19|20)[0-9]{2}|[0-9]{2})|(?:1er|0?[1-9]|[12][0-9]|3[01])\s{1,3}(?:janvier|f[ée]vrier|mars|avril|mai|juin|juillet|ao[uû]t|septembre|octobre|novembre|d[ée]cembre|(?:janv|f[ée]vr?|avr|juil|sept|oct|nov|d[ée]c)\.?|jui\.)\s{1,3}(?:(?:18|19|20)[0-9]{2}|[0-9]{2}))(?![0-9])'''
+group = "v"
+validator = "intl.calendar_date"
+boundary = "none"
+
+# Lieu de naissance entre « né » et la date (« Né à Lyon le 06/04/1969 », « née à Saint-Étienne (42), le 3 mars
+# 85 », « né au Mans le … ») : « à », « au », « aux » ou « en », un à cinq mots à majuscule (liaisons « de », « du »,
+# « des », « en », « sur », « sous », « lès » permises), département entre parenthèses facultatif, puis « le » et la
+# date. Niveau A. Birthplace between "né" and the date: capitalised words (with linking words), optional department,
+# then "le" and the date. Tier A.
+[[recognizer]]
+id = "FR_BIRTH_DATE_PLACE"
+entity = "BIRTH_DATE"
+label = "BIRTH_DATE"
+tier = "A"
+pattern = '''(?<![^\W\d_])[Nn][ée]e?s?(?:\(e\))?\s{1,3}(?:à|a|au|aux|en)(?:\s{1,3}(?:[A-ZÀ-ÖØ-Þ](?:[^\W\d_]|['’-])*|de|du|des|en|sur|sous|lès)){1,5}(?:\s{1,3}\([0-9A-Za-z]{1,4}\))?,?\s{1,3}le\s{1,3}(?P<v>(?:0?[1-9]|[12][0-9]|3[01])[/.\-](?:0?[1-9]|1[0-2])[/.\-](?:(?:18|19|20)[0-9]{2}|[0-9]{2})|(?:1er|0?[1-9]|[12][0-9]|3[01])\s{1,3}(?:janvier|f[ée]vrier|mars|avril|mai|juin|juillet|ao[uû]t|septembre|octobre|novembre|d[ée]cembre|(?:janv|f[ée]vr?|avr|juil|sept|oct|nov|d[ée]c)\.?|jui\.)\s{1,3}(?:(?:18|19|20)[0-9]{2}|[0-9]{2}))(?![0-9])'''
+group = "v"
+validator = "intl.calendar_date"
 boundary = "none"

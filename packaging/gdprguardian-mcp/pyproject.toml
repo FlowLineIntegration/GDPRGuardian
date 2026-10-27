@@ -8,7 +8,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "gdprguardian-mcp"
-version = "1.0.1"
+version = "1.0.2"
 description = "Serveur MCP local de Gardien RGPD : anonymisation irréversible sur le poste, sans réseau / GDPR Guardian local MCP server"
 readme = "README.md"
 license = "MIT"
@@ -23,7 +23,7 @@ classifiers = [
     "Topic :: Security",
 ]
 # Même version, toujours : `tools/release.py set` réécrit les deux / always the same version.
-dependencies = ["gdprguardian[local]==1.0.1"]
+dependencies = ["gdprguardian[local]==1.0.2"]
 
 [project.scripts]
 gdprguardian-mcp = "gdprguardian.cli:mcp_main"

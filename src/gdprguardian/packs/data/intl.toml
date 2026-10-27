@@ -13,6 +13,9 @@ detectors = [
     "gdprguardian.detectors.intl:IbanDetector",
     "gdprguardian.detectors.intl:MrzDetector",
     "gdprguardian.detectors.intl:InternationalPhoneDetector",
+    "gdprguardian.detectors.codes:IdentifierCodeDetector",
+    # 1.0.2, second tour (item J) : site dont l'hôte reprend le nom d'une personne citée / host repeating a quoted name.
+    "gdprguardian.detectors.intl:PersonalSiteDetector",
 ]
 
 [context.email]
@@ -53,8 +56,15 @@ nl = ["iban", "rekeningnummer", "bankrekening"]
 pt = ["iban", "conta bancária", "nib"]
 
 [context.card]
-fr = ["carte bancaire", "carte de crédit", "cb", "visa", "mastercard", "amex", "numéro de carte", "paiement"]
+fr = ["carte bancaire", "carte de crédit", "cb", "visa", "mastercard", "amex", "numéro de carte", "paiement",
+      "carte", "payé avec", "réglé par"]
 en = ["credit card", "card number", "visa", "mastercard", "amex", "payment"]
+
+# 1.0.2, second tour (item J) : site personnel annoncé / announced personal website.
+[context.personal_site]
+fr = ["site perso", "site personnel", "mon site", "son site", "page perso", "page personnelle", "portfolio",
+      "mon blog", "son blog", "cv en ligne", "site web personnel"]
+en = ["personal website", "personal site", "my website", "portfolio", "my blog", "homepage"]
 
 [context.imei]
 fr = ["imei", "numéro de série", "téléphone portable"]
@@ -62,8 +72,10 @@ en = ["imei", "serial number"]
 
 [context.dob]
 fr = ["né le", "née le", "nés le", "né(e) le", "date de naissance", "ddn", "naissance", "date naiss",
-      "vu le jour", "voit le jour", "venu au monde", "venue au monde"]
-en = ["born", "date of birth", "dob", "birth date", "birthday"]
+      "vu le jour", "voit le jour", "venu au monde", "venue au monde",
+      # 1.0.2, troisième tour (dates) / third round (dates).
+      "date de naiss", "d.d.n"]
+en = ["born", "date of birth", "dob", "birth date", "birthday", "birthdate"]
 de = ["geboren", "geburtsdatum", "geb."]
 es = ["nacido", "nacida", "fecha de nacimiento"]
 it = ["nato", "nata", "data di nascita"]
@@ -126,6 +138,24 @@ prefilter = ["linkedin.com", "facebook.com", "fb.com", "instagram.com", "twitter
 pattern = '(?:https?://)?(?:www\.)?(?:linkedin\.com/in|facebook\.com|fb\.com|instagram\.com|twitter\.com|x\.com|github\.com|gitlab\.com|tiktok\.com/@|youtube\.com/@|medium\.com/@|t\.me|wa\.me|viadeo\.com/fr/profile)/[\w.\-%@]{2,100}/?'
 boundary = "word"
 
+# 1.0.2, second tour (item J, test terrain 2) : site personnel annoncé (« Portfolio : sophiemartin.com », « mon blog
+# https://jdupont.blog », « site perso : https://www.kevin-lambert.fr ») : l'adresse entière, chemin compris. Sans
+# indice, un site reste lisible (« https://www.service-public.fr »), sauf si son hôte reprend le nom d'une personne
+# citée dans le texte (« Kevin Lambert … https://kevinlambert.fr » : détecteur `PersonalSiteDetector`).
+# Modes fort et essentiel (indice explicite). Announced personal website: the whole address; without a cue a site stays
+# readable unless its host repeats a quoted person's name.
+[[recognizer]]
+id = "URL_PERSONAL_SITE"
+entity = "URL"
+label = "URL"
+tier = "C"
+flags = "i"
+prefilter = ["."]
+pattern = '''(?<![\w@.\-/])(?:https?://)?(?:www\.)?[a-z0-9](?:[a-z0-9\-]{1,40}[a-z0-9])?\.(?:fr|com|net|org|eu|me|io|info|blog|site|online|page|dev|be|ch|ca|pro|name)(?:/(?:[\w.\-%~/]{0,99}[\w\-%~/])?)?(?![\w@\-])'''
+boundary = "none"
+context = "personal_site"
+window = [40, 5]
+
 [[recognizer]]
 id = "IPV4"
 entity = "IP"
@@ -142,18 +172,49 @@ entity = "IP"
 label = "IP"
 tier = "A"
 prefilter = ":"
-pattern = '(?:[0-9A-Fa-f]{1,4}:){2,7}[0-9A-Fa-f]{1,4}|(?:[0-9A-Fa-f]{1,4}:){1,7}:(?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4}){0,5})?|::(?:[0-9A-Fa-f]{1,4}:){0,5}[0-9A-Fa-f]{1,4}'
+# Filtre fort 1.0.2 : une seule suite maximale de groupes hexadécimaux (2 deux-points au moins), zone « %eth0 »
+# comprise ; le validateur exige 3 groupes ou un groupe de 3 chiffres hexadécimaux (« a::b », « x::y » du C++ restent).
+# Strong filter 1.0.2: one maximal run of hex groups (at least 2 colons), "%eth0" zone included; the validator wants
+# 3 groups or one group of 3 hex digits ("a::b", C++ "x::y" stay).
+pattern = '[0-9A-Fa-f]{0,4}(?::[0-9A-Fa-f]{0,4}){2,8}(?:%[0-9A-Za-z_.]{1,32})?'
 validator = "intl.ipv6"
 boundary = "hex"
 
+# Forme pointée « 001a.2b3c.4d5e » (Cisco) comprise ; tout en chiffres refusé par le validateur.
+# Dotted form included; all-digit dotted groups refused by the validator.
 [[recognizer]]
 id = "MAC"
 entity = "MAC"
 label = "MAC"
 tier = "A"
-pattern = '[0-9A-Fa-f]{2}(?::[0-9A-Fa-f]{2}){5}|[0-9A-Fa-f]{2}(?:-[0-9A-Fa-f]{2}){5}'
+pattern = '[0-9A-Fa-f]{2}(?::[0-9A-Fa-f]{2}){5}|[0-9A-Fa-f]{2}(?:-[0-9A-Fa-f]{2}){5}|[0-9A-Fa-f]{4}(?:\.[0-9A-Fa-f]{4}){2}'
 validator = "intl.mac"
 boundary = "hex"
+
+# --- Identifiants techniques (filtre fort 1.0.2) / technical identifiers (strong filter 1.0.2) ---
+
+[[recognizer]]
+id = "UUID"
+entity = "ID"
+label = "ID"
+tier = "A"
+flags = "i"
+prefilter = "-"
+pattern = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+boundary = "alnum"
+
+# Gabarit biométrique désigné par son libellé ; la valeur porte au moins un chiffre (« empreinte digitale pour… »
+# reste). Biometric template named by its label; the value holds at least one digit.
+[[recognizer]]
+id = "ID_BIOMETRIC"
+entity = "ID"
+label = "ID"
+tier = "A"
+flags = "i"
+prefilter = ["voiceprint", "empreinte", "gabarit", "template", "bio", "face"]
+pattern = '''(?<![\w-])(?:voiceprint(?:_id)?|empreinte[ \t](?:vocale|digitale|biom[ée]trique)|gabarit[ \t](?:biom[ée]trique|vocal)|template[ \t]biom[ée]trique|bio(?:metric)?_?id|face_?id|r[ée]f(?:[ée]rence)?[ \t]biom[ée]trique)[ \t]{0,3}(?:n[°o]\.?[ \t]{0,3})?[:=]?[ \t]{0,3}(?P<v>[0-9][A-Za-z0-9_\-]{3,40}|[A-Za-z][0-9][A-Za-z0-9_\-]{2,39}|[A-Za-z][A-Za-z_\-][0-9][A-Za-z0-9_\-]{1,38}|[A-Za-z][A-Za-z_\-]{2,39}[0-9][A-Za-z0-9_\-]{0,38})(?![\w-])'''
+group = "v"
+boundary = "none"
 
 [[recognizer]]
 id = "CARD"
@@ -181,6 +242,9 @@ pattern = '[2-6](?:[ ./\-]?[0-9]){15}'
 validator = "intl.card"
 boundary = "group"
 context = "card"
+# 1.0.2 (item H) : clé fausse gardée si le mot « carte » (ou un autre indice de carte) l'accompagne.
+# Wrong key kept when a card cue comes with it.
+invalid = "context"
 
 # Format imprimé 4-4-4-4 : la forme suffit, Luhn ne fait que moduler le score (fautes, OCR).
 # Printed 4-4-4-4 layout: the shape is enough, Luhn only adjusts the score (typos, OCR).
@@ -191,7 +255,9 @@ label = "CARD"
 tier = "L"
 score = 0.9
 prefilter = "digit"
-pattern = '[2-6][0-9]{3}(?: [0-9]{4}){3}|[2-6][0-9]{3}(?:-[0-9]{4}){3}'
+# 1.0.2 (second test terrain, item H) : groupes séparés par des points aussi (« 4970.1012.3456.7899 »).
+# Groups separated by dots too.
+pattern = '[2-6][0-9]{3}(?: [0-9]{4}){3}|[2-6][0-9]{3}(?:-[0-9]{4}){3}|[2-6][0-9]{3}(?:\.[0-9]{4}){3}'
 validator = "intl.card"
 boundary = "alnum"
 
@@ -263,6 +329,55 @@ tier = "C"
 flags = "i"
 prefilter = "digit"
 pattern = '(?:0?[1-9]|[12][0-9]|3[01])(?:st|nd|rd|th)?\s{1,3}(?:of\s{1,3})?(?:january|february|march|april|may|june|july|august|september|october|november|december)\.?,?\s{1,3}(?:18|19|20)[0-9]{2}|(?:january|february|march|april|may|june|july|august|september|october|november|december)\s{1,3}(?:0?[1-9]|[12][0-9]|3[01])(?:st|nd|rd|th)?,?\s{1,3}(?:18|19|20)[0-9]{2}'
+boundary = "alnum"
+context = "dob"
+veto = "other_date"
+window = [80, 4]
+
+# 1.0.2, troisième tour (dates) : année sur deux chiffres après un indice de naissance (« né le 06/04/69 », « DDN
+# 08/04/79 », « 03.05.79 », « Né le 3/5/38 ») ; valeur ISO (pivot `intl.BIRTH_YEAR_PIVOT` : 00-26 -> 20xx, sinon
+# 19xx), même liaison à la première date que `BIRTH_DATE`. Modes fort, essentiel, personnalisé (catégorie
+# dates_naissance). Third round (dates): two-digit year after a birth cue; ISO value; first-date binding.
+[[recognizer]]
+id = "BIRTH_DATE_SHORT"
+entity = "BIRTH_DATE"
+label = "BIRTH_DATE"
+tier = "C"
+prefilter = "digit"
+# Jamais un morceau d'une suite plus longue (« 01.02.03.04.05 ») / never a piece of a longer run.
+pattern = '(?<![.\-/0-9])(?:0?[1-9]|[12][0-9]|3[01])[/.\-](?:0?[1-9]|1[0-2])[/.\-][0-9]{2}(?![.,/\-][0-9])'
+validator = "intl.calendar_date"
+boundary = "alnum"
+context = "dob"
+veto = "other_date"
+window = [80, 4]
+
+# Forme compacte aaaammjj juste après un indice de naissance (« Date de naissance : 19751021 ») ; fenêtre courte.
+# Compact yyyymmdd right after a birth cue; short window.
+[[recognizer]]
+id = "BIRTH_DATE_COMPACT"
+entity = "BIRTH_DATE"
+label = "BIRTH_DATE"
+tier = "C"
+prefilter = "digit"
+# Aussi l'année en tête avec « . » ou « / » (« 1975.10.21 », « 1975/10/21 ») / also year first with "." or "/".
+pattern = '(?:18|19|20)[0-9]{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12][0-9]|3[01])|(?:18|19|20)[0-9]{2}[./](?:1[0-2]|0?[1-9])[./](?:3[01]|[12][0-9]|0?[1-9])'
+validator = "intl.calendar_date"
+boundary = "alnum"
+context = "dob"
+veto = "other_date"
+window = [40, 4]
+
+# Mois anglais abrégés (« born 3 Mar 1985 », « Sept. 3, 1985 ») ; valeur écrite, comme `BIRTH_DATE_WORDS_EN`.
+# Abbreviated English months; written value, as `BIRTH_DATE_WORDS_EN`.
+[[recognizer]]
+id = "BIRTH_DATE_ABBR_EN"
+entity = "BIRTH_DATE"
+label = "BIRTH_DATE"
+tier = "C"
+flags = "i"
+prefilter = "digit"
+pattern = '(?:0?[1-9]|[12][0-9]|3[01])(?:st|nd|rd|th)?\s{1,3}(?:of\s{1,3})?(?:jan|feb|mar|apr|jun|jul|aug|sept?|oct|nov|dec)\.?,?\s{1,3}(?:18|19|20)[0-9]{2}|(?:jan|feb|mar|apr|jun|jul|aug|sept?|oct|nov|dec)\.?\s{1,3}(?:0?[1-9]|[12][0-9]|3[01])(?:st|nd|rd|th)?,?\s{1,3}(?:18|19|20)[0-9]{2}'
 boundary = "alnum"
 context = "dob"
 veto = "other_date"
@@ -358,8 +473,58 @@ label = "SECRET"
 tier = "A"
 flags = "i"
 prefilter = ["pass", "pwd", "mot de passe", "mdp"]
-pattern = '''(?:password|passwd|pwd|mot de passe|mdp)\s{0,3}[:=]\s{0,3}(?P<v>[^\s"'<>]{4,128})'''
+# 1.0.2, second tour (item J) : un point, une virgule ou une parenthèse qui finit la phrase reste hors de la zone.
+# A sentence's closing full stop, comma or parenthesis stays outside the span. Modes fort et essentiel.
+# Voie « codes » (dernier tour) : une balise déjà produite (« [SECRET_1] ») n'est jamais relue : la valeur ne commence
+# pas par « [ » suivi d'une capitale. A tag already produced is never read again: the value never starts with "[" and a
+# capital letter.
+pattern = '''(?:password|passwd|pwd|mot de passe|mdp)\s{0,3}[:=]\s{0,3}(?P<v>(?:[^\s"'<>\[]|\[(?-i:[^A-Z\s"'<>]))[^\s"'<>]{2,126}[^\s"'<>.,;:)])'''
 group = "v"
+boundary = "none"
+
+# 1.0.2 (item J, test terrain 2) : mot de passe sans « : » (« mdp Zx9!kLm27pQ », « le mot de passe est Soleil2024! ») :
+# la valeur porte un chiffre ou un symbole (« mot de passe oublié » reste lisible) ; le point final de la phrase reste
+# hors de la zone. Modes fort et essentiel : un secret est toujours masqué. Password without ":": the value holds a
+# digit or a symbol ("mot de passe oublié" stays readable); the sentence's full stop stays outside. Modes fort and
+# essentiel: a secret is always masked.
+[[recognizer]]
+id = "SECRET_PASSWORD_PHRASE"
+entity = "SECRET"
+label = "SECRET"
+tier = "A"
+flags = "i"
+prefilter = ["pass", "pwd", "mot de passe", "mdp"]
+pattern = '''(?<![\w-])(?:password|passwd|pwd|mot[ \t]de[ \t]passe|mdp)(?:[ \t]{1,3}(?:provisoire|temporaire|initial|actuel|du[ \t]wi-?fi|wi-?fi))?(?:[ \t]{1,3}(?:est|is|était|sera|reste))?[ \t]{1,3}(?P<v>(?:[^\s"'<>\[]|\[(?-i:[^A-Z\s"'<>]))[^\s"'<>]{2,63}[0-9!#$%&*?@^~+=_](?:[^\s"'<>]{0,63}[^\s"'<>.,;:)])?|[0-9!#$%&*?@^~+=_][^\s"'<>]{2,63}[^\s"'<>.,;:)])'''
+group = "v"
+boundary = "none"
+
+# 1.0.2 (item J) : jeton ou clé dans les paramètres d'une adresse web (« ?token=… », « &key=… ») : 8 caractères ou
+# plus. Modes fort et essentiel. Token or key in a URL's query string: 8 characters or more.
+[[recognizer]]
+id = "SECRET_URL_PARAM"
+entity = "SECRET"
+label = "SECRET"
+tier = "A"
+flags = "i"
+prefilter = ["token=", "key=", "sig=", "signature=", "code=", "otp=", "secret=", "password=", "pwd=", "auth="]
+pattern = '''[?&;](?:[a-z_]{0,20}token|[a-z_]{0,20}key|sig|signature|code|otp|secret|password|pwd|auth|jwt|session|sid)=(?P<v>[A-Za-z0-9._~+/%\-]{8,512})'''
+group = "v"
+boundary = "none"
+
+# Troisième tour (revue du 26/10) : jeton ou clé affectés hors d'une URL (« token=abcDEF123456ghi », « api_key: … »,
+# « client_secret = … ») : un secret, dans tous les modes (« secrets » ne se coupe jamais). Lettres et chiffres mêlés
+# (validateur), 8 caractères au moins ; une balise déjà produite (« [SECRET_1] ») n'est jamais relue. A token or key
+# assigned outside a URL: a secret in every mode; letters and digits mixed, 8 characters or more.
+[[recognizer]]
+id = "SECRET_ASSIGNMENT"
+entity = "SECRET"
+label = "SECRET"
+tier = "A"
+flags = "i"
+prefilter = ["token", "key", "secret"]
+pattern = '''(?<![\w])(?:[a-z]{0,12}_?token|api_?key|apikey|access_?key|secret_?key|client_?secret|secret)[ \t]{0,3}[:=][ \t]{0,3}(?P<v>[A-Za-z0-9._~+/%\-]{8,512})'''
+group = "v"
+validator = "fr.alnum_mixed"
 boundary = "none"
 
 [[recognizer]]
@@ -371,4 +536,306 @@ flags = "i"
 prefilter = "bearer"
 pattern = 'bearer\s{1,3}(?P<v>[A-Za-z0-9\-._~+/]{20,500}=*)'
 group = "v"
+boundary = "none"
+
+# Témoins de session et jetons nommés (« PHPSESSID=… », « sid=… », « _ga=… ») : valeur de 8 caractères ou plus, avec
+# au moins une lettre et un chiffre (`fr.alnum_mixed` ; « session : printemps » reste ; raison `keyword`, table
+# `_DETECTOR_REASONS`). Session cookies and named tokens: a value of 8 characters or more, holding a letter and a
+# digit (reason `keyword`).
+[[recognizer]]
+id = "SECRET_SESSION"
+entity = "SECRET"
+label = "SECRET"
+tier = "A"
+flags = "i"
+prefilter = ["sess", "sid", "csrf", "xsrf", "_ga", "_gid", "_fbp", "auth", "token"]
+pattern = '''(?<![\w-])(?:(?:php)?sessid|jsessionid|sid|session(?:_?id)?|sess|csrf(?:token)?|xsrf-token|_ga|_gid|_fbp|auth(?:_token)?|access_token|refresh_token|remember_token)\s?[=:]\s?(?P<v>[A-Za-z0-9._~+/%-]{8,256})'''
+group = "v"
+validator = "fr.alnum_mixed"
+boundary = "none"
+
+# Clé d'API après son libellé (« X-Api-Key: … », « client_secret=… ») : 16 caractères ou plus.
+# API key after its label: 16 characters or more.
+[[recognizer]]
+id = "SECRET_API_KEY"
+entity = "SECRET"
+label = "SECRET"
+tier = "A"
+flags = "i"
+prefilter = ["key", "clé api", "secret", "token"]
+pattern = '''(?<![\w-])(?:x-api-key|api[_-]?key|apikey|cl[ée][ \t]api|access[_-]?key|client[_-]?secret|secret[_-]?key|private[_-]?token)["']?[ \t]{0,3}[:=][ \t]{0,3}["']?(?P<v>[A-Za-z0-9._~+/=-]{16,512})'''
+group = "v"
+boundary = "none"
+
+[[recognizer]]
+id = "SECRET_BASIC_AUTH"
+entity = "SECRET"
+label = "SECRET"
+tier = "A"
+flags = "i"
+prefilter = "basic"
+pattern = 'authorization:[ \t]{0,3}basic[ \t]{1,3}(?P<v>[A-Za-z0-9+/]{8,500}={0,2})'
+group = "v"
+boundary = "none"
+
+# --- Identités en ligne (filtre fort 1.0.2) / online identities (strong filter 1.0.2) ---
+
+# « @awa.m », « @ine_14 » : jamais dans un e-mail (lettre, chiffre, « . », « @ » ou « / » avant), pas de point final,
+# jamais une fonction de tableur (« @SUM( »). Never inside an e-mail (letter, digit, ".", "@" or "/" before), no
+# trailing full stop, never a spreadsheet function ("@SUM(").
+[[recognizer]]
+id = "HANDLE"
+entity = "HANDLE"
+label = "HANDLE"
+tier = "A"
+prefilter = "@"
+# Voie « codes » (1.0.2, dernier tour) : un trait d'union dans un morceau (« @jean-pierre.dupont ») et un premier
+# morceau d'une lettre suivi d'un point (« @k.lambert ») sont gardés entiers. Mode fort seulement (sans indice).
+# Last round: a hyphen inside a piece and a one-letter first piece followed by a dot are kept whole. Fort only.
+pattern = '(?<![\w.@/])@(?:[A-Za-z0-9_][A-Za-z0-9_\-]{0,28}[A-Za-z0-9_](?:\.[A-Za-z0-9_](?:[A-Za-z0-9_\-]{0,28}[A-Za-z0-9_])?){0,4}|[A-Za-z0-9_](?:\.[A-Za-z0-9_](?:[A-Za-z0-9_\-]{0,28}[A-Za-z0-9_])?){1,4})(?![\w@(])'
+boundary = "none"
+
+# Voie « codes » (1.0.2, dernier tour) : « @pseudo » annoncé par sa plateforme (« Instagram : @lune.noire »,
+# « sur X @jpdupont », « Discord @kiki ») : un pseudonyme dans tous les modes (indice explicite, raison `keyword`).
+# An "@handle" announced by its platform: a pseudonym in every mode (explicit cue, reason `keyword`).
+[[recognizer]]
+id = "HANDLE_CUED"
+entity = "HANDLE"
+label = "HANDLE"
+tier = "A"
+# Plus sûr que `HANDLE` (même zone) : c'est lui qui reste, donc masqué aussi en essentiel / beats `HANDLE` on the same
+# span, so the span stays masked in essentiel too.
+score = 0.97
+flags = "i"
+prefilter = "@"
+pattern = '''(?<![\w-])(?:insta(?:gram)?|github|gitlab|linkedin|discord|teams|twitter|tiktok|snapchat|snap|mastodon|twitch|reddit|threads|bluesky|x)[ \t]{0,3}:?[ \t]{0,3}(?P<v>@[A-Za-z0-9_](?:[A-Za-z0-9_.\-]{0,38}[A-Za-z0-9_])?)(?![\w@-]|\.[A-Za-z0-9])'''
+group = "v"
+boundary = "none"
+
+# Même indice suivi de « : » et d'un nom de compte sans « @ » (« Instagram : jp_dupont75 », « GitHub : kdupont »,
+# « Discord : lune#1234 ») : 3 caractères ASCII au moins, jamais le début d'une adresse web (« https:// »). « X » seul
+# n'est pas un indice sans « @ » (trop ambigu). « Teams » (outil de réunion : « Réunion Teams : lundi », « Teams :
+# 14h30 ») n'annonce un compte que s'il commence par une lettre et porte un chiffre ou « _ » (« Teams : jdupont42 »).
+# Tous les modes. The same cue followed by ":" and an account name without "@": 3 ASCII characters or more, never the
+# start of a web address; a bare "X" is not a cue here; after "Teams" (a meeting tool) the account must start with a
+# letter and carry a digit or "_".
+[[recognizer]]
+id = "HANDLE_PLATFORM"
+entity = "HANDLE"
+label = "HANDLE"
+tier = "A"
+flags = "i"
+prefilter = ["insta", "github", "gitlab", "linkedin", "discord", "twitter", "tiktok", "snapchat", "mastodon", "twitch",
+             "reddit"]
+pattern = '''(?<![\w-])(?:insta(?:gram)?|github|gitlab|linkedin|discord|twitter|tiktok|snapchat|mastodon|twitch|reddit)[ \t]{0,3}:[ \t]{0,3}(?P<v>[A-Za-z0-9_][A-Za-z0-9_.\-]{1,38}[A-Za-z0-9_](?:#[0-9]{4})?)(?![\w@'’:/\-]|\.[A-Za-z0-9])'''
+group = "v"
+boundary = "none"
+
+# « Teams : jdupont42 » (jonction 1.0.2) : une lettre en tête, un chiffre ou « _ » dedans ; « Réunion Teams : lundi »
+# et « Teams : 14h30 » restent lisibles. Teams account: a letter first, a digit or "_" inside; meeting notes stay readable.
+[[recognizer]]
+id = "HANDLE_PLATFORM_TEAMS"
+entity = "HANDLE"
+label = "HANDLE"
+tier = "A"
+flags = "i"
+prefilter = ["teams", "skype", "slack", "whatsapp"]
+# Fix 1.0.2 (revue des fuites) : « Teams : jean.dupont », « Skype : j.dupont », « Slack : jean-pierre.dupont » (un
+# login pointé) sont aussi des comptes ; Skype, Slack et WhatsApp suivent la même règle que Teams. Fix: a dotted login
+# is an account too; Skype, Slack and WhatsApp follow the Teams rule.
+pattern = '''(?<![\w-])(?:teams|skype|slack|whatsapp)[ \t]{0,3}:[ \t]{0,3}(?P<v>[A-Za-z][A-Za-z.\-]{0,38}[0-9_](?:[A-Za-z0-9_.\-]{0,37}[A-Za-z0-9_])?(?:#[0-9]{4})?|[A-Za-z][A-Za-z\-]{0,30}\.[A-Za-z][A-Za-z.\-]{0,30}[A-Za-z])(?![\w@'’:/\-]|\.[A-Za-z0-9])'''
+group = "v"
+boundary = "none"
+
+# Fix 1.0.2 : « Teams : jdupont », « Skype : Jdupont » : un seul mot ASCII de 5 lettres ou plus, en fin de ligne ou
+# devant « ; », « , » ou « ) », jamais un mot courant (« Teams : lundi », « Skype : indisponible », validateur
+# `intl.login_word`). Tous les modes. A single ASCII word of 5 letters or more at the line end or before ";,)", never
+# a common word (validator).
+[[recognizer]]
+id = "HANDLE_PLATFORM_CHAT_WORD"
+entity = "HANDLE"
+label = "HANDLE"
+tier = "A"
+flags = "i"
+prefilter = ["teams", "skype", "slack", "whatsapp"]
+pattern = '''(?<![\w-])(?:teams|skype|slack|whatsapp)[ \t]{0,3}:[ \t]{0,3}(?P<v>(?-i:[A-Za-z][a-z]{4,30}))(?=[ \t]{0,3}(?:[;,)]|\r?\n|\Z))'''
+group = "v"
+validator = "intl.login_word"
+boundary = "none"
+
+# Fix 1.0.2 (revue des fuites) : dossier personnel dans un chemin (« C:\Users\alegoff\Desktop », « /home/alegoff/ »,
+# « /Users/alegoff/ ») : le nom de session est masqué, jamais Public, Default ni Administrator (validateur). Tous les
+# modes. The user folder in a path is a login; never Public, Default or Administrator (validator).
+[[recognizer]]
+id = "LOGIN_PATH"
+entity = "HANDLE"
+label = "HANDLE"
+tier = "A"
+flags = "i"
+prefilter = ["users", "home"]
+pattern = '''(?<![\w])(?:[a-z]:\\users\\|/home/|/users/)(?P<v>[A-Za-z][A-Za-z0-9._\-]{1,30})(?=[\\/])'''
+group = "v"
+validator = "intl.login_word"
+boundary = "none"
+
+# Voie « codes » (1.0.2, dernier tour) : compte Windows « DOMAINE\utilisateur » (« CORP\jdupont », « ACME-FR\k.lambert ») :
+# seule la partie utilisateur est masquée, le domaine (l'organisation) reste lisible. Domaine en capitales, 2 à 15
+# caractères, jamais au milieu d'un chemin (« C:\WINDOWS\System32 », « \\SERVEUR\partage ») ni suivi d'un autre « \ ».
+# Tous les modes. A Windows "DOMAIN\user" account: only the user part is masked, the domain (the organisation) stays
+# readable; capital domain of 2 to 15 characters, never inside a path nor followed by another "\".
+[[recognizer]]
+id = "LOGIN_DOMAIN"
+entity = "HANDLE"
+label = "HANDLE"
+tier = "A"
+prefilter = '\'
+# Chaque morceau de la partie utilisateur n'a de capitale qu'en tête (« Jean.Dupont », « jdupont ») : une séquence
+# d'échappement suivie d'un mot (« ERROR\nStack ») n'est pas un compte. Each piece of the user part has a capital at
+# its head only, so an escape sequence followed by a word is not an account.
+pattern = '''(?<![\w\\/:.\-])[A-Z][A-Z0-9\-]{1,14}\\(?P<v>[A-Za-z][a-z0-9_\-]{1,30}(?:\.[A-Za-z][a-z0-9_\-]{0,30}){0,3}|[A-Za-z](?:\.[A-Za-z][a-z0-9_\-]{0,30}){1,3})(?![\w@\\\-]|\.[A-Za-z0-9])'''
+group = "v"
+boundary = "none"
+
+# Identifiant de connexion après son libellé (« user=vasseurf », « login : jdupont ») : une lettre au moins, jamais
+# une adresse e-mail (le détecteur d'e-mails la garde). Login after its label: at least one letter, never an e-mail.
+[[recognizer]]
+id = "LOGIN"
+entity = "HANDLE"
+label = "HANDLE"
+tier = "A"
+flags = "i"
+# Voie « codes » (dernier tour) : « compte AD : jdupont » aussi / "compte AD" too.
+prefilter = ["user", "login", "utilisateur", "identifiant", "uid", "samaccountname", "upn", "compte ad"]
+pattern = '''(?<![\w-])(?:user(?:name)?|login|utilisateur|identifiant(?:[ \t]de[ \t]connexion)?|uid|samaccountname|upn|compte[ \t]ad)[ \t]{0,3}[=:][ \t]{0,3}(?P<v>[A-Za-z][A-Za-z0-9._\-]{1,61}[A-Za-z0-9_]|[0-9][0-9._\-]{0,61}[A-Za-z][A-Za-z0-9._\-]{0,61}[A-Za-z0-9_])(?![\w@-]|\.[A-Za-z0-9])'''
+group = "v"
+boundary = "none"
+
+# 1.0.2 (item J, test terrain 2) : identifiant de connexion sans « = » ni « : » (« utilisateur xyz42 connecté »,
+# « login a.roux ») : la valeur porte un chiffre, « _ » ou « . » (« l'utilisateur standard » reste lisible). Modes fort
+# et essentiel (libellé explicite). Login without "=" or ":": the value holds a digit, "_" or "." (explicit label).
+[[recognizer]]
+id = "LOGIN_BARE"
+entity = "HANDLE"
+label = "HANDLE"
+tier = "A"
+flags = "i"
+# Voie « codes » (dernier tour) : « sAMAccountName k.dupont2 », « compte AD jdupont_2 » aussi / these cues too.
+prefilter = ["user", "login", "utilisateur", "identifiant", "samaccountname", "compte ad"]
+pattern = '''(?<![\w-])(?:user(?:name)?|login|utilisateur|identifiant|samaccountname|compte[ \t]ad)[ \t]{1,3}(?P<v>[A-Za-z][A-Za-z0-9\-]{0,30}[0-9_.][A-Za-z0-9._\-]{0,30}[A-Za-z0-9])(?![\w@-]|\.[A-Za-z0-9])'''
+group = "v"
+boundary = "none"
+
+# 1.0.2, second tour (item J, test terrain 2) : identifiant de connexion fait de lettres seules, sans « : »
+# (« login jdupont », « identifiant jdupont », « utilisateur jdupont bloqué », « connecté en tant que jdupont ») : un
+# mot en minuscules sans accent de 5 lettres ou plus, jamais un mot courant de la liste (« identifiant unique »,
+# « login sur le portail », « utilisateur final ») ni un participe ou un adverbe (« tout identifiant pouvant… », « un
+# identifiant participant ») ; « identifiant » ou « utilisateur » précédé d'un article reste un nom commun
+# (« l'utilisateur clique »). Modes fort et essentiel (libellé explicite). Letters-only login without ":": a lowercase
+# unaccented word of 5 letters or more, never a listed common word, a participle or an adverb; the cue after an
+# article is a common noun.
+[[recognizer]]
+id = "LOGIN_BARE_WORD"
+entity = "HANDLE"
+label = "HANDLE"
+tier = "A"
+flags = "i"
+# Voie « codes » (dernier tour) : « nom d'utilisateur jdupont », « compte AD jdupont », « sAMAccountName kdupont ».
+# These cues too.
+prefilter = ["user", "login", "en tant que", "utilisateur", "samaccountname", "compte ad"]
+pattern = '''(?<![\w-])(?:user(?:name)?|login|connect[ée]e?[ \t]en[ \t]tant[ \t]que|nom[ \t]d['’]utilisateur|samaccountname|compte[ \t]ad)[ \t]{1,3}(?P<v>(?-i:[a-z][a-z\-]{3,30}[a-z]))(?![\w@'’\-]|\.[A-Za-z0-9])'''
+group = "v"
+validator = "intl.login_word"
+boundary = "none"
+
+# Même règle après « identifiant (de connexion) » ou « utilisateur », sauf après un article (« l'utilisateur clique »,
+# « tout identifiant pouvant… », « un identifiant participant ») : look-behind en tête seulement, la liste de mots
+# courants est dans le validateur `intl.login_word` (jumeau Rust) ; le noyau Rust compile les deux motifs.
+# Same rule after "identifiant" or "utilisateur", except after an article; the common-word list lives in the validator.
+[[recognizer]]
+id = "LOGIN_BARE_WORD_NOUN"
+entity = "HANDLE"
+label = "HANDLE"
+tier = "A"
+flags = "i"
+prefilter = ["utilisateur", "identifiant"]
+# Jonction 1.0.2 : le noyau Rust ne compile qu'un look-behind d'un caractère ; « l'utilisateur » est exclu par
+# l'apostrophe, les autres articles (« un », « le », « tout »…) par le validateur (mots courants, -ant, -ment).
+# Join: the Rust core compiles a one-character look-behind only; "l'" is excluded here, other articles by the validator.
+pattern = '''(?<![\w'’-])(?:identifiant(?:[ \t]de[ \t]connexion)?|utilisateur)[ \t]{1,3}(?P<v>(?-i:[a-z][a-z\-]{3,30}[a-z]))(?![\w@'’\-]|\.[A-Za-z0-9])'''
+group = "v"
+validator = "intl.login_word"
+boundary = "none"
+
+# Voie « codes » (1.0.2, dernier tour) : pseudonyme après « avatar » ou « nickname » suivis de « : » (« avatar :
+# darkvador », « Nickname : Kiki ») : un mot ASCII de 3 caractères au moins, jamais le début d'une adresse web. Tous les
+# modes (indice explicite). Pseudonym after "avatar" or "nickname" and ":": an ASCII word of 3 characters or more.
+[[recognizer]]
+id = "PSEUDONYM_LABEL"
+entity = "HANDLE"
+label = "HANDLE"
+tier = "A"
+flags = "i"
+prefilter = ["avatar", "nickname"]
+pattern = '''(?<![\w-])(?:avatar|nickname)[ \t]{0,3}:[ \t]{0,3}(?P<v>[A-Za-z0-9_][A-Za-z0-9_.\-]{1,38}[A-Za-z0-9_])(?![\w@'’:/\-]|\.[A-Za-z0-9])'''
+group = "v"
+boundary = "none"
+
+# « pseudo : lunenoire » : après « pseudo(nyme) : », une valeur qui commence par une minuscule, un chiffre ou « _ »
+# (un mot capitalisé reste au détecteur de noms, qui propage sa valeur : « Pseudonyme : Testo le Magnifique »). Tous les
+# modes. After "pseudo(nyme):", a value starting with a lowercase letter, a digit or "_" (a capitalised word stays
+# with the name detector).
+[[recognizer]]
+id = "PSEUDONYM_LABEL_LOWER"
+entity = "HANDLE"
+label = "HANDLE"
+tier = "A"
+flags = "i"
+prefilter = "pseudo"
+pattern = '''(?<![\w-])pseudo(?:nyme)?[ \t]{0,3}:[ \t]{0,3}(?P<v>(?-i:[a-z0-9_])[A-Za-z0-9_.\-]{1,38}[A-Za-z0-9_])(?![\w@'’:/\-]|\.[A-Za-z0-9])'''
+group = "v"
+boundary = "none"
+
+# Fix 1.0.2 (revue des fuites) : « Pseudo : Kryptonix », « Pseudo : NeoKraken » : un seul mot capitalisé, en fin de
+# ligne ou devant une ponctuation, jamais un mot courant (validateur `intl.login_word`). Après « pseudo » seulement :
+# le champ « Pseudonyme : … » d'un avis BODACC reste au détecteur de noms, qui propage sa valeur (« Nom commercial :
+# … ») ; le prendre ici laissait le nom commercial lisible (2 avis des moitiés dev). Tous les modes. A single
+# capitalised word after "pseudo" only: the "Pseudonyme" field of a notice stays with the name detector, which
+# propagates its value to the trade name.
+[[recognizer]]
+id = "PSEUDONYM_LABEL_CAPS"
+entity = "HANDLE"
+label = "HANDLE"
+tier = "A"
+flags = "i"
+prefilter = "pseudo"
+pattern = '''(?<![\w-])pseudo[ \t]{0,3}:[ \t]{0,3}(?P<v>(?-i:[A-Z])[A-Za-z0-9_\-]{2,38}[A-Za-z0-9_])(?=[ \t]{0,3}(?:[.;,)!?]|\r?\n|\Z))'''
+group = "v"
+validator = "intl.login_word"
+boundary = "none"
+
+# Sans « : » (« son avatar dark_vador42 », « nickname kiki_2 ») : la valeur porte un chiffre, « _ » ou « . », comme
+# `LOGIN_BARE` ; ou un mot en minuscules de 5 lettres ou plus, jamais un mot courant (validateur `intl.login_word`),
+# jamais après un article élidé (« l'avatar choisi »). Tous les modes. Without ":": the value holds a digit, "_" or
+# ".", or is a lowercase word of 5 letters or more that is not a common word, never after an elided article.
+[[recognizer]]
+id = "PSEUDONYM_BARE"
+entity = "HANDLE"
+label = "HANDLE"
+tier = "A"
+flags = "i"
+prefilter = ["avatar", "nickname"]
+pattern = '''(?<![\w-])(?:avatar|nickname)[ \t]{1,3}(?P<v>[A-Za-z][A-Za-z0-9\-]{0,30}[0-9_.][A-Za-z0-9._\-]{0,30}[A-Za-z0-9])(?![\w@-]|\.[A-Za-z0-9])'''
+group = "v"
+boundary = "none"
+
+[[recognizer]]
+id = "PSEUDONYM_BARE_WORD"
+entity = "HANDLE"
+label = "HANDLE"
+tier = "A"
+flags = "i"
+prefilter = ["avatar", "nickname"]
+pattern = '''(?<![\w'’-])(?:avatar|nickname)[ \t]{1,3}(?P<v>(?-i:[a-z][a-z\-]{3,30}[a-z]))(?![\w@'’\-]|\.[A-Za-z0-9])'''
+group = "v"
+validator = "intl.login_word"
 boundary = "none"

@@ -46,6 +46,8 @@ _BUILTIN: tuple[tuple[str, str, str, str | None, tuple[str, ...]], ...] = (
     ("DATE", "DATE", "DATE", None, ()),
     ("POSTAL_CODE", "CODE_POSTAL", "POSTAL_CODE", None, ("CP", "ZIP")),
     ("ID", "IDENTIFIANT", "IDENTIFIER", None, ("ID", "REFERENCE", "REF")),
+    # Identité en ligne (filtre fort 1.0.2) : @pseudo, pseudonyme, identifiant de connexion / online identity.
+    ("HANDLE", "PSEUDO", "HANDLE", None, ("PSEUDONYME", "USERNAME", "LOGIN")),
     ("NATIONAL_ID", "ID_NATIONAL", "NATIONAL_ID", None, ()),
     ("TAX_ID", "NUM_FISCAL", "TAX_ID", "TAX_ID", ("NIF", "SPI", "TIN")),
     ("COMPANY_ID", "ID_ENTREPRISE", "COMPANY_ID", None, ()),

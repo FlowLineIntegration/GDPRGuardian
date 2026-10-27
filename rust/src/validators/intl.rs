@@ -217,6 +217,12 @@ pub fn ipv6(candidate: &str) -> Option<String> {
     if candidate.matches(':').count() < 2 || pystr::count(candidate, Is::Alnum)? < 3 {
         return None;
     }
+    // 1.0.2 : trois groupes, ou un groupe de trois caractères au moins / three groups, or one of three characters.
+    let head = candidate.split('%').next().unwrap_or("");
+    let groups: Vec<&str> = head.split(':').filter(|g| !g.is_empty()).collect();
+    if groups.len() < 3 && !groups.iter().any(|g| char_len(g) >= 3) {
+        return None;
+    }
     let address = parse_ipv6(candidate)?;
     // Boucle locale, non spécifiée, ou leur forme IPv4 encapsulée : jamais une donnée personnelle.
     // Loopback, unspecified, or their IPv4-mapped form: never personal data.
@@ -228,7 +234,18 @@ pub fn ipv6(candidate: &str) -> Option<String> {
 }
 
 pub fn mac(candidate: &str) -> Option<String> {
-    let value = pystr::upper(&candidate.replace('-', ":"))?;
+    let value = if candidate.contains('.') {
+        // Forme pointée (1.0.2), rendue en paires ; jamais tout en chiffres / dotted form, as pairs; never all digits.
+        let packed = candidate.replace('.', "");
+        if pystr::isdigit(&packed)? {
+            return None;
+        }
+        let chars: Vec<char> = packed.chars().collect();
+        let pairs: Vec<String> = chars.chunks(2).map(|pair| pair.iter().collect()).collect();
+        pystr::upper(&pairs.join(":"))?
+    } else {
+        pystr::upper(&candidate.replace('-', ":"))?
+    };
     (value != "00:00:00:00:00:00" && value != "FF:FF:FF:FF:FF:FF").then_some(value)
 }
 
@@ -266,14 +283,87 @@ pub fn digits_e164(candidate: &str) -> Option<String> {
     ((8..=15).contains(&char_len(&digits)) && is_digits(&digits)).then(|| format!("+{digits}"))
 }
 
-/// Date jj/mm/aaaa, jj.mm.aaaa ou aaaa-mm-jj valide ; chaque partie lue par `int()`, comme Python.
-/// Valid calendar date; each part read by `int()`, as in Python.
+/// Mois écrit en français, comme `intl._MONTH_WORDS` / French month word, as the Python table.
+fn month_number(word: &str) -> Option<&'static str> {
+    Some(match word {
+        "janvier" => "1",
+        "février" | "fevrier" => "2",
+        "mars" => "3",
+        "avril" => "4",
+        "mai" => "5",
+        "juin" => "6",
+        "juillet" => "7",
+        "août" | "aout" => "8",
+        "septembre" => "9",
+        "octobre" => "10",
+        "novembre" => "11",
+        "décembre" | "decembre" => "12",
+        // Abréviations (1.0.2, troisième tour, dates) / abbreviations (third round, dates).
+        "janv" => "1",
+        "févr" | "fevr" | "fév" | "fev" => "2",
+        "avr" => "4",
+        "juil" => "7",
+        "sept" => "9",
+        "oct" => "10",
+        "nov" => "11",
+        "déc" | "dec" => "12",
+        _ => return None,
+    })
+}
+
+/// `intl.BIRTH_YEAR_PIVOT` : année sur deux chiffres 00 à 26 -> 20xx, sinon 19xx / two-digit year pivot.
+const BIRTH_YEAR_PIVOT: u32 = 26;
+
+/// `intl._full_year` : année sur deux chiffres -> quatre chiffres / two-digit year -> four digits.
+fn full_year(part: &str) -> String {
+    if part.len() == 2 && part.bytes().all(|b| b.is_ascii_digit()) {
+        let yy: u32 = part.parse().unwrap_or(0);
+        return (if yy <= BIRTH_YEAR_PIVOT { 2000 + yy } else { 1900 + yy }).to_string();
+    }
+    part.to_string()
+}
+
+/// Date jj/mm/aaaa, jj.mm.aaaa ou aaaa-mm-jj valide ; chaque partie lue par `int()`, comme Python. Troisième tour
+/// (comme `intl.calendar_date`) : année sur deux chiffres, mois abrégés, forme compacte « 19751021 », « jui. »
+/// ambigu rendu tel quel, replié. Valid calendar date; each part read by `int()`, as in Python. Third round: two-digit
+/// years, abbreviated months, compact form, ambiguous "jui." returned folded.
 pub fn calendar_date(candidate: &str) -> Option<String> {
     let normalized = candidate.replace(['.', '-'], "/");
-    let parts: Vec<&str> = normalized.split('/').filter(|p| !p.is_empty()).collect();
-    let [first, second, third] = parts[..] else {
-        return None;
+    let mut parts: Vec<String> = if candidate.len() == 8 && candidate.bytes().all(|b| b.is_ascii_digit()) {
+        vec![candidate[..4].to_string(), candidate[4..6].to_string(), candidate[6..].to_string()]
+    } else {
+        normalized.split('/').filter(|p| !p.is_empty()).map(str::to_string).collect()
     };
+    if parts.len() != 3 {
+        // Forme en mots (« 12 mars 1985 », 1.0.2), comme `_MONTH_WORDS` / word form, as the Python table.
+        let words: Vec<&str> = candidate.split(pystr::is_space).filter(|w| !w.is_empty()).collect();
+        let [day, month, year] = words[..] else {
+            return None;
+        };
+        let month_lower = pystr::lower(month)?;
+        let month_word = month_lower.strip_suffix('.').unwrap_or(&month_lower);
+        if month_word == "jui" && month.ends_with('.') {
+            let first = pystr::lower(day)?;
+            let day_number: u32 = if first == "1er" {
+                1
+            } else if !first.is_empty() && first.bytes().all(|b| b.is_ascii_digit()) {
+                first.parse().unwrap_or(0)
+            } else {
+                0
+            };
+            let year = full_year(year);
+            if !(1..=31).contains(&day_number) || year.is_empty() || !year.bytes().all(|b| b.is_ascii_digit()) {
+                return None;
+            }
+            return Some(format!("{day_number} jui. {year}"));
+        }
+        let month = month_number(month_word)?;
+        let day = if pystr::lower(day)? == "1er" { "1" } else { day };
+        parts = vec![day.to_string(), month.to_string(), full_year(year)];
+    } else if char_len(&parts[0]) != 4 {
+        parts[2] = full_year(&parts[2]);
+    }
+    let [first, second, third] = [&parts[0], &parts[1], &parts[2]].map(String::as_str);
     let numbers = (pystr::int(first)?, pystr::int(second)?, pystr::int(third)?);
     let (year, month, day) = if char_len(first) == 4 { numbers } else { (numbers.2, numbers.1, numbers.0) };
     if !(1..=9999).contains(&year) || !(1..=12).contains(&month) || day < 1 {
@@ -286,4 +376,226 @@ pub fn calendar_date(candidate: &str) -> Option<String> {
         _ => 31,
     };
     (day <= max_day).then(|| format!("{year:04}-{month:02}-{day:02}"))
+}
+
+/// Mots courants après « login », « identifiant », « utilisateur »… : jamais un identifiant de connexion (même liste
+/// que `validators/intl.py: LOGIN_COMMON_WORDS`). Common words after a login cue (same list as the Python one).
+const LOGIN_COMMON_WORDS: [&str; 205] = [
+    "about",
+    "accede",
+    "accepte",
+    "active",
+    "actif",
+    "admin",
+    "administrateur",
+    "ainsi",
+    "ajoute",
+    "alors",
+    "ancien",
+    "anonyme",
+    "appelle",
+    "apple",
+    "apres",
+    "associe",
+    "aussi",
+    "autre",
+    "avait",
+    "avant",
+    "avoir",
+    "bancaire",
+    "bloque",
+    "choisit",
+    "client",
+    "clients",
+    "clique",
+    "comme",
+    "compte",
+    "confirme",
+    "connecte",
+    "connexion",
+    "consulte",
+    "contacte",
+    "dans",
+    "demande",
+    "demo",
+    "depuis",
+    "deux",
+    "dispose",
+    "distant",
+    "doit",
+    "doivent",
+    "domaine",
+    "dont",
+    "elle",
+    "elles",
+    "email",
+    "encore",
+    "entre",
+    "envoie",
+    "etait",
+    "etre",
+    "existante",
+    "externe",
+    "fait",
+    "faite",
+    "final",
+    "finale",
+    "fiscal",
+    "fiscale",
+    "fournit",
+    "google",
+    "guest",
+    "identifiant",
+    "inactif",
+    "inactive",
+    "incorrect",
+    "incorrecte",
+    "inconnu",
+    "inconnue",
+    "indique",
+    "interne",
+    "invalide",
+    "invite",
+    "lambda",
+    "lance",
+    "ldap",
+    "leur",
+    "leurs",
+    "local",
+    "login",
+    "mail",
+    "mais",
+    "meme",
+    "merci",
+    "microsoft",
+    "modifie",
+    "moyen",
+    "moyenne",
+    "national",
+    "nationale",
+    "nouveau",
+    "nouvelle",
+    "obligatoire",
+    "obtient",
+    "ouvre",
+    "paie",
+    "password",
+    "paye",
+    "personnel",
+    "personnelle",
+    "perso",
+    "peut",
+    "peuvent",
+    "possede",
+    "pour",
+    "principal",
+    "principale",
+    "provisoire",
+    "puis",
+    "quand",
+    "recoit",
+    "remplit",
+    "renseigne",
+    "requis",
+    "requise",
+    "reseau",
+    "root",
+    "saisit",
+    "sans",
+    "selon",
+    "sera",
+    "service",
+    "signale",
+    "signe",
+    "simple",
+    "souhaite",
+    "standard",
+    "suivante",
+    "support",
+    "supprime",
+    "system",
+    "systeme",
+    "tape",
+    "technique",
+    "temporaire",
+    "test",
+    "tests",
+    "toujours",
+    "trouve",
+    "unique",
+    "user",
+    "utilisateur",
+    "utilise",
+    "valide",
+    "voit",
+    "windows",
+    // Voie « codes » (dernier tour) : verbes après « utilisateur » / verbs after the cue (same as Python).
+    "aura",
+    "aurait",
+    "concerne",
+    "conserve",
+    "devra",
+    "devrait",
+    "existe",
+    "garde",
+    "pourra",
+    "pourrait",
+    "reste",
+    "restent",
+    "serait",
+    "seront",
+    // Fix 1.0.2 : valeurs ordinaires après « Teams : », « Pseudo : », dossiers communs d'un chemin / ordinary values.
+    "lundi",
+    "mardi",
+    "mercredi",
+    "jeudi",
+    "vendredi",
+    "samedi",
+    "dimanche",
+    "demain",
+    "visio",
+    "dispo",
+    "absent",
+    "absente",
+    "canal",
+    "groupe",
+    "serveur",
+    "profil",
+    "general",
+    "prive",
+    "public",
+    "ouvert",
+    "ferme",
+    "occupe",
+    "aucun",
+    "aucune",
+    "voir",
+    "neant",
+    "vide",
+    "indisponible",
+    "disponible",
+    "reunion",
+    "appel",
+    "equipe",
+    "lien",
+    "oui",
+    "non",
+    "default",
+    "administrator",
+    "matin",
+    "soir",
+    "semaine",
+    "message",
+    "video",
+    "rappel",
+];
+
+/// Identifiant de connexion fait de lettres seules (« jdupont ») : jamais un mot courant de la liste, un participe en
+/// « -ant(s) » ni un adverbe en « -ment » (le motif ne laisse passer que des lettres ASCII minuscules et « - »).
+/// Letters-only login: never a listed common word, a participle or an adverb.
+pub fn login_word(candidate: &str) -> Option<String> {
+    let value = candidate.to_ascii_lowercase();
+    let common = LOGIN_COMMON_WORDS.contains(&value.as_str());
+    let suffix = ["ant", "ants", "ment"].iter().any(|s| value.ends_with(s));
+    (!common && !suffix).then(|| candidate.to_string())
 }

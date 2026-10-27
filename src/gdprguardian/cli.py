@@ -41,6 +41,7 @@ class CliError(Exception):
 
 
 def build_parser() -> argparse.ArgumentParser:
+    from .categories import CATEGORIES_HELP
     from .engine import PROFILES
     from .server.options import LABEL_LANGUAGES
 
@@ -59,7 +60,17 @@ def build_parser() -> argparse.ArgumentParser:
                            help="packs pays séparés par des virgules (défaut : FR), « all », ou « auto » "
                                 "(expérimental) / country packs, comma-separated (default: FR), 'all', or 'auto' "
                                 "(experimental)")
-    anonymize.add_argument("--profile", choices=PROFILES, default="standard")
+    # Trois modes (docs/REGLES.md « Modes ») ; fort par défaut / three modes, fort by default.
+    anonymize.add_argument("--mode", default=None,
+                           help="fort (défaut, EN strong), essentiel (EN essential ; basique accepté) ou personnalise "
+                                "(EN custom) / fort (default), essentiel or personnalise")
+    anonymize.add_argument("--disable", default=None, metavar="CATEGORIES",
+                           help="catégories laissées en clair, séparées par des virgules (mode personnalise ; sans "
+                                f"--mode, il le choisit) : {CATEGORIES_HELP} / categories left in clear, "
+                                "comma-separated (personnalise mode)")
+    anonymize.add_argument("--profile", choices=PROFILES, default=None,
+                           help="déprécié, utilisez --mode : strict = fort, standard et fast = essentiel / deprecated, "
+                                "use --mode")
     anonymize.add_argument("--label-language", choices=LABEL_LANGUAGES, default="fr")
     anonymize.add_argument("--format", choices=("md", "json"), default="md", help="md (défaut) ou json + rapport")
     anonymize.add_argument("-o", "--output", help="fichier de sortie (défaut : stdout) / output file")
@@ -145,7 +156,8 @@ def _anonymize(args: argparse.Namespace) -> int:
     from .server.options import AnonymizeOptions
 
     try:
-        options = AnonymizeOptions.build(args.countries, args.profile, args.label_language)
+        options = AnonymizeOptions.build(args.countries, args.profile, args.label_language, mode=args.mode,
+                                         disable=args.disable)
     except ValueError as exc:
         raise CliError(str(exc), EXIT_USAGE) from None
     anonymizer = options.anonymizer()

@@ -440,6 +440,11 @@ _FORMATS: dict[str, Callable[[random.Random], str]] = {
     "intl.email": _email,
     "intl.digits_e164": _e164,
     "intl.calendar_date": _calendar,
+    # Identifiant de connexion en lettres (1.0.2) : mots de la liste, « -ant », « -ment », traits d'union, casse.
+    # Letters-only login: listed words, "-ant", "-ment", hyphens, case.
+    "intl.login_word": lambda r: r.choice(["jdupont", "utilisateur", "clique", "pouvant", "rapidement", "a-roux",
+                                           "Jdupont", "ldap", "marie-leclerc", "participants"]) + r.choice(
+        ["", "", "x", "ant", "ment", "-"]),
     "be.nn": lambda r: _niss(r, "be.nn"),
     "be.bis": lambda r: _niss(r, "be.bis"),
     "be.niss": _niss,

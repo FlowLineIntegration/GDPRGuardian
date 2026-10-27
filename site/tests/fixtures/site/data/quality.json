@@ -39,5 +39,18 @@
   "hard_ci_low": "—",
   "hard_ci_high": "—",
   "hard_docs": "—",
-  "hard_mention_recall_pct": "—"
+  "hard_mention_recall_pct": "—",
+  "fort_index": "—",
+  "fort_ci_low": "—",
+  "fort_ci_high": "—",
+  "fort_hard_index": "—",
+  "fort_code_loss": "—",
+  "ess_index": "—",
+  "ess_ci_low": "—",
+  "ess_ci_high": "—",
+  "ess_hard_index": "—",
+  "ess_code_loss": "—",
+  "modes_source": "—",
+  "modes_date": "—",
+  "modes_engine": "—"
 }

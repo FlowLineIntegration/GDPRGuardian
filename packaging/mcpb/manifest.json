@@ -2,9 +2,9 @@
   "manifest_version": "0.2",
   "name": "gdprguardian",
   "display_name": "GDPR Guardian (Gardien RGPD)",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Anonymisation irréversible des documents avant que Claude les lise, sur votre poste : rien ne quitte la machine. / Irreversible anonymisation of documents before Claude reads them, on your computer: nothing leaves the machine.",
-  "long_description": "Gardien RGPD remplace les données personnelles par des balises irréversibles ([PERSONNE_1], [NIR_1], [IBAN_1]...) avant que Claude ne lise un document (PDF, Word, Excel, CSV, e-mail...). Claude passe le chemin du fichier à l'outil anonymize_file : le serveur, lancé sur votre poste, lit le fichier dans les dossiers que vous avez autorisés et ne renvoie que le Markdown anonymisé. Aucune table de correspondance, aucun réseau pour anonymiser. Prérequis : uv (https://docs.astral.sh/uv/), puis, une fois avec le réseau : uv tool install \"gdprguardian[local]==1.0.1\" ; le serveur démarre ensuite sans réseau.\n\nGDPR Guardian replaces personal data with irreversible placeholders before Claude reads a document. Claude passes the file path to anonymize_file: the server, running on your computer, reads the file inside the folders you allowed and returns only the anonymised Markdown. No mapping table, no network to anonymise. Prerequisite: uv (https://docs.astral.sh/uv/), then, once with the network: uv tool install \"gdprguardian[local]==1.0.1\"; the server then starts without any network.",
+  "long_description": "Gardien RGPD remplace les données personnelles par des balises irréversibles ([PERSONNE_1], [NIR_1], [IBAN_1]...) avant que Claude ne lise un document (PDF, Word, Excel, CSV, e-mail...). Claude passe le chemin du fichier à l'outil anonymize_file : le serveur, lancé sur votre poste, lit le fichier dans les dossiers que vous avez autorisés et ne renvoie que le Markdown anonymisé. Aucune table de correspondance, aucun réseau pour anonymiser. Prérequis : uv (https://docs.astral.sh/uv/), puis, une fois avec le réseau : uv tool install \"gdprguardian[local]==1.0.2\" ; le serveur démarre ensuite sans réseau.\n\nGDPR Guardian replaces personal data with irreversible placeholders before Claude reads a document. Claude passes the file path to anonymize_file: the server, running on your computer, reads the file inside the folders you allowed and returns only the anonymised Markdown. No mapping table, no network to anonymise. Prerequisite: uv (https://docs.astral.sh/uv/), then, once with the network: uv tool install \"gdprguardian[local]==1.0.2\"; the server then starts without any network.",
   "author": {
     "name": "Guillaume CLEMENT - Flow Line Intégration"
   },
@@ -18,7 +18,7 @@
       "command": "uvx",
       "args": [
         "--from",
-        "gdprguardian[local]==1.0.1",
+        "gdprguardian[local]==1.0.2",
         "gdprguardian",
         "mcp",
         "--stdio",

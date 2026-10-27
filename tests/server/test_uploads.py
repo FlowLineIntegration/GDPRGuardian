@@ -64,10 +64,13 @@ def test_upload_url_is_single_use(client: TestClient) -> None:
     url = path_of(ticket["upload_url"])
     assert client.put(url, headers=AUTH_A, content=b"premier").status_code == 202
     again = client.put(url, headers=AUTH_A, content=b"second")
-    # Déjà utilisé, faux ou expiré : la même réponse, rien n'indique que le jeton a existé.
-    # Already used, wrong or expired: the same answer, nothing tells that the token existed.
+    # Déjà utilisé : dit à son détenteur (demander une nouvelle URL) ; faux ou d'une autre clé : réponse commune.
+    # Already used: told to its holder (request a new URL); wrong or another key's: the common answer.
     wrong = client.put("/v1/uploads/" + "x" * 43, headers=AUTH_A, content=b"second")
-    assert again.status_code == wrong.status_code == 404 and again.json() == wrong.json()
+    stolen = client.put(url, headers=AUTH_B, content=b"second")
+    assert again.status_code == wrong.status_code == stolen.status_code == 404
+    assert again.json()["error"]["code"] == "upload_used" and wrong.json() == stolen.json()
+    assert wrong.json()["error"]["code"] == "not_found"
 
 
 def test_upload_and_results_are_bound_to_the_principal(client: TestClient) -> None:

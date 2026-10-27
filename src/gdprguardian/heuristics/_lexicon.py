@@ -119,6 +119,8 @@ class Lexicon:
         """(sorte, code) d'un jeton capitalisé / (kind, code) of a capitalised token."""
         if key in V.STOP:
             return K_COMMON, 0
+        if original.lower() in V.ACCENTED_WORDS:
+            return K_COMMON, 0  # « Marié le 12/06/2015 » : pas le prénom « Marie » (1.0.2) / not the given name
         if key in V.PARTICLES:
             return K_PARTICLE, self.names.get(key, 0)
         if len(key) > 1 and key in V.FUNCTION:
@@ -145,6 +147,11 @@ class Lexicon:
         tail = original[len(head) + 1:]
         if rest == "s":
             return self.classify(head, original[:len(head)])  # possessif / possessive « Dupont's »
+        if head.endswith("c") and rest.startswith("h"):
+            # « Guivarc'h », « Kerc'hoz » : le c'h breton appartient au nom, jamais une élision (1.0.2, fort et
+            # essentiel). The Breton c'h belongs to the name: known as a whole, else an unknown name.
+            code = self.code(key)
+            return (K_NAME, code) if code is not None else (K_UNKNOWN, 0)
         if not tail or not tail[0].isupper() or head == "l":
             return K_COMMON, 0  # « C'est », « L'Europe », « L'Union » : élision d'un mot-outil / elision
         # « N'Diaye », « O'Brien », « D'Amico », « M'Bappé » : la base les écrit avec ou sans espace.

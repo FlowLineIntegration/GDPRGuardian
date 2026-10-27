@@ -79,6 +79,11 @@ PROGRESS_STAGES = frozenset({CONVERTING, ANONYMISING})
 _MAX_PROGRESS_PAGES = 1_000_000
 
 
+UPLOAD_USED_MESSAGE = ("URL d'envoi déjà utilisée : elle ne sert qu'une fois ; pour renvoyer le fichier, demandez une "
+                       "nouvelle URL (create_upload ou POST /v1/uploads) / upload URL already used: it works only "
+                       "once; to send the file again, request a new one (create_upload or POST /v1/uploads)")
+
+
 class Gone(NotFound):
     """Résultat disparu, motif distinct ; toujours 404 / vanished result, distinct reason; always 404."""
 
@@ -302,9 +307,13 @@ class JobStore:
             now = self._purge()
             capability = self._tokens.get(digest) if digest is not None else None
             job = self._jobs.get(capability) if capability is not None else None
-            if (job is None or not same_digest(job.token_digest or b"", digest or b"")
-                    or not self._allowed(job, principal) or job.state is not JobState.PENDING):
+            if job is None or not same_digest(job.token_digest or b"", digest or b"") or not self._allowed(job,
+                                                                                                         principal):
                 raise NotFound
+            if job.state is not JobState.PENDING:
+                # URL rejouée : seul le détenteur du jeton (256 bits) l'apprend / replayed URL: only the token's holder
+                # learns it.
+                raise NotFound(UPLOAD_USED_MESSAGE, code="upload_used")
             holders = (quota.client,) if quota.prefix is None else (quota.client, quota.prefix)
             for key, cap, share in zip(holders, (self._max_active, self._max_per_prefix),
                                        (STORE_CLIENT_SHARE, STORE_PREFIX_SHARE), strict=False):

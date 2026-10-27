@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import pytest
 from tools.eval.mutate import MUTATIONS
 from tools.eval.schema import DIRECT, GOLD_LABELS
 from tools.protocol import spec
@@ -53,8 +54,41 @@ def test_scope_of_a_leak() -> None:
 
 def test_history_is_kept() -> None:
     """La campagne 1.0 est listée : les moitiés test ne sont plus aveugles / the 1.0 campaign is listed."""
-    assert spec.PROTOCOL_VERSION == "1.1"
+    assert spec.PROTOCOL_VERSION == "1.2" and spec.SUPPORTED_VERSIONS == ("1.1", "1.2")
     assert any(c["date"] == "2026-10-26" and c["engine"] == "1.0.0+0c3ff9fc1fb0" for c in spec.EARLIER_CAMPAIGNS)
     assert any(t["by"] == "public protocol campaign 1.0" for t in spec.TEST_HALVES_MEASURED_BEFORE)
     assert spec.PREVIOUS_VERSIONS[0]["version"] == "1.0"
     assert spec.PREVIOUS_VERSIONS[0]["confidence_index"].startswith("61.8")
+    # 1.2 : la campagne 1.1 reste publiée et rend les moitiés test encore moins aveugles / the 1.1 campaign is listed.
+    assert spec.PREVIOUS_VERSIONS[1]["version"] == "1.1"
+    assert spec.PREVIOUS_VERSIONS[1]["confidence_index"].startswith("96.9")
+    assert any(c["protocol"] == "1.1" and c["engine"] == "1.0.1+4bb5c465425e" for c in spec.EARLIER_CAMPAIGNS)
+    assert any(t.get("added_by") == "1.2" for t in spec.TEST_HALVES_MEASURED_BEFORE)
+
+
+def test_modes_1_2() -> None:
+    """Deux modes, le défaut d'abord ; garde-fou des leurres en essentiel seulement / two modes, decoy guard."""
+    assert spec.MODES == ("fort", "essentiel")
+    assert spec.DECOY_GUARD_MODES == ("essentiel",)
+    assert set(spec.MODE_SITE_PREFIX) == set(spec.MODES) == set(spec.MODE_TITLES)
+    from tools.protocol.plan import build_plan, check_modes, service_options
+
+    assert service_options("FR", None) == {"countries": "FR", "profile": "standard", "label_language": "fr"}
+    assert service_options("FR", "fort") == {"countries": "FR", "mode": "fort", "label_language": "fr"}
+    with pytest.raises(ValueError):
+        check_modes(("fort", "fort"))
+    with pytest.raises(ValueError):
+        check_modes(("personnalise",))
+    legacy = build_plan(synthetic_seeds=(2026102581,), synthetic_docs_per_seed=4, redteam_seeds=(),
+                        redteam_bases_per_seed=0)
+    modal = build_plan(synthetic_seeds=(2026102581,), synthetic_docs_per_seed=4, redteam_seeds=(),
+                       redteam_bases_per_seed=0, modes=spec.MODES)
+    assert legacy.protocol == "1.1" and modal.protocol == "1.2" and legacy.units == modal.units
+    assert legacy.plan_id != modal.plan_id
+    # Empreinte d'un plan 1.1 inchangée par la 1.2 / a 1.1 plan's fingerprint is unchanged by 1.2.
+    import hashlib
+    import json
+
+    payload = json.dumps({"protocol": "1.1", "units": [u.uid + f"+{u.count}" for u in legacy.units]},
+                         separators=(",", ":"))
+    assert legacy.plan_id == hashlib.sha256(payload.encode()).hexdigest()[:16]

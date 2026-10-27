@@ -329,8 +329,10 @@ def test_unauthenticated_mcp_calls_of_a_keyed_service_use_the_network_client(
     client = make_client(client_ip_header=CLIENT_HEADER, limits=LimitPolicy(cheap_burst=3, cheap_rate=0.01))
     initialize = {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
         "protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "t", "version": "1"}}}
-    codes = [client.post("/mcp", headers={**MCP_HEADERS, **ALICE}, json=initialize).status_code for _ in range(4)]
-    assert codes == [401, 401, 401, 429]
+    answers = [client.post("/mcp", headers={**MCP_HEADERS, **ALICE}, json=initialize) for _ in range(4)]
+    assert [answer.status_code for answer in answers[:3]] == [401, 401, 401]
+    # Limite atteinte : erreur JSON-RPC (HTTP 200) lue par l'agent / limit reached: a JSON-RPC error the agent reads.
+    assert answers[3].status_code == 200 and answers[3].json()["error"]["data"]["code"] == "rate_limited"
     assert client.post("/mcp", headers={**MCP_HEADERS, **BOB}, json=initialize).status_code == 401
     assert client.post("/mcp", headers={**MCP_HEADERS, **BOB, **AUTH_A}, json=initialize).status_code == 200
 

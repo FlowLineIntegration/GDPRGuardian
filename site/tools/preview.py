@@ -68,9 +68,18 @@ LIVE_NAMES = {"uses_hour", "uses_hour_protocol", "bytes_hour", "docs_total", "do
 PENDING_KEYS = {"confidence_index", "confidence_ci_low", "confidence_ci_high", "mention_recall_pct", "protocol_docs",
                 "protocol_families", "real_corpora", "real_docs", "protocol_date", "protocol_engine",
                 "hard_index", "hard_ci_low", "hard_ci_high", "hard_docs", "hard_mention_recall_pct"}
-# Pending keys whose measured value is a string: an ISO date, a version.
+# Two scores per mode (fort, essentiel): anonymisation (index, interval, difficult documents) and useful codes lost
+# (decoys masked); with their source, date and engine. Written by the protocol run (internal until protocol 1.2).
+MODE_KEYS = {f"{mode}_{part}" for mode in ("fort", "ess")
+             for part in ("index", "ci_low", "ci_high", "hard_index", "code_loss")} | {
+    "modes_source", "modes_date", "modes_engine"}
+PENDING_KEYS |= MODE_KEYS
+# Pending keys whose measured value is a string: an ISO date, a version, the source of the per-mode scores.
 PENDING_STRINGS = {"protocol_date": re.compile(r"\d{4}-\d{2}-\d{2}"),
-                   "protocol_engine": re.compile(r"[0-9A-Za-z][0-9A-Za-z.+-]{0,31}")}
+                   "protocol_engine": re.compile(r"[0-9A-Za-z][0-9A-Za-z.+-]{0,31}"),
+                   "modes_date": re.compile(r"\d{4}-\d{2}-\d{2}"),
+                   "modes_engine": re.compile(r"[0-9A-Za-z][0-9A-Za-z.+-]{0,31}"),
+                   "modes_source": re.compile(r"protocole 1\.2|mesure interne, moitié dev")}
 PENDING = "—"
 
 
@@ -96,7 +105,9 @@ Q_KEYS = {"tests_windows", "tests_linux", "tests_offline_image", "parity_docs", 
           "ms_per_doc", "mb_per_s", "text_10mb_s", "service_p50_ms", "service_p99_ms", "pdf100_s", "image_mb",
           "core_mb", "measured_on"} | PENDING_KEYS | set(TABLE.SITE_KEYS)
 # Raw bytes (the daemon serves them Brotli-compressed, about a third of that; gzip size printed as a guide).
-BUDGETS = {"html": 56 * 1024, "css": 32 * 1024, "js": 30 * 1024, "fonts": 90 * 1024, "font_files": 3}
+# html 59 -> 63 KB and js 30 -> 34 KB on 2026-10-26: the mode selector (three modes, custom categories, codes to
+# keep) and the per-mode score cards.
+BUDGETS = {"html": 63 * 1024, "css": 32 * 1024, "js": 34 * 1024, "fonts": 90 * 1024, "font_files": 3}
 SCRIPTS = ("live.js", "cockpit.js")
 # Layout rules that browser checks found missing once; a stylesheet without them is a regression.
 CSS_GUARDS = (
@@ -284,12 +295,22 @@ GATE_FIX = ("python -I site/tools/protocol_table.py benchmarks/results/protocol-
             "campaign: python -I site/tools/protocol_table.py --pending --pending-index)")
 
 
+# The protocol whose result the site shows and describes point by point ("Comment nous nous notons"). Protocol 1.2
+# (per-mode scores) is declared there in one sentence, measured after the 1.0.2 release: until the site text is
+# rewritten for it, a 1.2 result under the 1.1 text is refused here.
+SITE_TEXT_PROTOCOL = "1.1"
+
+
 def site_protocol() -> str | None:
-    """PROTOCOL_VERSION in tools/protocol/spec.py: the protocol the site text describes (read, not imported)."""
+    """The protocol the site text describes in detail (SITE_TEXT_PROTOCOL); tools/protocol/spec.py may already
+    declare the next one (printed as information)."""
     path = TABLE.ROOT / "tools" / "protocol" / "spec.py"
     text = path.read_text(encoding="utf-8") if path.is_file() else ""
     match = re.search(r'^PROTOCOL_VERSION = "(\d+\.\d+)"', text, re.M)
-    return match.group(1) if match else None
+    if match and match.group(1) != SITE_TEXT_PROTOCOL:
+        print(f"note: tools/protocol/spec.py declares protocol {match.group(1)}; the site shows the published "
+              f"{SITE_TEXT_PROTOCOL} result, labelled as such")
+    return SITE_TEXT_PROTOCOL
 
 
 def version_gate(name: str, q: dict) -> int:

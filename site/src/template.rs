@@ -157,6 +157,120 @@ const WITH_INDEX: [&str; 6] = [
     "protocol_engine",
 ];
 
+/// Deux notes par mode (fort, essentiel), en pourcentage : anonymisation (indice, intervalle, documents difficiles)
+/// et codes utiles perdus (leurres masqués) / two scores per mode, in percent: anonymisation and useful codes lost.
+pub const MODE_PREFIXES: [&str; 2] = ["fort", "ess"];
+const MODE_SUFFIXES: [&str; 5] = ["index", "ci_low", "ci_high", "hard_index", "code_loss"];
+/// Publiées avec l'indice d'un mode / published with a mode's index.
+const WITH_MODE_INDEX: [&str; 3] = ["ci_low", "ci_high", "code_loss"];
+/// Source des notes par mode : le protocole public, ou une mesure interne affichée comme telle.
+/// Source of the per-mode scores: the public protocol, or an internal measurement shown as such.
+pub const MODE_SOURCES: [&str; 2] = ["protocole 1.2", "mesure interne, moitié dev"];
+const MODE_STRINGS: [&str; 3] = ["modes_source", "modes_date", "modes_engine"];
+
+/// Version de moteur : 1 à 32 caractères, alphanumérique au début, puis [0-9A-Za-z.+-] / engine version shape.
+fn version_shape(text: &str) -> bool {
+    (1..=32).contains(&text.len())
+        && text.starts_with(|c: char| c.is_ascii_alphanumeric())
+        && text
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || b".+-".contains(&byte))
+}
+
+/// Contrat des notes par mode : chaque clé présente, « — » ou bien formée ; l'indice d'un mode publié emporte son
+/// intervalle (qui l'encadre), ses codes perdus, la source, la date et le moteur ; sans indice, rien du mode n'est
+/// publié. Per-mode contract: every key present, pending or well formed; a published mode index brings its interval
+/// (around it), its code loss, source, date and engine; without the index, nothing of that mode is published.
+pub fn mode_contract_errors(quality: &BTreeMap<String, QValue>) -> Vec<String> {
+    let mut errors = Vec::new();
+    let pending =
+        |key: &str| matches!(quality.get(key), Some(QValue::Str(text)) if text == PENDING);
+    let number = |key: &str| match quality.get(key) {
+        Some(QValue::Num(raw)) => raw.parse::<f64>().ok(),
+        _ => None,
+    };
+    let percent_keys: Vec<String> = MODE_PREFIXES
+        .iter()
+        .flat_map(|prefix| {
+            MODE_SUFFIXES
+                .iter()
+                .map(move |suffix| format!("{prefix}_{suffix}"))
+        })
+        .collect();
+    let keys = percent_keys
+        .iter()
+        .map(String::as_str)
+        .chain(MODE_STRINGS.iter().copied());
+    for key in keys {
+        let Some(value) = quality.get(key) else {
+            errors.push(format!(
+                "« {key} » absente (« {PENDING} » tant qu'elle n'est pas mesurée) / missing"
+            ));
+            continue;
+        };
+        if pending(key) {
+            continue;
+        }
+        let well_formed = match (key, value) {
+            ("modes_source", QValue::Str(text)) => MODE_SOURCES.contains(&text.as_str()),
+            ("modes_date", QValue::Str(text)) => format::parse_iso_date(text).is_some(),
+            ("modes_engine", QValue::Str(text)) => version_shape(text),
+            (_, QValue::Num(_)) if !MODE_STRINGS.contains(&key) => {
+                number(key).is_some_and(|value| (0.0..=100.0).contains(&value))
+            }
+            _ => false,
+        };
+        if !well_formed {
+            errors.push(format!(
+                "« {key} » = {value:?} : forme attendue / expected shape: {}",
+                match key {
+                    "modes_source" => "« protocole 1.2 » ou « mesure interne, moitié dev »",
+                    "modes_date" => "date ISO / ISO date",
+                    "modes_engine" => "version (« 1.0.2 »)",
+                    _ => "pourcentage 0-100 / percentage 0-100",
+                }
+            ));
+        }
+    }
+    for prefix in MODE_PREFIXES {
+        let index = format!("{prefix}_index");
+        if pending(&index) {
+            for suffix in &MODE_SUFFIXES[1..] {
+                let key = format!("{prefix}_{suffix}");
+                if quality.contains_key(&key) && !pending(&key) {
+                    errors.push(format!(
+                        "« {key} » publiée sans « {index} » / published without the mode index"
+                    ));
+                }
+            }
+            continue;
+        }
+        for key in WITH_MODE_INDEX
+            .iter()
+            .map(|suffix| format!("{prefix}_{suffix}"))
+            .chain(MODE_STRINGS.iter().map(|key| key.to_string()))
+        {
+            if pending(&key) {
+                errors.push(format!(
+                    "indice du mode publié sans « {key} » / mode index published without {key}"
+                ));
+            }
+        }
+        if let (Some(low), Some(value), Some(high)) = (
+            number(&format!("{prefix}_ci_low")),
+            number(&index),
+            number(&format!("{prefix}_ci_high")),
+        ) {
+            if !(low <= value && value <= high) {
+                errors.push(format!(
+                    "intervalle {low}-{high} hors de « {index} » {value} / interval does not hold the mode index"
+                ));
+            }
+        }
+    }
+    errors
+}
+
 /// Contrat des valeurs du protocole public dans quality.json (contrat D) : chaque clé présente, « — » tant qu'elle
 /// n'est pas mesurée, sinon de la bonne forme (pourcentage, entier, date ISO, version) ; un indice publié emporte son
 /// intervalle (qui l'encadre), le nombre de documents et de familles, la date et la version du moteur ; corpus et
@@ -187,13 +301,7 @@ pub fn contract_errors(quality: &BTreeMap<String, QValue>) -> Vec<String> {
         }
         let well_formed = match (key, value) {
             ("protocol_date", QValue::Str(text)) => format::parse_iso_date(text).is_some(),
-            ("protocol_engine", QValue::Str(text)) => {
-                (1..=32).contains(&text.len())
-                    && text.starts_with(|c: char| c.is_ascii_alphanumeric())
-                    && text
-                        .bytes()
-                        .all(|byte| byte.is_ascii_alphanumeric() || b".+-".contains(&byte))
-            }
+            ("protocol_engine", QValue::Str(text)) => version_shape(text),
             (_, QValue::Num(raw)) if PROTOCOL_COUNTS.contains(&key) => {
                 raw.bytes().all(|byte| byte.is_ascii_digit())
             }
@@ -257,6 +365,7 @@ pub fn contract_errors(quality: &BTreeMap<String, QValue>) -> Vec<String> {
     if pending("real_corpora") != pending("real_docs") {
         errors.push("« real_corpora » et « real_docs » vont ensemble / go together".to_string());
     }
+    errors.extend(mode_contract_errors(quality));
     errors
 }
 
@@ -467,6 +576,14 @@ mod tests {
             .chain(["protocol_date", "protocol_engine"].iter())
             .map(|key| (key.to_string(), QValue::Str(PENDING.into())))
             .collect();
+        for prefix in MODE_PREFIXES {
+            for suffix in MODE_SUFFIXES {
+                quality.insert(format!("{prefix}_{suffix}"), QValue::Str(PENDING.into()));
+            }
+        }
+        for key in MODE_STRINGS {
+            quality.insert(key.to_string(), QValue::Str(PENDING.into()));
+        }
         for (key, value) in values {
             quality.insert(key.to_string(), value.clone());
         }
@@ -537,6 +654,70 @@ mod tests {
         let mut missing = protocol(&[]);
         missing.remove("protocol_engine");
         assert!(contract_errors(&missing)[0].contains("protocol_engine"));
+    }
+
+    #[test]
+    fn mode_scores_are_pending_or_published_with_their_interval_and_source() {
+        let num = |raw: &str| QValue::Num(raw.into());
+        let text = |raw: &str| QValue::Str(raw.into());
+        assert!(contract_errors(&protocol(&[])).is_empty());
+        let internal = protocol(&[
+            ("fort_index", num("96.1")),
+            ("fort_ci_low", num("95.4")),
+            ("fort_ci_high", num("96.8")),
+            ("fort_hard_index", num("85.0")),
+            ("fort_code_loss", num("17.4")),
+            ("ess_index", num("94.0")),
+            ("ess_ci_low", num("93.1")),
+            ("ess_ci_high", num("94.9")),
+            ("ess_code_loss", num("3.7")),
+            ("modes_source", text("mesure interne, moitié dev")),
+            ("modes_date", text("2026-10-26")),
+            ("modes_engine", text("1.0.2")),
+        ]);
+        assert!(
+            contract_errors(&internal).is_empty(),
+            "{:?}",
+            contract_errors(&internal)
+        );
+        // Une source inconnue, une date fausse, un pourcentage hors bornes / unknown source, bad date, bad percent.
+        for (key, value) in [
+            ("modes_source", text("protocole 1.1")),
+            ("modes_date", text("2026-13-01")),
+            ("modes_engine", text("v 1")),
+            ("fort_code_loss", num("120")),
+            ("ess_index", text("n/a")),
+        ] {
+            let mut quality = internal.clone();
+            quality.insert(key.to_string(), value);
+            let errors = contract_errors(&quality);
+            assert!(
+                errors.iter().any(|error| error.contains(key)),
+                "{key}: {errors:?}"
+            );
+        }
+        // Indice seul : intervalle, codes perdus, source, date et moteur manquent / index alone: five missing.
+        let alone = protocol(&[("fort_index", num("96.1"))]);
+        assert_eq!(
+            contract_errors(&alone).len(),
+            WITH_MODE_INDEX.len() + MODE_STRINGS.len()
+        );
+        // Intervalle qui n'encadre pas l'indice / interval not holding the index.
+        let mut outside = internal.clone();
+        outside.insert("ess_ci_high".to_string(), num("93.5"));
+        assert!(contract_errors(&outside)[0].contains("ess_index"));
+        // Codes perdus publiés sans l'indice du mode / code loss published without the mode index.
+        let mut orphan = internal.clone();
+        orphan.insert("ess_index".to_string(), text(PENDING));
+        orphan.insert("ess_ci_low".to_string(), text(PENDING));
+        orphan.insert("ess_ci_high".to_string(), text(PENDING));
+        let errors = contract_errors(&orphan);
+        assert_eq!(errors.len(), 1, "{errors:?}");
+        assert!(errors[0].contains("ess_code_loss"));
+        // Une clé absente / a missing key.
+        let mut missing = internal.clone();
+        missing.remove("modes_engine");
+        assert!(contract_errors(&missing)[0].contains("modes_engine"));
     }
 
     #[test]

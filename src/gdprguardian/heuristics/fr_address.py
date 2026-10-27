@@ -39,6 +39,7 @@ from .fr_names import GIVEN_ALONE_MIN
 # Code postal : départements 01-95, Corse 20, DOM-TOM 97-98 (Monaco 98000) / postcode.
 _POSTCODE_RE = re.compile(r"[0-9](?<![\w.,/-][0-9])[0-9]{4}(?![0-9]|[.,][0-9])")
 _COMMUNE_GAP_RE = re.compile(r"[ \t]{1,2}(?:-[ \t]{1,2})?|[ \t]{0,2},[ \t]{1,2}")
+_COMMUNE_BREAK_RE = re.compile(r"[ \t]{0,2},?[ \t]{0,2}\r?\n[ \t]{0,2}")  # COMMUNE_WRAP
 _PLACE_GAP_RE = re.compile(r"[ \t]{1,2}|[ \t]?[-'][ \t]?")
 _SUFFIX_RE = re.compile(
     r"(?:[ \t]{1,2}[0-9]{1,2}(?:e|er|ème|eme|è)?(?![\w]))?"
@@ -56,7 +57,7 @@ _CAPITAL_WORDS_RE = re.compile(rf"[{UPPER}][^\W\d_'-]{{1,30}}(?:[ '-][{UPPER}][^
 _NUMBER_BEFORE_RE = re.compile(
     r"(?<![\w.,])(?<!\b[LRDA]\.[ \t])(?<![0-9]-)"
     r"([0-9]{1,4}(?:[ \t]?(?i:bis|ter|quater|quinquies|[a-h])(?![\w]))?(?:[ \t]?[-/][ \t]?[0-9]{1,4})?)"
-    r"[ \t]{0,2},?[ \t]{0,2}$")
+    r"[ \t]{0,2},?[ \t]{0,2}\r?$")  # CRLF comme LF (revue du 26/10, crlf) / CRLF exactly like LF
 _NAME_WORD_RE = re.compile(r"[^\W\d_][^\W\d_'’-]{0,30}(?:['’-][^\W\d_]{1,30}){0,4}|[0-9]{1,4}(?:er|e|ème)?(?!\w)")
 _NAME_LOWER_PARTICLES = frozenset({"de", "du", "des", "d", "l", "la", "le", "les", "aux", "au", "en", "sur", "sous",
                                    "lès", "lez", "et"})
@@ -67,6 +68,67 @@ _STREET_ADJECTIVES = frozenset({"grande", "grand", "petite", "petit", "vieux", "
 _ADJECTIVE_BEFORE_RE = re.compile(r"(?<![\w.,'’-])([^\W\d_]{3,9})[ \t]{1,2}$")
 # Lieu-dit devant un code postal vérifié (« 2 la Testière 50700 … », « Adresse : La Testière 16570 … »).
 # Named place before a verified postcode.
+# Retour à la ligne dans un nom de voie coupé après une particule, marques de citation « > » comprises (courriel
+# cité). A line break inside a street name cut after a particle, quote marks included (quoted e-mail).
+_WRAP_GAP_RE = re.compile(r"[ \t]*\r?\n[ \t]*(?:>[ \t]*)*")
+# Fix 1.0.2 (revue des faux positifs, STREET_WRAP) : une voie dont le type finit la ligne ne continue sur la suivante
+# que si celle-ci ressemble à un nom de voie : des particules (« des », « de la », « d' »…) puis un mot capitalisé,
+# ou un mot capitalisé qui n'ouvre pas une phrase (« À revoir », « Merci ») et n'est pas un libellé (« Téléphone : »).
+# Jumeau Rust : `street_line_follows`. A street whose type ends the line continues on the next one only when that
+# line looks like a street name: particles then a capitalised word, or a capitalised word that does not start a
+# sentence and is not a label.
+_WRAP_PARTICLES = ("des", "du", "de", "les", "la", "le")
+_WRAP_STARTS = frozenset({
+    "à", "a", "au", "aux", "il", "elle", "ils", "elles", "nous", "vous", "je", "j", "on", "ce", "cette", "ces", "cet",
+    "un", "une", "merci", "cordialement", "bonjour", "bonsoir", "voir", "pour", "avec", "et", "ou", "mais", "donc",
+    "si", "en", "dans", "sur", "par", "puis", "ensuite", "tél", "tel", "téléphone", "telephone", "mail", "email",
+    "courriel", "fax", "mobile", "portable", "contact", "objet", "date", "réf", "ref", "pj", "nb", "note", "remarque",
+    "total", "montant", "prix", "fin", "suite", "voici", "attention", "important", "rappel", "signé", "fait", "le",
+    "la", "les", "mon", "ma", "mes", "son", "sa", "ses", "notre", "nos", "votre", "vos", "leur", "leurs", "qui", "que",
+    "quand", "comme", "selon", "après", "avant", "depuis", "lors", "chez", "entre", "vers", "sans", "sous", "ne",
+    "pas"})
+_LETTERS_RE = re.compile(r"[^\W\d_]+")
+
+
+def _particle_at(text: str, i: int, particle: str) -> bool:
+    """`particle` en `i`, minuscules ou capitales ASCII / `particle` at `i`, ASCII lower or upper case."""
+    return i + len(particle) <= len(text) and all(text[i + m] in (c, c.upper()) for m, c in enumerate(particle))
+
+
+def _street_line_follows(text: str, pos: int) -> bool:
+    """La ligne qui commence en `pos` ressemble à un nom de voie (STREET_WRAP) / the line looks like a street name."""
+    n = len(text)
+    i = pos
+    while i < n and text[i] in " \t>":
+        i += 1
+    particles = False
+    while True:
+        if i + 1 < n and text[i] in "dlDL" and text[i + 1] in "'’":
+            i += 2
+            particles = True
+            continue
+        k = -1
+        for particle in _WRAP_PARTICLES:
+            if _particle_at(text, i, particle) and i + len(particle) < n and text[i + len(particle)] in " \t":
+                k = i + len(particle)
+                break
+        if k < 0:
+            break
+        while k < n and text[k] in " \t":
+            k += 1
+        i = k
+        particles = True
+    if particles and i < n and text[i] in "0123456789":
+        return True  # « 103 rue⏎du 8 Mai 1945 », « du 11 Novembre » : une date après la particule / a date
+    word = _LETTERS_RE.match(text, i)
+    if word is None or not text[i].isupper():
+        return False
+    after = word.end()
+    while after < n and text[after] in " \t":
+        after += 1
+    if after < n and text[after] == ":":
+        return False  # un libellé (« Téléphone : ») / a label
+    return particles or word.group().lower() not in _WRAP_STARTS
 _PLACE_WORDS_MAX = 6
 _PLACE_SEGMENT_MAX = 80
 _HOUSE_NUMBER_RE = re.compile(r"[0-9]{1,4}(?i:bis|ter|[a-h])?,?")
@@ -89,6 +151,7 @@ _LINE_SEPARATORS = ",–—-"
 # ou un tiret, puis fin de ligne ou ponctuation. Town after a comma, "à" or a dash, then line end or punctuation.
 _TOWN_GAP_RE = re.compile(r"[ \t]{0,2},[ \t]{1,2}|[ \t]{1,2}[à–-][ \t]{1,2}")
 _TOWN_END_RE = re.compile(r"[ \t]{0,2}(?:[\r\n.,;)]|$)")
+_COMMUNE_WORD_RE = re.compile(r"commune[ \t]{1,2}(?:de[ \t]{1,2}|d['’])")
 _STOP_LOWER = frozenset({"depuis", "pour", "avec", "et", "mais", "où", "qui", "que", "dans", "chez", "ou", "puis",
                          "il", "elle", "je", "nous", "vous", "est", "sont", "a", "ont", "était", "à", "au", "en",
                          "pendant", "car", "donc", "lorsque", "quand", "si", "ne", "pas", "on", "se", "sa", "son"})
@@ -141,7 +204,10 @@ _COMPLEMENT_HINTS = ("bat", "bât", "esc", "app", "tage", "entr", "sidence", "s.
 _COMPLEMENT_LINE_RE = re.compile(r"[ \t]{0,6}" + _COMPLEMENT)
 # Domicile d'une personne (« domicilié rue … », « demeurant … ») / a person's home address cue.
 _TRIGGER_RE = re.compile(r"domicili|demeur|resid|habit|adresse|\bsise?\b")
-_TRIGGERS = ("domicili", "demeur", "resid", "habit", "adresse", " sis")
+_TRIGGERS = ("domicili", "demeur", "resid", "habit", "adresse", " sis", "lieu-dit", "lieu dit")
+# Lieu-dit (2e test terrain, modes fort et essentiel) : le mot désigne à lui seul un lieu d'habitation, sans numéro
+# ni indice (« lieu dit La Croix Blanche »). A named place needs neither a house number nor a home cue.
+_PLACE_TYPES = frozenset({"lieu-dit", "lieu dit"})
 # Mot de domicile en début de mot, juste avant un code postal et sa commune seuls, sur la même ligne et dans la même
 # phrase (« domiciliée à 69003 Lyon », « Domicile : 59000 Lille ») : lieu de résidence d'une personne, masqué. Pas
 # « Adresse : », étiquette des adresses d'organismes (marchés publics). A home word at a word start, right before a
@@ -155,12 +221,94 @@ _BOX_HINTS = ("bp", "b.p", "cs", "c.s", "tsa", "t.s.a", "postale")  # préfiltre
 # verified town; the others keep the detector's reason, « postcode_and_town ».
 STREET_NUMBERED = "street_and_number"
 STREET_CUED = "street_after_home_word"
+NAMED_PLACE = "named_place"  # lieu-dit (`_PLACE_TYPES`) / a named place
 _MAX_STREET_NAME = 70
 _MAX_LINK = 24         # écart maximal entre voie et code postal / max gap between street and postcode
 _MAX_COMPLEMENT = 160  # longueur maximale des compléments d'adresse / max length of address complements
 # Types de voie, cherchés en un passage sur le texte replié ; compilé une fois / street types, one pass, compiled once.
 _TYPES = sorted(V.STREET_TYPES)
 _TYPE_AC = ahocorasick_rs.AhoCorasick(_TYPES, matchkind=ahocorasick_rs.MatchKind.LeftmostLongest)
+
+
+_POSTCODE_TOWN_GAP_RE = re.compile(r"[ \t]{1,2}")
+# Particules d'un nom de commune, en minuscules entre deux mots capitalisés / town-name particles between capitals.
+_POSTCODE_TOWN_PARTICLES = frozenset({"de", "du", "des", "la", "le", "les", "sur", "sous", "en", "l", "d", "lez", "aux",
+                                      "au"})
+
+
+_LABEL_WINDOW = 60  # « adresse » au plus 60 caractères avant les deux-points / "adresse" at most 60 characters back
+_LABEL_TAIL = 40    # au plus 40 caractères entre « adresse » et les deux-points / at most 40 after "adresse"
+# L'étiquette nomme une personne (texte replié) ; « Adresse : 69003 Lyon » seule reste lisible (§ 2, adresses
+# d'organisations). The label names a person (folded text); a bare "Adresse :" stays readable (§ 2).
+_LABEL_PERSONS = ("salari", "employ", "client", "patient", "personnel", "domicil", "locataire", "assure",
+                  "beneficiaire", "adherent", "eleve", "candidat", "usager", "abonne", "titulaire", "agent",
+                  "interesse", "conjoint", "enfant", "parent", "proprietaire", "debiteur", "souscripteur", "requerant",
+                  "demandeur", "victime", "temoin", "stagiaire", "resident")
+
+
+def _labelled(folded: str, pos: int) -> bool:
+    """Règle ADDRESS_LABEL (revue du 26/10, tous modes) : « Adresse du salarié : 75011 Paris », une étiquette d'adresse
+    qui nomme une personne juste avant `pos` (« adresse », au plus 40 caractères sans chiffre ni « . : ; » dont un mot
+    de `_LABEL_PERSONS`, puis « : »), même ligne. Le code postal et sa commune font alors une adresse. Écrite sans
+    assertion arrière (le compilateur du noyau Rust n'en prend que d'un caractère). An address label naming a person
+    right before `pos`, same line: the postcode and its town then make an address. Written without a look-behind.
+    """
+    p = pos
+    while p > 0 and folded[p - 1] in " \t":
+        p -= 1
+    if p == 0 or folded[p - 1] != ":":
+        return False
+    p -= 1
+    while p > 0 and folded[p - 1] in " \t":
+        p -= 1
+    k = folded.rfind("adresse", max(0, p - _LABEL_WINDOW), p)
+    if k < 0 or (k > 0 and (folded[k - 1].isalnum() or folded[k - 1] == "_")):
+        return False
+    between = folded[k + 7:p]
+    return (len(between) <= _LABEL_TAIL and not any(c in "0123456789\n.:;" for c in between)
+            and any(word in between for word in _LABEL_PERSONS))
+
+
+# Règle OFFICE_NUMBER (revue du 26/10, tous modes) : un numéro de bureau, de salle ou de porte en fin de ligne n'est
+# pas le numéro de la voie qui commence la ligne d'après (« Bureau 1⏎rue de la Paix »). An office, room or door number
+# ending a line is not the house number of the street starting the next line.
+_ASCII_DIGIT_SET = frozenset("0123456789")
+_OFFICE_WORDS = frozenset({"bureau", "salle", "piece", "porte", "local", "chambre", "poste", "casier", "guichet",
+                           "box"})
+
+
+def _office_before(folded: str, pos: int) -> bool:
+    """Le mot juste avant `pos` (même ligne) est-il un mot de bureau ? / is the word right before an office word?"""
+    p = pos
+    while p > 0 and folded[p - 1] in " \t":
+        p -= 1
+    k = p
+    while k > 0 and (folded[k - 1].isalnum() or folded[k - 1] == "_"):
+        k -= 1
+    return k < p and folded[k:p] in _OFFICE_WORDS
+
+
+def _town_after_postcode(text: str, folded: str, end: int) -> int:
+    """Fin de la commune écrite après un code postal non vérifié (mots capitalisés reliés par des particules, puis
+    fin de ligne ou ponctuation), ou `end` (le code postal seul). End of the town written after an unverified
+    postcode (capitalised words joined by particles, then line end or punctuation), or `end` (the postcode alone).
+    """
+    gap = _POSTCODE_TOWN_GAP_RE.match(text, end)
+    if gap is None or not text[gap.end():gap.end() + 1].isupper():
+        return end
+    cursor, last, count = gap.end(), end, 0
+    for m in PLACE_TOKEN_RE.finditer(folded, cursor, min(len(text), cursor + 60)):
+        if m.start() != cursor and _PLACE_GAP_RE.fullmatch(text, cursor, m.start()) is None:
+            break
+        upper = text[m.start()].isupper()
+        if not upper and m.group() not in _POSTCODE_TOWN_PARTICLES:
+            break
+        cursor, count = m.end(), count + 1
+        if upper and _TOWN_END_RE.match(text, cursor):
+            last = cursor
+        if count == 8:
+            break
+    return last
 
 
 class FrenchAddressDetector:
@@ -201,7 +349,7 @@ class FrenchAddressDetector:
         boxes = [m.span() for m in _BOX_RE.finditer(text)] if has_box else []
         spans: list[Span] = []
         used: set[int] = set()
-        street_parts = sorted(((s, e) for s, e, _ in streets), key=lambda p: p[1])
+        street_parts = sorted(((s, e) for s, e, _, _ in streets), key=lambda p: p[1])
         street_ends = [e for _, e in street_parts]
         box_ends = [e for _, e in boxes]  # déjà triées par position / already sorted
         for start, end, score in anchors:
@@ -225,19 +373,34 @@ class FrenchAddressDetector:
                     left = place  # « 2 la Testière 50700 … » : lieu-dit / named place
                 elif score < 0.8 or (box is None and self._complement(text, left) == left
                                      and not self._street_near(street_parts, street_ends, left, text)
-                                     and not (has_home and self._home(ctx.folded, left))):
+                                     and not (has_home and self._home(ctx.folded, left))
+                                     and not _labelled(ctx.folded, left)):
                     # Commune non vérifiée sans voie ; code postal et commune seuls, sans complément, voie proche ni
                     # mot de domicile : conservés (REGLES.md § 2). Unverified town without a street; postcode and
                     # town alone, with no complement, nearby street or home word: kept (REGLES.md § 2).
                     continue
-            spans.append(self._span(self._complement(text, left), end, score))
-        for start, end, numbered in streets:
+            head = self._complement(text, left)
+            if street is None:
+                # « 12 rue des Lilas⏎Bât. C, 3e étage⏎75011 Paris » (2e test terrain, modes fort et essentiel) : la voie
+                # finie juste avant la ligne de compléments ou le lieu-dit fait partie de l'adresse, une seule balise.
+                # The street ending right before the complement line or named place belongs to the address: one tag.
+                joined = self._before(street_parts, street_ends, head, text)
+                if joined is not None:
+                    used.add(joined[0])
+                    head = self._complement(text, joined[0])
+            spans.append(self._span(head, end, score))
+        for start, end, numbered, place in streets:
             if start in used:
                 continue
-            if numbered or (has_trigger and self._cued(ctx.folded, start)):
+            if numbered or place or (has_trigger and self._cued(ctx.folded, start)):
                 tail = _POSTCODE_TAIL_RE.match(text, end) if has_digit else None
                 if tail is not None and tail.group(1) in self._lex.postal:
                     end = tail.end()  # « 40 avenue de la Grande Armée 75017 » : code postal sans commune
+                elif tail is not None:
+                    # Filtre fort 1.0.2 : code postal qu'aucun département ne porte, derrière la voie, et sa commune
+                    # (« 1, rue des Brumes, 99900 Val-des-Nuages, France »). Strong filter: a postcode no département
+                    # owns, after the street, and its town.
+                    end = _town_after_postcode(text, ctx.folded, tail.end())
                 else:
                     # « 6 rue des Essais, Vouziers », « Adresse : Place du Théâtre, Testville » : voie numérotée ou
                     # après un indice / numbered or cued street.
@@ -245,7 +408,7 @@ class FrenchAddressDetector:
                 # Raison propre (`explain`) : voie numérotée, ou voie après un mot de domicile, sans commune vérifiée.
                 # Own reason: numbered street, or street after a home word, without a verified town.
                 spans.append(self._span(self._complement(text, start), end, 0.85 if numbered else 0.75,
-                                        STREET_NUMBERED if numbered else STREET_CUED))
+                                        STREET_NUMBERED if numbered else NAMED_PLACE if place else STREET_CUED))
         # Boîte postale seule (« CS61336 », « BP 60120, Contact … ») / a lone postal box (`_lone_box`).
         for start, end in boxes:
             if _lone_box(text, start, end):
@@ -424,10 +587,17 @@ class FrenchAddressDetector:
         """« 6 rue des Essais, VOUZIERS » : commune connue après une voie numérotée, sans code postal, puis fin de ligne
         ou ponctuation. A known town after a numbered street, without a postcode, then line end or punctuation."""
         gap = _TOWN_GAP_RE.match(text, end)
-        if gap is None or not text[gap.end():gap.end() + 1].isupper():
+        if gap is None:
+            return end
+        cursor = gap.end()
+        # « lieu dit La Croix Blanche, commune de Plouay » (2e test terrain) : « commune de » après la virgule.
+        # "commune de" after the comma.
+        commune = _COMMUNE_WORD_RE.match(text, cursor) if "," in gap.group() else None
+        if commune is not None:
+            cursor = commune.end()
+        if not text[cursor:cursor + 1].isupper():
             return end
         tokens: list[tuple[int, int, str]] = []
-        cursor = gap.end()
         for m in PLACE_TOKEN_RE.finditer(folded, cursor, min(len(text), cursor + 60)):
             if m.start() != cursor and _PLACE_GAP_RE.fullmatch(text, cursor, m.start()) is None:
                 break
@@ -473,8 +643,14 @@ class FrenchAddressDetector:
                  known: frozenset[str]) -> tuple[int | None, float]:
         """Fin de la commune après le code, et confiance / end of the commune after the code, and confidence."""
         gap = _COMMUNE_GAP_RE.match(text, pos)
-        if gap is None:
-            return None, 0.0
+        # Règle COMMUNE_WRAP (revue du 26/10, équipe rouge line_break et crlf, tous modes) : code postal en fin de
+        # ligne, commune vérifiée en tête de la suivante (« 97600⏎MAMOUDZOU ») ; une commune inconnue ne passe jamais
+        # la ligne. Postcode ending a line, verified town heading the next one; an unknown town never crosses the line.
+        wrapped = gap is None or text[gap.end():gap.end() + 1] in ("\r", "\n")
+        if wrapped:
+            gap = _COMMUNE_BREAK_RE.match(text, pos)
+            if gap is None:
+                return None, 0.0
         tokens: list[tuple[int, int, str]] = []
         cursor = gap.end()
         limit = min(len(text), cursor + 60)
@@ -488,6 +664,8 @@ class FrenchAddressDetector:
         for k in range(len(tokens), 0, -1):
             if " ".join(t[2] for t in tokens[:k]) in known:
                 return tokens[k - 1][1], 0.9 if names is not None else 0.85
+        if wrapped:
+            return None, 0.0
         # Commune inconnue : mots capitalisés, retenus seulement avec une voie ou CEDEX / unknown commune.
         words = _CAPITAL_WORDS_RE.match(text, gap.end())
         if words is None:
@@ -509,7 +687,7 @@ class FrenchAddressDetector:
 
     # --- voies / streets ---------------------------------------------------------------------------------------
 
-    def _streets(self, text: str, folded: str) -> list[tuple[int, int, bool]]:
+    def _streets(self, text: str, folded: str) -> list[tuple[int, int, bool, bool]]:
         streets = []
         length = len(folded)
         for index, start, end in _TYPE_AC.find_matches_as_indexes(folded, overlapping=False):
@@ -524,6 +702,8 @@ class FrenchAddressDetector:
                 adjective = None
             head = adjective.start(1) if adjective is not None else start
             number = _NUMBER_BEFORE_RE.search(text, max(0, head - 24), head)
+            if number is not None and "\n" in text[number.start(1):head] and _office_before(folded, number.start(1)):
+                number = None  # « Bureau 1⏎rue … » : le numéro du bureau n'est pas celui de la voie / an office number
             if number is None and kind in V.STREET_ABBREVIATIONS:
                 continue
             if end < length and text[end] == "." and not kind.endswith("."):
@@ -533,7 +713,7 @@ class FrenchAddressDetector:
                 if adjective is None:
                     continue
                 name_end = end
-            streets.append((number.start(1) if number else head, name_end, number is not None))
+            streets.append((number.start(1) if number else head, name_end, number is not None, kind in _PLACE_TYPES))
         return streets
 
     @staticmethod
@@ -545,8 +725,20 @@ class FrenchAddressDetector:
         """
         limit = min(len(text), pos + _MAX_STREET_NAME)
         line_end = text.find("\n", pos, limit)
+        wrapped = False
         if line_end >= 0:
             limit = line_end
+            # Nom coupé après une particule en fin de ligne (2e test terrain, modes fort et essentiel) : « 29 avenue
+            # de la⏎Gare », « 4 impasse des⏎> Camélias » (courriel cité, coupé à 72 colonnes) : le nom continue sur
+            # la ligne suivante. A name cut after a particle at the line end continues on the next line.
+            # Règle STREET_WRAP (revue du 26/10, équipe rouge line_break et crlf, tous modes) : voie numérotée dont le
+            # type finit la ligne (« 84 rue⏎des Lilas ») : le nom est sur la ligne suivante. A numbered street whose
+            # type ends the line: the name is on the next line.
+            if FrenchAddressDetector._dangling(text, pos, line_end) or (
+                    numbered and not text[pos:line_end].strip(" \t\r") and _street_line_follows(text, line_end + 1)):
+                wrapped = True
+                next_end = text.find("\n", line_end + 1, min(len(text), pos + _MAX_STREET_NAME))
+                limit = min(len(text), pos + _MAX_STREET_NAME) if next_end < 0 else next_end
         end: int | None = None
         mode = ""   # "upper" : nom capitalisé, "lower" : nom en minuscules / capitalised or lowercase name
         count = 0
@@ -554,8 +746,21 @@ class FrenchAddressDetector:
         for m in _NAME_WORD_RE.finditer(text, pos, limit):
             gap = text[cursor:m.start()]
             glued = cursor > pos and not gap and text[cursor - 1] in "'’"
-            if gap.strip(" \t") or not (gap or glued):
+            if gap.strip(" \t") and not (wrapped and _WRAP_GAP_RE.fullmatch(gap) is not None):
                 break  # mots séparés par des espaces, ou collés après « l' » / spaces, or glued after "l'"
+            if not (gap or glued):
+                break
+            # Règle CODE_HEAD (revue du 26/10, tous modes) : un mot collé à « - » ou « _ » puis un chiffre est la tête
+            # d'un code, pas la suite du nom (« 12 rue des Lilas SKU-123456 », « 4 rue Haute FAC-2024-0012 ») ; en mode
+            # essentiel le code reste entier et lisible. Cinq chiffres juste après sont un code postal collé, pas un
+            # code (« route du Moulin de la Croix-99900 Val-des-Nuages », exemple fictif). A word glued to "-" or "_"
+            # then a digit heads a code; five digits right after are a glued postcode.
+            if text[m.end():m.end() + 1] in ("-", "_"):
+                digits = 0
+                while m.end() + 1 + digits < len(text) and text[m.end() + 1 + digits] in _ASCII_DIGIT_SET:
+                    digits += 1
+                if digits and digits != 5:
+                    break
             cursor = m.end()
             word = m.group()
             core = word[2:] if len(word) > 2 and word[1] in "'’" and word[0] in "dlDL" else word
@@ -573,6 +778,19 @@ class FrenchAddressDetector:
             end = m.end()
             count += 1
         return end
+
+    @staticmethod
+    def _dangling(text: str, pos: int, line_end: int) -> bool:
+        """Entre `pos` et la fin de ligne, rien que des particules (au moins une) : le nom de voie est coupé
+        (« avenue de la⏎Gare »). Only particles (one at least) up to the line end: the street name is cut."""
+        words = 0
+        cursor = pos
+        for m in _NAME_WORD_RE.finditer(text, pos, line_end):
+            if text[cursor:m.start()].strip(" \t") or m.group().lower().rstrip("'’") not in _NAME_LOWER_PARTICLES:
+                return False
+            words += 1
+            cursor = m.end()
+        return words > 0 and not text[cursor:line_end].strip(" \t\r")
 
     # --- assemblage / assembly ---------------------------------------------------------------------------------
 

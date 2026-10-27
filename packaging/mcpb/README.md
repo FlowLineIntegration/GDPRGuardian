@@ -4,13 +4,13 @@
 
 ## Français
 
-`gdprguardian-1.0.1.mcpb` s'installe dans Claude Desktop (macOS, Windows) par double-clic ou Paramètres >
+`gdprguardian-1.0.2.mcpb` s'installe dans Claude Desktop (macOS, Windows) par double-clic ou Paramètres >
 Extensions. Il ne contient que `manifest.json`, `icon.png` et `LICENSE` : au premier lancement, `uvx` installe
 Gardien RGPD à la version épinglée, **la même que celle du plugin Claude et du service en ligne**, puis lance le
 serveur MCP local. Rien ne quitte le poste.
 
 ```
-uvx --from "gdprguardian[local]==1.0.1" gdprguardian mcp --stdio --allow-dir <dossier 1> <dossier 2> ...
+uvx --from "gdprguardian[local]==1.0.2" gdprguardian mcp --stdio --allow-dir <dossier 1> <dossier 2> ...
 ```
 
 ### Choix du manifeste
@@ -30,7 +30,7 @@ uvx --from "gdprguardian[local]==1.0.1" gdprguardian mcp --stdio --allow-dir <do
 
 ```bash
 npm install -g @anthropic-ai/mcpb          # CLI officielle, une fois
-python packaging/mcpb/build.py            # mcpb validate, puis mcpb pack -> dist/gdprguardian-1.0.1.mcpb
+python packaging/mcpb/build.py            # mcpb validate, puis mcpb pack -> dist/gdprguardian-1.0.2.mcpb
 ```
 
 Le script vérifie que la version du manifeste, l'épinglage de `uvx` et la version du plugin Claude sont
@@ -43,7 +43,7 @@ Vérifié ici : `mcpb validate` et `mcpb pack` ; la commande que la fonction off
 tire du manifeste (Windows, Linux, macOS simulé), installée depuis un index local qui imite PyPI et pilotée par
 le client MCP officiel (outils, anonymisation d'un PDF dans un dossier autorisé, refus hors des dossiers).
 Sans réseau, `uvx` ne démarre le serveur que si sa copie de l'index est récente ; après
-`uv tool install "gdprguardian[local]==1.0.1"`, il démarre sans réseau (vérifié sous Windows et Linux, réseau
+`uv tool install "gdprguardian[local]==1.0.2"`, il démarre sans réseau (vérifié sous Windows et Linux, réseau
 coupé). Non vérifié, faute de machine vierge avec Claude Desktop :
 
 1. Installation par double-clic, affichage de l'icône, du sélecteur de dossiers multiple et de l'obligation
@@ -52,7 +52,7 @@ coupé). Non vérifié, faute de machine vierge avec Claude Desktop :
    Homebrew) ; sinon, message de Claude Desktop.
 3. Windows : `uvx` trouvé après une installation de uv faite avant le lancement de Claude Desktop.
 4. Premier lancement : durée du téléchargement de Gardien RGPD face au délai de démarrage de Claude Desktop ;
-   sinon, pré-installer avec `uv tool install "gdprguardian[local]==1.0.1"`.
+   sinon, pré-installer avec `uv tool install "gdprguardian[local]==1.0.2"`.
 5. Plusieurs dossiers choisis : tous acceptés, un fichier hors dossiers refusé (`not_found`).
 6. Disponibilité de l'extension dans Cowork : non documentée pour un `.mcpb` installé seul ; la voie documentée
    vers Cowork est le plugin (`integrations/claude/plugin`).
@@ -60,7 +60,7 @@ coupé). Non vérifié, faute de machine vierge avec Claude Desktop :
 
 ## English
 
-`gdprguardian-1.0.1.mcpb` installs in Claude Desktop (macOS, Windows) by double-click or Settings > Extensions. It
+`gdprguardian-1.0.2.mcpb` installs in Claude Desktop (macOS, Windows) by double-click or Settings > Extensions. It
 only holds `manifest.json`, `icon.png` and `LICENSE`: at first start, `uvx` installs GDPR Guardian at the pinned
 version, **the same as the Claude plugin's and the online service's**, then starts the local MCP server. Nothing
 leaves the computer.
@@ -79,7 +79,7 @@ leaves the computer.
   validate` and `mcpb pack` into `dist/`). It never signs: signing is up to the publisher.
 - **Still to check on a clean Claude Desktop (macOS and Windows).** Double-click install and the multiple folder
   picker; `uvx` found on macOS through the `PATH` override and on Windows; first-start download time against
-  Claude Desktop's start-up timeout (pre-install with `uv tool install "gdprguardian[local]==1.0.1"`, which also lets
+  Claude Desktop's start-up timeout (pre-install with `uv tool install "gdprguardian[local]==1.0.2"`, which also lets
   the server start without any network; without it, `uvx` needs the network once its index copy is a few
   minutes old);
   several folders accepted and a file outside refused; availability in Cowork (the documented path to Cowork is

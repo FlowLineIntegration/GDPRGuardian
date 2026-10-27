@@ -26,7 +26,7 @@ from gdprguardian.server.service import Service
 
 pytestmark = [pytest.mark.anyio, pytest.mark.usefixtures("fake_documents")]
 SHARED = {"get_anonymized", "anonymize_text", "list_packs"}
-OPTIONS = {"countries", "profile", "label_language", "rules", "explain"}
+OPTIONS = {"countries", "mode", "disable", "profile", "label_language", "rules", "explain"}
 NONCE = re.compile(r"(GDPRGUARDIAN_DOCUMENT) [0-9a-f]{12}")
 CONFIG = ServerConfig(dev_no_auth=True, limits=LimitPolicy(mode="off"), page_chars=1000, isolation=False)
 

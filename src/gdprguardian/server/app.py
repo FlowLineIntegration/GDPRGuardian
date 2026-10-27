@@ -25,6 +25,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.types import ASGIApp, Scope
 
 from .. import __version__
+from ..categories import MODES_HELP
 from .admission import AdmissionMiddleware
 from .api import build_router
 from .config import MULTIPART_ENVELOPE_BYTES, ServerConfig, scrub_settings
@@ -37,9 +38,11 @@ from .middleware import (
     BodySizeLimitMiddleware,
     GateMiddleware,
     HostGuardMiddleware,
+    McpProtocolGuard,
     SecurityHeadersMiddleware,
     route_template,
 )
+from .options import CATEGORIES_HELP
 from .security import ApiKeyAuthenticator, Authenticator, DevAuthenticator
 from .service import Service
 
@@ -61,10 +64,11 @@ _SYNCHRONOUS_ROUTES = frozenset({"/v1/anonymize/text", "/v1/detect", "/v1/anonym
 _HTTP_ERROR_CODES = {404: "not_found", 405: "method_not_allowed"}
 # Seuls ces noms de champs reviennent dans une erreur 422 (jamais une clé JSON inventée par le client).
 # Only these field names come back in a 422 (never a JSON key made up by the client).
-_KNOWN_FIELDS = frozenset({"body", "query", "path", "text", "countries", "profile", "label_language", "filename",
-                           "page", "page_chars", "format", "upload_id", "token"})
-_ALLOWED_VALUES = {"profile": "fast | standard | strict", "label_language": "fr | en | auto",
-                   "format": "json | markdown"}
+_KNOWN_FIELDS = frozenset({"body", "query", "path", "text", "countries", "mode", "disable", "profile", "label_language",
+                           "rules", "explain", "filename", "page", "page_chars", "format", "upload_id", "token"})
+_ALLOWED_VALUES = {"profile": "fast | standard | strict (deprecated: use mode)", "label_language": "fr | en | auto",
+                   "format": "json | markdown", "mode": MODES_HELP,
+                   "disable": "a list of categories: " + CATEGORIES_HELP, "explain": "true | false"}
 _DEV_WARNING = ("!!! GDPRGUARDIAN_DEV_NO_AUTH=1 : AUCUNE AUTHENTIFICATION. Usage local uniquement, jamais exposé "
                 "sur un réseau. / NO AUTHENTICATION. Local use only, never expose it on a network. !!!")
 
@@ -124,7 +128,7 @@ def create_app(config: ServerConfig | None = None, *, clock: Callable[[], float]
     if mcp_app is not None:
         # Route exacte vers l'application MCP : POST /mcp répond 200 (pas de redirection 307), et les autres
         # chemins gardent les erreurs JSON de l'API. Exact route to the MCP app: no 307, JSON errors elsewhere.
-        app.add_route("/mcp", mcp_app, include_in_schema=False)
+        app.add_route("/mcp", McpProtocolGuard(mcp_app), include_in_schema=False)
 
     def limit_for(scope: Scope) -> int:
         route = route_template(scope.get("path", ""))

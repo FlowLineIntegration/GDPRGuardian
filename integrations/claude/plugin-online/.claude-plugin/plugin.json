@@ -1,6 +1,6 @@
 {
   "name": "gdprguardian-online",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Anonymisation irréversible des documents avant que Claude les lise, par le service public gratuit Gardien RGPD : sans clé, rien à installer. / Irreversible anonymisation of documents before Claude reads them, through the free GDPR Guardian public service: no key, nothing to install.",
   "author": {
     "name": "Guillaume CLEMENT - Flow Line Intégration"

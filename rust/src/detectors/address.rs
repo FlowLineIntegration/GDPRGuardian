@@ -67,6 +67,8 @@ pub struct AddressData {
 /// Raisons propres des voies sans commune vérifiée (`STREET_NUMBERED`, `STREET_CUED`) / own reasons of streets.
 pub const STREET_NUMBERED: &str = "street_and_number";
 pub const STREET_CUED: &str = "street_after_home_word";
+/// `fr_address.NAMED_PLACE` : lieu-dit / a named place.
+pub const NAMED_PLACE: &str = "named_place";
 /// Zone d'adresse : (début, fin, score, raison propre) / address span: (start, end, score, own reason).
 pub type AddressSpan = (usize, usize, f64, Option<&'static str>);
 
@@ -85,7 +87,12 @@ struct StreetKind {
     strong: bool,
     ends_with_dot: bool,
     ends_alnum: bool,
+    /// `_PLACE_TYPES` : lieu-dit, sans numéro ni indice / a named place, needing neither number nor cue.
+    place: bool,
 }
+
+/// `fr_address._PLACE_TYPES` (types repliés) / folded named-place types.
+const PLACE_TYPES: [&str; 2] = ["lieu-dit", "lieu dit"];
 
 struct Anchor {
     start: usize,
@@ -97,6 +104,7 @@ struct Street {
     start: usize,
     end: usize,
     numbered: bool,
+    place: bool,
 }
 
 pub struct AddressDetector {
@@ -162,6 +170,7 @@ impl AddressDetector {
                 strong: data.strong_types.contains(kind),
                 ends_with_dot: kind.ends_with('.'),
                 ends_alnum: kind.chars().next_back().is_some_and(|c| table.is_alnum(c)),
+                place: PLACE_TYPES.contains(&kind.as_str()),
             })
             .collect();
         let patterns = |words: &[&str]| -> Vec<CiPattern> { words.iter().map(|w| CiPattern::new(w, &table)).collect() };
@@ -233,7 +242,9 @@ impl AddressDetector {
             if let Some(found) = first_box {
                 left = found.0;
             }
+            let mut linked = false;
             if let Some(street) = self.before(t, &street_parts, left) {
+                linked = true;
                 used.insert(street.0);
                 left = street.0;
                 score = score.max(0.92);
@@ -251,33 +262,53 @@ impl AddressDetector {
                 || (first_box.is_none()
                     && self.complement(t, left) == left
                     && !self.street_near(t, &street_parts, left)
-                    && !home(f, left))
+                    && !home(f, left)
+                    && !labelled(f, left))
             {
                 // Commune non vérifiée sans voie ; code postal et commune seuls, sans complément, voie proche ni mot
                 // de domicile : conservés. Unverified town without a street; postcode and town alone, with no
                 // complement, nearby street or home word: kept.
                 continue;
             }
-            spans.push((self.complement(t, left), anchor.end, score, None));
+            let mut head = self.complement(t, left);
+            // « 12 rue des Lilas⏎Bât. C, 3e étage⏎75011 Paris » : la voie juste avant les compléments, une seule
+            // balise / the street right before the complement line: one tag.
+            let joined = if linked { None } else { self.before(t, &street_parts, head) };
+            if let Some(street) = joined {
+                used.insert(street.0);
+                head = self.complement(t, street.0);
+            }
+            spans.push((head, anchor.end, score, None));
         }
         for street in &streets {
-            if used.contains(&street.start) || !(street.numbered || (has_trigger && cued(f, street.start))) {
+            if used.contains(&street.start)
+                || !(street.numbered || street.place || (has_trigger && cued(f, street.start)))
+            {
                 continue;
             }
             let mut end = street.end;
             let mut tail = false;
             if has_digit {
                 if let Some((code, tail_end)) = postcode_tail(t, end) {
-                    if self.postal.contains_key(&code) {
-                        end = tail_end; // « 40 avenue de la Grande Armée 75017 »
-                        tail = true;
-                    }
+                    end = if self.postal.contains_key(&code) {
+                        tail_end // « 40 avenue de la Grande Armée 75017 »
+                    } else {
+                        // Filtre fort 1.0.2 : code postal non vérifié et sa commune / unverified postcode and its town.
+                        town_after_postcode(t, f, tail_end)
+                    };
+                    tail = true;
                 }
             }
             if !tail {
                 end = self.town_after(t, f, end); // « 6 rue des Essais, Vouziers », « Place du Théâtre, Testville »
             }
-            let (score, reason) = if street.numbered { (0.85, STREET_NUMBERED) } else { (0.75, STREET_CUED) };
+            let (score, reason) = if street.numbered {
+                (0.85, STREET_NUMBERED)
+            } else if street.place {
+                (0.75, NAMED_PLACE)
+            } else {
+                (0.75, STREET_CUED)
+            };
             spans.push((self.complement(t, street.start), end, score, Some(reason)));
         }
         // Boîte postale seule (« CS61336 », « BP 60120, Contact … ») / a lone postal box (`lone_box`).
@@ -589,9 +620,14 @@ impl AddressDetector {
     /// `_town_after` : commune connue après une voie numérotée, sans code postal, puis fin de ligne ou ponctuation.
     /// A known town after a numbered street, without a postcode, then line end or punctuation.
     fn town_after(&self, t: Chars, f: Chars, end: usize) -> usize {
-        let Some(gap_end) = town_gap(t, end) else {
+        let Some(mut gap_end) = town_gap(t, end) else {
             return end;
         };
+        // « lieu dit La Croix Blanche, commune de Plouay » : « commune de » après la virgule / after the comma.
+        let comma = (end..gap_end).any(|i| t.is(i, ','));
+        if let Some(after) = commune_word(t, gap_end).filter(|_| comma) {
+            gap_end = after;
+        }
         if !t.test(gap_end, |c| t.u.is_upper(c)) {
             return end;
         }
@@ -662,7 +698,11 @@ impl AddressDetector {
 
     /// `_commune` : fin de la commune après le code, et confiance / end of the commune, and confidence.
     fn commune(&self, t: Chars, f: Chars, pos: usize, verified: bool, known: &[u32]) -> Option<(usize, f64)> {
-        let gap_end = commune_gap(t, pos)?;
+        // Code postal en fin de ligne, commune vérifiée en tête de la suivante (COMMUNE_WRAP) ; une commune inconnue ne
+        // passe jamais la ligne / postcode ending a line, verified town heading the next; an unknown town never crosses.
+        let gap = commune_gap(t, pos);
+        let wrapped = gap.is_none_or(|g| t.is(g, '\r') || t.is(g, '\n'));
+        let gap_end = if wrapped { commune_break(t, pos)? } else { gap? };
         let window = f.upto(gap_end + COMMUNE_WINDOW);
         let mut tokens: Vec<(usize, usize)> = Vec::new();
         let mut cursor = gap_end;
@@ -682,6 +722,9 @@ impl AddressDetector {
             if self.is_known(&key[..bounds[k - 1].1], known) {
                 return Some((tokens[k - 1].1, if verified { 0.9 } else { 0.85 }));
             }
+        }
+        if wrapped {
+            return None;
         }
         // Commune inconnue : mots capitalisés, retenus seulement avec une voie ou CEDEX / unknown commune.
         let words_end = capital_words(t, gap_end)?;
@@ -751,7 +794,11 @@ impl AddressDetector {
             // to the name, which may then end at the type.
             let adjective = adjective_before(t, start).filter(|&(a, b)| self.adjectives.contains(&f.string(a, b)));
             let head = adjective.map_or(start, |(a, _)| a);
-            let number = number_before(t.upto(head), head.saturating_sub(NUMBER_WINDOW), &self.house_suffixes);
+            let mut number = number_before(t.upto(head), head.saturating_sub(NUMBER_WINDOW), &self.house_suffixes);
+            // « Bureau 1⏎rue … » : le numéro du bureau n'est pas celui de la voie (OFFICE_NUMBER) / an office number.
+            if number.is_some_and(|n| (n..head).any(|i| t.is(i, '\n')) && office_before(f, n)) {
+                number = None;
+            }
             if number.is_none() && kind.abbreviation {
                 continue;
             }
@@ -763,16 +810,74 @@ impl AddressDetector {
                 None if adjective.is_some() => end,
                 None => continue,
             };
-            streets.push(Street { start: number.unwrap_or(head), end: name_end, numbered: number.is_some() });
+            streets.push(Street {
+                start: number.unwrap_or(head),
+                end: name_end,
+                numbered: number.is_some(),
+                place: kind.place,
+            });
         }
         streets
     }
 
+    /// `_street_line_follows` (fix 1.0.2, STREET_WRAP) : la ligne qui commence en `pos` ressemble à un nom de voie :
+    /// des particules puis un mot capitalisé, ou un mot capitalisé qui n'ouvre pas une phrase et n'est pas un libellé.
+    /// The line starting at `pos` looks like a street name.
+    fn street_line_follows(&self, t: Chars, pos: usize) -> bool {
+        let mut i = pos + t.run(pos, usize::MAX, |c| c == ' ' || c == '\t' || c == '>');
+        let mut particles = false;
+        loop {
+            if t.test(i, |c| matches!(c, 'd' | 'l' | 'D' | 'L')) && t.test(i + 1, |c| c == '\'' || c == '’') {
+                i += 2;
+                particles = true;
+                continue;
+            }
+            let next = WRAP_PARTICLES.iter().find_map(|particle| {
+                let k = i + particle.len();
+                let found =
+                    particle.chars().enumerate().all(|(m, c)| t.test(i + m, |x| x == c || x == c.to_ascii_uppercase()));
+                (found && t.blank(k)).then_some(k)
+            });
+            let Some(k) = next else {
+                break;
+            };
+            i = k + t.blanks(k, usize::MAX);
+            particles = true;
+        }
+        if particles && t.digit(i) {
+            return true; // « 103 rue⏎du 8 Mai 1945 » : une date après la particule / a date after the particle
+        }
+        let len = t.run(i, usize::MAX, |c| self.table.is_letter(c));
+        if len == 0 || !t.test(i, |c| self.table.is_upper(c)) {
+            return false;
+        }
+        let after = i + len;
+        if t.is(after + t.blanks(after, usize::MAX), ':') {
+            return false; // un libellé (« Téléphone : ») / a label
+        }
+        particles || !WRAP_STARTS.contains(&lowercase(&t.s[i..after]).as_str())
+    }
+
     /// `_street_name` : fin du nom de voie / end of the street name.
     fn street_name(&self, t: Chars, pos: usize, strong: bool, numbered: bool) -> Option<usize> {
-        let mut limit = (pos + self.max_street_name).min(t.len());
+        let bound = (pos + self.max_street_name).min(t.len());
+        let mut limit = bound;
+        let mut wrapped = false;
         if let Some(line_end) = (pos..limit).find(|&i| t.is(i, '\n')) {
             limit = line_end;
+            // Nom coupé après une particule en fin de ligne (`_dangling`, 2e test terrain) : il continue sur la ligne
+            // suivante / a name cut after a particle at the line end continues on the next line.
+            // Voie numérotée dont le type finit la ligne (STREET_WRAP) / a numbered street whose type ends the line.
+            // Fix 1.0.2 : seulement si la ligne suivante ressemble à un nom de voie / only when the next line looks
+            // like a street name.
+            if self.dangling(t, pos, line_end)
+                || (numbered
+                    && (pos..line_end).all(|i| t.blank(i) || t.is(i, '\r'))
+                    && self.street_line_follows(t, line_end + 1))
+            {
+                wrapped = true;
+                limit = (line_end + 1..bound).find(|&i| t.is(i, '\n')).unwrap_or(bound);
+            }
         }
         let view = t.upto(limit);
         let mut end = None;
@@ -783,8 +888,19 @@ impl AddressDetector {
         while let Some((start, stop)) = name_word(view, search) {
             search = stop;
             let glued = cursor > pos && start == cursor && view.test(cursor - 1, |c| c == '\'' || c == '’');
-            if !(cursor..start).all(|i| view.blank(i)) || (start == cursor && !glued) {
+            if !(cursor..start).all(|i| view.blank(i)) && !(wrapped && wrap_gap(view, cursor, start)) {
                 break; // mots séparés par des espaces / words separated by spaces
+            }
+            if start == cursor && !glued {
+                break;
+            }
+            // Tête d'un code (CODE_HEAD) : mot collé à « - » ou « _ » puis des chiffres, sauf cinq (code postal collé,
+            // « Tour-83120 ») / a code's head, except five digits (a glued postcode).
+            if t.test(stop, |c| c == '-' || c == '_') {
+                let digits = t.run(stop + 1, usize::MAX, |c| c.is_ascii_digit());
+                if digits > 0 && digits != 5 {
+                    break;
+                }
             }
             cursor = stop;
             let word = &view.s[start..stop];
@@ -812,6 +928,25 @@ impl AddressDetector {
             count += 1;
         }
         end
+    }
+
+    /// `_dangling` : rien que des particules (au moins une) jusqu'à la fin de ligne / only particles to the line end.
+    fn dangling(&self, t: Chars, pos: usize, line_end: usize) -> bool {
+        let view = t.upto(line_end);
+        let mut words = 0;
+        let mut cursor = pos;
+        let mut search = pos;
+        while let Some((start, stop)) = name_word(view, search) {
+            search = stop;
+            if !(cursor..start).all(|i| view.blank(i))
+                || !self.name_particles.contains(lowercase(&view.s[start..stop]).trim_end_matches(['\'', '’']))
+            {
+                return false;
+            }
+            words += 1;
+            cursor = stop;
+        }
+        words > 0 && (cursor..line_end).all(|i| view.blank(i) || view.is(i, '\r'))
     }
 
     // --- assemblage / assembly --------------------------------------------------------------------------------
@@ -989,6 +1124,22 @@ fn postcode_at(t: Chars, s: usize) -> bool {
 }
 
 /// `_COMMUNE_GAP_RE.match` : `[ \t]{1,2}(?:-[ \t]{1,2})?|[ \t]{0,2},[ \t]{1,2}`.
+fn commune_break(t: Chars, pos: usize) -> Option<usize> {
+    // `_COMMUNE_BREAK_RE` : `[ \t]{0,2},?[ \t]{0,2}\r?\n[ \t]{0,2}` (lecture forcée / forced parse), COMMUNE_WRAP.
+    let mut i = pos + t.blanks(pos, 2);
+    if t.is(i, ',') {
+        i += 1;
+    }
+    i += t.blanks(i, 2);
+    if t.is(i, '\r') {
+        i += 1;
+    }
+    if !t.is(i, '\n') {
+        return None;
+    }
+    Some(i + 1 + t.blanks(i + 1, 2))
+}
+
 fn commune_gap(t: Chars, pos: usize) -> Option<usize> {
     let lead = t.blanks(pos, 2);
     if lead > 0 {
@@ -1083,7 +1234,7 @@ fn cedex_suffix(t: Chars, q: usize, cedex: &CiPattern) -> Option<usize> {
 /// numéro qui mène à la fin. Seule l'existence d'un chemin compte : on calcule les positions atteignables.
 /// Start of group 1 of the leftmost match (view truncated at `hi`). Only the existence of a path matters, so the
 /// reachable positions are computed. Pattern: `(?<![\w.,])([0-9]{1,4}(?:[ \t]?(?i:bis|ter|quater|quinquies|
-/// [a-h])(?![\w]))?(?:[ \t]?[-/][ \t]?[0-9]{1,4})?)[ \t]{0,2},?[ \t]{0,2}$`.
+/// [a-h])(?![\w]))?(?:[ \t]?[-/][ \t]?[0-9]{1,4})?)[ \t]{0,2},?[ \t]{0,2}\r?$`.
 fn number_before(t: Chars, lo: usize, suffixes: &[CiPattern]) -> Option<usize> {
     (lo..t.len()).find(|&p| house_number_at(t, p, suffixes))
 }
@@ -1142,7 +1293,10 @@ fn house_number_at(t: Chars, p: usize, suffixes: &[CiPattern]) -> bool {
 fn separator_then_end(t: Chars, x: usize) -> bool {
     let n = t.len();
     let ends = [Some(n), (n > 0 && t.is(n - 1, '\n')).then(|| n - 1)];
-    ends.into_iter().flatten().filter(|&end| end >= x).any(|end| {
+    // `\r?$` : CRLF comme LF (revue du 26/10, crlf) / CRLF exactly like LF.
+    let ends =
+        ends.into_iter().flatten().flat_map(|end| [Some(end), (end > 0 && t.is(end - 1, '\r')).then(|| end - 1)]);
+    ends.flatten().filter(|&end| end >= x).any(|end| {
         let len = end - x;
         let lead = t.blanks(x, len);
         if lead == len {
@@ -1155,6 +1309,23 @@ fn separator_then_end(t: Chars, x: usize) -> bool {
 
 /// `_NAME_WORD_RE.finditer(text, pos, limit)` : prochain mot à partir de `from` / next word from `from`.
 /// `[^\W\d_][^\W\d_'’-]{0,30}(?:['’-][^\W\d_]{1,30}){0,4}|[0-9]{1,4}(?:er|e|ème)?(?!\w)`.
+/// `_WRAP_GAP_RE` en entier sur [a, b) : `[ \t]*\r?\n[ \t]*(?:>[ \t]*)*` (retour à la ligne, citations « > »).
+/// Full match on [a, b): a line break with blanks and quote marks.
+fn wrap_gap(t: Chars, a: usize, b: usize) -> bool {
+    let mut i = a;
+    while i < b && t.blank(i) {
+        i += 1;
+    }
+    if i < b && t.is(i, '\r') {
+        i += 1;
+    }
+    if !(i < b && t.is(i, '\n')) {
+        return false;
+    }
+    i += 1;
+    (i..b).all(|k| t.blank(k) || t.is(k, '>'))
+}
+
 fn name_word(t: Chars, from: usize) -> Option<(usize, usize)> {
     (from..t.len()).find_map(|p| name_word_at(t, p).map(|end| (p, end)))
 }
@@ -1275,6 +1446,91 @@ fn cued(f: Chars, start: usize) -> bool {
         }
     }
     last.is_some_and(|end| !(end..start).any(|i| view.is(i, '\n') || view.is(i, '.')))
+}
+
+/// `_OFFICE_WORDS` de `fr_address` (texte replié) / of `fr_address` (folded text).
+const OFFICE_WORDS: [&str; 10] =
+    ["bureau", "salle", "piece", "porte", "local", "chambre", "poste", "casier", "guichet", "box"];
+
+/// `_office_before` (règle OFFICE_NUMBER) : le mot juste avant `pos`, même ligne, est un mot de bureau.
+/// The word right before `pos`, same line, is an office word.
+fn office_before(f: Chars, pos: usize) -> bool {
+    let mut p = pos;
+    while p > 0 && (f.is(p - 1, ' ') || f.is(p - 1, '\t')) {
+        p -= 1;
+    }
+    let mut k = p;
+    while k > 0 && f.word(k - 1) {
+        k -= 1;
+    }
+    k < p && OFFICE_WORDS.contains(&f.s[k..p].iter().collect::<String>().as_str())
+}
+
+/// `_LABEL_WINDOW` et `_LABEL_TAIL` de `fr_address` / of `fr_address`.
+const LABEL_WINDOW: usize = 60;
+const LABEL_TAIL: usize = 40;
+/// `_LABEL_PERSONS` de `fr_address` : l'étiquette nomme une personne (texte replié) / the label names a person.
+const LABEL_PERSONS: [&str; 29] = [
+    "salari",
+    "employ",
+    "client",
+    "patient",
+    "personnel",
+    "domicil",
+    "locataire",
+    "assure",
+    "beneficiaire",
+    "adherent",
+    "eleve",
+    "candidat",
+    "usager",
+    "abonne",
+    "titulaire",
+    "agent",
+    "interesse",
+    "conjoint",
+    "enfant",
+    "parent",
+    "proprietaire",
+    "debiteur",
+    "souscripteur",
+    "requerant",
+    "demandeur",
+    "victime",
+    "temoin",
+    "stagiaire",
+    "resident",
+];
+
+/// `_labelled` (règle ADDRESS_LABEL) : « Adresse du salarié : 75011 Paris », étiquette d'adresse juste avant `pos`
+/// (« adresse », au plus 40 caractères sans chiffre ni « . : ; » ni saut de ligne, puis « : »), même ligne.
+/// An address label right before `pos`, same line.
+fn labelled(f: Chars, pos: usize) -> bool {
+    let blank = |i: usize| f.is(i, ' ') || f.is(i, '\t');
+    let mut p = pos;
+    while p > 0 && blank(p - 1) {
+        p -= 1;
+    }
+    if p == 0 || !f.is(p - 1, ':') {
+        return false;
+    }
+    p -= 1;
+    while p > 0 && blank(p - 1) {
+        p -= 1;
+    }
+    let lo = p.saturating_sub(LABEL_WINDOW);
+    let Some(k) = (lo..p.saturating_sub(6)).rev().find(|&k| k + 7 <= p && f.literal(k, "adresse")) else {
+        return false;
+    };
+    if k > 0 && f.word(k - 1) {
+        return false;
+    }
+    let between = &f.s[k + 7..p];
+    if between.len() > LABEL_TAIL || between.iter().any(|c| "0123456789\n.:;".contains(*c)) {
+        return false;
+    }
+    let between: String = between.iter().collect();
+    LABEL_PERSONS.iter().any(|word| between.contains(word))
 }
 
 /// `_home` : « domiciliée à 69003 Lyon », un mot de domicile avant `pos`, même ligne, même phrase (dernière
@@ -1405,6 +1661,31 @@ fn town_gap(t: Chars, pos: usize) -> Option<usize> {
     (trail > 0).then_some(sep + 1 + trail)
 }
 
+/// `_COMMUNE_WORD_RE.match` : `commune[ \t]{1,2}(?:de[ \t]{1,2}|d['’])`, fin de la correspondance / match end.
+fn commune_word(t: Chars, pos: usize) -> Option<usize> {
+    const WORD: &str = "commune";
+    if !WORD.chars().enumerate().all(|(k, c)| t.is(pos + k, c)) {
+        return None;
+    }
+    let mut i = pos + WORD.len();
+    let lead = t.blanks(i, 2);
+    if lead == 0 {
+        return None;
+    }
+    i += lead;
+    if !t.is(i, 'd') {
+        return None;
+    }
+    if t.is(i + 1, '\'') || t.is(i + 1, '’') {
+        return Some(i + 2);
+    }
+    if !t.is(i + 1, 'e') {
+        return None;
+    }
+    let trail = t.blanks(i + 2, 2);
+    (trail > 0).then_some(i + 2 + trail)
+}
+
 /// `_TOWN_END_RE.match` : `[ \t]{0,2}(?:[\r\n.,;)]|$)`.
 fn town_end_at(t: Chars, pos: usize) -> bool {
     let at = pos + t.blanks(pos, 2);
@@ -1428,6 +1709,147 @@ fn adjective_before(t: Chars, start: usize) -> Option<(usize, usize)> {
     let free =
         word_start == 0 || !t.test(word_start - 1, |c| t.u.is_word(c) || matches!(c, '.' | ',' | '\'' | '’' | '-'));
     ((3..=9).contains(&(word_end - word_start)) && word_start >= lo && free).then_some((word_start, word_end))
+}
+
+/// `fr_address._POSTCODE_TOWN_PARTICLES` : particules d'un nom de commune / town-name particles.
+/// `fr_address._WRAP_PARTICLES` et `_WRAP_STARTS` (fix 1.0.2, STREET_WRAP) : mêmes listes / same lists.
+const WRAP_PARTICLES: &[&str] = &["des", "du", "de", "les", "la", "le"];
+const WRAP_STARTS: &[&str] = &[
+    "à",
+    "a",
+    "au",
+    "aux",
+    "il",
+    "elle",
+    "ils",
+    "elles",
+    "nous",
+    "vous",
+    "je",
+    "j",
+    "on",
+    "ce",
+    "cette",
+    "ces",
+    "cet",
+    "un",
+    "une",
+    "merci",
+    "cordialement",
+    "bonjour",
+    "bonsoir",
+    "voir",
+    "pour",
+    "avec",
+    "et",
+    "ou",
+    "mais",
+    "donc",
+    "si",
+    "en",
+    "dans",
+    "sur",
+    "par",
+    "puis",
+    "ensuite",
+    "tél",
+    "tel",
+    "téléphone",
+    "telephone",
+    "mail",
+    "email",
+    "courriel",
+    "fax",
+    "mobile",
+    "portable",
+    "contact",
+    "objet",
+    "date",
+    "réf",
+    "ref",
+    "pj",
+    "nb",
+    "note",
+    "remarque",
+    "total",
+    "montant",
+    "prix",
+    "fin",
+    "suite",
+    "voici",
+    "attention",
+    "important",
+    "rappel",
+    "signé",
+    "fait",
+    "le",
+    "la",
+    "les",
+    "mon",
+    "ma",
+    "mes",
+    "son",
+    "sa",
+    "ses",
+    "notre",
+    "nos",
+    "votre",
+    "vos",
+    "leur",
+    "leurs",
+    "qui",
+    "que",
+    "quand",
+    "comme",
+    "selon",
+    "après",
+    "avant",
+    "depuis",
+    "lors",
+    "chez",
+    "entre",
+    "vers",
+    "sans",
+    "sous",
+    "ne",
+    "pas",
+];
+
+const POSTCODE_TOWN_PARTICLES: &[&str] =
+    &["de", "du", "des", "la", "le", "les", "sur", "sous", "en", "l", "d", "lez", "aux", "au"];
+
+/// `fr_address._town_after_postcode` : fin de la commune écrite après un code postal non vérifié (mots capitalisés
+/// reliés par des particules, puis fin de ligne ou ponctuation), ou `end`. End of the town after an unverified
+/// postcode, or `end`.
+fn town_after_postcode(t: Chars, f: Chars, end: usize) -> usize {
+    let gap = t.blanks(end, 2);
+    if gap == 0 {
+        return end;
+    }
+    let gap_end = end + gap;
+    if !t.test(gap_end, |c| t.u.is_upper(c)) {
+        return end;
+    }
+    let window = f.upto(gap_end + TOWN_WINDOW);
+    let (mut cursor, mut last, mut count) = (gap_end, end, 0);
+    while let Some((start, stop)) = place_token(window, cursor) {
+        if start != cursor && !place_gap(t, cursor, start) {
+            break;
+        }
+        let upper = t.test(start, |c| t.u.is_upper(c));
+        if !upper && !POSTCODE_TOWN_PARTICLES.contains(&f.string(start, stop).as_str()) {
+            break;
+        }
+        cursor = stop;
+        count += 1;
+        if upper && town_end_at(t, cursor) {
+            last = cursor;
+        }
+        if count == COMMUNE_TOKENS {
+            break;
+        }
+    }
+    last
 }
 
 /// `_POSTCODE_TAIL_RE.match` : `[ \t]{0,2},?[ \t]{1,2}([0-9]{5})(?![\w]|[.,][0-9])` -> (code, fin / end).

@@ -13,9 +13,11 @@ use aho_corasick::{AhoCorasick, AhoCorasickKind, MatchKind};
 
 mod address;
 mod chars;
+mod codes;
 mod fr;
 mod intl;
 mod organizations;
+mod personal_site;
 mod python;
 mod unicode;
 
@@ -29,6 +31,9 @@ fn automaton(patterns: &[String], kind: MatchKind) -> Result<AhoCorasick, String
 }
 
 // Jumeaux appelés directement par le moteur fusionné / twins called directly by the fused engine.
+pub(crate) use codes::{CodeData, CodeDetector, CodeKind};
+// Site personnel au nom d'une personne citée (voie perf) / personal site named after a quoted person.
+pub(crate) use personal_site::detect as personal_site_spans;
 pub(crate) use python::{
     mrz_spans, PyAddressDetector, PyBirthDateDetector, PyEmailDetector, PyIbanDetector, PyOrganizationDetector,
     PyUnicodeTable,

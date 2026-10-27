@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>GDPR Guardian · anonymise before the AI, keep the meaning</title>
-<meta name="description" content="A workspace for irreversible anonymisation: drop your documents, take them back anonymised before you hand them to an AI, with the logic of the text intact. Free, no key, no cookie; MIT licence, open code on GitHub.">
+<meta name="description" content="An irreversible first-level filter: drop your documents, take them back anonymised before you hand them to an AI, with the logic of the text intact. Free, no key, no cookie; MIT licence, open code on GitHub.">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="GDPR Guardian · remove the names, keep the meaning">
-<meta property="og:description" content="Irreversible anonymisation of documents before they reach an AI, open to everyone, no key. MIT licence.">
+<meta property="og:description" content="A first-level filter: irreversible anonymisation of documents before they reach an AI, open to everyone, no key. MIT licence.">
 <meta property="og:url" content="https://gdprguardian.com/">
 <meta property="og:locale" content="en_GB">
 <link rel="canonical" href="https://gdprguardian.com/">
@@ -27,7 +27,7 @@
 <a class="skip" href="#ck-t">Skip to the input</a>
 <div class="app" id="workspace">
 <header class="bar">
-<h1 class="brand"><a href="#workspace"><svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path class="mk" d="M7 4H4v16h3M17 4h3v16h-3"/><rect class="mb" x="7.5" y="10" width="9" height="4"/></svg>GDPR Guardian</a><span><span class="vh">, </span>irreversible anonymisation before the AI</span></h1>
+<h1 class="brand"><a href="#workspace"><svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path class="mk" d="M7 4H4v16h3M17 4h3v16h-3"/><rect class="mb" x="7.5" y="10" width="9" height="4"/></svg>GDPR Guardian</a><span><span class="vh">, </span>first-level filter before the AI</span></h1>
 <a class="keep" href="#privacy"><i aria-hidden="true"></i><span>No document kept<span>, neither here nor on the server</span></span></a>
 <a class="src" target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian" aria-label="Source code on GitHub">Source<span> code</span></a>
 <nav class="more" aria-label="Learn more"><a href="#video">Video</a><a href="#challenge">Challenge</a><a href="#story">Story</a><a href="#architecture">Architecture</a><a href="#protocol">Protocol &amp; scores</a><a href="#use">Use it</a><a href="#call">Open call</a><a href="#thanks">Thanks</a></nav>
@@ -37,15 +37,26 @@
 <div class="col cin">
 <form class="in" id="ck" aria-labelledby="t-in" novalidate>
 <div class="hd"><h2 id="t-in">Input</h2><button type="button" class="lk" data-ex="Mr Jean Dupont (jean.dupont@example.com, 06 12 34 56 78), NIR 1 85 05 78 006 084 91, IBAN FR76 3000 6000 0112 3456 7890 189. Mr Dupont will call Ms Claire Martin back. DUPONT Jean will pay invoice no. 2026-0042 for EUR 1,234.56.">Example</button></div>
+<fieldset class="md"><legend>How you work</legend>
+<label><input type="radio" name="mode" value="fort" checked><span><b>Strong (recommended)</b> masks everything it can, codes included</span><span class="mn q" data-v="{{q.fort_index}}"><span class="n">anonymisation {{q.fort_index}}% · useful codes lost {{q.fort_code_loss}}%</span><span class="pd">anonymisation — · useful codes lost —</span></span></label>
+<label><input type="radio" name="mode" value="essentiel"><span><b>Essential</b> what a check digit, a format or a label proves; product codes readable</span><span class="mn q" data-v="{{q.ess_index}}"><span class="n">anonymisation {{q.ess_index}}% · useful codes lost {{q.ess_code_loss}}%</span><span class="pd">anonymisation — · useful codes lost —</span></span></label>
+<label><input type="radio" name="mode" value="personnalise"><span><b>Custom</b> strong, with categories and codes of your choice</span><span class="mn">figures depend on your choices</span></label>
+</fieldset>
+<div class="cu" data-r="cu" hidden>
+<fieldset class="cats" data-r="cats"><legend>Masked (untick to leave in clear; secrets always stay masked)</legend></fieldset>
+<label class="kl" for="ck-k">Codes to keep</label>
+<input id="ck-k" name="keep" autocomplete="off" spellcheck="false" placeholder="SKU-###### LOT-@@@@-###" aria-describedby="ck-kh ck-ke">
+<p class="kh" id="ck-kh"># = one digit, @ = one letter, anything else as written, with at least one fixed letter or digit; a space between two codes. They stay readable.</p>
+<p class="ke" id="ck-ke" data-r="kerr" aria-live="polite"></p>
+</div>
+<p class="hint q msrc" data-v="{{q.modes_source}}">Three modes, so that everyone can use it as they see fit. Strong protects the most; essential keeps useful codes (order, invoice, product) readable. <span class="n">Figures: <span class="m-i">internal measurement, dev half (tuning data, not the public protocol)</span><span class="m-p">public protocol 1.2</span>, {{q.modes_date}}.</span><span class="pd">Figures: to come.</span></p>
 <label class="vh" for="ck-t">Text to anonymise</label>
 <textarea id="ck-t" name="text" spellcheck="false" autocomplete="off" placeholder="Paste or type a text. Documents? Drop them anywhere on the page, several at once."></textarea>
 <fieldset class="opts"><legend class="vh">Settings</legend>
 <label class="sel"><span>Country</span><select name="countries"><option value="FR" selected>France</option><option value="FR,BE">France + Belgium</option><option value="FR,CH">France + Switzerland</option><option value="FR,DE">France + Germany</option><option value="FR,ES">France + Spain</option><option value="FR,IT">France + Italy</option><option value="FR,LU">France + Luxembourg</option><option value="FR,MC">France + Monaco</option><option value="FR,NL">France + Netherlands</option><option value="FR,PT">France + Portugal</option><option value="all">All countries</option></select></label>
-<fieldset class="seg"><legend>Profile</legend><label><input type="radio" name="profile" value="standard" checked><span>standard</span></label><label><input type="radio" name="profile" value="strict"><span>strict</span></label></fieldset>
 <label class="chk"><input type="checkbox" name="explain" checked><span>Explanations</span></label>
 </fieldset>
 <p class="hint" data-r="hint" hidden>Outside France, only the country’s identifiers are verified and names go through the French lexicons: on legal texts from five countries (DE, ES, IT, NL, PT), 23–42% of names masked, 78–89% of documents with a leak (internal measurement, outside the protocol).</p>
-<p class="hint">Strict: masks more, with more false positives.</p>
 <div class="go"><button class="btn" type="submit" data-r="go" disabled>Anonymise</button><input class="vh" type="file" id="ck-f" multiple accept=".pdf,.docx,.docm,.dotx,.dotm,.xlsx,.xlsm,.xlsb,.xls,.pptx,.pptm,.ppsx,.potx,.odt,.ott,.fodt,.ods,.odp,.otp,.fodp,.odg,.rtf,.eml,.mht,.mhtml,.msg,.html,.htm,.xhtml,.csv,.tsv,.txt,.text,.md,.markdown"><label class="btn2" for="ck-f">Add documents</label></div>
 <p class="keys" data-r="keys">Ctrl + Enter anonymise · Ctrl + Shift + C copy · Ctrl + S download · Esc clear the input</p>
 <p class="fmts">PDF, Word, Excel, PowerPoint, OpenDocument, RTF, e-mail, HTML, CSV, text · 50&nbsp;MB per document · only the file name’s extension travels with the file</p>
@@ -78,22 +89,27 @@
 </section>
 
 <aside class="col rail" aria-label="Instruments">
-<section class="g gc" aria-labelledby="t-ci"><div class="gh"><h2 id="t-ci">Confidence index</h2><p class="live-st q" data-v="{{q.protocol_date}}"><span class="n">protocol 1.1 · {{q.protocol_date}}</span><span class="pd">protocol 1.1</span></p></div>
-<p class="lede">Share of documents in which no person’s name, address, phone number, e-mail or other direct identifier stays readable.</p>
+<section class="g gc" aria-labelledby="t-ci"><div class="gh"><h2 id="t-ci">Scores per mode</h2><p class="live-st">first level</p></div>
+<p class="lede">GDPR Guardian is a first-level filter: it masks direct identifiers. Meaning (health, opinions, cross-checks) is not handled here: with our skills, a light model of your AI then rereads the anonymised text; a governed LLM stage is under study. <a href="#challenge">The levels</a>.</p>
 <div class="sc">
-<div class="t s1 q" data-v="{{q.confidence_index}}"><p class="k">Normalised documents</p>
-<p class="ci-v"><span class="n">{{q.confidence_index}}<small>%</small></span><span class="pd">result to come</span></p>
-<p class="ci-ic"><span class="n">95% interval: <span class="nw">{{q.confidence_ci_low}}–{{q.confidence_ci_high}}%</span></span><span class="pd">published when the 1.1 run ends</span></p>
-<p class="ci-d">Texts written normally, with no damage or disguise: e-mails and internal documents (synthetic), real legal notices, public procurement notices and parliamentary debates.</p></div>
-<div class="t s2 q" data-v="{{q.hard_index}}"><p class="k">Difficult documents</p>
-<p class="ci-v"><span class="n">{{q.hard_index}}<small>%</small></span><span class="pd">result to come</span></p>
-<p class="ci-ic"><span class="n">95% interval: <span class="nw">{{q.hard_ci_low}}–{{q.hard_ci_high}}%</span></span><span class="pd">published when the 1.1 run ends</span></p>
-<p class="ci-d">Synthetic texts, damaged or disguised: garbled copy-paste, identifiers split by a line break, deliberate disguises, letters misread by OCR.</p></div>
+<div class="t s1 q" data-v="{{q.fort_index}}"><p class="k">Strong <span>(recommended)</span></p>
+<p class="ci-v"><span class="n">{{q.fort_index}}<small>%</small></span><span class="pd">—</span></p>
+<p class="ci-ic">anonymisation<span class="n">, 95% interval: <span class="nw">{{q.fort_ci_low}}–{{q.fort_ci_high}}%</span></span></p>
+<p class="ci-w"><span class="n">{{q.fort_code_loss}}<small>%</small></span><span class="pd">—</span></p>
+<p class="ci-ic">useful codes lost</p>
+<p class="ci-d q" data-v="{{q.fort_hard_index}}">Difficult documents: <span class="n">{{q.fort_hard_index}}%</span><span class="pd">to come</span></p></div>
+<div class="t s2 q" data-v="{{q.ess_index}}"><p class="k">Essential</p>
+<p class="ci-v"><span class="n">{{q.ess_index}}<small>%</small></span><span class="pd">—</span></p>
+<p class="ci-ic">anonymisation<span class="n">, 95% interval: <span class="nw">{{q.ess_ci_low}}–{{q.ess_ci_high}}%</span></span></p>
+<p class="ci-w"><span class="n">{{q.ess_code_loss}}<small>%</small></span><span class="pd">—</span></p>
+<p class="ci-ic">useful codes lost</p>
+<p class="ci-d q" data-v="{{q.ess_hard_index}}">Difficult documents: <span class="n">{{q.ess_hard_index}}%</span><span class="pd">to come</span></p></div>
 </div>
+<p class="note msrc q" data-v="{{q.modes_source}}"><span class="n">Source: <span class="m-i">internal measurement, dev half</span><span class="m-p">public protocol 1.2</span>, {{q.modes_date}}, engine {{q.modes_engine}}<span class="m-i">; not yet the public protocol; data used to tune the engine: optimistic figures</span>.</span><span class="pd">Scores per mode: measurement to come, on engine 1.0.2.</span></p>
+<p class="note">Anonymisation: the share of documents in which no direct identifier stays readable; higher is better. Useful codes lost: the share of numbers that designate nobody (order, invoice, product, ticket, lot) that the filter masks anyway, measured on our synthetic documents; lower is better.</p>
 <ul class="ok">
-<li class="q" data-v="{{q.confidence_index}}"><span class="n">Measured under a public protocol, registered before the run: more than a million documents through the real service, nearly 3,000 of them real annotated documents.</span><span class="pd">A public protocol, registered before the run: more than a million documents go through the real service.</span></li>
-<li>A leading-edge, frugal engine: {{q.ms_per_doc}} ms median per 2 KB document on a single CPU core, no GPU, no LLM. Irreversible: no mapping table.</li>
-<li>Poor-quality scans: degraded performance, measured and published separately.</li>
+<li class="q" data-v="{{q.confidence_index}}"><span class="n">Public result: protocol {{q.protocol_version}} · engine {{q.protocol_engine}} (single setting, before modes; not directly comparable with the per-mode scores), {{q.confidence_index}}% of normalised and {{q.hard_index}}% of difficult documents without a leak; more than a million documents through the real service.</span><span class="pd">A public protocol, registered before the run: more than a million documents go through the real service.</span></li>
+<li>A frugal engine: {{q.ms_per_doc}} ms median per 2 KB document on a single CPU core, no GPU, no LLM. Irreversible: no mapping table.</li>
 </ul>
 <a class="ci-a" href="#protocol">The protocol, in detail</a>
 </section>
@@ -121,8 +137,8 @@
 
 <section class="pn" id="video" aria-labelledby="h-vi"><div class="ph"><p>Video</p><a class="x" href="#workspace">Close</a></div>
 <h2 id="h-vi" tabindex="-1">The launch video</h2>
-<video class="vid" controls preload="none" playsinline poster="/media/gdpr-guardian-launch-en-poster.png?v=b19695e7" src="/media/gdpr-guardian-launch-en.mp4?v=cf7924d3" aria-labelledby="h-vi"></video>
-<p>Silent video: all its text is in the <a href="/media/gdpr-guardian-launch-en-transcript.txt?v=b7e78eae" target="_blank" rel="noopener">transcript</a>. Short 4:5 cut for social feeds: <a href="/media/gdpr-guardian-launch-en-social.mp4?v=8fdfbc3c" download>MP4, 4.9 MB</a>.</p>
+<video class="vid" controls preload="none" playsinline poster="/media/gdpr-guardian-launch-en-poster.png?v=b19695e7" src="/media/gdpr-guardian-launch-en.mp4?v=2d7d8aa9" aria-labelledby="h-vi"></video>
+<p>Silent video: all its text is in the <a href="/media/gdpr-guardian-launch-en-transcript.txt?v=34391f99" target="_blank" rel="noopener">transcript</a>. Short 4:5 cut for social feeds: <a href="/media/gdpr-guardian-launch-en-social.mp4?v=1c60c1b3" download>MP4, 5.0 MB</a>.</p>
 <p class="fine">The video’s index dates from its rendering; the current figure: <a href="#protocol">Protocol and scores</a>.</p>
 </section>
 
@@ -131,6 +147,12 @@
 <p class="lead">Contracts, HR files, medical reports, bank statements: they are pasted into AI assistants to be summarised, translated or analysed.</p>
 <p>Usually in good faith, and without knowing the rules. Personal data then lands with a third party, often with no legal basis or processing agreement, sometimes outside the European Union: exactly what the GDPR regulates. Once sent, it does not come back.</p>
 <p>The challenge comes down to three demands that pull against each other: <b>keep the logic</b> of the text, so the AI stays useful; make any <b>way back impossible</b>; stay <b>fast and frugal</b> enough never to be bypassed. Hence a workspace, not a page: drop, take back, move on, all day long.</p>
+<h3>A first-level filter</h3>
+<ul class="list">
+<li><b>What it does.</b> It masks direct identifiers: names, contact details, numbers, IP addresses, dates of birth… It relies on known formats, check digits, context and your organisation’s own rules. The same result every time, a named reason for every placeholder, no way back.</li>
+<li><b>What it leaves to the next level.</b> Whatever depends on meaning: health, opinions, trade union membership, offences… (GDPR, Art. 9 and 10), and clues that, put together, point to someone (job, town, date). Today, our Claude skills hand these, on a best-effort basis, to a light model of your own AI: <a href="#use">the pragmatic solution</a>.</li>
+<li><b>Next.</b> A governed LLM stage, for what depends on meaning, under study. The intention: a model kept under control, written rules, decisions checked and measured like the first level. No date announced.</li>
+</ul>
 </section>
 
 <section class="pn" id="story" aria-labelledby="h-st"><div class="ph"><p>The story</p><a class="x" href="#workspace">Close</a></div>
@@ -141,9 +163,9 @@
 <p class="lab">Naive masking</p><p class="txt"><mark class="p0">[NAME]</mark> annoys <mark class="p0">[NAME]</mark>. <mark class="p0">[NAME]</mark> hits <mark class="p0">[NAME]</mark>. <span class="why">Who hit whom? An AI can only guess.</span></p>
 <p class="lab">GDPR Guardian</p><p class="txt"><mark class="p1">[PERSON_1]</mark> annoys <mark class="p2">[PERSON_2]</mark>. <mark class="p2">[PERSON_2]</mark> hits <mark class="p1">[PERSON_1]</mark>. <span class="why">The roles survive, the identities do not.</span></p>
 </div>
-<p>On the workspace’s example, version 1.0.1 turns “Jean Dupont”, “Mr Dupont” and “DUPONT Jean” into one placeholder, <code>[PERSON_1]</code>; “Ms Claire Martin” becomes <code>Ms [PERSON_2]</code>. The title stays, as it helps to follow the text. The invoice number and the amount stay too: they are not personal data.</p>
+<p>On the workspace’s example, the engine turns “Jean Dupont”, “Mr Dupont” and “DUPONT Jean” into one placeholder, <code>[PERSON_1]</code>; “Ms Claire Martin” becomes <code>Ms [PERSON_2]</code>. The title stays, as it helps to follow the text. The amount stays: it is not personal data. The invoice number may be masked as a precaution.</p>
 <p>Not always, though: measured on 26 October on 2,463 fictitious people, the deployed engine gives 92.2% of them a single placeholder; 192 are split across several and 44 share another person’s.</p>
-<p>Each document is anonymised separately, with its own key, destroyed afterwards: <code>[PERSON_1]</code> in one document is not necessarily the same person in another. Later, on the roadmap: processing a set of documents under one code, to keep the same placeholders from one document to the next, still with no way back (the set’s key destroyed at the end).</p>
+<p>Each document is anonymised separately, with its own key, destroyed afterwards: <code>[PERSON_1]</code> in one document is not necessarily the same person in another. Later: a set of documents processed under one code, the same placeholders throughout, still with no way back (key destroyed at the end).</p>
 </section>
 
 <section class="pn" id="architecture" aria-labelledby="h-ar"><div class="ph"><p>Architecture</p><a class="x" href="#workspace">Close</a></div>
@@ -166,13 +188,13 @@
 <li><b>Original document</b>in a folder you allowed; it does not move.</li>
 <li class="hl"><b>GDPR Guardian, local</b>same Rust engine, no connection during processing; fully local option: a Docker container with no network.</li>
 <li><b>AI client, over MCP stdio</b>Claude Code, Claude Desktop, Cowork, VS Code or Cursor: it passes the path and receives the anonymised Markdown.</li>
-<li><b>AI model</b>receives the anonymised text. GDPR Guardian sends nothing and asks the assistant never to open the original.</li>
+<li><b>AI model</b>receives the anonymised text; with the skills, a light model has read it first (<a href="#use">two steps</a>). GDPR Guardian sends nothing and asks the assistant never to open the original.</li>
 </ol>
 <h3>Irreversible by construction</h3>
 <ul class="list">
 <li><b>One key per document, then destroyed.</b> 256 random bits; mentions of one person are matched through keyed BLAKE2b digests, never through their value. The key is never written; online, it disappears with the request’s process.</li>
 <li><b>No mapping table.</b> Nothing ties a placeholder to a name, neither on your side nor on the server: nothing to steal, nothing to restore, not even for us.</li>
-<li><b>Explainable.</b> No LLM: every placeholder comes from a named rule (check digits, keyword, form label, your organisation’s own rule).</li>
+<li><b>Explainable.</b> No LLM, by design for a first level: every placeholder comes from a named rule (check digits, keyword, form label, your organisation’s own rule).</li>
 </ul></div>
 </div>
 <h3>One CPU core is enough</h3>
@@ -191,10 +213,11 @@
 
 <section class="pn" id="protocol" aria-labelledby="h-pr"><div class="ph"><p>Protocol and scores</p><a class="x" href="#workspace">Close</a></div>
 <h2 id="h-pr" tabindex="-1">How we grade ourselves</h2>
-<p class="lead">An index is only worth something if anyone can check and recompute it. The results first, then protocol 1.1 point by point, precise enough to judge it and replay it; the reference text is <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/docs/PROTOCOLE.md">PROTOCOLE.md</a>.</p>
+<p class="lead">An index is only worth something if anyone can check and recompute it. These scores measure the first-level filter only. The results first, then protocol 1.1 point by point; the reference text is <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/docs/PROTOCOLE.md">PROTOCOLE.md</a>.</p>
+<p><b>Version 1.2, declared before its campaign.</b> Two scores per mode, strong and essential: anonymisation and useful codes lost (decoys masked: order, invoice, product numbers that designate nobody). In strong mode this loss is shown without failing the measurement, since masking these codes is intended there; in essential mode, the 10% guard stays. The readability guards (neutral text over-masked at most 2%, precision at least 70%) apply to both modes. Version 1.2 will be measured on engine 1.0.2, after its release; until then, the per-mode scores on the home page are an internal measurement. The 1.1 result stays published as it is.</p>
 <div class="rt">
 <table class="sheet rc">
-<caption class="q" data-v="{{q.confidence_index}}"><span class="pd">Run 1.1: results published when it ends.</span><span class="n">Protocol {{q.protocol_version}}, run of {{q.protocol_date}}, engine {{q.protocol_engine}}.</span></caption>
+<caption class="q" data-v="{{q.confidence_index}}"><span class="pd">Run 1.1: results published when it ends.</span><span class="n">Published result: protocol {{q.protocol_version}} · engine {{q.protocol_engine}}, run of {{q.protocol_date}}.</span></caption>
 <thead><tr><td></td><th scope="col">Normalised</th><th scope="col">Difficult</th></tr></thead>
 <tbody>
 <tr><th scope="row">Confidence index</th><td class="q" data-v="{{q.confidence_index}}"><span class="n">{{q.confidence_index}}%</span><span class="pd">not measured yet</span></td><td class="q" data-v="{{q.hard_index}}"><span class="n">{{q.hard_index}}%</span><span class="pd">not measured yet</span></td></tr>
@@ -228,11 +251,12 @@
 <div class="two">
 <div class="limits"><h3>Known limits</h3>
 <ul>
-<li>A first barrier, which lowers the risk without removing it; not a GDPR certification.</li>
+<li>A first-level filter, which lowers the risk without removing it; not a GDPR certification.</li>
 <li>Leaks found with engine 1.0: a line break inside an identifier, the spaced-out letters of a PDF, slashes or double spaces between digits, the addresses of BOAMP notices, French bank details (RIB) written field by field.</li>
 <li>Text only: the conversion of PDF, Word and Excel files is not measured; a scanned page with no text is dropped.</li>
 <li>Through the API, a country chosen without France masks neither names nor addresses.</li>
-<li>The engine also masks by mistake (Precision column); context (job title, place, date) can allow indirect re-identification.</li>
+<li>The engine also masks by mistake (Precision column).</li>
+<li>The first level does not read meaning: neither sensitive data (GDPR, Art. 9 and 10) nor cross-checks (job title, place, date) that can re-identify someone. Today: the Claude skills’ second pass, best effort, not measured. Next: the governed LLM stage.</li>
 </ul></div>
 <table class="sheet">
 <caption>Internal regression set, every release</caption>
@@ -298,6 +322,12 @@ python -m tools.protocol registration --bundle gg-protocol.pyz</code></pre>
 <section class="pn" id="use" aria-labelledby="h-us"><div class="ph"><p>Use it</p><a class="x" href="#workspace">Close</a></div>
 <h2 id="h-us" tabindex="-1">Beyond this page</h2>
 <p class="lead">The same service, free and without a key, from your AI assistant or your own programs; for very sensitive documents, on your own computer.</p>
+<h3>The pragmatic solution, in two steps</h3>
+<ol class="list">
+<li><b>The Guardian first.</b> It plugs into the AIs people already use: Claude through the MCP server and the skills, any MCP client, the API. The skills make it the rule: every document goes through the Guardian first. An instruction given to the AI, not a lock: a client without the skills, or text pasted into the chat, is not covered.</li>
+<li><b>Then a light model.</b> A light model of your own AI reads the anonymised document only and, on a best-effort basis, flags or masks what the first level cannot see: health, beliefs, opinions, trade union membership, sex life, offences and similar clues.</li>
+</ol>
+<p>Not perfect, but pragmatic: a high level of protection for everyday use. That is our assessment, not a measurement: only the first level is measured (<a href="#protocol">scores</a>). Under study, nothing decided, no date: running this second step through the API of Mistral AI, a European provider, within the governed LLM stage.</p>
 <div class="use">
 <div><h3>In Claude, over public MCP, no key</h3>
 <p>Address: <code>https://api.gdprguardian.com/mcp</code> (or <code>api.gardienrgpd.fr/mcp</code>). Claude Code:</p>
@@ -310,8 +340,8 @@ python -m tools.protocol registration --bundle gg-protocol.pyz</code></pre>
        "label_language": "en", "explain": true}'
 
 curl https://api.gdprguardian.com/v1/anonymize/file \
-  -F file=@contract.pdf -F label_language=en -F profile=strict</code></pre>
-<p>Response: the anonymised text (or Markdown) and the report. Options: <code>countries</code> (FR by default, <code>FR,BE</code>, <code>all</code>), <code>profile</code>, <code>label_language</code>, <code>explain</code>.</p></div>
+  -F file=@contract.pdf -F label_language=en -F mode=essentiel</code></pre>
+<p>Response: the anonymised text (or Markdown) and the report. Options: <code>countries</code> (FR by default, <code>FR,BE</code>, <code>all</code>), <code>mode</code> (<code>fort</code> by default, <code>essentiel</code>, <code>personnalise</code>; or <code>strong</code>, <code>essential</code>, <code>custom</code>), <code>disable</code>, <code>rules</code>, <code>label_language</code>, <code>explain</code>; the same over MCP.</p></div>
 <div><h3>On your computer</h3>
 <p>For very sensitive documents: the same software, as a local MCP server or in a container with no network; nothing leaves through GDPR Guardian. Installation: <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/docs/LOCAL.md">local version guide</a>; questions: <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>.</p>
 <h3>Limits of the public service</h3>
@@ -323,11 +353,12 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 
 <section class="pn" id="call" aria-labelledby="h-ap"><div class="ph"><p>Open call</p><a class="x" href="#workspace">Close</a></div>
 <h2 id="h-ap" tabindex="-1">To French public institutions</h2>
-<blockquote><p>“We, in the private sector, need a solution that is cheap to run and that we can trust completely.”</p><p class="by">Guillaume CLEMENT, Flow Line Intégration</p></blockquote>
-<p>AI use is not going away. A tool that protects data before it leaves should be a common good: audited, hosted and maintained over time, serving everyone, public bodies and companies alike. GDPR Guardian is ready to be taken over: MIT licence, open code, documented architecture, published measurements. A public institution could:</p>
+<blockquote><p>“We, in the private sector, need a solution that is cheap to run and that we can trust completely.”</p><p>“I would love one of our French schools, universities or public institutions to take up this subject, for the good of the whole community.”</p><p class="by">Guillaume CLEMENT, Flow Line Intégration</p></blockquote>
+<p>AI use is not going away. A tool that protects data before it leaves should be a common good: audited, hosted and maintained over time, serving everyone, public bodies and companies alike. GDPR Guardian is ready to be taken over: MIT licence, open code, documented architecture, public protocol, published measurements. A school, a university or a public institution could:</p>
 <ul class="list">
 <li>audit the code and the method;</li>
 <li>take over, host and run the service on public infrastructure;</li>
+<li>make the governed LLM stage, the second step, a subject of study or research;</li>
 <li>build the corpus of annotated office documents (PDF, Word, Excel) that is missing today to measure the conversion.</li>
 </ul>
 <p class="cta">To answer: <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>. No partnership exists to date: this is an open call.</p>
@@ -335,7 +366,7 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 
 <section class="pn" id="thanks" aria-labelledby="h-me"><div class="ph"><p>Thanks</p><a class="x" href="#workspace">Close</a></div>
 <h2 id="h-me" tabindex="-1">A tool given away, free to take further</h2>
-<p class="lead">GDPR Guardian is offered to the world: anyone can use it, draw inspiration from it and build on it, with nothing imposed. We show our scores as they are, weaknesses included.</p>
+<p class="lead">GDPR Guardian is offered to the world: anyone can use it, draw inspiration from it and build on it, with nothing imposed. We show our scores as they are, weaknesses included. Schools, universities, public institutions: <a href="#call">our open call</a>.</p>
 <p>Thanks to <a target="_blank" rel="noopener" href="https://www.flowlineintegration.com/">Flow Line Intégration</a>, which offers and hosts the online service free of charge. Created by <a target="_blank" rel="noopener" href="https://www.linkedin.com/in/guillaume-clement-erp-cloud/">Guillaume CLEMENT</a>, CTO Data &amp; AI. Interface design: Claude Design.</p>
 <p class="cta">A feature request, a performance problem, an identifier that gets through: <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/issues/new/choose">open an issue</a>. Describe the shape with made-up data only, never real data: “an IBAN broken by a line break”. Security vulnerability: <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/security/advisories/new">private report</a>.</p>
 </section>
@@ -344,13 +375,13 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 <h2 id="h-le" tabindex="-1">Legal notice</h2>
 <p>Under French law (LCEN). Publisher: <a target="_blank" rel="noopener" href="https://www.flowlineintegration.com/">Flow Line Intégration</a>. Publication director: Guillaume CLEMENT, CTO Data &amp; AI. Contact: <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>.</p>
 <p>Host: OVH SAS, 2 rue Kellermann, 59100 Roubaix, France, phone 1007 (from France).</p>
-<p>GDPR Guardian 1.0.1, MIT licence, code in the <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian">public repository</a>. Software provided as is, without warranty. It is a first automated barrier, explainable and measured: neither a GDPR compliance certification nor legal advice; each controller remains responsible for its own compliance.</p>
+<p>GDPR Guardian 1.0.2, MIT licence, code in the <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian">public repository</a>. Software provided as is, without warranty. It is a first-level filter, automated, explainable and measured: neither a GDPR compliance certification nor legal advice; each controller remains responsible for its own compliance.</p>
 </section>
 
 <section class="pn" id="privacy" aria-labelledby="h-co"><div class="ph"><p>Privacy</p><a class="x" href="#workspace">Close</a></div>
 <h2 id="h-co" tabindex="-1">No document kept, neither here nor on the server</h2>
 <ul class="list">
-<li><b>Here.</b> No cookie, no browser storage (neither local nor session storage, nor IndexedDB), no tracker, no third-party resource. Your texts and results live only in this tab’s memory: “Clear everything” empties it, and so does closing the tab.</li>
+<li><b>Here.</b> No cookie, no tracker, no third-party resource. The browser keeps only the mode you chose, with its categories and codes to keep (local storage): never a text. Your texts and results live only in this tab’s memory: “Clear everything” empties it, and so does closing the tab.</li>
 <li><b>On the server.</b> Each document is processed in memory in an isolated process, and nothing of it remains once the response has left; only the result comes back, to you alone. The file name does not travel: only its extension.</li>
 <li><b>We are still a third party.</b> You hand us the text, with no processing agreement. To send nothing: the <a href="#use">local version</a>.</li>
 <li><b>IP address</b>, in memory only, never written to disk, no access log. The web server keeps it as is (IPv4, or its /64 in IPv6) in its anti-abuse counters, which it recycles as traffic flows. The service replaces it at once with a keyed pseudonym, forgotten after 10 idle minutes (key renewed every 24 hours). To count visitors once a day: a keyed digest of the truncated address (/24, or /48 in IPv6) and of the browser’s user agent, key and digests forgotten every day.</li>
@@ -360,7 +391,7 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 </section>
 </main>
 <footer class="foot">
-<p>GDPR Guardian 1.0.1 · MIT licence<span>, open code on GitHub</span></p>
+<p>GDPR Guardian 1.0.2 · MIT licence<span>, open code on GitHub</span></p>
 <p>Offered by <a target="_blank" rel="noopener" href="https://www.flowlineintegration.com/">Flow Line Intégration</a> · <a target="_blank" rel="noopener" href="https://www.linkedin.com/in/guillaume-clement-erp-cloud/">Guillaume CLEMENT</a>, CTO Data &amp; AI · <span class="cd">Design: Claude Design</span></p>
 <p><a href="#legal">Legal notice</a><a href="#privacy">Privacy</a><a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/issues/new/choose">Report a problem</a></p>
 </footer>
@@ -441,6 +472,11 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 <li data-k="invalid_text">Invalid text: a lone character that cannot be encoded.</li>
 <li data-k="invalid_request">Request refused: check the text and the settings.</li>
 <li data-k="r">validated=check digits or official rules verified|validated_and_keyword=check digits verified, and a keyword present|keyword=known format near a keyword|format=structural format|keyword_despite_invalid_key=wrong check digits, but an explicit keyword|printed_layout=wrong check digits, but a typical printed layout|iban_layout_despite_invalid_key=IBAN with wrong check digits, written in blocks or near a keyword|phone_numbering_plan=numbering plan verified|name_lexicon=first or last name from the INSEE files, with a clue|postcode_and_town=postcode and town verified together|legal_form=legal form|matches_nir=birth date consistent with a NIR|propagation=another occurrence of a value already detected|custom_rule=organisation rule|deny_list=term imposed by the organisation|company_policy=organisation or company identifier, kept by policy|keep_rule=the organisation’s keep rule</li>
+<li data-k="mo">fort=strong|essentiel=essential|personnalise=custom</li>
+<li data-k="cats">personnes=Person names|emails=Personal e-mails|boites_fonctionnelles=Shared mailboxes (support@…)|telephones=Phone numbers|fragments=Number endings|adresses=Postal addresses|dates_naissance=Birth dates|iban=IBAN and bank details|cartes=Bank cards|numeros_nationaux=National numbers (NIR…)|ip=IP and MAC addresses|identifiants_techniques=Technical identifiers|codes=Codes (product, order…)|nombres_longs=Long numbers|plaques=Plates and VIN|pseudonymes=Handles and logins</li>
+<li data-k="kbad">Codes to keep, “{c}”: letters, digits, # @ and - . / _ only, 2 to 40 characters.</li>
+<li data-k="kfix">Codes to keep, “{c}”: at least one fixed letter or digit, as in SKU-######.</li>
+<li data-k="kmax">Codes to keep: 20 at most.</li>
 <li data-k="d">attachments=attachments|comments=comments|metadata=metadata|scanned_pages=scanned pages|links=links|hidden_text=hidden text|hidden_content=hidden content|hidden_slides=hidden slides|speaker_notes=speaker notes|tracked_deletions=tracked deletions|email_headers=e-mail headers|embedded_objects=embedded objects</li>
 </ul>
 <div class="dz" data-r="dz" aria-hidden="true"><p></p></div>

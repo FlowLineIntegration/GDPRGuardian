@@ -17,13 +17,28 @@ Version 1.1: one precise use case and two published indexes, each with its inter
 headline, target 95% or more): equal-weight mean of synthetic FR, BODACC, BOAMP, ParlaMint-FR. "Difficult documents":
 the whole red team (51 operators: damaged everyday formats, deliberate obfuscations, OCR noise), every mutated document
 counting once, per-group breakdown published. Old press, MAPA FR, other languages and the Judilibre control apart.
+
+Version 1.2 (26 octobre 2026, avant toute mesure 1.2, mesurée sur le moteur 1.0.2 après sa sortie) : deux modes du
+filtre déclarés par le plan, « fort » (le défaut du produit) et « essentiel » ; chaque document est noté une fois par
+mode, le mode est envoyé au service. Par mode, deux chiffres : « anonymisation » (les deux indices 1.1, mêmes
+définitions) et « codes utiles perdus » (leurres masqués, famille synthétique ; plus bas, mieux c'est). Le garde-fou des
+leurres (≤ 10 %) ne vaut plus que pour le mode essentiel : le mode fort masque tous les codes par choix du produit, sa
+perte est publiée sans garde-fou. Les autres garde-fous valent pour les deux modes. Le résultat 1.1 reste publié.
+Version 1.2: two filter modes declared by the plan, "fort" (the product default) and "essentiel"; every document is
+scored once per mode, the mode is sent to the service. Per mode, two numbers: "anonymisation" (the two 1.1 indexes,
+same definitions) and "useful codes lost" (decoys masked, synthetic family; lower is better). The decoy guard (≤ 10%)
+only applies to essentiel: fort masks every code by the product's choice, its loss is published without a guard. The
+other guards apply to both modes. The 1.1 result stays published.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 
-PROTOCOL_VERSION = "1.1"
+PROTOCOL_VERSION = "1.2"
+# Versions dont l'outil relit encore les points de reprise et les plans (un plan sans modes = 1.1) / versions whose
+# checkpoints and plans the tool still reads (a plan without modes = 1.1).
+SUPPORTED_VERSIONS: tuple[str, ...] = ("1.1", "1.2")
 # Date d'écriture de cette version. L'enregistrement lui-même = la publication, avant le lancement, des empreintes de
 # ce fichier, de docs/PROTOCOLE.md et du paquet (`python -m tools.protocol registration`), que chaque résultat recopie.
 # Date this version was written. The registration itself = publishing, before the launch, the digests of this file,
@@ -38,6 +53,10 @@ PREVIOUS_VERSIONS: tuple[dict[str, str], ...] = (
      # l'enregistrement 1.0, dans l'historique du dépôt, pas des fichiers 1.1. Its digests are those of the files at
      # the 1.0 registration (repository history), not of the 1.1 files.
      "registration": "PROTOCOL-REGISTRATION.json"},
+    {"version": "1.1", "registered": "2026-10-26", "campaign": "2026-10-26", "engine": "1.0.1+4bb5c465425e",
+     "confidence_index": "96.9 % [96.2-97.6]", "families": "4",
+     "results": "benchmarks/results/protocol-1.1-2026-10-26.md",
+     "registration": "PROTOCOL-REGISTRATION-1.1.json"},
 )
 
 # --- Usage mesuré et périmètre d'une fuite (1.1) / measured use and scope of a leak (1.1) ---------------------------
@@ -187,6 +206,11 @@ TEST_HALVES_MEASURED_BEFORE: tuple[dict[str, str], ...] = (
     {"utc": "2026-10-26", "by": "public protocol campaign 1.0", "engine": "1.0.0+0c3ff9fc1fb0",
      "what": "standard campaign, published: index 61.8% [58.6-66.9] under protocol 1.0, scores per family, corpus, "
              "label and red-team operator (benchmarks/results/protocol-2026-10-26)"},
+    # Ajouts de la version 1.2 (« added_by » : un résultat 1.1 relu ne les montre pas) / added by version 1.2.
+    {"utc": "2026-10-26", "by": "public protocol campaign 1.1", "engine": "1.0.1+4bb5c465425e",
+     "what": "standard campaign, published: normalised 96.9% [96.2-97.6], difficult 84.0% under protocol 1.1, scores "
+             "per family, corpus, label and red-team operator (benchmarks/results/protocol-1.1-2026-10-26)",
+     "added_by": "1.2"},
 )
 # Campagnes standard déjà publiées sur ces moitiés test : après la première, elles ne sont plus aveugles. Une campagne
 # suivante les liste ici (nouvelle version datée du protocole) ; le report vers le site refuse une campagne répétée
@@ -196,7 +220,26 @@ TEST_HALVES_MEASURED_BEFORE: tuple[dict[str, str], ...] = (
 EARLIER_CAMPAIGNS: tuple[dict[str, str], ...] = (
     {"date": "2026-10-26", "engine": "1.0.0+0c3ff9fc1fb0", "protocol": "1.0",
      "confidence_index": "61.8 % [58.6-66.9]"},
+    {"date": "2026-10-26", "engine": "1.0.1+4bb5c465425e", "protocol": "1.1",
+     "confidence_index": "96.9 % [96.2-97.6]"},
 )
+
+# --- Modes du filtre (1.2) / filter modes (1.2) ----------------------------------------------------------------------
+# Modes déclarés par le plan standard 1.2, le premier est le défaut du produit (clés confidence_* et hard_* du site).
+# Chaque document est noté une fois par mode ; le service reçoit « mode » (et plus « profile », dont « standard »
+# vaut désormais « essentiel »). Modes declared by the 1.2 standard plan, the first one is the product default (site
+# keys confidence_* and hard_*). Every document is scored once per mode; the service gets "mode" (no longer "profile").
+MODES: tuple[str, ...] = ("fort", "essentiel")
+MODE_TITLES: dict[str, tuple[str, str]] = {"fort": ("Mode fort", "Strong mode"),
+                                           "essentiel": ("Mode essentiel", "Essential mode")}
+# Préfixe des clés du site par mode / site key prefix per mode.
+MODE_SITE_PREFIX: dict[str, str] = {"fort": "fort", "essentiel": "ess"}
+# Séparateur mode / cellule dans le point de reprise (« fort::synthetic_fr/seed=… ») / mode-cell key separator.
+MODE_SEP = "::"
+# Garde-fou des leurres : mode essentiel seulement. En mode fort, la perte de codes utiles est publiée sans garde-fou
+# (le mode fort masque tous les codes par choix du produit). Decoy guard: essentiel only; in fort the loss of useful
+# codes is published without a guard (fort masks every code by the product's choice).
+DECOY_GUARD_MODES: tuple[str, ...] = ("essentiel",)
 
 
 @dataclass(frozen=True, slots=True)

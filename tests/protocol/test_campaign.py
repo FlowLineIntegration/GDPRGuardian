@@ -115,10 +115,15 @@ def test_campaign_matches_in_process_truth(tmp_path: Path, engine_transport: Any
     assert "## Autres langues, hors périmètre" in text
     assert text.index("| tab_en |") > text.index("## Autres langues, hors périmètre") > text.index("| bodacc_fr |")
     # Ce que les moitiés test ont déjà vu, recopié dans chaque résultat / test-half history in every result.
+    # Plan 1.1 (sans modes) : l'historique qu'il avait, rien de ce que la 1.2 ajoute / a 1.1 plan keeps its history.
     registration = report["registration"]
-    assert len(registration["test_halves_measured_before"]) == len(spec.TEST_HALVES_MEASURED_BEFORE) >= 7
-    assert registration["earlier_campaigns"] == list(spec.EARLIER_CAMPAIGNS)
-    earlier = ", ".join(f"{e['date']} ({e['engine']})" for e in spec.EARLIER_CAMPAIGNS) or "aucune / none"
+    before_1_1 = [e for e in spec.TEST_HALVES_MEASURED_BEFORE if "added_by" not in e]
+    assert registration["test_halves_measured_before"] == before_1_1 and len(before_1_1) >= 7
+    earlier_1_1 = [e for e in spec.EARLIER_CAMPAIGNS if e["protocol"] == "1.0"]
+    assert registration["earlier_campaigns"] == earlier_1_1
+    assert report["protocol"]["version"] == "1.1" and "modes" not in report
+    assert [p["version"] for p in report["protocol"]["previous_versions"]] == ["1.0"]
+    earlier = ", ".join(f"{e['date']} ({e['engine']})" for e in earlier_1_1) or "aucune / none"
     assert f"campagnes antérieures / earlier campaigns : {earlier}." in text
     # 1.1 : indice « documents normalisés » sur quatre familles, indice « documents difficiles » sur l'équipe rouge,
     # le reste à part / normalised index on four families, difficult index on the red team, the rest apart.

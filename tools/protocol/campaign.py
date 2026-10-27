@@ -35,7 +35,7 @@ import sys
 import threading
 import time
 from collections import Counter, deque
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
@@ -45,7 +45,7 @@ from tools.corpus.real_common import split_of
 from tools.protocol import spec
 from tools.protocol.align import AlignmentError, align
 from tools.protocol.outcomes import Cell, pack_bits, real_failure, score_real, score_synthetic, synthetic_failure
-from tools.protocol.plan import Plan, Unit, synthetic_documents, track
+from tools.protocol.plan import Plan, Unit, mode_key, service_options, synthetic_documents, track
 from tools.protocol.transport import (
     DocumentRefused,
     Gate,
@@ -101,6 +101,8 @@ class State:
     engine_check_docs: int = 0
     real_wiped: bool = False
     disclosures: list[str] = field(default_factory=list)   # écarts à déclarer (spec.DISCLOSURES) / to disclose
+    protocol: str = "1.1"                                   # version du plan (1.2 : avec modes) / the plan's version
+    modes: list[str] = field(default_factory=list)          # modes déclarés (1.2) / declared modes (1.2)
 
     def disclose(self, items: list[str] | tuple[str, ...]) -> None:
         """Ajoute des écarts à déclarer, sans doublon ; code inconnu refusé / adds departures to disclose."""
@@ -120,24 +122,33 @@ class State:
         return sum(item["docs"] for item in self.done.values())
 
     def to_json(self) -> dict[str, Any]:
-        return {"protocol": spec.PROTOCOL_VERSION, "plan_id": self.plan_id, "started": self.started,
-                "engine": self.engine, "tool": self.tool, "real_sources": self.real_sources, "done": self.done,
-                "cells": {k: c.to_json() for k, c in sorted(self.cells.items())}, "active_s": round(self.active_s, 3),
-                "retries": dict(self.retries), "throttled_s": round(self.throttled_s, 3), "runs": self.runs,
-                "engine_checks": self.engine_checks, "engine_check_docs": self.engine_check_docs,
-                "real_wiped": self.real_wiped, "disclosures": self.disclosures}
+        out = {"protocol": self.protocol, "plan_id": self.plan_id, "started": self.started,
+               "engine": self.engine, "tool": self.tool, "real_sources": self.real_sources, "done": self.done,
+               "cells": {k: c.to_json() for k, c in sorted(self.cells.items())}, "active_s": round(self.active_s, 3),
+               "retries": dict(self.retries), "throttled_s": round(self.throttled_s, 3), "runs": self.runs,
+               "engine_checks": self.engine_checks, "engine_check_docs": self.engine_check_docs,
+               "real_wiped": self.real_wiped, "disclosures": self.disclosures}
+        if self.modes:
+            out["modes"] = list(self.modes)
+        return out
 
     @classmethod
     def from_json(cls, data: Mapping[str, Any]) -> State:
-        if data.get("protocol") != spec.PROTOCOL_VERSION:
+        # Un point de reprise 1.1 (sans modes) se relit encore / a 1.1 checkpoint (no modes) still loads.
+        protocol = data.get("protocol")
+        if protocol not in spec.SUPPORTED_VERSIONS:
             raise SystemExit("point de reprise d'une autre version du protocole / checkpoint of another version")
+        modes = list(data.get("modes", []))
+        if bool(modes) != (protocol != "1.1"):
+            raise SystemExit("point de reprise incohérent : modes et version du protocole / inconsistent checkpoint")
         return cls(plan_id=data["plan_id"], started=data["started"], engine=data["engine"],
                    real_sources=data.get("real_sources", {}), done=data["done"],
                    cells={k: Cell.from_json(v) for k, v in data["cells"].items()}, active_s=data["active_s"],
                    retries=Counter(data.get("retries", {})), throttled_s=data.get("throttled_s", 0.0),
                    runs=data.get("runs", []), tool=data.get("tool", {}),
                    engine_checks=data.get("engine_checks", 0), engine_check_docs=data.get("engine_check_docs", 0),
-                   real_wiped=data.get("real_wiped", False), disclosures=list(data.get("disclosures", [])))
+                   real_wiped=data.get("real_wiped", False), disclosures=list(data.get("disclosures", [])),
+                   protocol=str(protocol), modes=modes)
 
 
 def check_disclosure(item: str) -> str:
@@ -236,27 +247,33 @@ def _probe_texts(count: int) -> list[tuple[str, str]]:
         return _PROBE_TEXTS[:count]
 
 
-def probe_digest(client: ServiceClient, count: int = spec.ENGINE_PROBE_DOCS) -> str:
-    """SHA-256 des sorties du service sur la sonde (jamais conservées) / digest of the service's probe outputs."""
+def probe_digest(client: ServiceClient, count: int = spec.ENGINE_PROBE_DOCS, modes: Sequence[str] = ()) -> str:
+    """SHA-256 des sorties du service sur la sonde (jamais conservées) / digest of the service's probe outputs.
+
+    Plan 1.2 : la sonde passe dans chaque mode déclaré (le nom du mode entre dans l'empreinte) ; plan 1.1 : comme
+    avant. 1.2 plan: the probe goes through every declared mode (its name enters the digest); 1.1 plan: as before.
+    """
     digest = hashlib.sha256()
-    options = {"countries": spec.FRENCH_COUNTRIES, "profile": spec.PROFILE, "label_language": spec.LABEL_LANGUAGE}
-    for doc_id, text in _probe_texts(count):
-        try:
-            output = client.anonymize(text, options)
-        except DocumentRefused as exc:
-            raise ProbeFailed(exc.kind) from None
-        track(digest, doc_id, output)
+    for mode in tuple(modes) or (None,):
+        options = service_options(spec.FRENCH_COUNTRIES, mode)
+        for doc_id, text in _probe_texts(count):
+            try:
+                output = client.anonymize(text, options)
+            except DocumentRefused as exc:
+                raise ProbeFailed(exc.kind) from None
+            track(digest, doc_id if mode is None else f"{mode}{spec.MODE_SEP}{doc_id}", output)
     return digest.hexdigest()
 
 
 def engine_fingerprint(client: ServiceClient, image: str | None = None,
-                       probe_docs: int = spec.ENGINE_PROBE_DOCS) -> dict[str, Any]:
+                       probe_docs: int = spec.ENGINE_PROBE_DOCS, modes: Sequence[str] = ()) -> dict[str, Any]:
     """Image (run-protocol.sh), version (/health), packs (/v1/packs) et sorties sur la sonde / engine fingerprint."""
     health = client.get_json("/health")
     packs = client.get_json("/v1/packs")
     digest = hashlib.sha256(json.dumps(packs, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
     return {"version": str(health.get("version")), "packs_sha256": digest, "image": image,
-            "probe_docs": probe_docs, "probe_sha256": probe_digest(client, probe_docs) if probe_docs else None}
+            "probe_docs": probe_docs,
+            "probe_sha256": probe_digest(client, probe_docs, modes) if probe_docs else None}
 
 
 def _differences(a: Mapping[str, Any], b: Mapping[str, Any]) -> list[str]:
@@ -311,12 +328,14 @@ class Worker:
 
     def __init__(self, client: ServiceClient, label_keys: Mapping[str, str],
                  real: Mapping[str, list[dict[str, Any]]], abort: threading.Event,
-                 watch: EngineWatch | None = None) -> None:
+                 watch: EngineWatch | None = None, modes: Sequence[str] = ()) -> None:
         self.client = client
         self.label_keys = label_keys
         self.real = real
         self.abort = abort
         self.watch = watch
+        # Plan 1.2 : chaque document passe une fois par mode ; plan 1.1 : une fois, sans mode / once per mode (1.2).
+        self.modes: tuple[str | None, ...] = tuple(modes) or (None,)
         self._epoch = 0
         self._generators: dict[int, Any] = {}
 
@@ -326,34 +345,37 @@ class Worker:
             self._generators[seed] = CorpusGenerator(seed)
         return self._generators[seed]
 
-    def _send(self, text: str, countries: str) -> str:
+    def _send(self, text: str, countries: str, mode: str | None = None) -> str:
         watch = self.watch
         if self.abort.is_set() or (watch is not None and (watch.epoch != self._epoch or not watch.open.is_set())):
             raise UnitAborted
-        return self.client.anonymize(text, {"countries": countries, "profile": spec.PROFILE,
-                                            "label_language": spec.LABEL_LANGUAGE})
+        return self.client.anonymize(text, service_options(countries, mode))
 
     def run(self, unit: Unit) -> UnitResult:
         """Une unité ; un document en échec (HTTP, alignement, exception) compte comme une fuite, jamais ne l'arrête.
 
-        One unit; a failed document (HTTP, alignment, exception) counts as a leak and never stops it.
+        One unit; a failed document (HTTP, alignment, exception) counts as a leak and never stops it. Plan 1.2 : chaque
+        document est envoyé et noté une fois par mode, dans les cellules de ce mode ; l'empreinte de ce qui est envoyé
+        le compte une fois (mêmes empreintes que le décompte à blanc). 1.2 plan: every document is sent and scored once
+        per mode, in that mode's cells; the sent-content fingerprint counts it once (same as the dry run).
         """
         started = time.monotonic()
         self._epoch = self.watch.epoch if self.watch is not None else 0
         cells: dict[str, Cell] = {}
         bits: list[int] = []
+        docs = 0
         digest = hashlib.sha256()
 
         def cell(key: str) -> Cell:
             return cells.setdefault(key, Cell())
 
-        def synthetic(doc: Any, key: str, baseline: list[bool] | None = None) -> list[bool] | None:
-            target = cell(key)
+        def synthetic(doc: Any, key: str, baseline: list[bool] | None = None,
+                      mode: str | None = None) -> list[bool] | None:
+            target = cell(mode_key(mode, key))
             target.docs += 1
             target.chars += len(doc.text)
-            track(digest, doc.doc_id, doc.text)
             try:
-                output = self._send(doc.text, spec.FRENCH_COUNTRIES)
+                output = self._send(doc.text, spec.FRENCH_COUNTRIES, mode)
                 alignment = align(doc.text, output)
                 flags, leak = score_synthetic(target, doc, output, alignment, self.label_keys, baseline)
             except _STOP_UNIT:
@@ -371,40 +393,46 @@ class Worker:
             return None
 
         if unit.kind in ("synthetic", "redteam"):
-            flags: list[bool] | None = None
+            flags: dict[str | None, list[bool] | None] = {}
             for key, doc, is_base in synthetic_documents(unit, self._generator(unit.seed or 0)):
-                if is_base:
-                    flags = synthetic(doc, key)
-                else:
-                    synthetic(doc, key, flags if unit.kind == "redteam" else None)
+                docs += 1
+                track(digest, doc.doc_id, doc.text)
+                for mode in self.modes:
+                    if is_base:
+                        flags[mode] = synthetic(doc, key, None, mode)
+                    else:
+                        synthetic(doc, key, flags.get(mode) if unit.kind == "redteam" else None, mode)
         elif unit.kind == "real":
             corpus = unit.corpus or ""
             records = self.real[corpus]
             countries = spec.REAL_CORPORA[corpus]
             for record in records[unit.start:unit.start + unit.count]:
-                target = cell(f"{corpus}/{split_of(record['id'])}")
-                target.docs += 1
-                target.chars += len(record["text"])
+                docs += 1
                 track(digest, record["id"], record["text"])
-                try:
-                    output = self._send(record["text"], countries)
-                    alignment = align(record["text"], output)
-                    leak = score_real(target, record, output, alignment, spec.REAL_DIRECT_LABELS)
-                except _STOP_UNIT:
-                    raise
-                except DocumentRefused as exc:
-                    kind = exc.kind
-                except AlignmentError:
-                    kind = "alignment"
-                except Exception as exc:  # comptée comme fuite / counted as a leak
-                    kind = f"exception:{type(exc).__name__}"
-                else:
-                    bits.append(leak)
-                    continue
-                bits.append(real_failure(target, record, kind, spec.REAL_DIRECT_LABELS))
+                for mode in self.modes:
+                    target = cell(mode_key(mode, f"{corpus}/{split_of(record['id'])}"))
+                    target.docs += 1
+                    target.chars += len(record["text"])
+                    try:
+                        output = self._send(record["text"], countries, mode)
+                        alignment = align(record["text"], output)
+                        leak = score_real(target, record, output, alignment, spec.REAL_DIRECT_LABELS)
+                    except _STOP_UNIT:
+                        raise
+                    except DocumentRefused as exc:
+                        kind = exc.kind
+                    except AlignmentError:
+                        kind = "alignment"
+                    except Exception as exc:  # comptée comme fuite / counted as a leak
+                        kind = f"exception:{type(exc).__name__}"
+                    else:
+                        bits.append(leak)
+                        continue
+                    bits.append(real_failure(target, record, kind, spec.REAL_DIRECT_LABELS))
         else:
             raise ValueError(unit.kind)
-        return UnitResult(unit.uid, cells, bits, digest.hexdigest(), len(bits), time.monotonic() - started,
+        # Bits : un par document et par mode, dans l'ordre d'envoi / one bit per document and mode, in sending order.
+        return UnitResult(unit.uid, cells, bits, digest.hexdigest(), docs, time.monotonic() - started,
                           self._epoch, time.monotonic())
 
 
@@ -463,7 +491,7 @@ def run_campaign(plan: Plan, settings: Settings, make_client: Callable[[Gate | N
         log("ATTENTION : jeton local absent ou refusé, requêtes comptées comme publiques (essai seulement) / "
             "WARNING: local token missing or refused, requests counted as public (trial only)")
     try:
-        engine = engine_fingerprint(probe, settings.engine_id, settings.probe_docs)
+        engine = engine_fingerprint(probe, settings.engine_id, settings.probe_docs, plan.modes)
     except (ServiceDown, ProbeFailed) as exc:
         log(f"service : empreinte du moteur impossible ({type(exc).__name__} {exc}) / engine fingerprint failed")
         return EXIT_DOWN
@@ -471,8 +499,12 @@ def run_campaign(plan: Plan, settings: Settings, make_client: Callable[[Gate | N
     state = load_state(work, log)
     if state is None:
         state = State(plan.plan_id, datetime.now(UTC).date().isoformat(), engine, dict(real_sources or {}),
-                      tool=tool)
+                      tool=tool, protocol=plan.protocol, modes=list(plan.modes))
     else:
+        if (state.protocol, state.modes) != (plan.protocol, list(plan.modes)):
+            log("refus : le point de reprise vient d'une autre version ou d'autres modes / refused: checkpoint of "
+                "another protocol version or other modes")
+            return EXIT_REFUSED
         if state.plan_id != plan.plan_id:
             log("refus : le point de reprise vient d'un autre plan / refused: checkpoint of another plan")
             return EXIT_REFUSED
@@ -506,7 +538,7 @@ def run_campaign(plan: Plan, settings: Settings, make_client: Callable[[Gate | N
                                 "units_pending": len(pending), "threads": settings.threads, "local_principal": local}
     state.runs.append(run_info)
     state.engine_checks += 1
-    state.engine_check_docs += settings.probe_docs
+    state.engine_check_docs += settings.probe_docs * max(len(plan.modes), 1)
     save_state(state, work)  # point de reprise dès le départ / a checkpoint from the very start
 
     gate = Gate(settings.threads)
@@ -536,7 +568,7 @@ def run_campaign(plan: Plan, settings: Settings, make_client: Callable[[Gate | N
         no_new.set()
 
     def work_loop() -> None:
-        worker = Worker(watched(gate), label_keys, real or {}, abort, watch)
+        worker = Worker(watched(gate), label_keys, real or {}, abort, watch, plan.modes)
         while not no_new.is_set():
             if not watch.wait_open(no_new):
                 return
@@ -561,9 +593,9 @@ def run_campaign(plan: Plan, settings: Settings, make_client: Callable[[Gate | N
 
     def check_engine(when: str) -> bool:
         """Recontrôle ; False et `outcome["changed"]` si le moteur a changé / check again; False if it changed."""
-        current = engine_fingerprint(checker, settings.engine_id, settings.probe_docs)
+        current = engine_fingerprint(checker, settings.engine_id, settings.probe_docs, plan.modes)
         state.engine_checks += 1
-        state.engine_check_docs += settings.probe_docs
+        state.engine_check_docs += settings.probe_docs * max(len(plan.modes), 1)
         if current != state.engine:
             stop("changed", f"{when}: {', '.join(_differences(state.engine, current))}")
             return False

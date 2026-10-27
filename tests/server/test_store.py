@@ -112,18 +112,23 @@ def test_partial_reads_never_keep_a_result_beyond_three_lifetimes(clock: FakeClo
     assert gone.value.code == "expired"
 
 
-def test_wrong_used_or_foreign_tokens_get_the_same_answer(clock: FakeClock) -> None:
+def test_wrong_or_foreign_tokens_get_the_same_answer_a_used_one_says_so(clock: FakeClock) -> None:
     store = make_store(clock)
     _job, token = store.create("p", "cv.txt", OPTIONS)
     with pytest.raises(NotFound) as foreign:
         store.claim(token, "intruder")
     store.claim(token, "p")
     with pytest.raises(NotFound) as used:
-        store.claim(token, "p")  # usage unique : même réponse qu'un faux jeton / single use: same as a wrong token
+        # Usage unique : le détenteur de la capacité apprend qu'elle a servi / single use: the holder learns it.
+        store.claim(token, "p")
     with pytest.raises(NotFound) as wrong:
         store.claim("x" * 43, "p")
-    assert {(e.value.status, e.value.code, e.value.message) for e in (foreign, used, wrong)} == {
+    assert {(e.value.status, e.value.code, e.value.message) for e in (foreign, wrong)} == {
         (404, "not_found", NotFound.message)}
+    assert (used.value.status, used.value.code) == (404, "upload_used")
+    with pytest.raises(NotFound) as foreign_used:
+        store.claim(token, "intruder")  # autre clé : réponse commune / another key: the common answer
+    assert foreign_used.value.code == "not_found"
     with pytest.raises(NotFound):
         store.read(result_id(token), "intruder", 1, 1000)
 

@@ -29,12 +29,14 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Any, BinaryIO
 
 # --- Limites publiées du service public : le seul endroit à mettre à jour / published limits: the one place to edit.
 PUBLIC_URL = "https://api.gardienrgpd.fr"
+# Modes du service (alias anglais acceptés aussi) / service modes (English aliases accepted too).
+MODES = ("fort", "essentiel", "personnalise", "strong", "essential", "custom")
 MAX_FILE_MB = 50                 # par fichier / per file
 MAX_TEXT_CHARS = 1_000_000       # par texte / per text
 # ---
@@ -210,18 +212,27 @@ def load_rules(explicit: str | None) -> dict[str, Any] | None:
     return rules
 
 
-def _options(countries: str, profile: str, label_language: str, explain: bool,
-             rules: dict[str, Any] | None) -> dict[str, Any]:
-    options: dict[str, Any] = {"countries": countries, "profile": profile, "label_language": label_language,
-                               "explain": explain}
+def _options(countries: str, profile: str | None, label_language: str, explain: bool,
+             rules: dict[str, Any] | None, mode: str | None = None,
+             disable: Sequence[str] | None = None) -> dict[str, Any]:
+    # Sans « mode », le service applique le mode fort ; « profile » n'est plus envoyé que s'il est demandé (alias
+    # déprécié : standard = essentiel). Without "mode" the service applies fort; "profile" only when asked.
+    options: dict[str, Any] = {"countries": countries, "label_language": label_language, "explain": explain}
+    if mode:
+        options["mode"] = mode
+    if disable:
+        options["disable"] = list(disable)
+    if profile:
+        options["profile"] = profile
     if rules is not None:
         options["rules"] = rules
     return options
 
 
-def anonymize_text(text: str, env: Mapping[str, str], *, countries: str = "FR", profile: str = "standard",
+def anonymize_text(text: str, env: Mapping[str, str], *, countries: str = "FR", profile: str | None = None,
                    label_language: str = "fr", timeout: float = 120.0, rules: dict[str, Any] | None = None,
-                   explain: bool = False) -> tuple[str, dict[str, Any]]:
+                   explain: bool = False, mode: str | None = None,
+                   disable: Sequence[str] | None = None) -> tuple[str, dict[str, Any]]:
     """Texte -> texte anonymisé, rien n'est gardé par le service / text -> anonymised text, nothing kept."""
     if len(text) > MAX_TEXT_CHARS:
         raise Failure(f"texte trop long ({len(text)} caractères > {MAX_TEXT_CHARS}) : enregistrez-le dans un fichier "
@@ -230,7 +241,7 @@ def anonymize_text(text: str, env: Mapping[str, str], *, countries: str = "FR", 
     base = base_url(env)
     key = env.get("GDPRGUARDIAN_API_KEY", "").strip() or None
     deadline = time.monotonic() + timeout
-    payload = {"text": text, **_options(countries, profile, label_language, explain, rules)}
+    payload = {"text": text, **_options(countries, profile, label_language, explain, rules, mode, disable)}
     status, headers, body = with_retries(
         lambda: request("POST", f"{base}/v1/anonymize/text", key, payload=payload,
                         timeout=deadline - time.monotonic()), deadline)
@@ -254,9 +265,10 @@ def _put(put_url: str, path: Path, size: int, key: str | None, deadline: float) 
     raise AssertionError("unreachable")
 
 
-def anonymize(path: Path, env: Mapping[str, str], *, countries: str = "FR", profile: str = "standard",
+def anonymize(path: Path, env: Mapping[str, str], *, countries: str = "FR", profile: str | None = None,
               label_language: str = "fr", timeout: float = 900.0, rules: dict[str, Any] | None = None,
-              explain: bool = False, sink: Callable[[str], None] | None = None) -> tuple[str, dict[str, Any]]:
+              explain: bool = False, sink: Callable[[str], None] | None = None, mode: str | None = None,
+              disable: Sequence[str] | None = None) -> tuple[str, dict[str, Any]]:
     """Envoi hors bande puis lecture de toutes les pages / out-of-band upload, then every page is read.
 
     Avec `sink`, chaque page lui est passée et le Markdown rendu est vide / with `sink`, pages go to it.
@@ -272,7 +284,8 @@ def anonymize(path: Path, env: Mapping[str, str], *, countries: str = "FR", prof
                       f"utilisez la skill locale / file too large ({size / 2**20:.1f} MB > {MAX_FILE_MB} MB): split "
                       f"it or use the local skill", EXIT_USAGE)
     deadline = time.monotonic() + timeout
-    options = {"filename": upload_name(path), **_options(countries, profile, label_language, explain, rules)}
+    options = {"filename": upload_name(path),
+               **_options(countries, profile, label_language, explain, rules, mode, disable)}
     for round_ in range(2):
         status, headers, body = with_retries(
             lambda: request("POST", f"{base}/v1/uploads", key, payload=options, timeout=deadline - time.monotonic()),
@@ -462,7 +475,13 @@ def build_parser() -> argparse.ArgumentParser:
                              "file, or '-' for standard input")
     parser.add_argument("--countries", default="FR",
                         help="packs pays, ex. FR (défaut), FR,BE, all, auto (expérimental) / country packs")
-    parser.add_argument("--profile", default="standard", choices=("fast", "standard", "strict"))
+    parser.add_argument("--mode", choices=MODES,
+                        help="fort (défaut : tout ce qu'on peut, codes compris), essentiel (codes métier lisibles), "
+                             "personnalise (le fort moins --disable) / fort (default), essentiel, personnalise")
+    parser.add_argument("--disable", help="catégories laissées en clair, séparées par des virgules (mode "
+                                          "personnalise ; jamais secrets) / categories left in clear (custom mode)")
+    parser.add_argument("--profile", choices=("fast", "standard", "strict"),
+                        help="ancien réglage, déprécié : standard = essentiel, strict = fort / deprecated")
     parser.add_argument("--label-language", default="fr", choices=("fr", "en", "auto"))
     parser.add_argument("--rules", help="règles de l'organisation (JSON), envoyées au service avec le document ; "
                                         "jamais sans cette option / organisation rules (JSON), sent to the service "
@@ -509,8 +528,9 @@ def main(argv: list[str] | None = None) -> int:
         if rules is None and unsent_rules(os.environ):
             print("gdprguardian: règles du projet NON envoyées ; --rules <fichier> pour les envoyer au service / "
                   "project rules NOT sent; pass --rules <file> to send them to the service", file=sys.stderr)
+        disable = [item.strip() for item in args.disable.split(",") if item.strip()] if args.disable else None
         settings = {"countries": args.countries, "profile": args.profile, "label_language": args.label_language,
-                    "rules": rules, "explain": args.explain}
+                    "rules": rules, "explain": args.explain, "mode": args.mode, "disable": disable}
         if source is None:
             text, report = anonymize_text(_read_text(args.text), os.environ, timeout=min(args.timeout, 300.0),
                                           **settings)

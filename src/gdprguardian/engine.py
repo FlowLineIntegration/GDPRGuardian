@@ -20,13 +20,14 @@ from collections import Counter
 from collections.abc import Callable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field, replace
 from functools import cache, partial
-from itertools import pairwise
+from itertools import accumulate, pairwise
 from pathlib import PurePath
 from time import perf_counter
 from typing import Any
 
 from . import _native
-from ._text import _native_preparer, fold, normalize, prepare
+from ._text import _native_preparer, delimited_tables, fold, normalize, prepare
+from .categories import _FORT_ONLY_RULES, Gate, mode_warning, resolve_mode
 from .custom import CUSTOM_PACK, KEEP_ENTITY, RuleError, RuleSet, load_rules, parse_rules
 from .heuristics._compose import _COMMON_MARKS
 from .keywords import MAX_KEYWORD_LEN, KeywordHits, KeywordIndex, longest_matches
@@ -37,6 +38,7 @@ from .operators import FORCED_REPLACE, NATIVE_NAMES, get_operator
 from .packs import Pack, PatternRecognizer, available_packs, load_pack
 from .sanitize import sanitize_output
 from .scope import HONORIFICS, Scope, native_rules
+from .selfcheck import output_check
 from .types import (
     MERGEABLE_ENTITIES,
     PRIORITY_CONTEXT_ONLY,
@@ -48,6 +50,14 @@ from .types import (
     Span,
 )
 
+try:  # automate de la propagation des valeurs / value propagation automaton
+    import ahocorasick_rs as _ahocorasick
+except ImportError:  # pragma: no cover - recherche par clé, même résultat / per-key search, same result
+    _ahocorasick = None
+
+# `profile` : ancien réglage, alias déprécié de `mode` (categories.PROFILE_MODES) ; « strict » garde en plus ses
+# effets d'avant (niveau B sans contexte, seuil 0,3, organisations masquées). Deprecated alias of `mode`; "strict"
+# also keeps its former effects (tier B without context, threshold 0.3, organisations masked).
 PROFILES = ("fast", "standard", "strict")
 COUNTRY_MODES = ("all", "auto")
 _MIN_SCORE = {"fast": 0.5, "standard": 0.5, "strict": 0.3}
@@ -58,6 +68,58 @@ NATURAL_PERSON_WINDOW = (120, 120)
 # Une personne morale dans cette fenêtre l'emporte (« la société X SAS, SIRET … ») / a legal entity there wins.
 LEGAL_ENTITY_WINDOW = (80, 40)
 _DIGIT_RE = re.compile(r"[0-9]")
+# Liaison de l'indice de naissance (`DetectionContext.cue_spent`, `scanner.rs`) : groupe-veto des dates de naissance,
+# « nom de naissance » (un nom), suites de chiffres. Birth cue binding: the birth dates' veto group, the birth-name
+# cue, digit runs.
+_DATE_VETO = "INTL:other_date"
+_BIRTH_NAME = "nom de naissance"
+_DIGIT_RUN_RE = re.compile(r"[0-9]+")
+
+
+def _date_seen(text: str, lo: int, hi: int) -> bool:
+    """Une date entre `lo` et `hi` : une année (4 chiffres 18xx, 19xx, 20xx) ou une date chiffrée à l'année sur deux
+    chiffres (« 12/05/84 », séparateurs « / . - ») ; suites de chiffres prises dans [lo, hi). A date in [lo, hi): a
+    year (4 digits 18xx-20xx) or a numeric date with a two-digit year; digit runs read inside [lo, hi)."""
+    runs = [m.span() for m in _DIGIT_RUN_RE.finditer(text, lo, hi)]
+    for k, (a, b) in enumerate(runs):
+        if b - a == 4 and text[a:a + 2] in ("18", "19", "20"):
+            return True
+        # Troisième tour : forme compacte « 19751021 » / third round: compact form.
+        if (b - a == 8 and text[a:a + 2] in ("18", "19", "20") and "01" <= text[a + 4:a + 6] <= "12"
+                and "01" <= text[a + 6:b] <= "31"):
+            return True
+        if k >= 2 and b - a == 2:
+            (a1, b1), (a2, b2) = runs[k - 2], runs[k - 1]
+            if (b1 - a1 <= 2 and b2 - a2 <= 2 and a2 == b1 + 1 and a == b2 + 1
+                    and text[b1] in "/.-" and text[b2] in "/.-"):
+                return True
+        # Troisième tour : mois en mots, année sur deux chiffres (« 3 mars 85 ») / month word, two-digit year.
+        if k >= 1 and b - a == 2:
+            a1, b1 = runs[k - 1]
+            if b1 - a1 <= 2 and _month_gap(text[b1:a]):
+                return True
+    return False
+
+
+# Mois en mots et abréviations (`validators/intl._MONTH_WORDS`, « jui » compris ; `scanner.rs: SEEN_MONTHS`).
+# Month words and abbreviations, "jui" included.
+_SEEN_MONTHS = frozenset({"janvier", "février", "fevrier", "mars", "avril", "mai", "juin", "juillet", "août", "aout",
+                          "septembre", "octobre", "novembre", "décembre", "decembre", "janv", "févr", "fevr", "fév",
+                          "fev", "avr", "juil", "jui", "sept", "oct", "nov", "déc", "dec"})
+
+
+def _month_gap(gap: str) -> bool:
+    """Entre le jour et l'année : « er » facultatif, blancs, un mois (point final permis), blancs (« 1er janv. »).
+    Between day and year: optional "er", spaces, one month word (final dot allowed), spaces."""
+    if len(gap) > 18:
+        return False
+    g = gap[2:] if gap[:2].lower() == "er" else gap
+    if not g or not g[0].isspace() or not g[-1].isspace():
+        return False
+    words = g.split()
+    return len(words) == 1 and words[0].lower().removesuffix(".") in _SEEN_MONTHS
+
+
 # Nom de société : une forme juridique de personne morale juste avant (« SARL DUPONT ») ou juste après (« DUPONT
 # SARL ») reste lisible (considérant 14 du RGPD) ; « M. Dupont » reste masqué ; l'entrepreneur individuel (« EI »)
 # est une personne. Même liste dans rust/src/finalize/pipeline.rs. A company name: a legal-entity form right before
@@ -98,6 +160,18 @@ def _surname_end(text: str, pos: int) -> int | None:
     return i
 
 
+def _caps_word_end(text: str, pos: int) -> int | None:
+    """Fin du mot en capitales (« LECLERC », « LE-GALL ») qui commence en `pos`, sinon None (1.0.2, troisième tour).
+    End of the all-capitals word starting at `pos`, else None."""
+    n = len(text)
+    i = pos
+    while i < n and ((text[i].isalpha() and text[i].isupper()) or (text[i] in "'-" and i > pos)):
+        i += 1
+    if i - pos < 2 or text[i - 1] in "'-" or (i < n and text[i].isalnum()):
+        return None
+    return i
+
+
 def _extend_after_civility(spans: list[Span], text: str) -> None:
     """« M. [Matthieu] Orphelin » -> « M. [Matthieu Orphelin] » (`spans` triées, disjointes / sorted, disjoint)."""
     for k, span in enumerate(spans):
@@ -115,7 +189,10 @@ def _extend_after_civility(spans: list[Span], text: str) -> None:
 # ni un titre (« Monsieur Président »). Même règle dans rust/src/finalize/pipeline.rs. A civility, one blank, then one
 # free capitalised word is a surname, even when it is also a common word; never an article nor a title.
 CIVILITY_WORDS = ("M.", "Mme", "Mlle", "Monsieur", "Madame", "Mademoiselle", "monsieur", "madame", "mademoiselle")
-_CIVILITY_RE = re.compile(r"(?<![\w.])(?:" + "|".join(map(re.escape, CIVILITY_WORDS)) + r")[ \t]")
+# Nom de naissance (1.0.2, troisième tour, revue du 26/10) : « née Leclerc », « née LECLERC » : le mot qui suit est un
+# nom de famille, capitalisé ou en capitales, raison `maiden_name` (fort et essentiel). Maiden name after « née ».
+MAIDEN_WORDS = ("née", "Née")
+_CIVILITY_RE = re.compile(r"(?<![\w.])(?:" + "|".join(map(re.escape, (*CIVILITY_WORDS, *MAIDEN_WORDS))) + r")[ \t]")
 NOT_SURNAMES = frozenset({
     "Le", "La", "Les", "L", "De", "Du", "Des", "Président", "Présidente", "Ministre", "Député", "Députée",
     "Sénateur", "Sénatrice", "Maire", "Rapporteur", "Rapporteure", "Secrétaire", "Directeur", "Directrice", "Juge",
@@ -137,16 +214,496 @@ def _civility_surnames(spans: list[Span], text: str) -> list[Span]:
     added: list[Span] = []
     for m in _CIVILITY_RE.finditer(text):
         pos = m.end()
+        maiden = text[m.start():pos - 1] in MAIDEN_WORDS
         end = _surname_end(text, pos)
+        if end is None and maiden:
+            end = _caps_word_end(text, pos)
+            if end is not None and text[pos:end] in _NAME_PARTICLES_CAPS and text[end:end + 1] == " ":
+                end = _caps_word_end(text, end + 1) or end  # « née LE GALL »
         if end is None or text[pos:end] in NOT_SURNAMES:
             continue
         i = bisect_right(starts, end - 1) - 1  # dernière zone qui commence avant la fin / last span starting before
         if i >= 0 and spans[i].end > m.start():
             continue
-        added.append(Span(pos, end, "PERSON", "PERSON", "FR_NAMES", 0.8, PRIORITY_HEURISTIC, text[pos:end], True))
+        added.append(Span(pos, end, "PERSON", "PERSON", "FR_NAMES", 0.8, PRIORITY_HEURISTIC, text[pos:end], True,
+                          reason="maiden_name" if maiden else None))
     if not added:
         return spans
     return sorted([*spans, *added], key=lambda s: s.start)
+
+
+# Signature en minuscules (1.0.2, docs/REGLES.md « Signatures ») : formules de clôture, repliées, ponctuation finale
+# retirée. Même liste dans rust/src/finalize/pipeline.rs. Lowercase signature: closing formulas, folded.
+CLOSING_FORMULAS = frozenset({
+    "cordialement", "bien cordialement", "tres cordialement", "bien a vous", "merci", "merci beaucoup",
+    "merci d'avance", "bonne journee", "bonne soiree", "belle journee", "a bientot", "salutations",
+    "sinceres salutations", "amities", "bises"})
+
+
+def _signature_names(spans: list[Span], text: str) -> list[Span]:
+    """Ligne de signature en minuscules : la première ligne non vide après une formule de clôture, ou la dernière
+    ligne non vide du texte, qui ne tient qu'un ou deux mots en minuscules égaux (repliés) au prénom, au nom ou aux
+    deux d'une seule personne déjà masquée dans le document : même balise qu'elle (sa valeur), raison `signature`.
+    A lowercase signature line (first non-empty line after a closing formula, or the text's last non-empty line)
+    holding one or two lowercase words equal to the given name, surname or both of exactly one person already masked
+    in the document gets that person's tag, reason `signature`.
+    """
+    people: dict[str, set[str]] = {}
+    values: dict[str, str] = {}
+    for span in spans:
+        if span.entity != "PERSON" or not span.personal:
+            continue
+        value = span.value if span.value is not None else text[span.start:span.end]
+        words = value.split()
+        if len(words) < 2:
+            continue
+        key = " ".join(fold(w) for w in words)
+        values.setdefault(key, value)
+        given, surname = fold(words[0]), fold(words[-1])
+        for part in (given, surname, f"{given} {surname}"):
+            people.setdefault(part, set()).add(key)
+    if not people:
+        return spans
+    lines: list[tuple[int, int]] = []
+    pos = 0
+    while pos <= len(text):
+        end = text.find("\n", pos)
+        end = len(text) if end < 0 else end
+        lines.append((pos, end))
+        pos = end + 1
+    candidates: list[int] = []
+    for k, (start, end) in enumerate(lines):
+        if fold(text[start:end]).strip().rstrip(",.!:;").strip() in CLOSING_FORMULAS:
+            nxt = next((j for j in range(k + 1, len(lines)) if text[lines[j][0]:lines[j][1]].strip()), None)
+            if nxt is not None:
+                candidates.append(nxt)
+    last = next((j for j in range(len(lines) - 1, -1, -1) if text[lines[j][0]:lines[j][1]].strip()), None)
+    if last is not None:
+        candidates.append(last)
+    starts = [s.start for s in spans]
+    added: list[Span] = []
+    for k in dict.fromkeys(candidates):
+        start, end = lines[k]
+        raw = text[start:end]
+        content = raw.strip()
+        words = content.split(" ")
+        if not 1 <= len(words) <= 2 or not all(len(w) >= 2 and all(c.isalpha() and c.islower() for c in w)
+                                                for w in words):
+            continue
+        owners = people.get(" ".join(fold(w) for w in words), set())
+        if len(owners) != 1:
+            continue
+        lo = start + len(raw) - len(raw.lstrip())
+        hi = lo + len(content)
+        i = bisect_right(starts, hi - 1) - 1  # dernière zone qui commence avant la fin / last span starting before
+        if i >= 0 and spans[i].end > lo:
+            continue
+        added.append(Span(lo, hi, "PERSON", "PERSON", "FR_SIGNATURE", 0.8, PRIORITY_HEURISTIC,
+                          values[next(iter(owners))], True, reason="signature"))
+    if not added:
+        return spans
+    return sorted([*spans, *added], key=lambda s: s.start)
+
+
+# Initiales après un indice (1.0.2, docs/REGLES.md « Initiales ») : indices repliés, sigles exclus. Même listes dans
+# rust/src/finalize/pipeline.rs. Initials after a cue: folded cues, excluded acronyms.
+INITIALS_CUES = (
+    "redige par", "redigee par", "etabli par", "etablie par", "valide par", "validee par", "vise par", "visee par",
+    "signe par", "signee par", "saisi par", "saisie par", "relu par", "relue par", "de la part de", "initiales",
+    "paraphe", "auteur", "visa", "trigramme", "paraphes")
+NOT_INITIALS = frozenset({
+    "RH", "DG", "DRH", "DSI", "CA", "CE", "CSE", "SA", "TVA", "UE", "IT", "PDG", "DAF", "QA", "IA", "DGS", "DGA",
+    "DPO", "CNIL", "SAS", "EI", "PME", "TPE", "CEO", "CTO", "CFO", "COO", "AI", "OK", "PS", "MOA", "MOE", "DSN",
+    "CB", "SNCF", "RATP", "CPAM", "CNAM", "MDPH", "DDTM", "DDPP", "GRDF", "UGAP", "SASU", "SARL", "EURL"})
+
+
+def _upper_at(text: str, i: int) -> bool:
+    return i < len(text) and "A" <= text[i] <= "Z"
+
+
+def _initials_at(text: str, p: int) -> int | None:
+    """Fin des initiales qui commencent en `p` : `[A-Z]{2,3}` hors sigle exclu, ou
+    `[A-Z]\\.\\s?[A-Z]\\.?(\\s?[A-Z]\\.?)?`, suivies d'un non-alphanumérique ; sinon None.
+    End of the initials at `p`, else None."""
+    i = p
+    while i < len(text) and i - p < 4 and _upper_at(text, i):
+        i += 1
+    nxt = text[i] if i < len(text) else ""
+    # « NB » puis un non-alphanumérique ou un point final (« … par NB. ») / then a non-alnum or a final full stop.
+    # Quatre lettres admises depuis le troisième tour (« Visa : FXLD ») / four letters since the third round.
+    if 2 <= i - p <= 4 and not nxt.isalnum() and not (nxt == "." and i + 1 < len(text) and text[i + 1].isalnum()):
+        return None if text[p:i] in NOT_INITIALS else i
+    if not (_upper_at(text, p) and text[p + 1:p + 2] == "."):
+        return None
+    i = p + 2
+    if text[i:i + 1] == " " and _upper_at(text, i + 1):
+        i += 1
+    if not _upper_at(text, i):
+        return None
+    i += 1
+    if text[i:i + 1] == ".":
+        i += 1
+    j = i + 1 if text[i:i + 1] == " " else i
+    if _upper_at(text, j):
+        j += 1
+        if text[j:j + 1] == ".":
+            j += 1
+        if not (j < len(text) and text[j].isalnum()):
+            return j
+    return None if i < len(text) and text[i].isalnum() else i
+
+
+def _initials(spans: list[Span], text: str, folded: str) -> list[Span]:
+    """« Rédigée par NB », « visa : F.L. » : initiales d'une personne après un indice, raison `initials_after_cue`
+    (`spans` triées, disjointes). Initials of a person after a cue (`spans` sorted, disjoint)."""
+    starts = [s.start for s in spans]
+    added: list[Span] = []
+    for cue in INITIALS_CUES:
+        pos = folded.find(cue)
+        while pos >= 0:
+            after = pos + len(cue)
+            if not ((pos > 0 and text[pos - 1].isalnum()) or (after < len(text) and text[after].isalnum())):
+                p = after
+                while p < len(text) and p - after < 3 and text[p] in " :":
+                    p += 1
+                end = _initials_at(text, p) if p > after else None
+                if end is not None:
+                    i = bisect_right(starts, end - 1) - 1
+                    if not (i >= 0 and spans[i].end > p) and not any(a.start < end and p < a.end for a in added):
+                        added.append(Span(p, end, "PERSON", "PERSON", "FR_INITIALS", 0.8, PRIORITY_HEURISTIC,
+                                          text[p:end], True, reason="initials_after_cue"))
+                        _more_initials(text, end, spans, starts, added)
+            pos = folded.find(cue, pos + 1)
+    for s in spans:
+        # « Jean-Marc Delaunay (JMD) » : initiales entre parenthèses juste après une personne masquée, égales aux
+        # initiales de son nom (1.0.2, fort et essentiel). Bracketed initials right after a masked person, equal to
+        # the initials of that person's name.
+        if s.entity != "PERSON":
+            continue
+        p = s.end + 1 if text[s.end:s.end + 1] == " " else s.end
+        if text[p:p + 1] != "(":
+            continue
+        q = p + 1
+        while q - p <= 5 and _upper_at(text, q):
+            q += 1
+        if not (2 <= q - p - 1 <= 4 and text[q:q + 1] == ")") or text[p + 1:q] != _name_initials(text[s.start:s.end]):
+            continue
+        i = bisect_right(starts, q - 1) - 1
+        if not (i >= 0 and spans[i].end > p + 1) and not any(a.start < q and p + 1 < a.end for a in added):
+            added.append(Span(p + 1, q, "PERSON", "PERSON", "FR_INITIALS", 0.8, PRIORITY_HEURISTIC, text[p + 1:q],
+                              True, reason="initials_of_person"))
+    if added:
+        spans = sorted([*spans, *added], key=lambda s: s.start)
+    return _names_r3(spans, text)
+
+
+def _more_initials(text: str, end: int, spans: list[Span], starts: list[int], added: list[Span]) -> None:
+    """« Paraphes : JBR / MEA » : jusqu'à trois autres initiales séparées par « / » ou « , » (1.0.2, fort et
+    essentiel). Up to three more initials separated by "/" or ",", each one shaped like the first."""
+    for _ in range(3):
+        k = end
+        while k < len(text) and k - end < 2 and text[k] == " ":
+            k += 1
+        if text[k:k + 1] not in ("/", ","):
+            return
+        k += 1
+        m = k
+        while m < len(text) and m - k < 2 and text[m] == " ":
+            m += 1
+        nxt = _initials_at(text, m)
+        if nxt is None:
+            return
+        i = bisect_right(starts, nxt - 1) - 1
+        if (i >= 0 and spans[i].end > m) or any(a.start < nxt and m < a.end for a in added):
+            return
+        added.append(Span(m, nxt, "PERSON", "PERSON", "FR_INITIALS", 0.8, PRIORITY_HEURISTIC, text[m:nxt], True,
+                          reason="initials_after_cue"))
+        end = nxt
+
+
+def _name_initials(name: str) -> str:
+    """Initiales d'un nom : première lettre A-Z de chaque partie (blancs, « - », apostrophes), les parties en
+    minuscules (« de ») ou à lettre accentuée ne comptent pas. Initials of a name: the A-Z first letter of each part."""
+    out = []
+    part_start = True
+    for c in name:
+        if c.isspace() or c in "-'’":
+            part_start = True
+            continue
+        if part_start and "A" <= c <= "Z":
+            out.append(c)
+        part_start = False
+    return "".join(out)
+
+
+# Noms, troisième tour (1.0.2, revue du 26/10, docs/REGLES.md « Noms, troisième tour ») : initiales pointées, nom
+# coupé par un saut de ligne, « DUPONT, Jean ». Règles des personnes : fort et essentiel ; personnalise sauf si
+# « personnes » est coupée. Mêmes listes et même ordre dans rust/src/finalize/pipeline.rs. Names, third round:
+# dotted initials, a name cut by a line break, "DUPONT, Jean"; person rules, fort and essentiel.
+DOTTED_NOT_INITIALS = frozenset({
+    "NB", "PJ", "HT", "TTC", "JO", "RCS", "TGI", "PV", "AR", "RN", "RD", "ZI", "ZA", "ZAC", "BP", "CS", "CV", "ID",
+    "US", "UK", "ND", "VO", "SNC", "SCI", "MM", "CGI", "CP", "CC", "CT", "TA", "RIB", "AE", "RC", "DCE", "BPU", "DQE",
+    "SPS", "OPC", "VRD", "TCE", "PLU", "ERP", "BTP", "CAA", "TI", "TC", "JAF", "CPH", "QPC", "AM", "PM", "SVP", "STP",
+    "ONU", "USA", "TV", "PC", "CD", "DVD", "GPS", "SMS", "NC", "SO", "NO", "NE", "SE", "QC", "OPJ", "APJ", "CAF",
+    "CGV", "CGU", "FAQ", "HLM", "BO", "PO", "EDF", "SDF", "RER", "TGV", "VTC", "PMR", "RSA", "APL", "CMU", "AME",
+    "IRM", "ASE", "PMA"})
+_INITIAL_PREPOSITIONS = ("de", "par", "pour", "avec", "chez", "à")
+_INITIAL_PARTICLES = ("de", "du", "des", "van", "von", "der", "di", "da", "del", "le", "la", "Le", "La", "De", "Du")
+_NAME_PARTICLES_CAPS = ("LE", "LA", "DE", "DU", "DA", "DI", "VAN", "VON", "DEL", "DES")
+
+
+def _dotted_initials_at(text: str, p: int) -> tuple[int, str] | None:
+    """`[A-Z]\\.` puis jusqu'à deux fois `[ -]?[A-Z]\\.` (« J.D. », « J.-B. », « M. T. ») : (fin, lettres), ou None si
+    un alphanumérique suit. Dotted initials at `p`: (end, letters), or None when an alphanumeric follows."""
+    if not (_upper_at(text, p) and text[p + 1:p + 2] == "."):
+        return None
+    letters = text[p]
+    i = p + 2
+    while len(letters) < 3:
+        j = i + 1 if text[i:i + 1] in (" ", "-") else i
+        if not (_upper_at(text, j) and text[j + 1:j + 2] == "."):
+            break
+        letters += text[j]
+        i = j + 2
+    if i < len(text) and text[i].isalnum():
+        return None
+    return i, letters
+
+
+def _initials_ok(letters: str) -> bool:
+    return letters not in NOT_INITIALS and letters not in DOTTED_NOT_INITIALS
+
+
+def _capital_word_follows(text: str, end: int) -> bool:
+    """Un blanc puis une lettre capitale en `end` / one blank then a capital letter at `end`."""
+    return text[end:end + 1] == " " and end + 1 < len(text) and text[end + 1].isalpha() and text[end + 1].isupper()
+
+
+def _particle_surname_end(text: str, pos: int) -> int | None:
+    """« de La Fontaine », « Martin » : jusqu'à deux particules puis un nom capitalisé (`_surname_end`), sinon None.
+    Up to two particles then a capitalised surname, else None."""
+    q = pos
+    for _ in range(2):
+        for particle in _INITIAL_PARTICLES:
+            k = q + len(particle)
+            if text.startswith(particle, q) and text[k:k + 1] == " " and k + 1 < len(text) and text[k + 1].isalpha():
+                q = k + 1
+                break
+        else:
+            if text[q:q + 2] in ("d'", "D'") and q + 2 < len(text) and text[q + 2].isalpha():
+                q += 2
+            break
+    end = _surname_end(text, q)
+    if end is None or text[q:end] in NOT_SURNAMES:
+        return None
+    return end
+
+
+def _preposition_before(text: str, p: int) -> bool:
+    """« de », « par », « pour », « avec », « chez » ou « à », non précédé d'un alphanumérique, puis un blanc juste
+    avant `p`. A preposition, then one blank, right before `p`."""
+    if p < 2 or text[p - 1] != " ":
+        return False
+    for word in _INITIAL_PREPOSITIONS:
+        start = p - 1 - len(word)
+        if start >= 0 and text[start:p - 1] == word and not (start > 0 and text[start - 1].isalnum()):
+            return True
+    return False
+
+
+_LIST_LINK_RE = re.compile(r"[ \t]?(?:,|et|&)[ \t]{1,2}")
+_LINE_BREAK_GAP_RE = re.compile(r"[ \t]{0,2}\r?\n[ \t]{0,2}")
+
+
+def _names_r3(spans: list[Span], text: str) -> list[Span]:
+    """Initiales et noms, troisième tour (`spans` triées, disjointes ; renvoyées triées) :
+
+    - « Lefebvre-Durand M.-H. », « Lemoine P. » : initiales pointées juste après une personne, ajoutées à sa zone ;
+    - « J.-B. Lemoine » : initiales d'au moins deux lettres juste avant une personne, ajoutées à sa zone ;
+    - « (M. T.) » : initiales pointées entre parenthèses, raison `initials_in_brackets` ;
+    - « Paul Morel, Sophie Blanc, C.M. » : initiales pointées après une personne et « , », « et » ou « & », raison
+      `initials_in_list` ;
+    - « J.-B. de La Fontaine » : initiales à trait d'union puis particules et nom, raison `initials_with_surname` ;
+    - « J.D. Contactez », « Adresse de I.P. » : initiales pointées en début de ligne (puis fin de ligne ou mot
+      capitalisé) ou après « de », « par », « pour », « avec », « chez », « à », raison `initials_dotted` ;
+    - « "DUPONT, Jean" » : nom en capitales, virgule, prénom : une seule personne ;
+    - « Jean⏎Dupont », « Yann LE⏎GALL » : nom coupé par un saut de ligne, une seule personne.
+
+    Sigles exclus (`NOT_INITIALS`, `DOTTED_NOT_INITIALS`). Third round of initials and names; excluded acronyms.
+    """
+    n = len(text)
+    starts = [s.start for s in spans]
+    added: list[Span] = []
+
+    def free(a: int, b: int) -> bool:
+        i = bisect_right(starts, b - 1) - 1
+        return not (i >= 0 and spans[i].end > a) and not any(x.start < b and a < x.end for x in added)
+
+    def person(s: Span) -> bool:
+        return s.entity == "PERSON" and s.personal
+
+    # Initiales juste après une personne / initials right after a person.
+    for s in spans:
+        if not person(s) or text[s.end:s.end + 1] != " ":
+            continue
+        found = _dotted_initials_at(text, s.end + 1)
+        if found is None or not _initials_ok(found[1]) or _capital_word_follows(text, found[0]):
+            continue
+        if free(s.end + 1, found[0]):
+            s.end = found[0]
+    def listed(p: int) -> bool:
+        """Une personne (ou des initiales déjà prises), puis « , », « et » ou « & » juste avant `p`."""
+        i = bisect_right(starts, p - 1) - 1
+        prev = spans[i] if i >= 0 and spans[i].end <= p else None
+        if added and added[-1].end <= p and (prev is None or added[-1].end > prev.end):
+            prev = added[-1]
+        return prev is not None and prev.entity == "PERSON" and _LIST_LINK_RE.fullmatch(text, prev.end, p) is not None
+
+    index = {s.start: k for k, s in enumerate(spans)}
+    p = 0
+    while p < n:
+        if not (_upper_at(text, p) and text[p + 1:p + 2] == ".") or (
+                p > 0 and (text[p - 1].isalnum() or text[p - 1] in ".-'’_@/")):
+            p += 1
+            continue
+        if text[p] == "M" and text[p + 2:p + 3] == " " and not (p > 0 and text[p - 1] == "(") and not listed(p):
+            p += 2  # civilité « M. » (« M. J.-B. de La Fontaine ») / a civility
+            continue
+        found = _dotted_initials_at(text, p)
+        if found is None:
+            p += 1
+            continue
+        end, letters = found
+        if len(letters) >= 2 and _initials_ok(letters) and free(p, end):
+            k = index.get(end + 1) if text[end:end + 1] == " " else None
+            reason = None
+            stop = end
+            if k is not None and person(spans[k]):
+                spans[k].start = p  # « J.-B. Lemoine »
+                starts[k] = p
+            elif p > 0 and text[p - 1] == "(" and text[end:end + 1] == ")":
+                # Trois lettres collées entre parenthèses : un sigle (« (C.C.P.) ») / three glued letters: an acronym.
+                if len(letters) == 2 or " " in text[p:end] or "-" in text[p:end]:
+                    reason = "initials_in_brackets"
+            else:
+                if listed(p):
+                    reason = "initials_in_list"
+                elif "-" in text[p:end] and text[end:end + 1] == " ":
+                    surname = _particle_surname_end(text, end + 1)
+                    if surname is not None and free(p, surname):
+                        reason, stop = "initials_with_surname", surname
+                if reason is None and (len(letters) == 2 or "-" in text[p:end]) and " " not in text[p:end]:
+                    line_start = p == 0 or text[p - 1] == "\n"
+                    line_end = end >= n or text[end] in "\r\n" or _capital_word_follows(text, end)
+                    if (line_start and line_end) or _preposition_before(text, p):
+                        reason = "initials_dotted"
+            if reason is not None:
+                added.append(Span(p, stop, "PERSON", "PERSON", "FR_INITIALS", 0.8, PRIORITY_HEURISTIC, text[p:stop],
+                                  True, reason=reason))
+                end = stop
+        p = end
+    if added:
+        spans = sorted([*spans, *added], key=lambda s: s.start)
+    return _join_split_names(_bare_initials_in_list(spans, text), text)
+
+
+def _list_link_end(text: str, pos: int) -> int | None:
+    """`_LIST_LINK_RE.match(text, pos)` : fin du lien, sinon None / end of the list link, else None."""
+    m = _LIST_LINK_RE.match(text, pos)
+    return None if m is None else m.end()
+
+
+def _bare_initials_in_list(spans: list[Span], text: str) -> list[Span]:
+    """« Présents : Quentin Moreau, Mathéo Moreau, AC » : initiales en capitales (`_initials_at`, sigles exclus)
+    après deux personnes d'une même liste, raison `initials_in_list` (`spans` triées, disjointes). Bare capital
+    initials after two persons of one list."""
+    added: list[Span] = []
+    for k in range(1, len(spans)):
+        a, b = spans[k - 1], spans[k]
+        if a.entity != "PERSON" or b.entity != "PERSON" or not _LIST_LINK_RE.fullmatch(text, a.end, b.start):
+            continue
+        if " " not in text[a.start:a.end] or " " not in text[b.start:b.end]:
+            continue  # deux personnes en prénom et nom (« Fonte, Grès, PRV » : non) / two full names
+        q = _list_link_end(text, b.end)
+        if q is None or not _upper_at(text, q) or text[q + 1:q + 2] == ".":
+            continue
+        end = _initials_at(text, q)
+        if end is None or not _initials_ok(text[q:end]) or (k + 1 < len(spans) and spans[k + 1].start < end):
+            continue
+        added.append(Span(q, end, "PERSON", "PERSON", "FR_INITIALS", 0.8, PRIORITY_HEURISTIC, text[q:end], True,
+                          reason="initials_in_list"))
+    if not added:
+        return spans
+    return sorted([*spans, *added], key=lambda s: s.start)
+
+
+def _after_closing(text: str, line_start: int) -> bool:
+    """La ligne juste avant `line_start` finit par « , » ou est une formule de clôture (signature), ou `line_start`
+    ouvre le texte. The line right before ends with a comma or is a closing formula, or `line_start` opens the text."""
+    if line_start == 0:
+        return True
+    before = text[text.rfind("\n", 0, line_start - 1) + 1:line_start - 1].strip()
+    return before.endswith(",") or fold(before).strip().rstrip(",.!:;").strip() in CLOSING_FORMULAS
+
+
+def _join_split_names(spans: list[Span], text: str) -> list[Span]:
+    """« "DUPONT, Jean" », « Jean⏎Dupont », « Yann LE⏎GALL » : une seule personne (`spans` triées, disjointes).
+
+    One person for a capitals surname, a comma and a given name, for one-word names on two lines (the first starts
+    its line, the second ends it), and for a name followed by a capitals particle, a line break and a capitals word.
+    """
+    out: list[Span] = []
+    n = len(text)
+    for s in spans:
+        prev = out[-1] if out else None
+        if prev is not None and prev.entity == "PERSON" and prev.personal and s.entity == "PERSON" and s.personal:
+            left, right = text[prev.start:prev.end], text[s.start:s.end]
+            single = " " not in left and " " not in right and "\n" not in left and "\n" not in right
+            if single and text[prev.end:s.start] == ", " and len(left) >= 2 and left.isupper() and right[:1].isupper() \
+                    and len(right) >= 2 and all(c.isalpha() and c.islower() for c in right[1:]) \
+                    and not (s.end < n and text[s.end].isalnum()):
+                prev.end = s.end  # « DUPONT, Jean »
+                continue
+            gap = _LINE_BREAK_GAP_RE.fullmatch(text, prev.end, s.start)
+            line_start = text.rfind("\n", 0, prev.start) + 1
+            if single and gap is not None and not text[line_start:prev.start].strip() and (
+                    s.end >= n or text[s.end] in "\r\n") and _after_closing(text, line_start):
+                prev.value = f"{prev.value or left} {s.value or right}"  # « Jean⏎Dupont »
+                prev.end = s.end
+                continue
+        out.append(s)
+    # Fix 1.0.2 (revue d'intégrité, temps quadratique) : `out` est triée par début ; une zone d'avant ne gêne que si
+    # sa fin dépasse (`reach`, plus grande fin déjà vue), une zone d'après que si elle commence avant `end`. Même
+    # résultat que le parcours complet, en temps linéaire. `out` is sorted by start: an earlier span blocks only when
+    # its end passes (`reach`), a later one only when it starts before `end`; same result, linear time.
+    reach = -1
+    for i, s in enumerate(out):
+        if s.entity == "PERSON" and s.personal and text[s.end:s.end + 1] == " ":
+            for particle in _NAME_PARTICLES_CAPS:
+                k = s.end + 1 + len(particle)
+                if not text.startswith(particle, s.end + 1):
+                    continue
+                gap = _LINE_BREAK_GAP_RE.match(text, k)
+                if gap is None:
+                    continue
+                end = _caps_word_end(text, gap.end())
+                if end is not None and (end >= n or text[end] in "\r\n") and reach <= s.end \
+                        and _clear_after(out, i, s.end, end):
+                    s.end = end  # « Yann LE⏎GALL »
+                break
+        reach = max(reach, s.end)
+    return out
+
+
+def _clear_after(out: list[Span], i: int, start: int, end: int) -> bool:
+    """Aucune zone après `out[i]` ne commence avant `end` en finissant après `start` / no later span overlaps."""
+    for j in range(i + 1, len(out)):  # sans copie de la liste / no list copy
+        o = out[j]
+        if o.start >= end:
+            return True
+        if o.end > start:
+            return False
+    return True
 
 
 def _company_named(text: str, start: int, end: int) -> bool:
@@ -160,13 +717,44 @@ def _company_named(text: str, start: int, end: int) -> bool:
         return False
     if _COMPANY_BEFORE_RE.search(text, max(0, start - 12), start) is not None:
         return True
-    after = _COMPANY_AFTER_RE.match(text, end)
-    if after is None:
-        return False
-    i = after.end()
-    while i < len(text) and text[i] in " \t":
-        i += 1
-    return not (i > after.end() and i < len(text) and text[i].isalpha() and text[i].isupper())
+    for tail in _company_tail_ends(text, end):
+        after = _COMPANY_AFTER_RE.match(text, tail)
+        if after is None:
+            continue
+        i = after.end()
+        while i < len(text) and text[i] in " \t":
+            i += 1
+        if not (i > after.end() and i < len(text) and text[i].isalpha() and text[i].isupper()):
+            return True
+    return False
+
+
+def _company_tail_ends(text: str, end: int) -> list[int]:
+    """Fins possibles du nom d'une société qui commence par une personne : la personne seule, puis jusqu'à trois mots
+    de plus, capitalisés, « & » ou « et », après un ou deux blancs (« Dupont Frères SAS », « Martin & Fils SARL »,
+    1.0.2, troisième tour, fort et essentiel). Possible ends of a company name starting with a person: up to three more
+    capitalised words, "&" or "et", each after one or two blanks."""
+    ends = [end]
+    i, n = end, len(text)
+    for _ in range(3):
+        j = i
+        while j < n and j - i < 2 and text[j] in " \t":
+            j += 1
+        if j == i or j >= n:
+            break
+        if text[j] == "&":
+            k = j + 1
+        elif text.startswith("et", j) and not (j + 2 < n and text[j + 2].isalnum()):
+            k = j + 2
+        elif text[j].isalpha() and text[j].isupper():
+            k = j + 1
+            while k < n and (text[k].isalnum() or text[k] in "'’-"):
+                k += 1
+        else:
+            break
+        ends.append(k)
+        i = k
+    return ends
 
 
 # Société civile professionnelle ou d'exercice libéral (« SCP Dupont, Martin et Durand », « SELARL Testa & Testi ») :
@@ -227,7 +815,14 @@ class Settings:
     # identifiers need context) or "auto" (EXPERIMENTAL: inferred country).
     countries: str | tuple[str, ...] = ("FR",)
     default_countries: tuple[str, ...] = ("FR",)
-    profile: str = "standard"
+    # Mode du filtre (docs/REGLES.md « Modes ») : « fort » (défaut), « essentiel », « personnalise » ; alias anglais
+    # strong, essential (basique, basic), custom. `disable` : catégories laissées en clair (categories.CATEGORIES),
+    # personnalise seulement ; sans mode, il le choisit. Filter mode: fort (default), essentiel, personnalise;
+    # `disable`: categories left in clear, personnalise only (selects it when no mode is given).
+    mode: str | None = None
+    disable: str | Sequence[str] = ()
+    # Déprécié : alias de `mode` (strict -> fort, standard et fast -> essentiel) / deprecated alias of `mode`.
+    profile: str | None = None
     label_language: str = "fr"
     neutral_labels: bool = False
     company_ids: str = "auto"
@@ -256,8 +851,9 @@ class Settings:
             if unknown or not self.countries:
                 raise ValueError(f"Pays sans pack / countries without pack: {unknown or '[]'} "
                                  f"(disponibles / available: {available_packs()})")
-        if self.profile not in PROFILES:
-            raise ValueError(f"profile ∈ {PROFILES}")
+        if self.profile is not None and self.profile not in PROFILES:
+            raise ValueError(f"profile (déprécié, utilisez mode / deprecated, use mode) ∈ {PROFILES}")
+        resolve_mode(self.mode, self.profile, self.disable)  # ValueError avec la liste / with the list
         if self.company_ids not in ("auto", "keep", "mask") or self.facility_ids not in ("keep", "mask"):
             raise ValueError("company_ids ∈ auto|keep|mask, facility_ids ∈ keep|mask")
         if self.label_language not in ("fr", "en", "auto"):
@@ -365,6 +961,29 @@ class DetectionContext:
             return veto_wins and start - veto <= 4
         return veto_wins
 
+    def cue_spent(self, groups: Sequence[str], start: int, end: int, after: int) -> bool:
+        """Liaison de l'indice de naissance (1.0.2, 2e test terrain, modes fort et essentiel) : « né le », « date de
+        naissance » ne valent que pour la PREMIÈRE date qui les suit. Une date déjà passée entre le dernier indice et
+        la valeur (`_date_seen`) annule le contexte (« né le 12 juin 1934 à Nantes, entré le 5 janvier 2024 », un
+        journal horodaté sous « Date de naissance : … ») ; « nom de naissance » désigne un nom, pas une date. Les
+        en-têtes et un indice placé après la valeur ne sont jamais annulés (`scanner.rs: cue_spent`).
+
+        Birth cue binding: a birth cue binds only to the FIRST date after it. A date already passed between the
+        last cue and the value cancels the context; "nom de naissance" (birth name) names a name, not a date.
+        Column headers and a cue after the value are never cancelled.
+        """
+        index, lo, hi = self.segment(start)
+        if self._header_context(groups, index, start, end):
+            return False
+        if any(self.hits.near(g, start, end, 0, after, lo, hi) for g in groups):
+            return False
+        keyword = max(self.hits.last_end(g, start, lo) for g in groups)
+        if keyword < 0:
+            return False
+        if keyword >= len(_BIRTH_NAME) and self.text[keyword - len(_BIRTH_NAME):keyword].lower() == _BIRTH_NAME:
+            return True
+        return _date_seen(self.text, keyword, start)
+
 
 class _FoundView(Sequence[Span]):
     """`ctx.found` des détecteurs Python du moteur fusionné : les zones du passage, lues dans Rust au premier
@@ -446,10 +1065,42 @@ def markdown_table_zones(text: str, groups_of: Callable[[str], frozenset[str]]) 
     """Cellules dont l'en-tête de colonne porte un contexte (« Date de naissance », « Passeport »…).
 
     Cells whose column header carries context ("Date de naissance", "Passeport"…): the header then acts as
-    context for every cell below it, however far. Zones triées et disjointes / sorted, disjoint zones.
+    context for every cell below it, however far. Zones triées et disjointes / sorted, disjoint zones. Depuis
+    1.0.2, aussi les tableaux CSV et TSV (`_text.delimited_tables`) ; leurs en-têtes sont lus avec « _ » et « - »
+    changés en espaces (« date_naissance »), et une cellule déjà couverte par un tableau Markdown reste à lui.
+    Since 1.0.2, CSV and TSV tables too; their headers are read with "_" and "-" as spaces, and a cell already
+    covered by a Markdown table stays with it.
     """
-    if "|" not in text:
-        return []
+    zones = _gfm_zones(text, groups_of) if "|" in text else []
+    extra: list[Zone] = []
+    for table in delimited_tables(text):
+        columns = [groups_of(text[s:e].replace("_", " ").replace("-", " ")) for s, e in table[0]]
+        if not any(columns):
+            continue
+        for row in table[1:]:
+            for column, (start, stop) in enumerate(row):
+                if column < len(columns) and columns[column] and stop > start:
+                    extra.append((start, stop, columns[column]))
+    if not extra:
+        return zones
+    if zones:
+        starts = [z[0] for z in zones]
+        extra = [z for z in extra if not _overlaps(zones, starts, z[0], z[1])]
+        zones = sorted(zones + extra, key=lambda z: z[0])
+        return zones
+    return extra
+
+
+def _overlaps(zones: list[Zone], starts: list[int], start: int, end: int) -> bool:
+    """[start, end) chevauche-t-il une zone (triées, disjointes) ? / overlaps a sorted, disjoint zone?"""
+    i = bisect_right(starts, start) - 1
+    if i >= 0 and zones[i][1] > start:
+        return True
+    return i + 1 < len(zones) and zones[i + 1][0] < end
+
+
+def _gfm_zones(text: str, groups_of: Callable[[str], frozenset[str]]) -> list[Zone]:
+    """Tableaux Markdown (GFM) / Markdown tables."""
     zones: list[Zone] = []
     consumed = 0
     for delimiter in _TABLE_DELIMITER_RE.finditer(text):
@@ -750,6 +1401,10 @@ class Anonymizer:
         elif isinstance(settings.rules, (str, PurePath)):
             settings = replace(settings, rules=load_rules(settings.rules))
         settings.validate()
+        # Mode canonique (alias et `profile` déprécié résolus) / canonical mode (aliases, deprecated profile).
+        mode, disable = resolve_mode(settings.mode, settings.profile, settings.disable)
+        settings = replace(settings, mode=mode, disable=disable)
+        self._gate = Gate(mode, disable)
         self.settings = settings
         self._packs = _packs_for(settings.countries)
         self._keywords = _keyword_index(tuple(p.id for p in self._packs))
@@ -776,7 +1431,8 @@ class Anonymizer:
         self._ei_groups = tuple(g for p in self._packs for g in p.context if g.endswith(":ei"))
         self._person_groups = tuple(g for p in self._packs for g in p.context if g.endswith(":natural_person"))
         self._entity_groups = tuple(g for p in self._packs for g in p.context if g.endswith(":legal_entity"))
-        self._min_score = settings.min_score if settings.min_score is not None else _MIN_SCORE[settings.profile]
+        self._min_score = settings.min_score if settings.min_score is not None else _MIN_SCORE[
+            settings.profile or "standard"]
         rules: RuleSet | None = settings.rules
         allow, deny = tuple(settings.allow_list), dict(settings.deny_list)
         if rules is not None:
@@ -814,9 +1470,16 @@ class Anonymizer:
         self._default_operator = get_operator("replace")
         # Après la détection, tout en Rust si possible : mêmes zones, même texte, même rapport.
         # After detection, everything in Rust when possible: same spans, same text, same report.
-        self._finalizer = self._native_finalizer() if settings.native else None
+        # Personnes coupées (mode personnalisé) : la finalisation Python, qui retire aussi les personnes qu'elle crée
+        # (civilités, initiales, signatures). Persons switched off: Python finalisation, which also drops the persons
+        # it creates.
+        self._finalizer = self._native_finalizer() if settings.native and not self._gate.post_entities else None
         # Moteur fusionné : la détection aussi, en un appel par document, puis la finalisation avec ce finaliseur-là.
-        # Fused engine: detection too, one call per document, then finalisation with this very finalizer.
+        # Hors du mode fort (voie perf, 26/10) : la détection fusionnée aussi, en un appel ; puis la porte du mode trie
+        # en Python les zones détectées (`_gated`) et le même finaliseur Rust termine (mêmes zones, même texte
+        # que le chemin par étapes). Fused engine: detection too, then finalisation with this very finalizer. Outside
+        # mode fort, the same one-call detection; the mode gate then sorts the detected spans in Python and the same
+        # Rust finalizer ends (same spans, same text as the staged path).
         self._host: _Host | None = None
         self._fused = self._fused_engine() if self._finalizer is not None else None
         self._fused_finalizer = self._finalizer
@@ -1016,7 +1679,7 @@ class Anonymizer:
     def analyze(self, text: str) -> Analysis:
         t0 = perf_counter()
         document = self._fused_document(text)
-        if document is not None:
+        if document is not None and not self._gate.active:  # porte active : `_gated` d'abord / gate first
             t1 = perf_counter()
             spans = document.analyze(self._finalizer)
             if spans is not None:
@@ -1026,6 +1689,7 @@ class Anonymizer:
                 countries, reasons = self._fused_countries(document)
                 return Analysis(text, spans, countries, reasons, document.language, timings)
         ctx, detected, reasons, offsets, timings = self._fused_fallback(document) or self._detect_text(text)
+        detected, _ = self._gated(ctx.text, detected)
         t1 = perf_counter()
         spans = self._final_spans(ctx, detected, offsets)
         timings["resolve"] = (perf_counter() - t1) * 1000
@@ -1070,7 +1734,7 @@ class Anonymizer:
         """
         _check_forced(texts, forced)
         document = self._fused_cells(texts, forced)
-        if document is not None:
+        if document is not None and not self._gate.active:  # porte active : `_gated` d'abord / gate first
             found = document.analyze_cells(self._finalizer)
             if found is not None:
                 per_segment, spans = found
@@ -1079,6 +1743,7 @@ class Anonymizer:
                                              dict(document.timings))
         staged = self._fused_cells_fallback(document) or self._detect_segments(texts, forced)
         ctx, detected, reasons, normalized, timings = staged
+        detected, _ = self._gated(ctx.text, detected)
         per_segment, spans = self._segment_spans(ctx, detected, normalized)
         return per_segment, Analysis(ctx.text, spans, ctx.countries, reasons, ctx.language, timings)
 
@@ -1271,7 +1936,10 @@ class Anonymizer:
                         continue
                     score *= 0.6
             has_context = (bool(rec.contexts) and ctx.near(rec.contexts, start, end, rec.before, rec.after)
-                           and not (rec.vetoes and ctx.vetoed(rec.contexts, rec.vetoes, start, end, rec.after)))
+                           and not (rec.vetoes and ctx.vetoed(rec.contexts, rec.vetoes, start, end, rec.after))
+                           # Une date de naissance : l'indice ne vaut que pour la première date / first date only.
+                           and not (_DATE_VETO in rec.vetoes
+                                    and ctx.cue_spent(rec.contexts, start, end, rec.after)))
             if needs_context and not has_context:
                 if rec.tier == "C" or not ctx.strict:
                     pos = _next_start(skip, text, full_start)
@@ -1299,17 +1967,31 @@ class Anonymizer:
             return mode == "mask", None
         if ctx.strict:
             return True, None
-        # « Entrepreneur individuel » n'importe où dans le document suffit : rappel d'abord. L'état civil d'une
-        # personne physique (prénom, date de naissance) à côté du numéro désigne aussi son titulaire.
-        # "Sole trader" anywhere in the document is enough: recall first. A natural person's civil status (given
-        # name, birth date) next to the number also names its holder.
-        if self._ei_groups and ctx.any_context(self._ei_groups):
+        # « Entrepreneur individuel » dans le paragraphe du numéro, ou ailleurs sans personne morale près du numéro
+        # (1.0.2 : un seul repère masquait le SIREN d'une société nommée 300 mots plus loin). L'état civil d'une
+        # personne physique (prénom, date de naissance) à côté du numéro désigne aussi son titulaire. "Sole trader"
+        # in the number's paragraph, or elsewhere when no legal entity is near the number; a natural person's civil
+        # status next to the number also names its holder.
+        if self._ei_groups and self._sole_trader(ctx, start, end):
             return True, "sole_trader"
         if self._person_groups and self._civil_status(ctx, start, end):
             return True, "civil_status_nearby"
         if _no_legal_entity(ctx.text, start):
             return True, "no_legal_entity"
         return False, None
+
+    def _sole_trader(self, ctx: DetectionContext, start: int, end: int) -> bool:
+        """« Entrepreneur individuel », « EI », « auto-entrepreneur »… : rend le numéro personnel (1.0.2).
+
+        A sole-trader cue in the number's paragraph (its line, or the lines around it up to a blank line, within the
+        natural-person window); or anywhere in the document when no legal entity (« société », « SAS »…) is near
+        the number in that paragraph. Runs in every mode (fort and essentiel).
+        """
+        lo, hi = _block_bounds(ctx.text, start, end, *NATURAL_PERSON_WINDOW)
+        if ctx.near(self._ei_groups, start, end, *NATURAL_PERSON_WINDOW, lo, hi):
+            return True
+        return ctx.any_context(self._ei_groups) and not (
+            self._entity_groups and ctx.near(self._entity_groups, start, end, *LEGAL_ENTITY_WINDOW, lo, hi))
 
     def _civil_status(self, ctx: DetectionContext, start: int, end: int) -> bool:
         """État civil d'une personne physique à côté du numéro, sans personne morale plus près.
@@ -1342,8 +2024,8 @@ class Anonymizer:
         return spans
 
     def _finalize(self, ctx: DetectionContext, spans: list[Span]) -> list[Span]:
-        if self._custom:
-            spans = _apply_keep(spans)
+        zones = _keep_zones(spans) if self._custom else None
+        spans = _apply_keep(spans, zones)
         text = ctx.text
         minimum = self._min_score
         allow = self._allow
@@ -1360,13 +2042,23 @@ class Anonymizer:
             if span.value is None and span.entity in MERGEABLE_ENTITIES:
                 span.value = text[span.start:span.end]
             kept.append(span)
+        post = self._gate.post_entities  # entités coupées par le mode (personnes) / switched off by the mode
         if not kept:
-            return []
+            resolved = _initials([], text, ctx.folded)  # les initiales ne dépendent d'aucune zone / need no span
+            _keep_after(zones, resolved)
+            return [s for s in resolved if s.entity not in post] if post else resolved
         resolved = resolve(merge_same_entity(kept), text)
         resolved = self._propagate(ctx, resolved)
+        resolved = self._propagate_values(ctx, resolved)
         resolved = _drop_company_names(text, resolved)
         _extend_after_civility(resolved, text)
         resolved = _civility_surnames(resolved, text)
+        resolved = _signature_names(resolved, text)
+        resolved = _initials(resolved, text, ctx.folded)
+        resolved = output_check(text, ctx.folded, resolved)  # contrôle final de sortie / output self-check
+        _keep_after(zones, resolved)
+        if post:
+            resolved = [s for s in resolved if s.entity not in post]
         for span in resolved:
             if span.value is None:
                 span.value = text[span.start:span.end]
@@ -1396,22 +2088,85 @@ class Anonymizer:
         for index, start, end in longest_matches(forms, text):
             if (start > 0 and text[start - 1].isalnum()) or (end < len(text) and text[end].isalnum()):
                 continue
-            i = bisect_right(starts, start) - 1
-            if i >= 0 and ordered[i].end > start:
-                continue
-            if i + 1 < len(ordered) and ordered[i + 1].start < end:
-                continue
+            if _after_saint(text, start):
+                continue  # « Saint-Claude » : une commune, pas la personne « CLAUDE Martin » (1.0.2) / a town
             source = sources[forms[index]]
-            seg = ctx.segment(start)
-            if end > seg[2]:
+            if not _place(ctx, ordered, starts, start, end, source, None):
                 continue
-            span = Span(start, end, source.entity, source.label, f"propagated:{source.source}",
-                        source.score * 0.95, PRIORITY_PROPAGATED, None, True)
-            k = bisect_left(starts, start)
-            starts.insert(k, start)
-            ordered.insert(k, span)
             added = True
         return ordered if added else spans
+
+    def _propagate_values(self, ctx: DetectionContext, spans: list[Span]) -> list[Span]:
+        """Propagation universelle des valeurs (1.0.2, docs/REGLES.md « Propagation des valeurs ») : chaque valeur
+        personnelle trouvée est masquée partout, sous toutes ses graphies, avec la même balise (valeur héritée).
+        Universal value propagation: every personal value found is masked everywhere, in every written variant,
+        with the same tag (inherited value). Familles / families: noms de plusieurs mots repliés, dates de
+        naissance (formes générées), téléphones (numéro national de 9 chiffres), codes (squelette alphanumérique).
+        """
+        text, folded = ctx.text, ctx.folded
+        spans = sorted(spans, key=lambda s: s.start)
+        names: dict[str, tuple[Span, str]] = {}
+        dates: dict[str, tuple[Span, str]] = {}
+        phones: dict[str, tuple[Span, str]] = {}
+        codes: dict[str, tuple[Span, str]] = {}
+        for span in spans:
+            if not span.personal:
+                continue
+            surface = text[span.start:span.end]
+            if span.entity == "PERSON":
+                if not span.propagate:
+                    continue
+                for form in (surface, *span.forms):
+                    form = form.strip()
+                    if " " in form and "\n" not in form and len(form) >= 5:
+                        names.setdefault(fold(form), (span, form))
+            elif span.entity == "BIRTH_DATE":
+                iso = _iso_date(span.value) or _iso_date(surface)
+                if iso is not None:
+                    span.value = iso  # valeur canonique ISO / canonical ISO value
+                    for form in _date_forms(iso):
+                        dates.setdefault(form, (span, iso))
+            elif span.entity == "PHONE":
+                national = _national_number(_skeleton_of(surface))
+                if national is not None:
+                    phones.setdefault(national, (span, span.value if span.value is not None else surface))
+            elif span.entity in _SKELETON_ENTITIES:
+                key = _skeleton_of(surface)
+                digits = sum(c in "0123456789" for c in key)
+                if digits and (len(key) >= _SKELETON_MIN if digits < len(key) else len(key) >= _DIGITS_MIN):
+                    codes.setdefault(key, (span, span.value if span.value is not None else surface))
+        if not (names or dates or phones or codes):
+            return spans
+        ordered = spans
+        starts = [s.start for s in ordered]
+        for table in (names, dates):
+            if not table:
+                continue
+            forms = list(table)
+            for index, start, end in longest_matches(forms, folded):
+                if (start > 0 and text[start - 1].isalnum()) or (end < len(text) and text[end].isalnum()):
+                    continue
+                source, value = table[forms[index]]
+                _place(ctx, ordered, starts, start, end, source, value)
+        if phones or codes:
+            skeleton, positions = _skeleton_positions(folded)
+            for table, phone in ((phones, True), (codes, False)):
+                if not table:
+                    continue
+                hits = []
+                keys = list(table)
+                for order, (key, found) in enumerate(zip(keys, _all_occurrences(keys, skeleton), strict=True)):
+                    hits.extend((s, e, order, key) for s, e in _skeleton_hits(text, folded, skeleton, positions,
+                                                                              key, phone, found))
+                hits.sort(key=lambda h: (h[0], h[0] - h[1], h[2]))
+                last = -1
+                for start, end, _order, key in hits:
+                    if start < last:
+                        continue
+                    last = end
+                    source, value = table[key]
+                    _place(ctx, ordered, starts, start, end, source, value)
+        return ordered
 
     # --- anonymisation ---
 
@@ -1427,7 +2182,7 @@ class Anonymizer:
         t0 = perf_counter()
         native_scope = _native_scope(scope)
         document = self._fused_document(text) if scope is None or native_scope is not None else None
-        if document is not None:
+        if document is not None and not self._gate.active:  # porte active : `_gated` d'abord / gate first
             t1 = perf_counter()
             language = document.language
             # `explain` vrai au sens de Python (1, "oui"…), comme `_render_text` ; `sanitize_output` en Rust (jumeau
@@ -1444,6 +2199,7 @@ class Anonymizer:
                 return AnonymizedText(output, analysis,
                                       self._report(language, countries, reasons, timings, replaced, kept, explain))
         ctx, detected, reasons, offsets, timings = self._fused_fallback(document) or self._detect_text(text)
+        detected, left = self._gated(ctx.text, detected)
         t1 = perf_counter()
         native = None
         if self._finalizer is not None and (scope is None or native_scope is not None):
@@ -1461,7 +2217,8 @@ class Anonymizer:
         timings["total"] = (perf_counter() - t0) * 1000
         analysis = Analysis(text, spans, ctx.countries, reasons, ctx.language, timings)
         return AnonymizedText(output, analysis,
-                              self._report(ctx.language, ctx.countries, reasons, timings, replaced, kept, explain))
+                              self._report(ctx.language, ctx.countries, reasons, timings, replaced, kept, explain,
+                                           left))
 
     def _labels(self, scope: Scope | None, language: str, display: Callable[..., Any] = LABELS.display,
                 ) -> tuple[Callable[..., Any], str, bool]:
@@ -1495,7 +2252,7 @@ class Anonymizer:
         _check_forced(texts, forced)
         native_scope = _native_scope(scope)
         document = self._fused_cells(texts, forced) if native_scope is not None else None
-        if document is not None:
+        if document is not None and not self._gate.active:  # porte active : `_gated` d'abord / gate first
             done = document.anonymize_cells(self._finalizer, native_scope,
                                             self._labels(scope, document.language, _display_all),
                                             bool(self.settings.explain), bool(self.settings.sanitize))
@@ -1506,6 +2263,7 @@ class Anonymizer:
                                              replaced, kept, explain)
         staged = self._fused_cells_fallback(document) or self._detect_segments(texts, forced)
         ctx, detected, reasons, normalized, timings = staged
+        detected, left = self._gated(ctx.text, detected)
         native = None
         if self._finalizer is not None and native_scope is not None:
             native = self._finalizer.anonymize_segments(
@@ -1526,7 +2284,7 @@ class Anonymizer:
                 replaced.update(rep)
                 kept.update(kep)
             explain = _aggregate(entries) if entries is not None else None
-        return outputs, self._report(ctx.language, ctx.countries, reasons, timings, replaced, kept, explain)
+        return outputs, self._report(ctx.language, ctx.countries, reasons, timings, replaced, kept, explain, left)
 
     def new_scope(self, language: str = "und") -> Scope:
         return Scope(self._label_language(language), self.settings.neutral_labels, native=self.settings.native)
@@ -1598,8 +2356,74 @@ class Anonymizer:
 
     def _report(self, language: str, countries: Sequence[str], reasons: dict[str, list[str]],
                 timings: Mapping[str, float], replaced: Mapping[str, int], kept: Mapping[str, int],
-                explain: list[dict[str, Any]] | None = None) -> dict[str, Any]:
-        """Rapport ; `explain` : lignes déjà agrégées (`_aggregate`) / report; `explain`: aggregated lines."""
+                explain: list[dict[str, Any]] | None = None,
+                left: Sequence[tuple[str, str]] | None = None) -> dict[str, Any]:
+        """Rapport ; `explain` : lignes déjà agrégées (`_aggregate`) ; `left` : (catégorie, règle) des zones que le
+        mode laisse en clair. Report; `explain`: aggregated lines; `left`: (category, rule) of the spans the mode
+        leaves in clear."""
+        report = self._report_body(language, countries, reasons, timings, replaced, kept, explain)
+        # Mode (docs/REGLES.md « Modes ») : nom canonique, catégories coupées, zones laissées en clair par catégorie,
+        # avertissement qui nomme ce qui reste en clair ; `explain` : une ligne par (catégorie, règle), raison
+        # « mode_essentiel » ou « mode_personnalise ». Mode, disabled categories, spans left in clear per category, a
+        # warning naming what stays in clear; `explain`: one line per (category, rule).
+        report["mode"] = self.settings.mode
+        report["disable"] = list(self.settings.disable)
+        if self._gate.active:
+            report["left_in_clear_by_mode"] = dict(sorted(Counter(category for category, _ in left or ()).items()))
+        warning = mode_warning(self.settings.mode, self.settings.disable)
+        if warning is not None:
+            report["warnings"] = [*report.get("warnings", ()), warning]
+        if explain is not None and left:
+            # Ordre stable, le même dans les deux moteurs / stable order, the same in both engines.
+            report["explain"] = [*explain, *_aggregate([{"left_in_clear": category, "rule": rule,
+                                                         "reason": f"mode_{self.settings.mode}"}
+                                                        for category, rule in sorted(left)])]
+        return report
+
+    def _gated(self, text: str, detected: list[Span]) -> tuple[list[Span], list[tuple[str, str]]]:
+        """Porte du mode : (zones gardées, (catégorie, règle) des zones laissées en clair). Mode fort : tout passe.
+
+        Mode gate: (kept spans, (category, rule) of the spans left in clear). Mode fort: everything passes.
+        """
+        gate = self._gate
+        if not gate.active:
+            return detected, []
+        kept: list[Span] = []
+        left: list[tuple[str, str]] = []
+        zones: list[tuple[int, int]] = []
+        for span in detected:
+            category = gate.left_in_clear(span, text)
+            if category is None:
+                kept.append(span)
+            else:
+                rule = _rule_of(span)
+                left.append((category, rule))
+                # Une règle du seul mode fort (« @pseudo » sans indice) ne protège pas la règle à indice de la même
+                # zone (« X : @jpdupont ») / a fort-only rule never shields the cued rule on the same span.
+                if category not in _CATCH_ALL and rule not in _FORT_ONLY_RULES:
+                    zones.append((span.start, span.end))
+        if not zones:
+            return kept, left
+        # Une zone laissée en clair l'est en entier : les zones d'autres règles qu'elle contient (la carte dans un
+        # IBAN, le code dans un pseudonyme) restent en clair, sauf les règles de l'organisation. Sauf les règles
+        # attrape-tout (codes, nombres longs) : coupées, elles ne protègent jamais un passeport, une CNI, un IBAN ou
+        # un NIR qu'elles recouvrent (essentiel les laissait en clair). A zone left in clear is left whole: other
+        # rules' spans inside it stay in clear too, except the organisation's rules; the catch-all rules (codes, long
+        # numbers) never shield the validated identifier they overlap.
+        zones.sort()
+        starts = [start for start, _ in zones]
+        reach = list(accumulate((end for _, end in zones), max))
+
+        def inside(span: Span) -> bool:
+            i = bisect_right(starts, span.start) - 1
+            return i >= 0 and reach[i] >= span.end and not (
+                span.source.startswith(("CUSTOM_", "keep:")) or span.source == "deny_list")
+
+        return [span for span in kept if not inside(span)], left
+
+    def _report_body(self, language: str, countries: Sequence[str], reasons: dict[str, list[str]],
+                     timings: Mapping[str, float], replaced: Mapping[str, int], kept: Mapping[str, int],
+                     explain: list[dict[str, Any]] | None) -> dict[str, Any]:
         mode = self.settings.countries if isinstance(self.settings.countries, str) else "explicit"
         report: dict[str, Any] = {
             "entities": dict(sorted(replaced.items())),
@@ -1628,10 +2452,33 @@ class Anonymizer:
 
 
 # Raisons des détecteurs (docs/EXPLAIN.md) / detector reason codes.
+# Catégories attrape-tout : coupées, leurs zones ne protègent pas les autres règles / catch-all categories: their
+# switched-off spans never shield other rules' spans.
+_CATCH_ALL = frozenset({"codes", "nombres_longs"})
 _DETECTOR_REASONS = {
     "EMAIL": "format", "INTL_MRZ": "format", "INTL_PHONE": "phone_numbering_plan", "FR_NAMES": "name_lexicon",
     "FR_ADDRESS": "postcode_and_town", "ORGANIZATIONS": "legal_form", "FR_NIR_BIRTH_DATE": "matches_nir",
     "NER": "ner_model",
+    # Filtre fort 1.0.2 (REGLES.md § 4) / strong filter 1.0.2.
+    "ID_CODE": "identifier_code", "FR_PHONE_COMPACT": "phone_numbering_plan",
+    "FR_PHONE_FRAGMENT": "phone_fragment", "SECRET_SESSION": "keyword", "SECRET_API_KEY": "keyword",
+    "SECRET_BASIC_AUTH": "keyword", "ID_BIOMETRIC": "keyword", "LOGIN": "keyword", "FR_PSEUDONYM": "keyword",
+    "FR_PSEUDONYM_QUOTED": "keyword", "SECRET_COOKIE": "keyword", "FR_LABELLED_NUMBER": "keyword",
+    "FR_LABELLED_NUMBER_START": "keyword", "ID_LONG_NUMBER": "long_number",
+    # 1.0.2, second tour (items H, J) : valeurs liées à leur libellé / values bound to their label.
+    "LOGIN_BARE": "keyword", "LOGIN_BARE_WORD": "keyword", "LOGIN_BARE_WORD_NOUN": "keyword",
+    "SECRET_PASSWORD_PHRASE": "keyword",
+    "SECRET_URL_PARAM": "keyword", "SECRET_ASSIGNMENT": "keyword", "FR_ORDER_NUMBER": "keyword",
+    "FR_IBAN_LABELLED": "keyword",
+    "URL_PERSONAL_NAME": "personal_site_name",
+    # 1.0.2, dernier tour (voie « codes ») : pseudonymes, comptes et identifiants de plateforme annoncés.
+    # Last round: announced pseudonyms, accounts and platform handles.
+    "HANDLE_CUED": "keyword", "HANDLE_PLATFORM": "keyword", "HANDLE_PLATFORM_TEAMS": "keyword",
+    "LOGIN_DOMAIN": "keyword", "PSEUDONYM_LABEL": "keyword",
+    "PSEUDONYM_LABEL_LOWER": "keyword", "PSEUDONYM_BARE": "keyword", "PSEUDONYM_BARE_WORD": "keyword",
+    # Fix 1.0.2 : comptes de messagerie, dossier personnel d'un chemin, pseudonyme capitalisé / chat accounts, the
+    # user folder of a path, a capitalised pseudonym.
+    "HANDLE_PLATFORM_CHAT_WORD": "keyword", "LOGIN_PATH": "keyword", "PSEUDONYM_LABEL_CAPS": "keyword",
 }
 
 
@@ -1664,6 +2511,215 @@ def _offset_array(raw: bytes | None) -> array | None:
     offsets = array("q")
     offsets.frombytes(raw)
     return offsets
+
+
+# --- Propagation des valeurs (1.0.2) / value propagation -------------------------------------------------------
+# Entités cherchées par squelette alphanumérique (séparateurs retirés) / entities searched by alphanumeric skeleton.
+_SKELETON_ENTITIES = frozenset({
+    "ID", "NATIONAL_ID", "ID_CARD", "BANK_ACCOUNT", "PLATE", "TAX_ID", "SOCIAL_ID", "HEALTH_ID", "PASSPORT",
+    "DRIVER_LICENSE", "RESIDENCE_PERMIT", "STUDENT_ID", "IBAN", "IP", "MAC", "CARD", "IMEI", "CRYPTO", "SECRET",
+    "HANDLE"})
+_SKELETON_MIN = 6   # lettres et chiffres, au moins un chiffre / letters and digits, at least one digit
+_DIGITS_MIN = 9     # chiffres seuls / digits only
+_SKELETON_RUN_RE = re.compile(r"[0-9a-z]+")
+_AUTOMATON_KEYS = 8  # au-delà, un automate trouve les occurrences / beyond, an automaton finds the occurrences
+_CODE_GAP = frozenset(" -./_")
+_PHONE_GAP = frozenset(" -./_()")
+_PHONE_PREFIXES = ("00330", "0033", "330", "33", "0", "")
+_DIGIT_CHARS = frozenset("0123456789")
+_MONTH_NAMES: dict[int, tuple[str, ...]] = {
+    1: ("janvier", "janv"), 2: ("fevrier", "fevr", "fev"), 3: ("mars",), 4: ("avril", "avr"), 5: ("mai",),
+    6: ("juin",), 7: ("juillet", "juil"), 8: ("aout",), 9: ("septembre", "sept"), 10: ("octobre", "oct"),
+    11: ("novembre", "nov"), 12: ("decembre", "dec")}
+_MONTHS = {name: month for month, names in _MONTH_NAMES.items() for name in names}
+_ISO_DATE_RE = re.compile(r"([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})")
+_DMY_DATE_RE = re.compile(r"([0-9]{1,2})[/.\- ]([0-9]{1,2})[/.\- ]([0-9]{4})")
+_TEXT_DATE_RE = re.compile(r"([0-9]{1,2})(?:er)? ([a-z]+)\.? ([0-9]{4})")
+_SAINT_HEADS = frozenset({"saint", "sainte", "st", "ste"})
+
+
+def _after_saint(text: str, start: int) -> bool:
+    """Occurrence collée à « Saint- » (« Saint-Claude ») : un lieu, jamais propagé (1.0.2) / glued to "Saint-"."""
+    if start < 3 or text[start - 1] != "-":
+        return False
+    k = start - 1
+    while k > 0 and text[k - 1].isalpha():
+        k -= 1
+    return text[k:start - 1].lower() in _SAINT_HEADS
+
+
+def _place(ctx: DetectionContext, ordered: list[Span], starts: list[int], start: int, end: int, source: Span,
+           value: str | None) -> bool:
+    """Insère une occurrence propagée dans `ordered` (triée, disjointe). Elle remplace les zones de la même entité
+    qu'elle contient strictement (« sohan [Kervadec] » -> « [sohan Kervadec] ») ; une date de naissance remplace aussi
+    une date ordinaire qu'elle couvre ; tout autre chevauchement l'écarte. Inserts a propagated occurrence; it
+    replaces same-entity spans it strictly contains (a birth date also replaces an ordinary date it covers); any
+    other overlap drops it.
+    """
+    if end > ctx.segment(start)[2]:
+        return False
+    lo = bisect_right(starts, start) - 1
+    if lo < 0 or ordered[lo].end <= start:
+        lo += 1
+    hi = bisect_left(starts, end)
+    for inner in ordered[lo:hi]:
+        if inner.start < start or inner.end > end:
+            return False
+        if source.entity == "BIRTH_DATE" and inner.entity == "DATE":
+            continue
+        if inner.entity != source.entity or not inner.personal or inner.end - inner.start >= end - start:
+            return False
+    ordered[lo:hi] = [Span(start, end, source.entity, source.label, f"propagated:{source.source}",
+                           source.score * 0.95, PRIORITY_PROPAGATED, value, True)]
+    starts[lo:hi] = [start]
+    return True
+
+
+def _skeleton_of(text: str) -> str:
+    """Squelette : lettres ASCII et chiffres du texte replié / ASCII letters and digits of the folded text."""
+    return "".join(_SKELETON_RUN_RE.findall(fold(text)))
+
+
+def _skeleton_positions(folded: str) -> tuple[str, array]:
+    """Squelette du document et position de chacun de ses caractères (tableau compact, 8 octets par position) /
+    document skeleton and its positions (compact array, 8 bytes per position)."""
+    pieces: list[str] = []
+    positions = array("q")
+    for m in _SKELETON_RUN_RE.finditer(folded):
+        pieces.append(m.group())
+        positions.extend(range(m.start(), m.end()))
+    return "".join(pieces), positions
+
+
+def _all_occurrences(keys: list[str], haystack: str) -> list[list[int]]:
+    """Débuts de toutes les occurrences (chevauchantes comprises) de chaque clé, croissants : un automate au-delà de
+    `_AUTOMATON_KEYS` clés (un export de milliers d'identifiants reste linéaire), sinon une recherche par clé ; même
+    résultat. Starts of every occurrence (overlapping included) of each key, increasing: an automaton beyond
+    `_AUTOMATON_KEYS` keys (an export of thousands of identifiers stays linear), else one search per key; same result.
+    """
+    starts: list[list[int]] = [[] for _ in keys]
+    if len(keys) > _AUTOMATON_KEYS and _ahocorasick is not None:
+        automaton = _ahocorasick.AhoCorasick(keys, matchkind=_ahocorasick.MatchKind.Standard)
+        for index, start, _end in automaton.find_matches_as_indexes(haystack, overlapping=True):
+            starts[index].append(start)
+        for found in starts:
+            found.sort()
+        return starts
+    for index, key in enumerate(keys):
+        i = haystack.find(key)
+        while i >= 0:
+            starts[index].append(i)
+            i = haystack.find(key, i + 1)
+    return starts
+
+
+def _skeleton_hits(text: str, folded: str, skeleton: str, positions: Sequence[int], key: str,
+                   phone: bool, occurrences: list[int]) -> list[tuple[int, int]]:
+    """Occurrences de `key` dans le squelette, en positions du texte. Entre deux caractères : au plus deux
+    séparateurs `[ -./_]` (et parenthèses pour un téléphone), jamais de saut de ligne ; bornes alphanumériques ;
+    une suite de chiffres ne se prolonge pas au-delà. Occurrences of `key` in the skeleton, as text positions:
+    at most two separators between two characters, never a line break; alphanumeric boundaries; a digit run does
+    not continue past them. Téléphone : `key` est le numéro national, précédé au plus de 0, 33, 330, 0033, 00330.
+    Phone: `key` is the national number, preceded at most by those prefixes.
+    """
+    gaps = _PHONE_GAP if phone else _CODE_GAP
+
+    def linked(k: int) -> bool:
+        p, q = positions[k], positions[k + 1]
+        return q - p - 1 <= 2 and all(c in gaps for c in folded[p + 1:q])
+
+    def start_ok(s: int) -> bool:
+        p = positions[s]
+        if p > 0 and text[p - 1].isalnum():
+            return False
+        return not (s > 0 and skeleton[s] in _DIGIT_CHARS and skeleton[s - 1] in _DIGIT_CHARS and linked(s - 1))
+
+    def end_ok(j: int) -> bool:
+        p = positions[j - 1] + 1
+        if p < len(text) and text[p].isalnum():
+            return False
+        return not (j < len(skeleton) and skeleton[j - 1] in _DIGIT_CHARS and skeleton[j] in _DIGIT_CHARS
+                    and linked(j - 1))
+
+    hits: list[tuple[int, int]] = []
+    size = len(key)
+    free = 0  # après une occurrence retenue, la suivante commence au-delà / after a hit, the next starts past it
+    for i in occurrences:
+        if i < free:
+            continue
+        j = i + size
+        first: int | None = None
+        if all(linked(k) for k in range(i, j - 1)) and end_ok(j):
+            if phone:
+                for prefix in _PHONE_PREFIXES:
+                    s = i - len(prefix)
+                    if s >= 0 and skeleton[s:i] == prefix and all(linked(k) for k in range(s, i)) and start_ok(s):
+                        first = s
+                        break
+            elif start_ok(i):
+                first = i
+        if first is None:
+            continue
+        begin = positions[first]
+        if phone and begin > 0 and text[begin - 1] == "+":
+            begin -= 1
+        hits.append((begin, positions[j - 1] + 1))
+        free = j
+    return hits
+
+
+def _national_number(skeleton: str) -> str | None:
+    """Numéro national à 9 chiffres d'un téléphone (préfixes 0033, 33, 0 retirés) / 9-digit national number."""
+    if not skeleton or any(c not in _DIGIT_CHARS for c in skeleton):
+        return None
+    for prefix in ("0033", "33"):
+        if skeleton.startswith(prefix) and len(skeleton) - len(prefix) in (9, 10):
+            skeleton = skeleton[len(prefix):]
+            break
+    if len(skeleton) == 10 and skeleton[0] == "0":
+        skeleton = skeleton[1:]
+    return skeleton if len(skeleton) == 9 and skeleton[0] != "0" else None
+
+
+def _iso_date(value: str | None) -> str | None:
+    """Date ISO d'une date de naissance écrite (« 12/03/1985 », « 12 mars 1985 », « 1985-03-12 ») / ISO date."""
+    if value is None:
+        return None
+    flat = " ".join(fold(value).split())
+    m = _ISO_DATE_RE.fullmatch(flat)
+    if m is not None:
+        year, month, day = m.groups()
+    else:
+        m = _DMY_DATE_RE.fullmatch(flat)
+        if m is not None:
+            day, month, year = m.groups()
+        else:
+            m = _TEXT_DATE_RE.fullmatch(flat)
+            if m is None or m.group(2) not in _MONTHS:
+                return None
+            day, year = m.group(1), m.group(3)
+            month = str(_MONTHS[m.group(2)])
+    d, mo = int(day), int(month)
+    if not (1 <= d <= 31 and 1 <= mo <= 12):
+        return None
+    return f"{year}-{mo:02d}-{d:02d}"
+
+
+def _date_forms(iso: str) -> list[str]:
+    """Graphies repliées d'une date de naissance ISO / folded written forms of an ISO birth date."""
+    year, month, day = iso.split("-")
+    d, mo = int(day), int(month)
+    days = list(dict.fromkeys((str(d), f"{d:02d}")))
+    months = list(dict.fromkeys((str(mo), f"{mo:02d}")))
+    forms = [f"{dd}{sep}{mm}{sep}{year}" for sep in "/.-" for dd in days for mm in months]
+    forms.append(iso)
+    words = days + (["1er"] if d == 1 else [])
+    for k, name in enumerate(_MONTH_NAMES[mo]):
+        for dd in words:
+            forms.append(f"{dd} {name} {year}")
+            if k:
+                forms.append(f"{dd} {name}. {year}")
+    return list(dict.fromkeys(forms))
 
 
 def _rule_of(span: Span) -> str:
@@ -1699,17 +2755,18 @@ _UNMASKABLE = frozenset({"NATIONAL_ID", "TAX_ID", "SOCIAL_ID", "IBAN", "BANK_ACC
                          "DRIVER_LICENSE", "MRZ", "SECRET", "CRYPTO"})
 
 
-def _apply_keep(spans: list[Span]) -> list[Span]:
-    """Zones « keep » d'une règle : les détections entièrement comprises dans une zone restent en clair, sauf un
-    identifiant officiel validé par sa clé (NIR, IBAN, carte…), que rien ne démasque. Une détection qui déborde
-    reste masquée (rappel d'abord). Keep zones leave detections fully inside them in clear, except a validated
-    official identifier; a detection that sticks out stays masked (recall first).
+_KeepZones = tuple[list[int], list[int], list[str]]
+
+
+def _keep_zones(spans: list[Span]) -> _KeepZones | None:
+    """Zones « keep » des règles de l'organisation : (débuts triés, fin la plus lointaine parmi les zones 0..i, sa
+    règle), ou None. Keep zones of the organisation's rules: (sorted starts, furthest end among zones 0..i, its rule).
     """
     keep = sorted((s.start, s.end, s.source) for s in spans if s.entity == KEEP_ENTITY)
     if not keep:
-        return spans
+        return None
     starts = [k[0] for k in keep]
-    reach: list[int] = []  # fin la plus lointaine parmi les zones 0..i / furthest end among zones 0..i
+    reach: list[int] = []
     owner: list[str] = []
     for _start, end, source in keep:
         if not reach or end > reach[-1]:
@@ -1718,18 +2775,50 @@ def _apply_keep(spans: list[Span]) -> list[Span]:
         else:
             reach.append(reach[-1])
             owner.append(owner[-1])
+    return starts, reach, owner
+
+
+def _keep_span(zones: _KeepZones, span: Span) -> None:
+    """Une détection entièrement comprise dans une zone « keep » reste en clair, sauf un identifiant officiel validé
+    par sa clé (NIR, IBAN, carte…), que rien ne démasque. A detection fully inside a keep zone stays in clear, except
+    a validated official identifier.
+    """
+    starts, reach, owner = zones
+    # Zones commençant avant la détection : la plus lointaine la contient-elle ? / does the furthest one contain it?
+    i = bisect_right(starts, span.start) - 1
+    protected = span.priority >= PRIORITY_VALIDATED and span.entity in _UNMASKABLE
+    if not protected and i >= 0 and reach[i] >= span.end:
+        span.personal = False
+        if not span.source.startswith("keep:"):
+            span.source = f"keep:{owner[i]}"
+
+
+def _apply_keep(spans: list[Span], zones: _KeepZones | None) -> list[Span]:
+    """Zones « keep » d'une règle : les détections entièrement comprises dans une zone restent en clair (voir
+    `_keep_span`). Une détection qui déborde reste masquée (rappel d'abord). Keep zones leave detections fully inside
+    them in clear; a detection that sticks out stays masked (recall first).
+    """
+    if zones is None:
+        return spans
     kept = []
     for span in spans:
         if span.entity == KEEP_ENTITY:
             continue
-        # Zones commençant avant la détection : la plus lointaine la contient-elle ? / does the furthest one contain it?
-        i = bisect_right(starts, span.start) - 1
-        protected = span.priority >= PRIORITY_VALIDATED and span.entity in _UNMASKABLE
-        if not protected and i >= 0 and reach[i] >= span.end:
-            span.personal = False
-            span.source = f"keep:{owner[i]}"
+        _keep_span(zones, span)
         kept.append(span)
     return kept
+
+
+def _keep_after(zones: _KeepZones | None, spans: list[Span]) -> None:
+    """Filtre fort 1.0.2 : les zones « keep » l'emportent aussi sur tout ce qui s'ajoute après la résolution
+    (propagation des valeurs, signatures, initiales) : une zone gardée n'est jamais masquée. Keep zones also win over
+    everything added after resolution (value propagation, signatures, initials): a kept zone is never masked.
+    """
+    if zones is None:
+        return
+    for span in spans:
+        if span.personal:
+            _keep_span(zones, span)
 
 
 def _trim_honorific(span: Span, text: str) -> None:

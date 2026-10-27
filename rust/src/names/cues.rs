@@ -9,8 +9,8 @@ use super::lexicon::{ambiguity, given_rank, surname_rank, AMB_ENTITY, AMB_NONE};
 use super::patterns;
 use super::vocab::flag;
 use super::{
-    Confirmed, Doc, PositionMap, Positions, GIVEN_ALONE_MIN, MEDIUM, NEG, NONE, STRONG, SURNAME_ALONE_MIN, T_CLOSING,
-    T_EPONYM, T_EPONYM_DIRECT, T_GREETING, T_HONORIFIC, T_ROLE,
+    Confirmed, Doc, PositionMap, Positions, GIVEN_ALONE_MIN, MEDIUM, NEG, NONE, STRONG, SURNAME_ALONE_MIN, T_CIVILITY,
+    T_CLOSING, T_EPONYM, T_EPONYM_DIRECT, T_GREETING, T_HONORIFIC, T_ROLE,
 };
 
 /// Étiquette de champ : (début de la valeur, force, demande un nom ?, demande un prénom ?).
@@ -130,9 +130,15 @@ impl Doc<'_> {
             {
                 continue;
             }
+            // « Pont-l'Abbé. Montant facturé » : article élidé lié par un trait d'union, un lieu, pas une civilité
+            // (1.0.2, fort et essentiel). An elided article bound by a hyphen: a place, never an honorific.
+            if trigger.check_left && start >= 3 && matches!(folded[start - 1], '\'' | '’') && folded[start - 3] == '-'
+            {
+                continue;
+            }
             let mut flags = trigger.flags;
             if flags & T_HONORIFIC != 0 && trigger.case_sensitive && !chars.is_upper(&text[start..start + 1]) {
-                flags &= !T_HONORIFIC;
+                flags &= !(T_HONORIFIC | T_CIVILITY);
             }
             let places = T_EPONYM | T_EPONYM_DIRECT | T_ROLE;
             if flags & places != 0 && end - start > 1 && chars.is_upper(&text[start..end]) {
@@ -143,8 +149,10 @@ impl Doc<'_> {
                     cues.signature.push(zone);
                 }
             }
-            if flags & T_EPONYM != 0 || negative.contains(&start) {
-                // « rue du Docteur Roux » : l'éponyme se transmet à la civilité suivante / eponym chains on.
+            if flags & T_EPONYM != 0 || (negative.contains(&start) && flags & T_CIVILITY == 0) {
+                // « rue du Docteur Roux » : l'éponyme se transmet au titre suivant / eponym chains on to a title.
+                // « l'arrêt maladie de M. Jean Dupont » : une civilité désigne la personne (1.0.2) / a civility
+                // names the person concerned and takes the honorific branch below.
                 if let Some(after) = patterns::after_eponym(text, end) {
                     negative.insert(after);
                     cues.put(text, after, NEG, true, CueKind::Plain);

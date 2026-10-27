@@ -70,8 +70,17 @@ def test_mcp_requests_are_rate_limited_per_key(make_client: Callable[..., TestCl
     assert call(client, AUTH_A, "anonymize_text", {"text": "x"})["isError"] is False
     for payload in (mcp_call("anonymize_text", {"text": "x"}), LIST_TOOLS, {"jsonrpc": "2.0"}):
         limited = client.post("/mcp", headers={**MCP_HEADERS, **AUTH_A}, json=payload)
-        assert limited.status_code == 429 and limited.json()["error"]["code"] == "rate_limited"
-        assert int(limited.headers["retry-after"]) >= 1
+        wait = int(limited.headers["retry-after"])
+        assert wait >= 1
+        if "id" in payload:
+            # Requête JSON-RPC : erreur lisible par l'agent (un client MCP ignore le corps d'un 429), en HTTP 200.
+            # JSON-RPC request: an error the agent can read (an MCP client ignores a 429's body), over HTTP 200.
+            error = limited.json()["error"]
+            assert limited.status_code == 200 and limited.json()["id"] == payload["id"]
+            assert error["data"] == {"code": "rate_limited", "http_status": 429, "retry_after_s": wait}
+        else:
+            # Sans id (rien à quoi répondre) : le 429 HTTP / no id (nothing to answer): the HTTP 429.
+            assert limited.status_code == 429 and limited.json()["error"]["code"] == "rate_limited"
     assert call(client, AUTH_B, "anonymize_text", {"text": "x"})["isError"] is False
 
 

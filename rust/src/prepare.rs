@@ -252,6 +252,103 @@ fn group_longer<'a>(bytes: impl Iterator<Item = &'a u8>) -> bool {
     bytes.take(GAP_GROUP + 1).take_while(|b| b.is_ascii_alphanumeric()).count() > GAP_GROUP
 }
 
+/// `_text._delimited_row` (1.0.2) : la ligne qui commence ici porte au moins deux « ; », tabulations ou « , »
+/// d'une même sorte (ligne d'un tableau CSV : jamais recollée à la précédente) / a CSV row is never joined.
+fn delimited_row(rest: &[u8]) -> bool {
+    let line = rest.iter().position(|&b| b == b'\n').map_or(rest, |end| &rest[..end]);
+    b";\t,".iter().any(|d| line.iter().filter(|&b| b == d).count() >= 2)
+}
+
+/// Condition nécessaire de `_text._tab_row` (1.0.2) : la ligne de `pos` porte au moins deux tabulations, autant que
+/// la ligne d'avant ou celle d'après ; `gaps` vérifie ensuite que la ligne appartient à un tableau TSV de
+/// `delimited_tables` (revue du 26/10). Necessary condition of `_tab_row`: the line holds two or more tabs, as many
+/// as the line before or after; `gaps` then checks that the line belongs to a `delimited_tables` TSV table.
+fn tab_row(bytes: &[u8], pos: usize) -> bool {
+    let tabs_in = |a: usize, b: usize| bytes.get(a..b).map_or(0, |part| part.iter().filter(|&&c| c == b'\t').count());
+    let start = bytes[..pos].iter().rposition(|&b| b == b'\n').map_or(0, |i| i + 1);
+    let end = bytes[pos..].iter().position(|&b| b == b'\n').map_or(bytes.len(), |i| pos + i);
+    let tabs = tabs_in(start, end);
+    if tabs < 2 {
+        return false;
+    }
+    if start > 0 {
+        let previous = bytes[..start - 1].iter().rposition(|&b| b == b'\n').map_or(0, |i| i + 1);
+        if tabs_in(previous, start - 1) == tabs {
+            return true;
+        }
+    }
+    if end < bytes.len() {
+        let after = bytes[end + 1..].iter().position(|&b| b == b'\n').map_or(bytes.len(), |i| end + 1 + i);
+        return tabs_in(end + 1, after) == tabs;
+    }
+    false
+}
+
+/// `_text._PHONE_HEAD_RE` : longueur d'un téléphone français entier (`0[1-9]` puis 4 groupes de 2 chiffres, un
+/// séparateur « ␣.- » permis devant chacun) en tête de ces octets, lus dans l'ordre donné. Lecture forcée, donc égale
+/// à la regex. Length of a whole French phone number at the head of these bytes, read in the given order; the parse
+/// is forced, hence equal to the regex. `reverse` : octets lus de droite à gauche / bytes read right to left.
+fn phone_at(bytes: &[u8], reverse: bool) -> Option<usize> {
+    let at = |k: usize| if reverse { bytes.len().checked_sub(k + 1).map(|j| bytes[j]) } else { bytes.get(k).copied() };
+    let digit = |k: usize| at(k).is_some_and(|b| b.is_ascii_digit());
+    let sep = |k: usize| at(k).is_some_and(|b| matches!(b, b' ' | b'.' | b'-'));
+    let mut k = 0;
+    if !reverse {
+        if at(0) != Some(b'0') || !at(1).is_some_and(|b| (b'1'..=b'9').contains(&b)) {
+            return None;
+        }
+        k = 2;
+    }
+    for _ in 0..4 {
+        if reverse {
+            if !(digit(k) && digit(k + 1)) {
+                return None;
+            }
+            k += 2;
+            if sep(k) {
+                k += 1;
+            }
+        } else {
+            if sep(k) {
+                k += 1;
+            }
+            if !(digit(k) && digit(k + 1)) {
+                return None;
+            }
+            k += 2;
+        }
+    }
+    if reverse {
+        if !at(k).is_some_and(|b| (b'1'..=b'9').contains(&b)) || at(k + 1) != Some(b'0') {
+            return None;
+        }
+        k += 2;
+    }
+    (!digit(k)).then_some(k)
+}
+
+/// `_text._phone_line` : le saut de ligne GAP [start, end) borde un téléphone entier (début de la ligne d'après ou
+/// fin de celle d'avant) / the GAP break borders a whole phone number (next line's head or previous line's tail).
+fn phone_line(bytes: &[u8], start: usize, end: usize) -> bool {
+    if phone_at(&bytes[end..], false).is_some() {
+        return true;
+    }
+    let line = bytes[..start].iter().rposition(|&b| b == b'\n').map_or(0, |k| k + 1);
+    phone_at(&bytes[line..start], true).is_some()
+}
+
+/// `_text._POSTCODE_HEAD_RE` (`[0-9]{5}[ \t]+[A-ZÀ-Ý]`) en tête : code postal et ville, un autre champ (troisième
+/// tour) / a postcode and its town at the head: another field.
+fn postcode_head(text: &str) -> bool {
+    let bytes = text.as_bytes();
+    if bytes.len() < 7 || !bytes[..5].iter().all(u8::is_ascii_digit) {
+        return false;
+    }
+    let rest = text[5..].trim_start_matches([' ', '\t']);
+    rest.len() < text.len() - 5
+        && rest.chars().next().is_some_and(|c| c.is_ascii_uppercase() || ('À'..='Ý').contains(&c))
+}
+
 /// Forme `[ \t]{0,3}\r?\n[ \t]{0,3}` d'une suite de blancs / shape of a blank run holding one line break.
 fn break_shape(run: &[u8]) -> bool {
     let Some(newline) = run.iter().position(|&b| b == b'\n') else {
@@ -273,6 +370,17 @@ fn gaps(text: &str) -> Vec<(usize, usize, usize)> {
     }
     let bytes = text.as_bytes();
     let blank = |b: u8| matches!(b, b' ' | b'\t' | b'\r' | b'\n');
+    // Débuts (en caractères) des lignes des tableaux TSV, calculés au premier besoin / TSV table line starts.
+    let mut table_rows: Option<Vec<usize>> = None;
+    let mut in_table = |start: usize, first: usize| {
+        let line = bytes[..start].iter().rposition(|&b| b == b'\n').map_or(0, |k| k + 1);
+        let line_char = first - bytes[line..start].iter().filter(|&&b| (b as i8) >= -0x40).count();
+        let rows = table_rows.get_or_insert_with(|| {
+            let chars: Vec<char> = text.chars().collect();
+            crate::text::tab_table_rows(&chars)
+        });
+        rows.binary_search(&line_char).is_ok()
+    };
     let (mut position, mut i) = (0, 0);
     while i < bytes.len() {
         if !blank(bytes[i]) {
@@ -299,6 +407,7 @@ fn gaps(text: &str) -> Vec<(usize, usize, usize)> {
                     && run != b" "
                     && !run.contains(&b'\r')
                     && (before.is_ascii_digit() || after.is_ascii_digit())
+                    && !(run.contains(&b'\t') && tab_row(bytes, start) && in_table(start, first))
             }
             1 => {
                 before.is_ascii_digit()
@@ -306,6 +415,9 @@ fn gaps(text: &str) -> Vec<(usize, usize, usize)> {
                     && break_shape(run)
                     && !group_longer(bytes[..start].iter().rev())
                     && !group_longer(bytes[i..].iter())
+                    && !delimited_row(&bytes[i..])
+                    && !phone_line(bytes, start, i)
+                    && !postcode_head(&text[i..])
             }
             _ => false,
         };
@@ -410,16 +522,42 @@ fn email_join(left: &[u8], right: &[u8]) -> bool {
     if ats != 1 || left.is_empty() || right.is_empty() {
         return false;
     }
+    // Fin de phrase (1.0.2) : point final, saut de ligne, majuscule, courriel complet ou absent à gauche.
+    // End of sentence: final full stop, line break, capital, e-mail complete or absent on the left.
+    if left.last() == Some(&b'.') && right[0].is_ascii_uppercase() {
+        let complete = match left.iter().position(|&b| b == b'@') {
+            None => true,
+            Some(at) => {
+                let mut domain = &left[at + 1..];
+                while let Some((&b'.', head)) = domain.split_last() {
+                    domain = head;
+                }
+                domain_ok(domain)
+            }
+        };
+        if complete {
+            return false;
+        }
+    }
     if let Some(at) = left.iter().position(|&b| b == b'@') {
         let domain = &left[at + 1..];
         let joined = [domain, right].concat();
         return at > 0 && !domain_ok(domain) && domain_ok(&joined);
     }
     let at = right.iter().position(|&b| b == b'@').unwrap_or(0);
+    let signed = left.iter().any(|b| b"._-0123456789".contains(b));
+    // Courriel déjà complet en tête de ligne (troisième tour) : un morceau de gauche qui porte une majuscule n'est pas
+    // le début de sa partie locale. An already complete address: a left piece with a capital is not its start.
+    if at >= 2 && left.iter().any(u8::is_ascii_uppercase) {
+        return false;
+    }
+    // Mot de la ligne d'avant (revue du 26/10) : mot sans signe à majuscule, ou partie locale déjà complète à droite.
+    // The previous line's last word: a plain word with a capital, or an already complete local part on the right.
+    if !signed && (left.iter().any(u8::is_ascii_uppercase) || right[..at].iter().skip(1).any(|b| b"._-".contains(b))) {
+        return false;
+    }
     // Le morceau de gauche commence par une lettre / the left piece starts with a letter.
-    domain_ok(&right[at + 1..])
-        && left[0].is_ascii_alphabetic()
-        && (left.len() <= BREAK_LOCAL || left.iter().any(|b| b"._-0123456789".contains(b)))
+    domain_ok(&right[at + 1..]) && left[0].is_ascii_alphabetic() && (left.len() <= BREAK_LOCAL || signed)
 }
 
 /// `_text._IBAN_HEAD_RE` en entier / full match of an IBAN head.
@@ -441,6 +579,190 @@ fn iban_complete(group: &[u8]) -> bool {
         }
     }
     remainder == 1
+}
+
+/// Caractère d'un morceau de numéro (`_text._NUMBER_PART`) / character of a number piece.
+fn number_part(b: u8) -> bool {
+    b.is_ascii_digit() || b == b'.' || b == b'-'
+}
+
+/// Valeur d'une suite de chiffres ASCII / value of an ASCII digit run.
+fn digits_value(digits: &[u8]) -> u64 {
+    digits.iter().fold(0, |acc, &b| acc * 10 + u64::from(b - b'0'))
+}
+
+/// `_text._luhn`.
+fn luhn(digits: &[u8]) -> bool {
+    let total: u32 = digits
+        .iter()
+        .rev()
+        .enumerate()
+        .map(|(i, &b)| {
+            let value = u32::from(b - b'0') * if i % 2 == 1 { 2 } else { 1 };
+            if value > 9 {
+                value - 9
+            } else {
+                value
+            }
+        })
+        .sum();
+    total.is_multiple_of(10)
+}
+
+/// `_text._PHONE_FULL_RE` en entier (`0[1-9](?:[.\-]?[0-9]{2}){4}`) ; lecture forcée, donc égale à la regex.
+/// Full match of a French phone shape; the parse is forced, hence equal to the regex.
+fn phone_full(b: &[u8]) -> bool {
+    if b.len() < 10 || b[0] != b'0' || !(b'1'..=b'9').contains(&b[1]) {
+        return false;
+    }
+    let mut k = 2;
+    for _ in 0..4 {
+        if k < b.len() && matches!(b[k], b'.' | b'-') {
+            k += 1;
+        }
+        if !(k + 1 < b.len() && b[k].is_ascii_digit() && b[k + 1].is_ascii_digit()) {
+            return false;
+        }
+        k += 2;
+    }
+    k == b.len()
+}
+
+/// `_text._IPV4_RE` en entier : quatre nombres de 0 à 255 sans zéro de tête / four numbers 0-255, no leading zero.
+fn ipv4_full(b: &[u8]) -> bool {
+    let groups: Vec<&[u8]> = b.split(|&c| c == b'.').collect();
+    groups.len() == 4
+        && groups.iter().all(|g| {
+            (1..=3).contains(&g.len())
+                && g.iter().all(u8::is_ascii_digit)
+                && (g.len() == 1 || g[0] != b'0')
+                && digits_value(g) <= 255
+        })
+}
+
+/// `_text._number_join` (règle BREAK_NUMBER) : les deux morceaux font un seul numéro prouvé (téléphone, IPv4,
+/// SIREN ou SIRET par la clé de Luhn, NIR ou RIB par la clé 97) / both pieces make one proven number.
+fn number_join(left: &[u8], right: &[u8]) -> bool {
+    let mut left = left;
+    while let Some((&b'.' | &b'-', tail)) = left.split_first() {
+        left = tail;
+    }
+    let mut right = right;
+    while let Some((&b'.' | &b'-', head)) = right.split_last() {
+        right = head;
+    }
+    if !left.iter().any(u8::is_ascii_digit) || !right.iter().any(u8::is_ascii_digit) {
+        return false;
+    }
+    let joined = [left, right].concat();
+    if phone_full(&joined) || ipv4_full(&joined) {
+        return true;
+    }
+    if !joined.iter().all(u8::is_ascii_digit) {
+        return false;
+    }
+    match joined.len() {
+        9 | 14 => luhn(&joined),
+        15 => b"12378".contains(&joined[0]) && 97 - digits_value(&joined[..13]) % 97 == digits_value(&joined[13..]),
+        23 => {
+            let sum =
+                89 * digits_value(&joined[..5]) + 15 * digits_value(&joined[5..10]) + 3 * digits_value(&joined[10..21]);
+            97 - sum % 97 == digits_value(&joined[21..])
+        }
+        _ => false,
+    }
+}
+
+/// Caractère d'une plaque (`_text._PLATE_PART`) / character of a licence plate.
+fn plate_part(b: u8) -> bool {
+    b.is_ascii_uppercase() || b.is_ascii_digit() || b == b' ' || b == b'-'
+}
+
+/// `_text._PLATE_SIDE` : caractères lus de chaque côté du saut / characters read on each side of the break.
+const PLATE_SIDE: usize = 9;
+
+/// Séparateur `[ -]?` en `k` / optional separator at `k`.
+fn skip_plate_sep(b: &[u8], k: usize) -> usize {
+    if k < b.len() && matches!(b[k], b' ' | b'-') {
+        k + 1
+    } else {
+        k
+    }
+}
+
+/// Longueur de la suite de `class` en `k` / length of the `class` run at `k`.
+fn class_run(b: &[u8], k: usize, class: fn(&u8) -> bool) -> usize {
+    b[k..].iter().take_while(|c| class(c)).count()
+}
+
+/// `_text._PLATE_RES[0]` en entier (SIV, `[A-Z]{2}[ -]?[0-9]{3}[ -]?[A-Z]{2}`) ; lecture forcée, égale à la regex.
+/// Full match of a SIV plate; the parse is forced, hence equal to the regex.
+fn plate_siv(b: &[u8]) -> bool {
+    if class_run(b, 0, u8::is_ascii_uppercase) != 2 {
+        return false;
+    }
+    let k = skip_plate_sep(b, 2);
+    if class_run(b, k, u8::is_ascii_digit) != 3 {
+        return false;
+    }
+    let k = skip_plate_sep(b, k + 3);
+    class_run(b, k, u8::is_ascii_uppercase) == 2 && k + 2 == b.len()
+}
+
+/// `_text._PLATE_RES[1]` en entier (FNI, `[0-9]{1,4}[ -]?[A-Z]{1,3}[ -]?(?:[0-9]{2}|2[AB])`) ; lecture forcée.
+/// Full match of an FNI plate; the parse is forced.
+fn plate_fni(b: &[u8]) -> bool {
+    let digits = class_run(b, 0, u8::is_ascii_digit);
+    if !(1..=4).contains(&digits) {
+        return false;
+    }
+    let k = skip_plate_sep(b, digits);
+    let letters = class_run(b, k, u8::is_ascii_uppercase);
+    if !(1..=3).contains(&letters) {
+        return false;
+    }
+    let tail = &b[skip_plate_sep(b, k + letters)..];
+    (tail.len() == 2 && tail.iter().all(u8::is_ascii_digit)) || tail == b"2A" || tail == b"2B"
+}
+
+/// `_text._plate_join` (règle BREAK_PLATE) : 0 pas de plaque, 1 saut ramené à une espace, 2 saut retiré.
+/// 0: no plate, 1: the break becomes one space, 2: the break is removed.
+fn plate_join(text: &str, start: usize, end: usize, classes: &Classes) -> u8 {
+    let bytes = text.as_bytes();
+    if !plate_part(bytes[start - 1]) || !plate_part(bytes[end]) {
+        return 0;
+    }
+    let mut i = start;
+    while i > 0 && start - i < PLATE_SIDE && plate_part(bytes[i - 1]) {
+        i -= 1;
+    }
+    let mut j = end;
+    while j < bytes.len() && j - end < PLATE_SIDE && plate_part(bytes[j]) {
+        j += 1;
+    }
+    let lefts: Vec<usize> = (i..start)
+        .filter(|&k| {
+            !char_before(text, k).is_some_and(|c| classes.is_alnum(c))
+                && (k == i || matches!(bytes[k - 1], b' ' | b'-'))
+        })
+        .collect();
+    let rights: Vec<usize> = (end + 1..=j)
+        .rev()
+        .filter(|&k| {
+            !char_at(text, k).is_some_and(|c| classes.is_alnum(c)) && (k == j || matches!(bytes[k], b' ' | b'-'))
+        })
+        .collect();
+    for (sep, result) in [(&b" "[..], 1), (&b""[..], 2)] {
+        for &l in &lefts {
+            for &r in &rights {
+                let candidate = [&bytes[l..start], sep, &bytes[end..r]].concat();
+                if plate_siv(&candidate) || plate_fni(&candidate) {
+                    return result;
+                }
+            }
+        }
+    }
+    0
 }
 
 /// Zone GAP : (caractère de début, longueur, octet de début) / GAP zone: (start character, length, start byte).
@@ -479,6 +801,31 @@ fn breaks(text: &str, classes: &Classes) -> (Vec<GapZone>, Vec<CutZone>) {
             cuts.push((first, first + length));
             continue;
         }
+        // Règle BREAK_NUMBER (`_text._number_join`) : numéro prouvé coupé par le saut de ligne / a proven number.
+        let (l0, l1, left_whole) = token(text, start, true, number_part, classes);
+        let (r0, r1, right_whole) = token(text, end, false, number_part, classes);
+        if left_whole
+            && right_whole
+            && number_join(&bytes[l0..l1], &bytes[r0..r1])
+            && !delimited_row(&bytes[end..])
+            && !postcode_head(&text[end..])
+            && !(before.is_ascii_digit() && after.is_ascii_digit() && phone_line(bytes, start, end))
+        {
+            cuts.push((first, first + length));
+            continue;
+        }
+        // Règle BREAK_PLATE (`_text._plate_join`) : plaque coupée par le saut de ligne / a split licence plate.
+        match plate_join(text, start, end, classes) {
+            1 => {
+                gaps.push((first, length, start));
+                continue;
+            }
+            2 => {
+                cuts.push((first, first + length));
+                continue;
+            }
+            _ => {}
+        }
         let (l0, l1, left_whole) = token(text, start, true, alnum, classes);
         let (r0, r1, right_whole) = token(text, end, false, alnum, classes);
         let (left, right) = (&bytes[l0..l1], &bytes[r0..r1]);
@@ -491,8 +838,17 @@ fn breaks(text: &str, classes: &Classes) -> (Vec<GapZone>, Vec<CutZone>) {
             && upper(right)
             && digit(right)
             && (15..=34).contains(&(left.len() + right.len()))
-            && !iban_complete(left)
+            && !(left.len() >= 15 && iban_complete(left))
+            && phone_at(&bytes[end..], false).is_none()
         {
+            cuts.push((first, first + length));
+        } else if left.len() == 2
+            && left.iter().all(u8::is_ascii_uppercase)
+            && (13..=32).contains(&right.len())
+            && iban_head(&[left, right].concat())
+            && iban_complete(&[left, right].concat())
+        {
+            // Code pays seul en fin de ligne, IBAN entier à clé juste (BREAK_NUMBER) / a country code alone.
             cuts.push((first, first + length));
         } else if !(left.last().is_some_and(u8::is_ascii_digit) && right[0].is_ascii_digit())
             && left.len() <= BREAK_GROUP

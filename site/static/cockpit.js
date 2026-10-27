@@ -1,5 +1,6 @@
 /* Workspace: a session queue sent one request at a time, same origin; results in this tab's memory only (no cookie,
-   no Web Storage, no IndexedDB); files sent as "document.<ext>"; Retry-After honoured. Texts: #i18n. */
+   no IndexedDB; Web Storage keeps the chosen mode only, never a text); files sent as "document.<ext>"; Retry-After
+   honoured. Texts: #i18n. */
 (function () {
 "use strict";
 var d = document, form = d.getElementById("ck");
@@ -10,7 +11,7 @@ function q(s, r) { return (r || d).querySelector(s); }
 function el(tag, cls, text) { var e = d.createElement(tag); e.className = cls || ""; if (text != null) e.textContent = text; return e; }
 var T = {};
 each(d.querySelectorAll("#i18n [data-k]"), function (li) { T[li.dataset.k] = li.textContent; });
-"rd".split("").forEach(function (p) {
+["r", "d", "mo"].forEach(function (p) {
   each((T[p] || "").split("|"), function (s) { var i = s.indexOf("="); if (i > 0) T[p + ":" + s.slice(0, i)] = s.slice(i + 1); });
 });
 function t(k, v) { var s = T[k] || ""; for (var x in v) s = s.split("{" + x + "}").join(v[x]); return s; }
@@ -47,9 +48,43 @@ var pin = "", hot = null, lit = [], X = {}, ran = 0, vis = null;
 function say(m) { R.st.textContent = m; }
 function ext(name) { var m = /\.[A-Za-z0-9]+$/.exec(name); return m ? m[0].toLowerCase() : ""; }
 function open(it) { return /^(wait|run|retry)$/.test(it.st); }
+// --- mode (fort by default), sent as the API and the MCP take it: mode, disable, rules.
+var cu = R.cu, kf = form.elements.keep, MK = "gg-mode";
+function mode() { return form.querySelector("[name=mode]:checked").value; }
+function off() { return [].filter.call(R.cats.querySelectorAll("input"), function (b) { return !b.checked; }).map(function (b) { return b.value; }); }
+// Codes to keep, "SKU-###### LOT-@@@@-###": # one digit, @ one letter, the rest as written (a letter A too); each one
+// a keep rule, with at least one fixed letter or digit (never a bare "##########": keep rules win in every mode).
+// Invalid: false, said under the field; none: null.
+function keep() {
+  var c = kf.value.split(/[\s,;]+/).filter(Boolean), bad = c.filter(function (x) { return !/^[\w.\/#@-]{2,40}$/.test(x); })[0];
+  var fix = c.filter(function (x) { return !/[A-Za-z0-9]/.test(x); })[0];
+  var msg = bad ? t("kbad", { c: bad }) : fix ? t("kfix", { c: fix }) : c.length > 20 ? t("kmax") : "";
+  R.kerr.textContent = msg;
+  kf.setAttribute("aria-invalid", !!msg);
+  return msg ? false : c.length ? { rules: c.map(function (x, i) {
+    return { label: (/^[A-Za-z]+/.exec(x) || ["CODE"])[0].toUpperCase().slice(0, 24) + "_" + (i + 1), action: "keep",
+      pattern: x.replace(/#+|@+|[^#@]/g, function (m) {
+        var n = m.length > 1 ? "{" + m.length + "}" : "";
+        return m[0] === "#" ? "[0-9]" + n : m[0] === "@" ? "[A-Z]" + n : m === "." ? "\\." : m;
+      }) };
+  }) } : null;
+}
+function modeOk() {
+  if (mode() !== "personnalise" || keep() !== false) return true;
+  say(R.kerr.textContent);
+  kf.focus();
+  return false;
+}
 function opts() {
-  return { countries: sel.value, label: sel.options[sel.selectedIndex].text,
-    profile: form.querySelector("[name=profile]:checked").value, explain: form.elements.explain.checked };
+  var m = mode(), o = { countries: sel.value, label: sel.options[sel.selectedIndex].text, mode: m, ml: t("mo:" + m),
+    explain: form.elements.explain.checked };
+  if (m === "personnalise") { o.disable = off(); o.rules = keep(); }
+  return o;
+}
+// Remembered in this browser, the settings only; the page works without storage.
+function remember() {
+  cu.hidden = mode() !== "personnalise";
+  try { localStorage.setItem(MK, JSON.stringify({ m: mode(), off: off(), k: kf.value })); } catch (e) { /* none */ }
 }
 
 // --- queue
@@ -73,6 +108,7 @@ function added(list) {
 }
 function addFiles(files) {
   var list = [];
+  if (!modeOk()) return;
   each(files || [], function (f) {
     var x = ext(f.name);
     list.push(push({ file: f, name: f.name, ext: x, kind: x.slice(1).toUpperCase() || "?", size: f.size }));
@@ -83,6 +119,7 @@ function addText(v) { added([push({ text: v, name: t("tname", { n: n0(++texts) }
 function submit() {
   var v = ta.value;
   if (!v.trim()) { say(t("empty")); ta.focus(); return; }
+  if (!modeOk()) return;
   ta.value = "";
   addText(v);
   ta.focus();
@@ -106,13 +143,18 @@ function pump() {
 
 // XHR, not fetch: upload progress (it.up). No cookie exists on this origin to send.
 function send(it) {
-  var o = it.o, x = new XMLHttpRequest(), start = performance.now(), body;
+  var o = it.o, x = new XMLHttpRequest(), start = performance.now(), body,
+    f = { countries: o.countries, label_language: fr ? "fr" : "en", explain: o.explain };
+  // fort is the service's default: sent only when another mode is chosen (an engine before 1.0.2 refuses "mode").
+  if (o.mode !== "fort") f.mode = o.mode;
+  if (o.disable && o.disable.length) f.disable = o.disable;
+  if (o.rules) f.rules = o.rules;
   if (it.file) {
     body = new FormData();
     body.append("file", it.file, "document" + it.ext);
-    [["countries", o.countries], ["profile", o.profile], ["label_language", fr ? "fr" : "en"], ["explain", "" + o.explain]]
-      .forEach(function (x) { body.append(x[0], x[1]); });
-  } else body = JSON.stringify({ text: it.text, countries: o.countries, profile: o.profile, label_language: fr ? "fr" : "en", explain: o.explain });
+    // Form fields: disable comma-separated, rules as JSON text.
+    for (var k in f) body.append(k, k === "rules" ? JSON.stringify(f[k]) : "" + f[k]);
+  } else { f.text = it.text; body = JSON.stringify(f); }
   running = it;
   ctl = x;
   ran++;
@@ -150,7 +192,9 @@ function send(it) {
 
 function done(it, j, ms) {
   var r = j.report || {}, ent = r.entities || {}, m;
+  // am: the mode the service says it applied (none from an engine without modes).
   Object.assign(it, { st: "done", ms: ms, out: typeof j.text === "string" ? j.text : String(j.markdown || ""), rep: r,
+    am: typeof r.mode === "string" ? T["mo:" + r.mode] || r.mode : "",
     pages: j.pages || 0, warn: [].concat(j.warnings || [], r.warnings || []).filter(function (w, i, a) { return a.indexOf(w) === i; }), dropped: j.dropped || {} });
   it.total = typeof r.total_replaced === "number" ? r.total_replaced : Object.keys(ent).reduce(function (s, k) { return s + ent[k]; }, 0);
   it.N = {};
@@ -273,7 +317,7 @@ function show() {
   res.textContent = "";
   if (!it) { R.what.textContent = ""; res.appendChild(empty); return; }
   R.what.textContent = [pad(it.id) + " · " + it.name, it.file && it.kind, it.pages && tn("pages", it.pages), bytes(it.size),
-    ok && dur(it.ms), it.o.label + " · " + it.o.profile].filter(Boolean).join(" · ");
+    ok && dur(it.ms), it.o.label, ok ? it.am : it.o.ml].filter(Boolean).join(" · ");
   if (ok) return render(it);
   if (it.st === "err") {
     each(ban.querySelectorAll("b,span,code"), function (e, i) { e.textContent = [it.err.h, it.err.b, it.err.c][i]; });
@@ -488,7 +532,12 @@ R.clear.addEventListener("click", function () {
 // --- input: submit, keys, paste and drop anywhere
 form.addEventListener("submit", function (e) { e.preventDefault(); submit(); });
 // The example goes straight to the queue: a draft in the input stays as it is.
-q("[data-ex]").addEventListener("click", function () { addText(this.getAttribute("data-ex")); });
+q("[data-ex]").addEventListener("click", function () { if (modeOk()) addText(this.getAttribute("data-ex")); });
+form.querySelector(".md").addEventListener("change", remember);
+cu.addEventListener("change", remember);
+kf.addEventListener("input", function () { keep(); remember(); });
+// Enter in the codes field does not send the text; Ctrl + Enter still does.
+kf.addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.ctrlKey && !e.metaKey) e.preventDefault(); });
 fin.addEventListener("change", function () { addFiles(fin.files); fin.value = ""; });
 sel.addEventListener("change", function () { R.hint.hidden = sel.value === "FR"; });
 d.addEventListener("keydown", function (e) {
@@ -556,6 +605,20 @@ addEventListener("beforeunload", function (e) { if ((Q.length || ta.value) && Da
 
 R.dz.firstChild.textContent = t("dropHint");
 if (/Mac|iP/.test(navigator.platform)) { R.keys.textContent = R.keys.textContent.split("Ctrl").join("⌘"); for (var k in T) T[k] = T[k].split("Ctrl").join("⌘"); }
+// Categories of the custom mode (#i18n "cats"), all masked at first; then the settings this browser kept.
+each((T.cats || "").split("|"), function (s) {
+  var i = s.indexOf("="), l = el("label", "chk"), b = el("input");
+  b.type = "checkbox"; b.name = "cat"; b.value = s.slice(0, i); b.checked = true;
+  l.append(b, el("span", "", s.slice(i + 1)));
+  R.cats.append(l);
+});
+try {
+  var st = JSON.parse(localStorage.getItem(MK)) || {};
+  each(form.elements.mode, function (r) { if (r.value === st.m) r.checked = true; });
+  each(R.cats.querySelectorAll("input"), function (b) { b.checked = (st.off || []).indexOf(b.value) < 0; });
+  if (typeof st.k === "string") { kf.value = st.k; keep(); }
+} catch (e) { /* no storage: fort */ }
+cu.hidden = mode() !== "personnalise";
 R.go.disabled = false;
 R.hint.hidden = sel.value === "FR";
 onHash();

@@ -465,14 +465,18 @@ def build_anonymizer(args: argparse.Namespace, env: Mapping[str, str]) -> Any:
     from gdprguardian.server.options import AnonymizeOptions
 
     try:
-        options = AnonymizeOptions.build(args.countries, args.profile, args.label_language, None, args.explain)
+        # Sans --mode : le mode fort, défaut du moteur ; --profile n'est plus qu'un alias déprécié.
+        # Without --mode: the engine's default fort mode; --profile is only a deprecated alias.
+        options = AnonymizeOptions.build(args.countries, args.profile, args.label_language, None, args.explain,
+                                         mode=args.mode, disable=args.disable)
     except ValueError as exc:
         raise Failure(str(exc), EXIT_USAGE) from None
     rules = load_rules(args.rules, env)
     if rules is None:
         return options.anonymizer()
-    return Anonymizer(countries=options.countries, profile=options.profile, label_language=options.label_language,
-                      rules=rules, explain=options.explain)
+    extra = {} if options.profile is None else {"profile": options.profile}
+    return Anonymizer(countries=options.countries, mode=options.mode, disable=options.disable,
+                      label_language=options.label_language, rules=rules, explain=options.explain, **extra)
 
 
 def anonymize_file(path: Path, anonymizer: Any, *, max_mb: float, timeout: float, in_process: bool
@@ -601,7 +605,13 @@ def build_parser() -> argparse.ArgumentParser:
                         help="texte UTF-8 : un fichier, ou « - » pour l'entrée standard / UTF-8 text: a file, or '-'")
     parser.add_argument("--countries", default="FR",
                         help="packs pays, ex. FR (défaut), FR,BE, all, auto (expérimental) / country packs")
-    parser.add_argument("--profile", default="standard", choices=("fast", "standard", "strict"))
+    parser.add_argument("--mode", choices=("fort", "essentiel", "personnalise", "strong", "essential", "custom"),
+                        help="fort (défaut : tout ce qu'on peut, codes compris), essentiel (codes métier lisibles), "
+                             "personnalise (le fort moins --disable) / fort (default), essentiel, personnalise")
+    parser.add_argument("--disable", help="catégories laissées en clair, séparées par des virgules (mode "
+                                          "personnalise ; jamais secrets) / categories left in clear (custom mode)")
+    parser.add_argument("--profile", choices=("fast", "standard", "strict"),
+                        help="ancien réglage, déprécié : standard = essentiel, strict = fort / deprecated")
     parser.add_argument("--label-language", default="fr", choices=("fr", "en", "auto"))
     parser.add_argument("--rules", help="règles de l'organisation (JSON ou TOML) ; défaut : GDPRGUARDIAN_RULES ou "
                                         ".gdprguardian/rules.json / organisation rules")

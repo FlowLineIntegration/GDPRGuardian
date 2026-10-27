@@ -124,7 +124,8 @@ def test_hard_negatives(found, text):
 @pytest.mark.parametrize(("text", "expected"), [
     # Messages, tickets, SMS : nom en minuscules juste après un indice / lowercase name right after a cue.
     ("La commande 152000 du client guillaume au tél 0650123456.",
-     "La commande 152000 du client [PERSONNE_1] au tél [TEL_1]."),
+     # 1.0.2 : un numéro après « commande » est masqué (filtre fort) / a number after "commande" is masked.
+     "La commande [IDENTIFIANT_1] du client [PERSONNE_1] au tél [TEL_1]."),
     ("Bonjour guillaume, ta commande est prête.", "Bonjour [PERSONNE_1], ta commande est prête."),
     ("Le client guillaume martin a rappelé.", "Le client [PERSONNE_1] a rappelé."),
     ("M. dupont est absent.", "M. [PERSONNE_1] est absent."),

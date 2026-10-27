@@ -134,9 +134,10 @@ def test_limited_answers_are_closed_json_with_retry_after(make_client: Callable[
     assert client.post("/v1/anonymize/text", headers=ALICE, json={"text": "x"}).status_code == 200
     limited = client.post("/v1/anonymize/text", headers={**ALICE, "Content-Type": "application/json"},
                           content=b'{"text": "' + NIR.encode())  # jamais lu / never read
+    # Attente en secondes dans le corps aussi / wait in seconds in the body too.
     assert limited.status_code == 429 and limited.json() == {"error": {
         "code": "rate_limited", "message": "Trop de requêtes, réessayez après Retry-After / too many requests, retry "
-                                           "after Retry-After"}}
+                                           "after Retry-After", "retry_after_s": int(limited.headers["retry-after"])}}
     assert int(limited.headers["retry-after"]) >= 1
     assert limited.headers["ratelimit-policy"].startswith('"cpu";q=6;qu="worker-ms"')
     assert no_store(limited) and NIR not in limited.text
@@ -226,12 +227,17 @@ def test_deferred_results_are_reachable_through_their_capability_only(public: Te
     assert consumed.json()["error"]["code"] == "already_read" and wrong.json()["error"]["code"] == "not_found"
 
 
-def test_a_used_upload_url_answers_like_a_wrong_one(public: TestClient) -> None:
+def test_a_used_upload_url_says_so_to_its_holder_only(public: TestClient) -> None:
+    # Seul le détenteur de la capacité (256 bits) apprend « déjà utilisée », comme pour un résultat disparu ; un faux
+    # jeton reçoit toujours la réponse commune. Only the capability's holder learns "already used", as for a vanished
+    # result; a wrong token still gets the common answer.
     ticket = public.post("/v1/uploads", headers=ALICE, json={"filename": "a.txt"}).json()
     assert public.put(path_of(ticket["upload_url"]), headers=ALICE, content=b"x").status_code == 202
     again = public.put(path_of(ticket["upload_url"]), headers=BOB, content=b"y")
     wrong = public.put("/v1/uploads/" + secrets.token_urlsafe(32), headers=BOB, content=b"y")
-    assert again.status_code == wrong.status_code == 404 and again.json() == wrong.json()
+    assert again.status_code == wrong.status_code == 404
+    assert again.json()["error"]["code"] == "upload_used" and "create_upload" in again.json()["error"]["message"]
+    assert wrong.json()["error"]["code"] == "not_found"
 
 
 def test_a_keyed_upload_stays_bound_to_its_key(make_client: Callable[..., TestClient]) -> None:

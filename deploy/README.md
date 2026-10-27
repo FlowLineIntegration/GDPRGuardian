@@ -136,8 +136,13 @@ Le cockpit (même origine) et les clients hors navigateur (en-tête absent) ne s
 avec `Retry-After` en secondes entières, plus 0 à 20 % d'aléa pour que les clients refusés ne reviennent pas ensemble,
 et au mieux `RateLimit-Policy` / `RateLimit` (brouillon IETF httpapi-ratelimit-headers-11 :
 `"req";q=30;w=3`, `"cpu";q=20000;qu="worker-ms";w=40` ; « worker-ms » n'est pas une unité enregistrée, seul
-`Retry-After` fait foi). Aux clients (scripts, agents MCP) : respecter `Retry-After`, trois essais au plus, des
-reprises sous 10 % des requêtes.
+`Retry-After` fait foi). Le corps donne aussi l'attente en secondes (`retry_after_s`). Sur `/mcp`, un client MCP ne
+lit jamais le corps d'une réponse HTTP 4xx/5xx (il n'affiche que « Server returned an error response ») : une requête
+JSON-RPC refusée (429, 503, 408, 413) y reçoit donc HTTP 200 et une erreur JSON-RPC (`-32000`, message
+`code: message … retry_after_s=N`, `data` : `code`, `http_status`, `retry_after_s`), avec le même `Retry-After` ;
+sans identifiant JSON-RPC (notification, lot), le statut HTTP reste. L'identifiant est cherché dans les 8 premiers Kio
+et les 512 derniers octets du corps lu à vide, rien d'autre n'est gardé. Aux clients (scripts, agents MCP) : une
+requête à la fois, respecter `Retry-After`, trois essais au plus, des reprises sous 10 % des requêtes.
 
 **Bord Nginx** (garde grossière, avant le service) : 20 requêtes par seconde (rafale 40) et 16 connexions par
 adresse IPv4 ou /64 IPv6, 48 par /24 ou /48, 1 500 en tout (API et `/v1/` des sites) ; en-têtes lus en 10 s, corps
@@ -164,7 +169,8 @@ base de fail2ban (clients SSH seulement) et les anciennes entrées du journal du
   ou une ligne de commande, n'en déduit pas l'identifiant), remises au seul demandeur, gardées en **empreintes** SHA-256,
   comparées en temps constant ; le jeton sert une fois ; le résultat est effacé 2 minutes après sa lecture complète
   (une réponse perdue se relit) ou à son échéance, 30 minutes au plus après sa publication ; un jeton faux,
-  expiré ou déjà utilisé donne **la même réponse** (404 `not_found`) ; un résultat disparu donne un motif
+  expiré ou d'une autre clé donne **la même réponse** (404 `not_found`) ; un jeton déjà utilisé le dit à son seul
+  détenteur (404 `upload_used` : demander une nouvelle URL) ; un résultat disparu donne un motif
   distinct (`already_read`, `expired`, `deleted`, toujours 404) au seul détenteur de son identifiant ; aucune route ne
   liste quoi que ce soit ; MCP est sans état (aucun identifiant de session, qui ne donnerait de toute façon aucun
   droit). Dans le service public, la capacité suffit (l'adresse d'un agent change entre ses appels) ; avec une clé,
@@ -470,17 +476,18 @@ service d'écrire sur le socket ; un socket Unix ne passe pas par le réseau, le
 
 Toute erreur a la forme `{"error": {"code": "…", "message": "…"}}` : code stable, message fixe (en français et
 en anglais ; en anglais seul pour `not_found` et `method_not_allowed` d'une route inconnue), jamais un extrait du
-contenu ; un 422 de validation liste aussi les noms des champs (`fields`). Les outils MCP renvoient
-`code: message`.
+contenu ; un 422 de validation liste aussi les noms des champs (`fields`) ; un refus temporaire ajoute
+`retry_after_s`. Les outils MCP renvoient `code: message` (avec `retry_after_s=N` pour un refus temporaire) ; un refus
+de la porte d'entrée sur `/mcp` arrive en erreur JSON-RPC (voir « Réponses »).
 
 | HTTP | `code` | Cause | Que faire |
 |---|---|---|---|
 | 400 | `invalid_request` | en-tête `Content-Length` invalide | corriger la requête |
 | 401 | `unauthorized` | mode à clés seulement : clé d'API absente ou invalide | vérifier la clé |
 | 403 | `cross_site_request` | requête envoyée par un navigateur depuis une autre page (`Sec-Fetch-Site`) | appeler depuis un script, un agent ou le cockpit |
-| 404 | `not_found`, `page_not_found`, `already_read`, `expired`, `deleted` | envoi ou résultat faux, d'une autre clé, jeton déjà utilisé (`not_found`) ; résultat lu puis effacé, expiré ou supprimé (motif distinct, pour le seul détenteur de l'identifiant) ; page inexistante | recréer l'envoi |
+| 404 | `not_found`, `upload_used`, `page_not_found`, `already_read`, `expired`, `deleted` | envoi ou résultat faux, d'une autre clé (`not_found`) ; URL d'envoi déjà utilisée (`upload_used`, pour son seul détenteur) ; résultat lu puis effacé, expiré ou supprimé (motif distinct, pour le seul détenteur de l'identifiant) ; page inexistante | recréer l'envoi (`create_upload` ou `POST /v1/uploads`) |
 | 405 | `method_not_allowed` | méthode non prise en charge | — |
-| 408 | `upload_timeout` | corps reçu trop lentement (15 s plus sa taille à `GDPRGUARDIAN_MIN_BODY_RATE_KIB`) | réessayer une fois |
+| 408 | `upload_timeout` | corps reçu trop lentement (15 s plus sa taille à `GDPRGUARDIAN_MIN_BODY_RATE_KIB`) | réessayer une fois ; avec une URL d'envoi, en demander une nouvelle (elle ne sert qu'une fois) |
 | 413 | `payload_too_large`, `document_too_large` | au-delà d'une limite, que le message nomme : fichier de plus de 50 Mo, texte de plus d'un million de caractères, résultat de plus de 12,5 millions de caractères, plus de 10 000 pages ou diapositives, plus d'un million de balises HTML ou de 256 niveaux d'imbrication, plus de 100 000 paragraphes Word ou d'un million d'éléments, mémoire du travailleur épuisée (voir « Gros documents ») | découper le document ; `gdprguardian anonymize` (ligne de commande locale) n'a pas le plafond de résultat, mais garde 50 Mo par fichier, 500 pages et 60 s |
 | 415 | `unsupported_format` | format de document non pris en charge | exporter en PDF ou DOCX |
 | 421 | `misdirected_request` | nom d'hôte non autorisé (`GDPRGUARDIAN_ALLOWED_HOSTS`) | corriger l'hôte |
@@ -718,7 +725,11 @@ so its footprint does not depend on the rules it receives.
   is refused before allocating: 422 `invalid_request` with the engine's reason (see `docs/REGLES.md`). For an
   out-of-band upload, `POST /v1/uploads` (and `create_upload`) compiles the patterns in a worker before the file
   leaves: the 422 comes at upload creation. A worker that dies while a text is processed with rules
-  gives 422 `rules_too_costly` (safety net behind the budget), never 5xx.
+  gives 422 `rules_too_costly` (safety net behind the budget), never 5xx. Since 1.0.2 every letter-and-digit code
+  of 6 characters or more and every bare run of 8 digits or more is masked by default; an organisation keeps codes
+  of a precise structure readable with a `keep` rule, which wins over the code rule, long numbers and value
+  propagation: `{"rules": [{"label": "SKU", "pattern": "SKU-[0-9]{6}", "action": "keep"}]}` keeps `SKU-123456`
+  while `CLT-204518` is masked (`docs/REGLES.md` § 3).
 - **Admission**: every request carrying content reserves its size (`Content-Length`) **before** its body is
   read, in a memory budget (`GDPRGUARDIAN_QUEUE_MB`). A key beyond its fair share cannot take the last quarter of
   the budget, kept for other keys. Admitted requests wait for a free worker: a freed slot goes to the waiting
@@ -822,8 +833,14 @@ origin) and non-browser clients (no header) are unaffected.
 **Answers.** 429 `rate_limited` (a client's budget) or 503 `service_busy` (shedding), closed JSON body, always with
 `Retry-After` in whole seconds plus 0-20% jitter so refused clients do not come back together, and, best effort,
 `RateLimit-Policy` / `RateLimit` (IETF draft httpapi-ratelimit-headers-11: `"req";q=30;w=3`,
-`"cpu";q=20000;qu="worker-ms";w=40`; "worker-ms" is not a registered unit, `Retry-After` is authoritative). For
-clients (scripts, MCP agents): honour `Retry-After`, at most three attempts, retries under 10% of requests.
+`"cpu";q=20000;qu="worker-ms";w=40`; "worker-ms" is not a registered unit, `Retry-After` is authoritative). The body
+also gives the wait in seconds (`retry_after_s`). On `/mcp`, an MCP client never reads the body of an HTTP 4xx/5xx
+(it only shows "Server returned an error response"): a refused JSON-RPC request (429, 503, 408, 413) therefore gets
+HTTP 200 and a JSON-RPC error there (`-32000`, message `code: message … retry_after_s=N`, `data`: `code`,
+`http_status`, `retry_after_s`), with the same `Retry-After`; without a JSON-RPC id (notification, batch) the HTTP
+status stays. The id is looked for in the first 8 KiB and last 512 bytes of the drained body, nothing else is kept.
+For clients (scripts, MCP agents): one request at a time, honour `Retry-After`, at most three attempts, retries under
+10% of requests.
 
 **Nginx edge** (coarse guard in front of the service): 20 requests per second (burst 40) and 16 connections per IPv4
 address or IPv6 /64, 48 per /24 or /48, 1,500 in all (API and the sites' `/v1/`); headers read within 10 s, no body
@@ -848,8 +865,9 @@ service remain fail2ban's database (SSH clients only) and older kernel journal e
   derived from the first by HMAC under an in-memory key: whoever sees the upload URL, in a shell history or a command
   line, cannot derive the id), handed to the requester alone, stored as SHA-256 **digests**, compared in constant
   time; the token works once; the result is deleted 2 minutes after a full read (a lost answer can be read again)
-  or at expiry, 30 minutes at most after publication; a wrong, expired or used token gets **the same answer**
-  (404 `not_found`); a vanished result gets a distinct reason (`already_read`, `expired`, `deleted`, always
+  or at expiry, 30 minutes at most after publication; a wrong or expired token, or another key's, gets **the same
+  answer** (404 `not_found`); a used token tells its holder alone (404 `upload_used`: request a new URL); a vanished
+  result gets a distinct reason (`already_read`, `expired`, `deleted`, always
   404), told only to the holder of its id; no route lists anything; MCP is stateless (no session
   id, which would grant nothing anyway). In the public service the capability is enough (an agent's address changes
   between calls); with a key, the key is required too;

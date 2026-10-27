@@ -38,11 +38,33 @@ pub struct KeepRules {
 /// `engine._apply_keep` : une détection entièrement comprise dans une zone « keep » reste en clair, sauf un
 /// identifiant officiel validé. A detection fully inside a keep zone stays in clear, except a validated
 /// official identifier.
-pub fn apply_keep(rules: &KeepRules, spans: Vec<Span>) -> Vec<Span> {
+pub fn apply_keep(rules: &KeepRules, zones: Option<&KeepZones>, spans: Vec<Span>) -> Vec<Span> {
+    let Some(zones) = zones else {
+        return spans;
+    };
+    spans
+        .into_iter()
+        .filter(|s| *s.entity != *rules.entity)
+        .map(|mut span| {
+            keep_span(rules, zones, &mut span);
+            span
+        })
+        .collect()
+}
+
+/// `engine._KeepZones` : débuts triés, et pour chaque zone 0..i la fin la plus lointaine et sa règle.
+/// Sorted starts, and for zones 0..i the furthest end and its rule.
+pub struct KeepZones {
+    starts: Vec<usize>,
+    reach: Vec<(usize, Arc<str>)>,
+}
+
+/// `engine._keep_zones` : zones « keep » des règles de l'organisation, ou `None` / keep zones, or `None`.
+pub fn keep_zones(rules: &KeepRules, spans: &[Span]) -> Option<KeepZones> {
     let mut zones: Vec<(usize, usize, Arc<str>)> =
         spans.iter().filter(|s| *s.entity == *rules.entity).map(|s| (s.start, s.end, s.source.clone())).collect();
     if zones.is_empty() {
-        return spans;
+        return None;
     }
     zones.sort();
     let starts: Vec<usize> = zones.iter().map(|z| z.0).collect();
@@ -55,21 +77,33 @@ pub fn apply_keep(rules: &KeepRules, spans: Vec<Span>) -> Vec<Span> {
         };
         reach.push(next);
     }
-    spans
-        .into_iter()
-        .filter(|s| *s.entity != *rules.entity)
-        .map(|mut span| {
-            let protected = span.priority >= rules.priority_validated && rules.unmaskable.contains(&*span.entity);
-            let zone = starts.partition_point(|&s| s <= span.start).checked_sub(1).and_then(|i| reach.get(i));
-            if let Some((furthest, owner)) = zone {
-                if !protected && *furthest >= span.end {
-                    span.personal = false;
-                    span.source = format!("keep:{owner}").into();
-                }
+    Some(KeepZones { starts, reach })
+}
+
+/// `engine._keep_span` : une détection entièrement comprise dans une zone reste en clair, sauf un identifiant
+/// officiel validé. A detection fully inside a zone stays in clear, except a validated official identifier.
+fn keep_span(rules: &KeepRules, zones: &KeepZones, span: &mut Span) {
+    let protected = span.priority >= rules.priority_validated && rules.unmaskable.contains(&*span.entity);
+    let zone = zones.starts.partition_point(|&s| s <= span.start).checked_sub(1).and_then(|i| zones.reach.get(i));
+    if let Some((furthest, owner)) = zone {
+        if !protected && *furthest >= span.end {
+            span.personal = false;
+            if !span.source.starts_with("keep:") {
+                span.source = format!("keep:{owner}").into();
             }
-            span
-        })
-        .collect()
+        }
+    }
+}
+
+/// `engine._keep_after` : les zones « keep » l'emportent aussi sur tout ce qui s'ajoute après la résolution
+/// (propagation des valeurs, signatures, initiales). Keep zones also win over everything added after resolution.
+pub fn keep_after(rules: &KeepRules, zones: Option<&KeepZones>, spans: &mut [Span]) {
+    let Some(zones) = zones else {
+        return;
+    };
+    for span in spans.iter_mut().filter(|s| s.personal) {
+        keep_span(rules, zones, span);
+    }
 }
 
 /// Boucle de `engine._finalize` : score minimal, liste d'autorisation, civilité, valeur des composites.
@@ -305,9 +339,15 @@ mod tests {
         let rules = KeepRules { entity: "_KEEP".into(), unmaskable: HashSet::new(), priority_validated: 100 };
         let mut zone = span(0, 10, "_KEEP", 95);
         zone.source = "CUSTOM_1_REF".into();
-        let kept = apply_keep(&rules, vec![zone, span(2, 5, "PHONE", 95), span(8, 12, "PHONE", 95)]);
+        let spans = vec![zone, span(2, 5, "PHONE", 95), span(8, 12, "PHONE", 95)];
+        let zones = keep_zones(&rules, &spans);
+        let kept = apply_keep(&rules, zones.as_ref(), spans);
         assert_eq!(kept.len(), 2);
         assert!(!kept[0].personal && &*kept[0].source == "keep:CUSTOM_1_REF");
         assert!(kept[1].personal);
+        // Une zone ajoutée après la résolution (propagation) reste en clair / a span added later stays in clear.
+        let mut later = vec![span(1, 9, "ID", 50)];
+        keep_after(&rules, zones.as_ref(), &mut later);
+        assert!(!later[0].personal && &*later[0].source == "keep:CUSTOM_1_REF");
     }
 }

@@ -153,6 +153,7 @@ _ASTRAL_RE = re.compile("[\U00010000-\U0010ffff]")
 _ASCII_ALNUM = frozenset("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
 _ASCII_DIGITS = frozenset("0123456789")
 _ASCII_LETTERS = frozenset("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
+_UPPER_LETTERS = frozenset("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 
 def _group_longer(text: str, start: int, step: int) -> bool:
@@ -168,6 +169,77 @@ def _group_longer(text: str, start: int, step: int) -> bool:
     return True
 
 
+def _delimited_row(text: str, pos: int) -> bool:
+    """La ligne qui commence en `pos` porte-t-elle au moins deux « ; », tabulations ou « , » d'une même sorte ?
+    Une ligne de tableau CSV n'est jamais recollée à la précédente par GAP (1.0.2). Does the line starting at `pos`
+    hold two or more ";", tabs or "," of one kind? A CSV row is never joined to the previous one by GAP.
+    """
+    end = text.find("\n", pos)
+    line = text[pos:] if end < 0 else text[pos:end]
+    return any(line.count(d) >= 2 for d in (";", "\t", ","))
+
+
+def _tab_row(text: str, pos: int) -> bool:
+    """La ligne de `pos` est une ligne (en-tête compris) d'un tableau TSV que `delimited_tables` reconnaît (en-tête
+    aux cellules d'étiquette, puis au moins deux lignes de même nombre de tabulations) : ses tabulations restent des
+    séparateurs de colonnes (1.0.2). Une prose dont les espaces sont des tabulations n'est pas un tableau (revue du
+    26/10). The line of `pos` is a row (header included) of a TSV table `delimited_tables` finds: its tabs stay
+    column separators. Prose whose spaces are tabs is not a table.
+    """
+    start = text.rfind("\n", 0, pos) + 1
+    end = text.find("\n", pos)
+    end = len(text) if end < 0 else end
+    tabs = text.count("\t", start, end)
+    if tabs < 2:
+        return False
+    # Condition nécessaire, bon marché : une ligne voisine porte autant de tabulations. Cheap necessary condition.
+    if not (start > 0 and text.count("\t", text.rfind("\n", 0, start - 1) + 1, start - 1) == tabs):
+        if end >= len(text):
+            return False
+        after = text.find("\n", end + 1)
+        if text.count("\t", end + 1, len(text) if after < 0 else after) != tabs:
+            return False
+    return start in _tab_table_rows(text)
+
+
+# Lignes des tableaux TSV du dernier texte lu : (longueur, empreinte `hash`) -> débuts de ligne. Le texte lui-même
+# n'est pas gardé. Rows of the last text's TSV tables, keyed by length and `hash`; the text itself is not kept.
+_TAB_ROWS: list[tuple[tuple[int, int], frozenset[int]]] = []
+
+
+def _tab_table_rows(text: str) -> frozenset[int]:
+    """Débuts des lignes des tableaux TSV de `delimited_tables` / line starts of `delimited_tables`' TSV tables."""
+    key = (len(text), hash(text))
+    cached = _TAB_ROWS[-1] if _TAB_ROWS else None
+    if cached is not None and cached[0] == key:
+        return cached[1]
+    rows = frozenset(start for delimiter, lines in _table_scan(text) if delimiter == "\t" for start, _ in lines)
+    _TAB_ROWS[:] = [(key, rows)]
+    return rows
+
+
+# Numéro de téléphone français entier (10 chiffres, groupes de 2) qui commence la ligne d'après ou finit la ligne
+# d'avant : la ligne est un autre champ, jamais recollé par GAP (« Matricule 0049217⏎06 74 28 19 53 », 2e test
+# terrain, tous modes). A whole French phone number starting the next line or ending the previous one: another field,
+# never joined by GAP (every mode).
+_PHONE_HEAD_RE = re.compile(r"0[1-9](?:[ .\-]?[0-9]{2}){4}(?![0-9])")
+_PHONE_TAIL_RE = re.compile(r"(?<![0-9])0[1-9](?:[ .\-]?[0-9]{2}){4}\Z")
+
+
+def _phone_line(text: str, start: int, end: int) -> bool:
+    """Le saut de ligne GAP [start, end) sépare-t-il un téléphone entier de son voisin ? / does the break border a
+    whole phone number?"""
+    if _PHONE_HEAD_RE.match(text, end) is not None:
+        return True
+    return _PHONE_TAIL_RE.search(text[text.rfind("\n", 0, start) + 1:start]) is not None
+
+
+# Ligne qui commence par un code postal suivi de sa ville (« 75011 Paris ») : un autre champ, jamais recollé au nombre
+# de la ligne d'avant (revue du 26/10, troisième tour : « Dossier 56 78⏎75011 Paris »). A line starting with a postcode
+# and its town: another field, never joined to the previous line's number.
+_POSTCODE_HEAD_RE = re.compile(r"[0-9]{5}[ \t]+[A-ZÀ-Ý]")
+
+
 def _gaps(text: str) -> list[tuple[int, int]]:
     """Règle GAP : zones [début, fin) de blancs à ramener à une espace / GAP rule: blank zones to make one space."""
     gaps: list[tuple[int, int]] = []
@@ -178,12 +250,15 @@ def _gaps(text: str) -> list[tuple[int, int]]:
                 continue
             before, after = text[start - 1], text[end]
             if (before in _ASCII_ALNUM and after in _ASCII_ALNUM
-                    and (before in _ASCII_DIGITS or after in _ASCII_DIGITS)):
+                    and (before in _ASCII_DIGITS or after in _ASCII_DIGITS)
+                    and not ("\t" in text[start:end] and _tab_row(text, start))):
                 gaps.append((start, end))
     if "\n" in text:
         for m in _GAP_BREAK_RE.finditer(text):
             start, end = m.span(1)
-            if not _group_longer(text, start, -1) and not _group_longer(text, end, 1):
+            if not _group_longer(text, start, -1) and not _group_longer(text, end, 1) \
+                    and not _delimited_row(text, end) and not _phone_line(text, start, end) \
+                    and _POSTCODE_HEAD_RE.match(text, end) is None:
                 gaps.append((start, end))
         gaps.sort()
     return gaps
@@ -205,6 +280,13 @@ def _email_join(left: str, right: str) -> bool:
     right = right.rstrip(".-")
     if (left + right).count("@") != 1 or not left or not right:
         return False
+    # Fin de phrase (1.0.2) : un point final suivi d'un saut de ligne et d'une majuscule n'est jamais recollé quand
+    # le courriel est déjà complet (« …@gmail.com.⏎IBAN ») ou absent à gauche (« … fin.⏎Jean@x.fr »).
+    # End of sentence: a final full stop, a line break and a capital are never joined when the e-mail is already
+    # complete on the left, or absent from the left.
+    if left[-1] == "." and right[0] in _UPPER_LETTERS and (
+            "@" not in left or _DOMAIN_RE.fullmatch(left.partition("@")[2].rstrip(".")) is not None):
+        return False
     if "@" in left:
         local, _, domain = left.partition("@")
         return (bool(local) and "@" not in right and _DOMAIN_RE.fullmatch(domain) is None
@@ -212,8 +294,22 @@ def _email_join(left: str, right: str) -> bool:
     # Le morceau de gauche commence par une lettre : un numéro en fin de ligne (« 06 12 34 56 78⏎jean@… ») n'est
     # pas collé au courriel. The left piece starts with a letter: a number ending the line is not glued on.
     local, _, domain = right.partition("@")
+    signed = any(c in "._-0123456789" for c in left)
+    # Courriel déjà complet en tête de ligne (revue du 26/10, troisième tour) : un morceau de gauche qui porte une
+    # majuscule n'est pas le début de sa partie locale (« Bonjour M.⏎paul@… », « Jean.⏎marie.durand@… »,
+    # « SKU-123456⏎support@… »). Un morceau en minuscules reste recollé (« michele.⏎vallee57@… », équipe rouge crlf).
+    # An already complete address at the line start: a left piece holding a capital is not the start of its local
+    # part; a lowercase piece is still joined back.
+    if len(local) >= 2 and left != left.lower():
+        return False
+    # Mot de la ligne d'avant (2e test terrain, revue du 26/10, tous modes) : un mot sans signe qui porte une majuscule
+    # (« Agence de Tours⏎karine.lopez@… », « ACME France SAS⏎sophie.lemoine@… ») ou suivi d'une partie locale déjà
+    # complète (« prénom.nom », séparateur intérieur) n'est pas le début du courriel. A plain word with a capital, or
+    # followed by an already complete "first.last" local part, is the previous line's last word, not a piece.
+    if not signed and (left != left.lower() or any(c in "._-" for c in local[1:])):
+        return False
     return (_DOMAIN_RE.fullmatch(domain) is not None and left[0] in _ASCII_LETTERS
-            and (len(left) <= _BREAK_LOCAL or any(c in "._-0123456789" for c in left)))
+            and (len(left) <= _BREAK_LOCAL or signed))
 
 
 def _iban_complete(group: str) -> bool:
@@ -224,6 +320,86 @@ def _iban_complete(group: str) -> bool:
         for digit in str(int(ch, 36)):
             remainder = (remainder * 10 + int(digit)) % 97
     return remainder == 1
+
+
+# Numéro coupé par un saut de ligne (règle BREAK_NUMBER, 1.0.2, équipe rouge crlf et line_break, tous modes) : les deux
+# morceaux (chiffres, « . » et « - ») ne forment qu'un numéro qu'une fois recollés sans blanc, et ce numéro est prouvé
+# par sa forme ou sa clé : téléphone français entier (« 07⏎-93-28-03-42 », « 07.42.66.93⏎.70 »), IPv4
+# (« 5.46⏎.239.23 »), SIREN ou SIRET (clé de Luhn), NIR (clé 97), RIB (clé 97). Sans preuve, rien n'est recollé.
+# A number split by a line break: both pieces make one number only once joined without a blank, proven by its shape
+# or key.
+_NUMBER_PART = frozenset("0123456789.-")
+_PHONE_FULL_RE = re.compile(r"0[1-9](?:[.\-]?[0-9]{2}){4}")
+_IPV4_RE = re.compile(r"(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.){3}"
+                      r"(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])")
+
+
+def _luhn(digits: str) -> bool:
+    total = 0
+    for i, ch in enumerate(reversed(digits)):
+        value = int(ch) * (2 if i % 2 else 1)
+        total += value - 9 if value > 9 else value
+    return total % 10 == 0
+
+
+def _number_join(left: str, right: str) -> bool:
+    """Les deux morceaux forment-ils un seul numéro prouvé ? / do both pieces make one proven number?"""
+    left, right = left.lstrip(".-"), right.rstrip(".-")
+    if not left or not right or not any(c in _ASCII_DIGITS for c in left) \
+            or not any(c in _ASCII_DIGITS for c in right):
+        return False
+    joined = left + right
+    if _PHONE_FULL_RE.fullmatch(joined) is not None or _IPV4_RE.fullmatch(joined) is not None:
+        return True
+    if not all(c in _ASCII_DIGITS for c in joined):
+        return False
+    size = len(joined)
+    if size in (9, 14):
+        return _luhn(joined)
+    if size == 15:
+        return joined[0] in "12378" and 97 - int(joined[:13]) % 97 == int(joined[13:])
+    if size == 23:
+        return 97 - (89 * int(joined[:5]) + 15 * int(joined[5:10]) + 3 * int(joined[10:21])) % 97 == int(joined[21:])
+    return False
+
+
+def _country_code_join(left: str, right: str) -> bool:
+    """Code pays seul en fin de ligne (« IBAN FR⏎7616… ») : recollé si la clé de l'IBAN entier est juste (BREAK_NUMBER).
+    A country code alone ending the line: joined when the whole IBAN's key is right."""
+    return (len(left) == 2 and all(c in _UPPER_LETTERS for c in left) and 13 <= len(right) <= 32
+            and _IBAN_HEAD_RE.fullmatch(left + right) is not None and _iban_complete(left + right))
+
+
+# Plaque d'immatriculation coupée par un saut de ligne (règle BREAK_PLATE, équipe rouge, tous modes) : SIV
+# (« WB 864⏎SW », « DV-185⏎-FP », « SF-112-⏎ES ») ou FNI (« 9971 ZL⏎59 », « 8871⏎LZ 59 »). Le saut devient une espace si
+# la plaque se lit ainsi (il remplaçait une espace), sinon il est retiré. A licence plate split by a line break: the
+# break becomes a space when the plate reads so, otherwise it is removed.
+_PLATE_PART = frozenset("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 -")
+_PLATE_RES = (re.compile(r"[A-Z]{2}[ -]?[0-9]{3}[ -]?[A-Z]{2}"),
+              re.compile(r"[0-9]{1,4}[ -]?[A-Z]{1,3}[ -]?(?:[0-9]{2}|2[AB])"))
+_PLATE_SIDE = 9
+
+
+def _plate_join(text: str, start: int, end: int) -> int:
+    """0 : pas de plaque ; 1 : saut ramené à une espace ; 2 : saut retiré / 0: no plate; 1: one space; 2: removed."""
+    if text[start - 1] not in _PLATE_PART or text[end] not in _PLATE_PART:
+        return 0
+    i = start
+    while i > 0 and start - i < _PLATE_SIDE and text[i - 1] in _PLATE_PART:
+        i -= 1
+    j = end
+    while j < len(text) and j - end < _PLATE_SIDE and text[j] in _PLATE_PART:
+        j += 1
+    lefts = [text[k:start] for k in range(i, start)
+             if (k == 0 or not text[k - 1].isalnum()) and (k == i or text[k - 1] in " -")]
+    rights = [text[end:k] for k in range(j, end, -1)
+              if (k == len(text) or not text[k].isalnum()) and (k == j or text[k] in " -")]
+    for sep in (" ", ""):
+        for left in lefts:
+            for right in rights:
+                if any(regex.fullmatch(left + sep + right) is not None for regex in _PLATE_RES):
+                    return 1 if sep else 2
+    return 0
 
 
 def _breaks(text: str) -> tuple[list[tuple[int, int]], list[tuple[int, int]]]:
@@ -237,12 +413,29 @@ def _breaks(text: str) -> tuple[list[tuple[int, int]], list[tuple[int, int]]]:
         if left_whole and right_whole and _email_join(left, right):
             cuts.append((start, end))
             continue
+        left, left_whole = _token(text, start, -1, _NUMBER_PART)
+        right, right_whole = _token(text, end, 1, _NUMBER_PART)
+        if left_whole and right_whole and _number_join(left, right) and not _delimited_row(text, end) \
+                and _POSTCODE_HEAD_RE.match(text, end) is None \
+                and not (left[-1] in _ASCII_DIGITS and right[0] in _ASCII_DIGITS and _phone_line(text, start, end)):
+            cuts.append((start, end))
+            continue
+        plate = _plate_join(text, start, end)
+        if plate:
+            (gaps if plate == 1 else cuts).append((start, end))
+            continue
         left, left_whole = _token(text, start, -1, _ASCII_ALNUM)
         right, right_whole = _token(text, end, 1, _ASCII_ALNUM)
         if not (left and right and left_whole and right_whole):
             continue
-        if _IBAN_HEAD_RE.fullmatch(left) and right == right.upper() and any(c in _ASCII_DIGITS for c in right) \
-                and 15 <= len(left) + len(right) <= 34 and not _iban_complete(left):
+        # Jamais un téléphone entier en tête de la ligne d'après (revue du 26/10, troisième tour : « TVA
+        # FR44732829320⏎01 23 45 67 89 » n'est pas un IBAN coupé). Never a whole phone number heading the next line.
+        # Un IBAN n'est « déjà entier » qu'à 15 caractères au moins : « FR76 » seul a une clé juste par hasard (équipe
+        # rouge line_break, « IBAN FR76⏎1660… »). An IBAN is "already whole" only from 15 characters: "FR76" alone
+        # has a right key by chance.
+        if (_IBAN_HEAD_RE.fullmatch(left) and right == right.upper() and any(c in _ASCII_DIGITS for c in right)
+                and 15 <= len(left) + len(right) <= 34 and not (len(left) >= 15 and _iban_complete(left))
+                and _PHONE_HEAD_RE.match(text, end) is None) or _country_code_join(left, right):
             cuts.append((start, end))
         elif (left[-1] not in _ASCII_DIGITS or right[0] not in _ASCII_DIGITS) \
                 and len(left) <= _BREAK_GROUP and len(right) <= _BREAK_GROUP \
@@ -613,6 +806,77 @@ def ignorecase_data() -> dict[str, Any]:
 
 def strip_separators(value: str) -> str:
     return value.translate(_STRIP_TABLE)
+
+
+# Tableaux en texte délimité (1.0.2, docs/REGLES.md « Tableaux CSV et TSV ») : « ; », tabulation ou « , ». La barre
+# « | » reste aux tableaux Markdown. Delimited-text tables: ";", tab or ","; "|" stays with Markdown tables.
+CSV_DELIMITERS = (";", "\t", ",")
+_CSV_HEADER_MAX = 40  # cellule d'en-tête : 1 à 40 caractères, sans chiffre / header cell: 1-40 chars, no digit
+_CSV_MIN_ROWS = 2     # au moins deux lignes de données de même nombre de champs / at least two data rows
+
+
+def _csv_cells(text: str, start: int, stop: int, delimiter: str) -> list[tuple[int, int]]:
+    """Champs d'une ligne [start, stop), rognés de leurs blancs (`str.isspace`) / a line's fields, trimmed."""
+    cells: list[tuple[int, int]] = []
+    left = start
+    while True:
+        right = text.find(delimiter, left, stop)
+        right = stop if right < 0 else right
+        a, b = left, right
+        while a < b and text[a].isspace():
+            a += 1
+        while b > a and text[b - 1].isspace():
+            b -= 1
+        cells.append((a, b))
+        if right >= stop:
+            return cells
+        left = right + 1
+
+
+def delimited_tables(text: str) -> list[list[list[tuple[int, int]]]]:
+    """Tableaux CSV ou TSV : un en-tête d'au moins deux délimiteurs d'une même sorte, cellules courtes sans chiffre,
+    puis au moins deux lignes de même nombre de champs ; le tableau s'arrête à la première ligne qui diffère.
+    Chaque tableau : ses lignes (en-tête d'abord), chaque ligne ses champs (positions). CSV or TSV tables: a header
+    with two or more delimiters of one kind, short cells with no digit, then two or more lines with the same field
+    count; the table ends at the first line that differs. Each table: its rows (header first), each row its fields.
+    """
+    return [[_csv_cells(text, start, stop, delimiter) for start, stop in lines]
+            for delimiter, lines in _table_scan(text)]
+
+
+def _table_scan(text: str) -> list[tuple[str, list[tuple[int, int]]]]:
+    """Tableaux de `delimited_tables` : (délimiteur, lignes [début, fin) en-tête d'abord) / (delimiter, lines)."""
+    if "\n" not in text:
+        return []
+    lines: list[tuple[int, int]] = []
+    pos = 0
+    while pos <= len(text):
+        end = text.find("\n", pos)
+        end = len(text) if end < 0 else end
+        lines.append((pos, end - 1 if end > pos and text[end - 1] == "\r" else end))
+        pos = end + 1
+    tables: list[tuple[str, list[tuple[int, int]]]] = []
+    i = 0
+    while i < len(lines):
+        start, stop = lines[i]
+        for delimiter in CSV_DELIMITERS:
+            count = text.count(delimiter, start, stop)
+            if count < 2:
+                continue
+            header = _csv_cells(text, start, stop, delimiter)
+            if not all(0 < b - a <= _CSV_HEADER_MAX and not any(c in _ASCII_DIGITS for c in text[a:b])
+                       for a, b in header):
+                continue
+            j = i + 1
+            while j < len(lines) and text.count(delimiter, *lines[j]) == count:
+                j += 1
+            if j - i - 1 < _CSV_MIN_ROWS:
+                continue
+            tables.append((delimiter, lines[i:j]))
+            i = j - 1
+            break
+        i += 1
+    return tables
 
 
 _STRIP_TABLE = {ord(" "): None, ord("."): None, ord("-"): None, ord("/"): None}

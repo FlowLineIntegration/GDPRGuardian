@@ -16,7 +16,7 @@ use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::PyTuple;
 
-use crate::detectors::mrz_spans;
+use crate::detectors::{mrz_spans, personal_site_spans, CodeKind};
 use crate::finalize::{IndexedText, Span};
 use crate::scanner::{Context, Settings};
 use crate::text::Classes;
@@ -24,7 +24,10 @@ use crate::text::Classes;
 use super::document::{add_python_spans, Document};
 use super::organizations::Facts;
 use super::phone;
-use super::plan::{Address, BirthDates, Custom, CustomScan, Email, Iban, Mode, Mrz, Names, Organizations, Phone, Slot};
+use super::plan::{
+    Address, BirthDates, Codes, Custom, CustomScan, Email, Iban, Mode, Mrz, Names, Organizations, PersonalSite, Phone,
+    Slot,
+};
 use super::python::PyEngine;
 
 /// Millisecondes écoulées, comme `(perf_counter() - t0) * 1000` / elapsed milliseconds.
@@ -246,7 +249,26 @@ impl Run<'_, '_> {
             Slot::Iban(iban) => self.iban(iban),
             Slot::Mrz(mrz) => self.mrz(mrz),
             Slot::Phone(phone) => self.phone(phone),
+            Slot::PersonalSite(site) => self.personal_site(site),
+            Slot::Codes(codes) => self.codes(codes),
         }
+    }
+
+    /// `IdentifierCodeDetector.detect` (codes, longues suites, témoins) : jumeau natif, mêmes zones et valeurs.
+    /// Native twin: same spans and values.
+    fn codes(&self, slot: &Codes) -> PyResult<()> {
+        let shared = &self.shared;
+        let table = self.engine.table.get().table();
+        let found = self.py.detach(|| slot.detector.detect(&shared.text, shared.folded, shared.has_digit, table));
+        self.push(found.into_iter().map(|found| {
+            let template = match found.kind {
+                CodeKind::Code => &slot.code,
+                CodeKind::LongNumber => &slot.long_number,
+                CodeKind::Cookie => &slot.cookie,
+            };
+            Span { value: Some(found.value), ..template.span(found.start, found.end) }
+        }));
+        Ok(())
     }
 
     /// `FrenchNameDetector.detect` ; texte refusé par le jumeau : le détecteur Python reprend.
@@ -418,6 +440,30 @@ impl Run<'_, '_> {
         }
         let bands = self.py.detach(|| mrz_spans(shared.norm));
         self.push(bands.into_iter().map(|(start, end, score)| Span { score, ..slot.template.span(start, end) }));
+        Ok(())
+    }
+
+    /// `PersonalSiteDetector.detect` : jumeau natif ; hors de son domaine (« İ », « ı », « ſ », « K », mot replié
+    /// vide), le détecteur Python reprend. Native twin; outside its domain, the Python detector takes over.
+    fn personal_site(&self, slot: &PersonalSite) -> PyResult<()> {
+        let shared = &self.shared;
+        if !slot.prefilters.iter().any(|p| shared.folded.contains(p.as_str())) {
+            return Ok(());
+        }
+        let table = self.engine.table.get();
+        let fold = slot.fold.bind(self.py);
+        let found = personal_site_spans(
+            shared.norm,
+            |c| table.is_word(c),
+            |c| table.is_letter(c),
+            |word| fold.call1((word,)).and_then(|f| f.extract::<String>()).ok(),
+        );
+        let Some(found) = found else {
+            return self.python(slot.fallback);
+        };
+        self.push(
+            found.into_iter().map(|(start, end, host)| Span { value: Some(host), ..slot.template.span(start, end) }),
+        );
         Ok(())
     }
 

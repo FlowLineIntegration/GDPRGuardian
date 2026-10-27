@@ -326,7 +326,10 @@ def test_labelled_enterprise_numbers(text):
 
 
 def test_quebec_enterprise_number_is_not_belgian():
-    assert Anonymizer(countries="BE").analyze("Numéro d'entreprise du Québec (NEQ) : 1173456789").spans == []
+    # Pas un numéro d'entreprise belge ; depuis 1.0.2, une suite nue de 10 chiffres (`ID_LONG_NUMBER`).
+    # Not a Belgian enterprise number; since 1.0.2, a bare run of 10 digits.
+    spans = Anonymizer(countries="BE").analyze("Numéro d'entreprise du Québec (NEQ) : 1173456789").spans
+    assert [s.source for s in spans] == ["ID_LONG_NUMBER"]
 
 
 def test_weak_identifiers_need_context():
@@ -334,13 +337,16 @@ def test_weak_identifiers_need_context():
     assert "591-1917064-58" in a.anonymize("Référence interne 591-1917064-58.").text
     assert a.anonymize("Carte eID 591-1917064-58.").text == "Carte eID [CNI_1]."
     assert a.anonymize("IBAN ancien : 539-0075470-34.").text == "IBAN ancien : [RIB_1]."
-    assert "0475123456" in a.anonymize("Commande 0475123456 livrée.").text
+    # Filtre fort 1.0.2 : numéro compact conforme au plan français, masqué sans mot-clé (pas en identifiant belge).
+    # Strong filter 1.0.2: a compact number that fits the French plan is masked with no keyword (not as a BE id).
+    assert a.anonymize("Commande 0475123456 livrée.").text == "Commande [TEL_1] livrée."
 
 
 def test_invalid_or_ambiguous_numbers_are_kept():
     a = Anonymizer(countries="BE")
     text = "Dossier 85.07.30-033.29, échéance 02/03/2024, code 1-AB-123, total 0474."
-    assert a.anonymize(text).text == text
+    # Filtre fort 1.0.2 : « 1-AB-123 » est un code (lettres et chiffres, 6 caractères) / a code, masked by ID_CODE.
+    assert a.anonymize(text).text == text.replace("1-AB-123", "[IDENTIFIANT_1]")
 
 
 def test_explicit_country_works_without_france():

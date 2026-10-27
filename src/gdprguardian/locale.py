@@ -65,6 +65,19 @@ def detect_language(folded: str, minimum: int = 2, *, native: bool = False) -> s
     return best
 
 
+def stopword_counts(folded: str) -> dict[str, int]:
+    """Mots outils par langue sur l'échantillon (même table que `detect_language`) / stopwords per language.
+
+    Sert à juger la confiance d'une détection ; ne change pas `detect_language` (ni son jumeau Rust).
+    Used to judge a detection's confidence; does not change `detect_language` (nor its Rust twin).
+    """
+    counts: dict[str, int] = {}
+    for word in _WORD_RE.findall(folded, 0, LANGUAGE_SAMPLE):
+        for language in _WORD_LANGUAGES.get(word, ()):
+            counts[language] = counts.get(language, 0) + 1
+    return counts
+
+
 def evidence(spans: Iterable[Span]) -> tuple[list[str], list[str], list[str]]:
     """Indices de pays tirés des zones VALIDÉES : IBAN, téléphones E.164, domaines des e-mails.
 

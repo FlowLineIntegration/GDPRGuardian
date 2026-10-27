@@ -50,7 +50,9 @@ def test_context_words_gate_a_rule():
     rules = {"rules": [{"label": "DOSSIER", "pattern": "[A-Z]{2}[0-9]{5}", "context": ["dossier"]}]}
     a = Anonymizer(countries="FR", rules=rules)
     assert a.anonymize("Dossier AB12345 ouvert.").text == "Dossier [DOSSIER_1] ouvert."
-    assert a.anonymize("Modèle AB12345 en stock.").text == "Modèle AB12345 en stock."
+    # Sans son mot de contexte la règle se tait ; depuis 1.0.2 la règle des codes masque le code, en identifiant
+    # générique. Without its context word the rule stays off; since 1.0.2 the code rule masks it generically.
+    assert a.anonymize("Modèle AB12345 en stock.").text == "Modèle [IDENTIFIANT_1] en stock."
 
 
 def test_explain_gives_rule_and_reason_never_the_value():

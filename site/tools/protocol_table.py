@@ -14,6 +14,8 @@ Nothing of steps 2 and 3 is written when a README marker names a key the site fi
 and every README marker, no result needed (protocol_version is left as it is; --pending-index also resets the
 headline keys and protocol_version, so the site says "not measured yet" rather than show an earlier version's index);
 --quality and --readme pick other files (tests). The site build accepts "—" for every table key.
+--modes-file F writes the per-mode keys of an internal measure (`python -m tools.protocol modes-dev`), refused for an
+engine label older than 1.0.2; --only-fort leaves the essentiel keys at "—".
 """
 
 from __future__ import annotations
@@ -49,6 +51,14 @@ HEADLINE_KEYS = ("confidence_index", "confidence_ci_low", "confidence_ci_high", 
                  "protocol_families", "real_corpora", "real_docs", "protocol_date", "protocol_engine",
                  "hard_index", "hard_ci_low", "hard_ci_high", "hard_docs", "hard_mention_recall_pct")
 PERCENT_DECIMALS = {"g_overmask": 2}
+# Protocol 1.2: two numbers per filter mode (anonymisation: normalised index, its interval, difficult index; useful
+# codes lost: decoys masked), and where they come from. Written from a 1.2 result (modes_source "protocole 1.2") or,
+# until the 1.2 campaign, from `python -m tools.protocol modes-dev` with --modes-file (modes_source "mesure interne,
+# moitié dev"). Not in SITE_KEYS: preview.py lists them itself; --pending leaves them as they are.
+MODE_KEYS = ("fort_index", "fort_ci_low", "fort_ci_high", "fort_hard_index", "fort_code_loss",
+             "ess_index", "ess_ci_low", "ess_ci_high", "ess_hard_index", "ess_code_loss",
+             "modes_source", "modes_date", "modes_engine")
+INTERNAL_SOURCE = "mesure interne, moitié dev"
 
 
 def _pct(value: Any, decimals: int = 1) -> Any:
@@ -104,9 +114,49 @@ def table_values(results: dict[str, Any]) -> dict[str, Any]:
     out["f_jud_docs"] = _count(control.get("docs"))
     out["f_jud_spans"] = round(float(spans), 1) if isinstance(spans, (int, float)) else PENDING
     checks = (results.get("guards") or {}).get("checks") or {}
-    out["g_overmask"] = _pct((checks.get("overmask_synthetic") or {}).get("value"), PERCENT_DECIMALS["g_overmask"])
-    out["g_decoys"] = _pct((checks.get("decoys_masked_synthetic") or {}).get("value"))
+    if "overmask_synthetic" in checks or "decoys_masked_synthetic" in checks:  # 1.0 and 1.1: one set of guards
+        overmask = (checks.get("overmask_synthetic") or {}).get("value")
+        decoys = (checks.get("decoys_masked_synthetic") or {}).get("value")
+    else:
+        # 1.2: guards per mode ("fort/overmask_synthetic"…). Over-masking: the higher of the modes (the guard that
+        # matters); decoys: the mode(s) where the decoy guard applies (essentiel; fort shows its loss, no guard).
+        values = [c.get("value") for k, c in checks.items() if k.endswith("/overmask_synthetic")]
+        overmask = max((v for v in values if isinstance(v, (int, float))), default=None)
+        decoys = next((c.get("value") for k, c in checks.items() if k.endswith("/decoys_masked_synthetic")), None)
+    out["g_overmask"] = _pct(overmask, PERCENT_DECIMALS["g_overmask"])
+    out["g_decoys"] = _pct(decoys)
+    if tuple(int(x) for x in version.split(".")) >= (1, 2):
+        out.update(_merge_module().mode_values(results.get("quality_keys") or {}, f"protocole {version}"))
     return out
+
+
+def _merge_module() -> Any:
+    """tools/protocol/merge_quality.py, loaded by path (standard library only, works under python -I)."""
+    path = ROOT / "tools" / "protocol" / "merge_quality.py"
+    spec = importlib.util.spec_from_file_location("merge_quality", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+MODES_FROM_ENGINE = (1, 0, 2)  # the first engine with modes; an earlier label means unfinished sources
+
+
+def internal_mode_values(data: dict[str, Any], quality: dict[str, Any], *, only_fort: bool = False) -> dict[str, Any]:
+    """Per-mode keys of a modes-dev file (internal measure, dev halves); never over a protocol 1.2 result.
+
+    Refused when the engine label is older than 1.0.2 (modes did not exist: unfinished sources, not a release).
+    only_fort: the essentiel keys are written "—" (a mode not yet fit to show; the site then shows nothing of it)."""
+    if str(quality.get("modes_source", "")).startswith("protocole"):
+        raise ValueError("the site already shows a protocol result per mode; an internal measure never replaces it")
+    engine = str((data.get("keys") or {}).get("modes_engine", ""))
+    base = re.match(r"(\d+)\.(\d+)\.(\d+)", engine)
+    if not base or tuple(int(x) for x in base.groups()) < MODES_FROM_ENGINE:
+        raise ValueError(f"engine {engine!r}: modes exist from 1.0.2; rerun modes-dev on the released engine")
+    values = _merge_module().mode_values(data.get("keys") or {}, INTERNAL_SOURCE)
+    if only_fort:
+        values.update({k: PENDING for k in values if k.startswith("ess_")})
+    return values
 
 
 # ---------------------------------------------------------------------------------------------- README markers
@@ -148,11 +198,23 @@ def fill_readme(text: str, quality: dict[str, Any] | None) -> str:
 # ---------------------------------------------------------------------------------------------- main
 
 def run_merge(results: Path, quality: Path, *, force_guards: bool, site_text_checked: bool) -> int:
-    path = ROOT / "tools" / "protocol" / "merge_quality.py"
-    spec = importlib.util.spec_from_file_location("merge_quality", path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module.merge(results, quality, force_guards=force_guards, site_text_checked=site_text_checked)
+    return _merge_module().merge(results, quality, force_guards=force_guards, site_text_checked=site_text_checked)
+
+
+def write_modes_file(path: Path, quality_path: Path, *, only_fort: bool = False) -> int:
+    """--modes-file: the per-mode keys of an internal measure into the site file, nothing else."""
+    quality = json.loads(quality_path.read_text(encoding="utf-8"))
+    try:
+        values = internal_mode_values(json.loads(path.read_text(encoding="utf-8")), quality, only_fort=only_fort)
+    except ValueError as exc:
+        print(f"refus / refused: {exc}", file=sys.stderr)
+        return 2
+    quality.update(values)
+    write_json(quality_path, quality)
+    print(json.dumps(values, ensure_ascii=False, indent=2))
+    print(f"modes: internal measure written ({INTERNAL_SOURCE}); the site must label it as such, never as the protocol",
+          file=sys.stderr)
+    return 0
 
 
 def write_json(path: Path, data: dict[str, Any]) -> None:
@@ -174,7 +236,18 @@ def main(argv: list[str] | None = None) -> int:
                              "yet' instead of an earlier version's index)")
     parser.add_argument("--force-guards", action="store_true", help="passed to merge_quality.py")
     parser.add_argument("--site-text-checked", action="store_true", help="passed to merge_quality.py")
+    parser.add_argument("--modes-file", type=Path,
+                        help="per-mode keys of `python -m tools.protocol modes-dev` (internal measure, dev halves) "
+                             "into the site file; nothing else is written")
+    parser.add_argument("--only-fort", action="store_true",
+                        help="with --modes-file: write the fort keys only, the essentiel keys stay '—'")
     args = parser.parse_args(argv)
+    if args.only_fort and args.modes_file is None:
+        parser.error("--only-fort goes with --modes-file")
+    if args.modes_file is not None:
+        if args.pending or args.results is not None:
+            parser.error("--modes-file goes alone")
+        return write_modes_file(args.modes_file, args.quality, only_fort=args.only_fort)
     if args.pending == (args.results is not None):
         parser.error("give a results file, or --pending")
     if args.pending_index and not args.pending:

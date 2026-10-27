@@ -8,6 +8,7 @@ use super::lexicon::{Kind, AMB_ENTITY, AMB_NONE, AMB_WORD};
 use super::patterns;
 use super::vocab::flag;
 use super::{inside, Doc, Element, Keys, MAX_RUN, NONE, SURNAME_ALONE_MIN};
+use crate::unicode::DIGIT;
 
 /// Suite de jetons qui peut former un nom (`_Run`) : les éléments `elements[from..to]`.
 /// Capitalised tokens that may form one name: elements `elements[from..to]`.
@@ -90,14 +91,17 @@ impl Doc<'_> {
             let mut entry = det.vocab.get(folded_key);
             // « S.p.A. », « B.V. » : forme juridique ; « AVENANT N° 2 » : signe de numéro ; pas des initiales.
             // A dotted legal form or a number sign, not initials.
-            let (mut kind, mut code) = if covers(&forms, start) || (eq(folded_key, "n") && text.get(end) == Some(&'°'))
-            {
-                (Kind::Common, 0)
-            } else if end - start == 1 && text.get(end) == Some(&'.') && !entry.has(flag::STOP) {
-                (Kind::Initial, 0) // « A. Lambert » : initiale, même si « a » est un mot / an initial
-            } else {
-                det.classify(folded_key, original, entry)
-            };
+            // « Jean Dupont CLT-204518 » : la tête d'un code n'est jamais un nom (1.0.2) / the head of a code.
+            let code_head = matches!(text.get(end), Some(&'-') | Some(&'_'))
+                && text.get(end + 1).is_some_and(|&c| det.chars.is(c, DIGIT));
+            let (mut kind, mut code) =
+                if covers(&forms, start) || (eq(folded_key, "n") && text.get(end) == Some(&'°')) || code_head {
+                    (Kind::Common, 0)
+                } else if end - start == 1 && text.get(end) == Some(&'.') && !entry.has(flag::STOP) {
+                    (Kind::Initial, 0) // « A. Lambert » : initiale, même si « a » est un mot / an initial
+                } else {
+                    det.classify(folded_key, original, entry)
+                };
             let wrapped = tokens.last().copied().filter(|left| {
                 text.get(left.end) == Some(&'-')
                     && kind.is_name()
@@ -211,6 +215,9 @@ impl Doc<'_> {
         }
         if !patterns::space_gap(gap) {
             return false;
+        }
+        if gap.contains(&'\t') && crate::text::tab_row_chars(text, left.end) {
+            return false; // colonnes d'un tableau TSV : deux cellules, pas un nom (1.0.2) / TSV columns: two cells
         }
         if gap.iter().all(|&c| is_blank(c)) {
             return true;

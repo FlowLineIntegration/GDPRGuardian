@@ -6,7 +6,7 @@ import pytest
 
 from gdprguardian import Anonymizer
 from gdprguardian.heuristics.organizations import OrganizationDetector
-from gdprguardian.types import PRIORITY_HEURISTIC, PRIORITY_PROPAGATED
+from gdprguardian.types import PRIORITY_PROPAGATED
 
 NAMES = [
     ("Le contrat lie Acme SAS et Globex SARL.", ["Acme", "Globex"]),
@@ -42,8 +42,10 @@ def test_strict_profile_masks_organisations():
 
 
 def test_physicomorale_company_named_after_a_person_is_masked(fr):
+    # Règle produit 1.0.2 : nom entier lisible avec une forme juridique (« SARL Durand et Fils ») ; sans forme
+    # juridique, une société au nom de personne reste masquée. Product rule 1.0.2: readable with a legal form.
     out = fr.anonymize("La SARL Durand et Fils et le Cabinet Martin & Associés sont mandatés.").text
-    assert out == "La SARL [ORG_1] et le [ORG_2] sont mandatés."
+    assert out == "La SARL Durand et Fils et le [ORG_1] sont mandatés."
 
 
 def test_company_name_with_a_legal_form_stays_readable_and_the_person_is_masked(fr):
@@ -77,8 +79,10 @@ def test_articles_and_particles_are_not_given_names(found):
 
 
 def test_kept_organisation_never_shields_a_person_name(fr):
+    # 1.0.2 : la personne est masquée, le nom de société à forme juridique reste lisible en entier (règle produit).
+    # The person is masked; the company name with a legal form stays readable as a whole (product rule).
     out = fr.anonymize("M. Petit est le gérant de la Boulangerie Petit SARL.").text
-    assert "Petit" not in out
+    assert out == "M. [PERSONNE_1] est le gérant de la Boulangerie Petit SARL."
 
 
 def test_sole_trader_context_masks_the_company(fr):
@@ -92,7 +96,8 @@ def test_priorities(context):
     ctx = context("Acme SAS et la SARL Durand et Fils.")
     spans = {ctx.text[s.start:s.end]: s for s in OrganizationDetector(None).detect(ctx)}
     assert (spans["Acme"].personal, spans["Acme"].priority) == (False, PRIORITY_PROPAGATED)
-    assert (spans["Durand et Fils"].personal, spans["Durand et Fils"].priority) == (True, PRIORITY_HEURISTIC)
+    # 1.0.2 : nom à forme juridique (« SARL Durand et Fils ») conservé comme « Acme SAS » / kept like "Acme SAS".
+    assert (spans["Durand et Fils"].personal, spans["Durand et Fils"].priority) == (False, PRIORITY_PROPAGATED)
     assert all(s.entity == "ORG" and s.label == "ORG" and s.propagate for s in spans.values())
 
 

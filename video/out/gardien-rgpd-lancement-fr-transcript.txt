@@ -1,6 +1,6 @@
 Gardien RGPD · vidéo de lancement · tout le texte à l’écran, dans l’ordre
 Vidéo muette (aucune voix, aucune musique) : ce fichier reprend chaque texte au moment où il apparaît.
-168.3 s · 1920 x 1080 · 30 fps
+171.9 s · 1920 x 1080 · 30 fps
 
 [00:00] Gardien RGPD
 [00:00] M. Jean Dupont, 06 12 34 56 78
@@ -23,7 +23,7 @@ Vidéo muette (aucune voix, aucune musique) : ce fichier reprend chaque texte 
 [00:28] Boîte noire — Rien n’explique le masquage.
 [00:32] Retirer les noms, garder le sens.
 [00:32] M. Jean Dupont · jean.dupont@exemple.fr · 06 12 34 56 78 / IBAN FR76 3000 6000 0112 3456 7890 189 / M. Dupont rappellera Mme Claire Martin. / DUPONT Jean réglera la facture n° 2026-0042.
-[00:33] sortie réelle, version 1.0.0
+[00:33] sortie réelle, version 1.0.1
 [00:33] Clé aléatoire de 256 bits, propre à ce document
 [00:38] M. [PERSONNE_1] · [EMAIL_1] · [TEL_1] / IBAN [IBAN_1] / M. [PERSONNE_1] rappellera Mme [PERSONNE_2]. / [PERSONNE_1] réglera la facture n° 2026-0042.
 [00:38] Clé détruite : aucun retour possible.
@@ -57,31 +57,31 @@ Vidéo muette (aucune voix, aucune musique) : ce fichier reprend chaque texte 
 [01:40] Votre serveur — docker compose deploy/README.md
 [01:42] Contribuez — Améliorez, proposez : /issues
 [01:45] Testé, mesuré, publié
-[01:45] 4 200+ — tests automatisés, Windows et Linux
-[01:48] 91,9 % — des 450 000 documents synthétiques sans fuite
-[01:50] 63,7 % — des documents piégés sans fuite, 51 façons de déguiser un identifiant
+[01:45] 6 600+ — tests automatisés, Windows et Linux
+[01:48] 97,2 % — des 450 000 documents synthétiques sans fuite
+[01:50] 84 % — des documents difficiles sans fuite : 51 façons de piéger un texte
 [01:55] 14 — jeux de textes réels annotés, dont 6 français, 8 178 documents
-[01:59] 16,5 à 93 % — des documents réels français sans fuite, selon la famille
-[02:02] 89,9 % — des annonces du BODACC sans fuite, 97,8 % des mentions masquées
+[01:59] 95,1 % — des avis du BOAMP sans fuite, 98,3 % des mentions masquées
+[02:03] 97,5 % — des annonces du BODACC sans fuite, 99,5 % des mentions masquées
 [02:07] Comment nous nous notons
-[02:07] Indice de confiance
-[02:07] 61,8 %
-[02:08] IC 95 % : 58,6 – 66,9 %
-[02:08] Mentions masquées : 79,8 % · précision : 99,1 % BODACC, 87,3 % BOAMP · texte neutre masqué à tort : 0,07 %
-[02:14] Part des documents sans identifiant direct lisible.
-[02:14] Campagne du 26 octobre 2026 : 1 019 385 documents, protocole écrit avant.
-[02:20] Limites connues
-[02:20] Presse ancienne, MAPA FR : un document sur six sans fuite.
-[02:24] BOAMP : 4 avis sur 10 gardent une mention lisible.
-[02:27] Noms allemands, espagnols, italiens, néerlandais, portugais : non détectés.
-[02:30] Une première barrière, pas une certification RGPD.
-[02:32] Le protocole : gardienrgpd.fr/#protocole
-[02:36] Gardien RGPD
-[02:36] Le meilleur outil open source pour le RGPD et l’IA !
-[02:40] À vous de juger.
-[02:42] gardienrgpd.fr · gdprguardian.com
-[02:42] github.com/FlowLineIntegration/GDPRGuardian
-[02:43] Offert par Flow Line Intégration
-[02:43] Guillaume CLEMENT, CTO Data & IA
-[02:43] Conception : Claude Design
-[02:44] Licence MIT · version 1.0.0
+[02:08] Indice de confiance
+[02:08] 96,9 %
+[02:08] IC 95 % : 96,2 – 97,6 %
+[02:08] Mentions masquées : 99,3 % · précision : 99,2 % BODACC, 87,7 % BOAMP · texte neutre masqué à tort : 0,07 %
+[02:14] Documents normalisés : part des documents sans identifiant direct lisible, protocole 1.1.
+[02:15] Campagne du 26 octobre 2026 : 1 019 385 documents, protocole publié avant.
+[02:21] Limites connues
+[02:22] Publiés à part : presse ancienne (OCR de mauvaise qualité), MAPA FR, autres langues.
+[02:26] Corpus réels déjà vus pendant la mise au point : chiffres optimistes.
+[02:30] Noms allemands, espagnols, italiens, néerlandais, portugais : non détectés.
+[02:33] Une première barrière, pas une certification RGPD.
+[02:36] Le protocole : gardienrgpd.fr/#protocole
+[02:39] Gardien RGPD
+[02:40] Le meilleur outil open source pour le RGPD et l’IA !
+[02:43] À vous de juger.
+[02:45] gardienrgpd.fr · gdprguardian.com
+[02:45] github.com/FlowLineIntegration/GDPRGuardian
+[02:46] Offert par Flow Line Intégration
+[02:47] Guillaume CLEMENT, CTO Data & IA
+[02:47] Conception : Claude Design
+[02:47] Licence MIT · version 1.0.1

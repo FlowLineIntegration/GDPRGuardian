@@ -86,6 +86,17 @@ impl NameDetector {
         if entry.has(flag::STOP) {
             return (Kind::Common, 0);
         }
+        // La minuscule n'allonge jamais moins : un jeton plus long que tous les mots ne peut pas en être un.
+        // Lowercasing never shortens: a token longer than every listed word cannot be one of them.
+        if self.text_sets.accented_words.iter().any(|w| w.len() >= original.len()) {
+            // « Marié le 12/06/2015 » : l'accent distingue le mot du prénom « Marie » (1.0.2, fort et essentiel).
+            // The accent tells the word from the given name.
+            let mut lower = Vec::with_capacity(original.len());
+            self.chars.push_lower(original, &mut lower);
+            if self.text_sets.accented_words.contains(&lower) {
+                return (Kind::Common, 0);
+            }
+        }
         if entry.has(flag::PARTICLE) {
             return (Kind::Particle, entry.name().unwrap_or(0));
         }
@@ -125,6 +136,11 @@ impl NameDetector {
         if eq(rest, "s") {
             // Possessif (« Dupont's ») / possessive.
             return self.classify(head, sub(original, 0, apostrophe), self.vocab.get(head));
+        }
+        if head.last() == Some(&'c') && rest.first() == Some(&'h') {
+            // « Guivarc'h », « Kerc'hoz » : le c'h breton appartient au nom, jamais une élision (1.0.2, fort et
+            // essentiel). The Breton c'h belongs to the name: known as a whole, else an unknown name.
+            return self.code(key).map_or((Kind::Unknown, 0), |code| (Kind::Name, code));
         }
         if tail.is_empty() || !self.chars.is_upper(&tail[..1]) || eq(head, "l") {
             return (Kind::Common, 0); // « C'est », « L'Union » : élision d'un mot-outil / function-word elision

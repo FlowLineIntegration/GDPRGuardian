@@ -1,0 +1,80 @@
+{
+  "note_fr": "Enregistrement public de la version 1.2 du protocole d'auto-évaluation de Gardien RGPD, écrite le 26 octobre 2026 après la campagne 1.1 et AVANT la campagne 1.2 (une mesure interne sur les moitiés dev, le même soir, montrait déjà que le mode fort masque environ 15 % des leurres : c'est ce qui motive ce changement). Publié le 27 octobre 2026 avec le moteur 1.0.2, avant la campagne 1.2 : outil, spécification, texte du protocole et paquet sont figés ci-dessous (empreintes inchangées depuis le 26 octobre, revérifiées) ; les champs « TO_FILL_AT_RELEASE » qui restent (packs et sonde du service) se relèvent sur le service 1.0.2 une fois déployé et se publient ici avant la campagne, comme le prévoit le protocole. Deux modes notés, fort (par défaut) et essentiel ; deux chiffres par mode : anonymisation (indices « documents normalisés » et « documents difficiles », définitions 1.1) et codes utiles perdus (leurres masqués, famille synthétique). Garde-fou des leurres (≤ 10 %) pour le mode essentiel seulement ; en mode fort, la perte est publiée sans garde-fou. Le résultat 1.1 (96,9 % [96,2–97,6], difficiles 84,0 %) reste publié tel quel.",
+  "note_en": "Public registration of version 1.2 of the GDPR Guardian self-rating protocol, written on 26 October 2026 after the 1.1 campaign and BEFORE the 1.2 campaign (an internal measure on the dev halves, the same evening, already showed that strong mode masks about 15% of the decoys: that is what prompted this change). Published on 27 October 2026 with engine 1.0.2, before the 1.2 campaign: tool, spec, protocol text and bundle are frozen below (digests unchanged since 26 October, checked again); the remaining TO_FILL_AT_RELEASE fields (the service's packs and probe) are taken on the 1.0.2 service once deployed and published here before the campaign, as the protocol says. Two scored modes, strong (fort, default) and essential (essentiel); two numbers per mode: anonymisation (normalised and difficult indexes, 1.1 definitions) and useful codes lost (decoys masked, synthetic family). Decoy guard (<= 10%) for essential mode only; in strong mode the loss is published without a guard. The 1.1 result (96.9% [96.2-97.6], difficult 84.0%) stays published as it is.",
+  "protocol": "1.2",
+  "written": "2026-10-26",
+  "published": "2026-10-27",
+  "tools_sha256": "87508d32f28c46e673b225c38b1dca7ab509d2327a4073988fba624e7f64be01",
+  "spec_sha256": "b9f69bde3cc5ba742c84c1675012b06d65171aa1e5a7e1085c073b9911925fdc",
+  "protocole_md_sha256": "5872b8634ce74a569a4fde319280878308134cd328f18531307d09e4f8769e5d",
+  "digests_note": "tools_sha256, spec_sha256 and protocole_md_sha256 as written on 26 October 2026 (python -m tools.protocol registration); checked again on 27 October 2026 at the 1.0.2 release with `registration --bundle` (matches_repository: true), unchanged",
+  "bundle": {
+    "path": "gg-protocol.pyz",
+    "bundle_sha256": "552526c9ed6889d8c50f8c4adeb2a9156e376d6fffe852fb4aedfa5bf574b5e2",
+    "bytes": 9853033,
+    "files": 788,
+    "rebuild": "python -m tools.protocol bundle --out gg-protocol.pyz (fixed dates: the same sources give the same bytes)"
+  },
+  "modes": ["fort", "essentiel"],
+  "registered_plan": {
+    "faker": "40.43.0",
+    "documents": {
+      "synthetic_fr": 450000,
+      "redteam_bases": 12000,
+      "redteam_fr": 548907,
+      "real_annotated": 8478
+    },
+    "requests_per_document": 2,
+    "synthetic_sha256": "0b91be78435e5434ee5a3b136ab8f08dd10a2c3673dad56fc6dca469c87a955b",
+    "redteam_sha256": "d984ee1bf9dba70bf2ccf32957cab9da9bbf1fdf02adf5b7444956fa0137760b"
+  },
+  "real_corpora_sha256": {
+    "bodacc_fr.jsonl": "504db7aeee386be59d2ca17632c0e0d61e513f01f9d38f53367500d567af47d9",
+    "boamp_fr.jsonl": "435373ea39a1814a19b5cf4aa97801d955faefeb1753c09182bec56a35cac6f8",
+    "parlamint_fr.jsonl": "ab76277f360421960f15d3a9a958b5bbfd49aa258fe872927cc0489d22c70b1d",
+    "europeana_fr.jsonl": "4b96d2df00f8db3f4ca3b1140cd55405d281d9d522263107ae96fb3b7011d3cd",
+    "hipe_newseye_fr.jsonl": "6a69d94fe630e3dc896d52fda6b5ce7c47da208015556a0e1fd25f59f39a9535",
+    "mapa_fr.jsonl": "f446679df5829829a2eff7a510f9a44e3fbe45e70e897c8269d7926267ac356c",
+    "mapa_de.jsonl": "7f224515d68feea7c231417afc18e175e7042eb253c2132469a6054549b5dd96",
+    "mapa_es.jsonl": "b69e6234c340135970f13c2b69947298987a3891c301e31fa786f912e9350921",
+    "mapa_it.jsonl": "6299a9e9e60582de6399b79f39ed273383898e0334dcb0e0fe7cb89308731836",
+    "mapa_nl.jsonl": "cf2c5d171dea9086b75a81be4a1e9425c1351bbc3ec9ba08ff99f07348c678bc",
+    "mapa_pt.jsonl": "4494c20e44c677fce32661e4c1423d4bb257f2ab660f99f9b14adf956dcb132e",
+    "meddocan_es.jsonl": "32408fe009d118394ea6bbaef0e44c243a9e738bb602bf3c1b6baaabfa838c13",
+    "german_ler_de.jsonl": "f56a84e18dca7af61e39768b709c356b411886e8dabbf4770f988d4187d58d6e",
+    "tab_en.jsonl": "98d995139013ab917e92956ced31ffed8fdbaee8c89c8d3ddf9e0cc020b50709",
+    "judilibre_fr.jsonl": "64adc7e85ee5aaa893a5b19856a301ea6c9b0f52fc36b2295367d759c5d0324d"
+  },
+  "results_files": "benchmarks/results/protocol-1.2-<date>.{json,md}",
+  "engine": {
+    "version": "1.0.2",
+    "packs_sha256": "TO_FILL_AT_RELEASE",
+    "probe_sha256": "TO_FILL_AT_RELEASE",
+    "probe_docs": 200,
+    "probe_modes": ["fort", "essentiel"]
+  },
+  "confidence_index": "per mode, anonymisation: normalised documents (site keys confidence_* for the default mode fort, fort_index/fort_ci_low/fort_ci_high and ess_index/ess_ci_low/ess_ci_high per mode), same definition as 1.1: share of documents in which no direct identifier stays readable, 4 families equally weighted (synthetic_fr, bodacc_fr, boamp_fr, parlamint_fr), real corpora on their test halves, 95% bootstrap interval stratified by family (2,000 resamples, seed 20261025)",
+  "hard_index": "per mode, detail of anonymisation: difficult documents (hard_* for the default mode, fort_hard_index and ess_hard_index per mode), same definition as 1.1: whole red team, 51 operators in three groups, every mutated document counts once, interval stratified by group",
+  "useful_codes_lost": "per mode: share of the synthetic family's decoys (order, invoice, product, ticket, lot numbers that designate nobody) masked anyway, 10 seeds; lower is better (fort_code_loss, ess_code_loss); guard <= 10% for essentiel only, published without a guard for fort",
+  "published_apart": "unchanged from 1.1: old press, MAPA FR, other languages and the Judilibre control, in neither index",
+  "changes": [
+    "the plan declares the scored modes: fort (default) and essentiel; every document is sent and scored once per mode; the service gets 'mode' and no longer 'profile' (since engine 1.0.2, profile 'standard' means essentiel); custom mode is not scored (its result depends on the categories chosen)",
+    "two numbers per mode: anonymisation (normalised index with its interval, difficult index as a detail) and useful codes lost (decoys masked, synthetic family)",
+    "guards: readability guards for both modes (neutral text over-masked <= 2%, BODACC and BOAMP precision >= 70%); decoy guard (<= 10%) for essentiel only; in fort the loss is published without a guard, because fort masks every code by the product's choice (owner, 26 October 2026: 'strong mode, remove as few decoys as possible; essential mode, keep as many as possible')",
+    "declared series break: the 1.1 result covers the single setting of engine 1.0.1, neither fort nor essentiel; the 1.2 headline is fort, which masks more; both modes are published side by side and the 1.1 result stays shown",
+    "the default mode (fort) fills the site keys confidence_* and hard_*; per-mode keys fort_* and ess_*; modes_source says 'protocole 1.2' (campaign) or 'mesure interne, moitié dev' (internal measure before the campaign, never presented as the protocol)",
+    "the engine probe goes through each declared mode",
+    "the 1.1 campaign added to spec.EARLIER_CAMPAIGNS and spec.TEST_HALVES_MEASURED_BEFORE (test halves even less blind; real-corpus figures optimistic)",
+    "unchanged: leak definition (an e-mail address counts whoever it belongs to, so a shared mailbox left readable by essentiel counts as a leak, declared), both index definitions, families and weights, bootstrap, dev/test split, seeds, plan and its fingerprints, guard thresholds; about twice as many requests (about 4 h 30 on the server)"
+  ],
+  "previous": {
+    "protocol": "1.1",
+    "registration": "PROTOCOL-REGISTRATION-1.1.json",
+    "campaign": "2026-10-26",
+    "engine": "1.0.1+4bb5c465425e",
+    "confidence_index": "96.9 % [96.2-97.6]",
+    "hard_index": "84.0 %",
+    "results": "benchmarks/results/protocol-1.1-2026-10-26.md",
+    "note": "the 1.1 digests in PROTOCOL-REGISTRATION-1.1.json match the files as they were at the 1.1 registration (repository history), not the 1.2 files; the 1.1 result copies them"
+  }
+}

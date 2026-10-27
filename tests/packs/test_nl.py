@@ -152,7 +152,9 @@ def test_shared_dutch_reference_document(anonymizer):
 
 
 def test_weak_tier_needs_context(anonymizer_nl):
-    assert "123456782" in anonymizer_nl.anonymize("Factuur 123456782 betaald.").text
+    # 1.0.2 : sans contexte ce n'est pas un BSN, mais une suite nue de 8 chiffres ou plus est un identifiant
+    # générique. Without context no BSN, but a bare run of 8+ digits is a generic identifier.
+    assert anonymizer_nl.anonymize("Factuur 123456782 betaald.").text == "Factuur [IDENTIFIANT_1] betaald."
     assert "123456782" not in Anonymizer(countries=("NL",), profile="strict").anonymize(
         "Factuur 123456782 betaald.").text
     assert "1234 AB" in anonymizer_nl.anonymize("Bestelling 1234 AB verzonden").text

@@ -36,6 +36,15 @@ HONORIFICS = _fold_all("""
 """)
 # Civilités homonymes de mots courants : exigées avec une majuscule / honorifics that need a capital letter.
 CASE_SENSITIVE_HONORIFICS = _fold_all("me | me. | pr | ms | don | dame | sir | lady | lord | miss | mx | fr.")
+# Civilités d'une personne vivante (1.0.2) : après un éponyme (« l'arrêt maladie de M. Jean Dupont »), elles
+# désignent la personne concernée, pas un lieu ni une maladie ; seuls les titres (« rue du Docteur Roux ») héritent
+# de l'éponyme. Civilities of a living person: after an eponym they name the person concerned; only titles chain.
+CIVILITIES = _fold_all("""
+    m. | mr | mr. | monsieur | mme | mme. | madame | mlle | mlle. | mademoiselle
+    mm. | messieurs | mmes | mmes. | mesdames | mlles | mlles. | mesdemoiselles
+    mrs | mrs. | ms | ms. | miss | mx | mx. | herr | herrn | frau | fräulein
+    sr | sr. | sra | sra. | srta | srta. | signor | signora | dhr. | mevr. | mevrouw | meneer
+""")
 
 # --- Déclencheurs moyens / medium triggers ---------------------------------------------------------------------
 
@@ -255,7 +264,10 @@ STOP = HONORIFICS | GREETINGS | _DOTLESS_HONORIFICS | _ALPHA_LEGAL_FORMS | _fold
     csv | json | api | url | sql | ia | ai | llm | gpt | faq | asap | fyi | nord | sud | est | ouest | centre
     junior | senior | jr | saint | sainte | st | ste | fc | ac | afc | sc | rc | og | ufc | psg
     siret | siren | rcs | naf | ape | rna | nir | finess | rpps | adeli | eori | duns
+    cse | cssct | chsct | udaf | ehpad | mdph | ccas | pmi | esat | ssiad | cmpp | apec | carsat | cnav | crous
 """)
+# 1.0.2 (fort et essentiel) : sigles d'instances et d'organismes (« Le CSE se réunira », boîte « cse.morez@ »,
+# « UDAF 44 ») ; jamais un nom, ni propagés depuis une adresse e-mail. Acronyms of bodies: never a name.
 # Mots de rôle et de voie : déclencheurs seulement s'ils précèdent un autre jeton capitalisé.
 # Role and street words: triggers only when followed by another capitalised token.
 CONTEXTUAL = frozenset(w for w in ROLES | EPONYMS | EPONYMS_DIRECT if " " not in w)
@@ -340,7 +352,11 @@ EXTRA_WORDS = _fold_all("""
     astreinte | astreintes | relevé | relevés | récapitulatif | récapitulatifs | échéancier | échéanciers | impayé
     impayés | créance | créances | copropriété | copropriétés | résiliation | résiliations | détachement
     titularisation | télétravail | webinaire | webinaires | saisie | saisies | suivi | suivis | avoir | avoirs
+    contactez | appelez | rappelez | écrivez | envoyez | transmettez | adressez | joignez | prévenez | voyez
+    consultez | signez | remplissez | retournez | merci | contacter | rappeler | relancer
 """)
+# 1.0.2 (fort et essentiel) : impératifs en tête de phrase (« J.D. Contactez P. Lemoine ») : un mot, jamais le
+# début d'un nom. Sentence-initial imperatives are words, never the start of a name.
 
 # Formes verbales homonymes de noms de famille (« Rendu le 3 mars », « Donne acte ») : mots courants.
 # Verb forms that are also surnames: treated as common words (the build excludes verb lexemes).
@@ -348,6 +364,9 @@ VERB_FORMS = _fold_all("""
     rendu | rendue | donne | donné | fini | finie | choisi | battu | pendu | clos | attendu | entendu | vu | lu
     su | tenu | venu | reçu | connu | perdu | vendu | ordonne | condamne | confirme | constate | déclare
 """)
+# Mots que leur accent distingue d'un prénom (« Marié le 12/06/2015 » n'est pas « Marie ») : comparés en minuscules,
+# accents compris, jamais repliés (1.0.2, fort et essentiel). Words told from a given name by their accent only.
+ACCENTED_WORDS = frozenset({"marié", "mariée", "mariés", "mariées"})
 # Types de document homonymes de noms de famille rares (« AVENANT N° 2 », « Devis », « Bordereau ») : ambigus, un
 # nom seulement avec un indice (« M. Devis »). Document types that are also rare surnames: a name only with a cue.
 DOCUMENT_WORDS = _fold_all("avenant | devis | bordereau")

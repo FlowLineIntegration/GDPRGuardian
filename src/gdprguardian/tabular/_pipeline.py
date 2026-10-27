@@ -708,6 +708,8 @@ class _Job:
             "kept_by_policy": _merged_kept(self.reports),
             "countries": sorted({country for report in self.reports for country in report.get("countries", ())}),
             "language": detected,
+            "mode": self.anonymizer.settings.mode,
+            "disable": list(self.anonymizer.settings.disable),
             "profile": self.anonymizer.settings.profile,
             "dropped": dict(sorted(dropped.items())),
             "segments": len(self.texts),

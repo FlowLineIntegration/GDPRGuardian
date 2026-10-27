@@ -86,6 +86,43 @@ fn words<'t>(text: &'t str, table: &PyUnicodeTable) -> Vec<&'t str> {
     found
 }
 
+/// `organizations._is_form` d'un mot du texte / of a word of the text.
+fn is_form(facts: &Facts<'_>, word: &str) -> bool {
+    facts.names.is_company_form(word, &facts.fold(word))
+}
+
+/// `organizations._formal` : la raison sociale porte une forme juridique de société, dans ses mots, juste avant
+/// (deux blancs au plus) ou juste après (blancs, tabulations et virgule, trois au plus). The company name carries
+/// a company legal form: among its words, right before it or right after it.
+fn formal(facts: &Facts<'_>, start: usize, end: usize, words: &[&str]) -> bool {
+    if words.iter().any(|w| is_form(facts, w)) {
+        return true;
+    }
+    let text = facts.text;
+    let at = |i: usize| text.char_at(i).unwrap_or('\0');
+    let mut i = start;
+    while i > 0 && matches!(at(i - 1), ' ' | '\t') && start - i < 2 {
+        i -= 1;
+    }
+    let mut j = i;
+    while j > 0 && !facts.table.is_space(at(j - 1)) && i - j < 12 {
+        j -= 1; // mot précédent, borné / previous word, bounded
+    }
+    if i < start && j < i && is_form(facts, text.slice(j, i)) {
+        return true;
+    }
+    let len = text.len();
+    let mut k = end;
+    while k < len && matches!(at(k), ' ' | '\t' | ',') && k - end < 3 {
+        k += 1;
+    }
+    let mut m = k;
+    while m < len && !facts.table.is_space(at(m)) && !matches!(at(m), ',' | ';' | ')') && m - k < 12 {
+        m += 1;
+    }
+    end < k && k < m && is_form(facts, text.slice(k, m).trim_end_matches('.'))
+}
+
 impl Decision {
     /// `_spans` : une zone par organisation (la plus longue), puis la décision / one span each, then the decision.
     pub(crate) fn spans(&self, facts: &Facts<'_>, mut found: Vec<(usize, usize, bool)>) -> Vec<Span> {
@@ -112,6 +149,18 @@ impl Decision {
                 continue;
             }
             let (person, only_person, safe) = self.person_content(facts, &words, &first);
+            if !sole
+                && facts.company_ids == "auto"
+                && !facts.strict
+                && formal(facts, start, end, &words)
+                && (self.ei_groups.is_empty() || !facts.context.near_groups(&self.ei_groups, start, end, 200, 200))
+            {
+                // Forme juridique de société (pas EI/EIRL) : la raison sociale entière reste lisible, même si elle
+                // contient un nom de personne (1.0.2, « SARL DUPONT BÂTIMENT », « Clinique Jules Verne SAS »).
+                // A company legal form (not a sole trader): the whole company name stays readable.
+                spans.push(self.kept.span(start, end));
+                continue;
+            }
             if only_person {
                 let mut span = self.person.span(start, end);
                 span.propagate = safe;

@@ -12,6 +12,7 @@ from __future__ import annotations
 import ipaddress
 import json
 import logging
+import re
 from collections.abc import Callable, Iterable, Sequence
 from fnmatch import fnmatchcase
 from time import perf_counter
@@ -102,6 +103,166 @@ def _expects_continue(scope: Scope) -> bool:
     return any(key == b"expect" and value.lower() == b"100-continue" for key, value in scope.get("headers", ()))
 
 
+# Identifiant JSON-RPC d'un message MCP : clé « id » hors chaîne (dans une chaîne JSON, un guillemet est échappé).
+# JSON-RPC id of an MCP message: an "id" key outside any string (inside a JSON string a quote is escaped).
+_JSONRPC_ID_RE = re.compile(rb'(?<!\\)"id"\s*:\s*(-?\d{1,18}|"(?:[^"\\]|\\.){0,128}")')
+_PROBE_HEAD = 8 * 1024   # début du corps gardé pour l'id (SDK Python : id en tête) / body head kept for the id
+_PROBE_TAIL = 512        # fin du corps gardée (SDK TypeScript : id à la fin) / body tail kept (id at the end)
+# Erreur JSON-RPC « serveur » pour un refus temporaire ou de transport / JSON-RPC server error for these refusals.
+JSONRPC_SERVER_ERROR = -32000
+
+
+class JsonRpcIdProbe:
+    """Garde le début et la fin d'un corps MCP, jamais le reste, pour retrouver l'id de la requête.
+
+    Keeps the head and tail of an MCP body, never the rest, to find the request id. Rien n'est journalisé ni renvoyé
+    hormis l'id lui-même / nothing is logged or echoed but the id itself.
+    """
+
+    __slots__ = ("head", "tail")
+
+    def __init__(self) -> None:
+        self.head = b""
+        self.tail = b""
+
+    def feed(self, chunk: bytes) -> None:
+        if len(self.head) < _PROBE_HEAD:
+            room = _PROBE_HEAD - len(self.head)
+            self.head += chunk[:room]
+        self.tail = (self.tail + chunk)[-_PROBE_TAIL:]
+
+    def request_id(self) -> int | str | None:
+        """Premier id du début (SDK Python), sinon dernier de la fin / first id of the head, else last of the tail."""
+        match = _JSONRPC_ID_RE.search(self.head)
+        if match is None:
+            found = list(_JSONRPC_ID_RE.finditer(self.tail))
+            match = found[-1] if found else None
+        if match is None:
+            return None
+        try:
+            value = json.loads(match.group(1))
+        except ValueError:
+            return None
+        return value if isinstance(value, int | str) else None
+
+
+def is_mcp_post(scope: Scope) -> bool:
+    return scope.get("method") == "POST" and route_template(scope.get("path", "")) == "/mcp"
+
+
+def jsonrpc_error_body(error: ServiceError, request_id: int | str) -> dict[str, object]:
+    """Erreur JSON-RPC lisible par l'agent : code stable, message FR/EN, retry_after_s et statut HTTP d'origine.
+
+    JSON-RPC error an agent can read: stable code, FR/EN message, retry_after_s and the original HTTP status. Un
+    client MCP ne lit jamais le corps d'une réponse HTTP 4xx/5xx (« Server returned an error response ») : sur /mcp,
+    le refus part donc en HTTP 200 avec cette erreur. An MCP client never reads the body of an HTTP 4xx/5xx, so on
+    /mcp the refusal goes out as HTTP 200 carrying this error.
+    """
+    retry = error.retry_after
+    hint = (f" Réessayez dans {retry} s, une requête à la fois / retry in {retry} s, one request at a time "
+            f"(retry_after_s={retry})." if retry else "")
+    if error.code in ("upload_timeout", "payload_too_large"):
+        hint += " Texte long : utilisez create_upload / long text: use create_upload."
+    data: dict[str, object] = {"code": error.code, "http_status": error.status}
+    if retry:
+        data["retry_after_s"] = retry
+    return {"jsonrpc": "2.0", "id": request_id,
+            "error": {"code": JSONRPC_SERVER_ERROR, "message": f"{error.code}: {error.message}{hint}", "data": data}}
+
+
+async def send_refusal(scope: Scope, send: Send, error: ServiceError, extra: Sequence[tuple[bytes, bytes]],
+                       probe: JsonRpcIdProbe | None = None) -> None:
+    """Refus HTTP (statut et en-têtes gardés), ou erreur JSON-RPC en HTTP 200 sur /mcp quand l'id est connu.
+
+    HTTP refusal (status and headers kept), or a JSON-RPC error over HTTP 200 on /mcp when the id is known; the
+    Retry-After header is kept either way.
+    """
+    request_id = probe.request_id() if probe is not None and is_mcp_post(scope) else None
+    if request_id is None:
+        await send_json(send, error.status, error.to_dict(), extra)
+        return
+    await send_json(send, 200, jsonrpc_error_body(error, request_id), extra)
+
+
+_MCP_INVALID = ("Requête invalide : un seul objet JSON-RPC 2.0 avec \"jsonrpc\": \"2.0\", pas de lot / invalid "
+                "request: send one JSON-RPC 2.0 object with \"jsonrpc\": \"2.0\"; batches are not supported")
+_MCP_PARSE = "JSON illisible / parse error: the body is not valid JSON"
+_ERROR_BODY_MAX = 64 * 1024
+
+
+class McpProtocolGuard:
+    """Réponses du SDK MCP corrigées, sans écho de l'entrée / the MCP SDK's answers fixed, never echoing the input.
+
+    - Message invalide (lot, « jsonrpc » absent…) : le SDK répond 400 `-32602` avec l'erreur Pydantic, qui cite
+      l'entrée (`input_value=…`, un texte personnel peut-être). Remplacé par un message fixe : `-32600` (requête
+      invalide), ou `-32700` pour un JSON illisible. An invalid message (batch, missing "jsonrpc"…) gets a fixed
+      message instead of the Pydantic error that quotes the input.
+    - `Allow` d'un 405 : le SDK annonce DELETE alors que DELETE répond 405 (serveur sans session) ; seul POST est
+      annoncé. A 405's `Allow` names POST only (DELETE answers 405 too on this stateless server).
+    """
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        held: Message | None = None
+        chunks: list[bytes] = []
+        size = 0
+
+        async def guarded_send(message: Message) -> None:
+            nonlocal held, size
+            if message["type"] == "http.response.start":
+                status = message["status"]
+                if status == 405:
+                    message["headers"] = [(name, b"POST" if name.lower() == b"allow" else value)
+                                          for name, value in message.get("headers", ())]
+                elif status == 400:
+                    held = message  # corps remplacé à la fin / body replaced at the end
+                    return
+                await send(message)
+                return
+            if held is None:
+                await send(message)
+                return
+            if size < _ERROR_BODY_MAX:
+                chunk = message.get("body", b"")[:_ERROR_BODY_MAX - size]
+                chunks.append(chunk)
+                size += len(chunk)
+            if not message.get("more_body", False):
+                await self._replace(send, held, b"".join(chunks))
+
+        await self.app(scope, receive, guarded_send)
+
+    @staticmethod
+    async def _replace(send: Send, start: Message, body: bytes) -> None:
+        try:
+            original = json.loads(body)
+        except ValueError:
+            original = None
+        error = original.get("error") if isinstance(original, dict) else None
+        if not isinstance(error, dict) or "jsonrpc" not in original:
+            # Pas une erreur JSON-RPC du SDK : rendue telle quelle / not a JSON-RPC error of the SDK: as is.
+            await send(start)
+            await send({"type": "http.response.body", "body": body})
+            return
+        code = error.get("code")
+        if code == -32700:
+            fixed = {"code": -32700, "message": _MCP_PARSE}
+        elif code in (-32600, -32602):
+            fixed = {"code": -32600, "message": _MCP_INVALID}
+        else:
+            fixed = {"code": code if type(code) is int else -32600, "message": _MCP_INVALID}
+        payload = json.dumps({"jsonrpc": "2.0", "id": None, "error": fixed}, ensure_ascii=False).encode()
+        headers = [(name, value) for name, value in start.get("headers", ())
+                   if name.lower() not in (b"content-length", b"content-type")]
+        await send({"type": "http.response.start", "status": 400,
+                    "headers": [*headers, _JSON, (b"content-length", str(len(payload)).encode())]})
+        await send({"type": "http.response.body", "body": payload})
+
+
 async def refuse(scope: Scope, receive: Receive, send: Send, error: ServiceError,
                  headers: Sequence[tuple[bytes, bytes]], limit: int) -> None:
     """Refus lisible par tout client : corps lu à vide (borné), sauf « Expect: 100-continue ».
@@ -113,11 +274,15 @@ async def refuse(scope: Scope, receive: Receive, send: Send, error: ServiceError
     """
     declared = content_length(scope)
     drained = declared == 0
+    # MCP : début et fin du corps lu à vide gardés pour l'id JSON-RPC / MCP: drained body's ends kept for the id.
+    probe = JsonRpcIdProbe() if is_mcp_post(scope) else None
     if declared != 0 and not _expects_continue(scope):
         received = 0
         with anyio.move_on_after(_DRAIN_S):
             while received <= limit:
                 message = await receive()
+                if probe is not None and message["type"] == "http.request":
+                    probe.feed(message.get("body", b""))
                 if message["type"] != "http.request" or not message.get("more_body", False):
                     drained = message["type"] == "http.request"
                     break
@@ -127,7 +292,9 @@ async def refuse(scope: Scope, receive: Receive, send: Send, error: ServiceError
         extra.append((b"retry-after", str(error.retry_after).encode()))
     if not drained:
         extra.append((b"connection", b"close"))
-    await send_json(send, error.status, error.to_dict(), extra)
+        if probe is not None:
+            probe.tail = b""  # fin non reçue : seul le début compte / end not received: the head only
+    await send_refusal(scope, send, error, extra, probe)
 
 
 class AccessLogMiddleware:
@@ -415,6 +582,9 @@ class BodySizeLimitMiddleware:
         refusal: ServiceError | None = None
         complete = declared == 0
         started = False
+        # MCP : début du corps gardé pour répondre une erreur JSON-RPC à l'agent (408, 413) / MCP: body head kept to
+        # answer the agent with a JSON-RPC error.
+        probe = JsonRpcIdProbe() if is_mcp_post(scope) else None
 
         async def limited_receive() -> Message:
             nonlocal received, refusal, complete
@@ -435,6 +605,8 @@ class BodySizeLimitMiddleware:
             if received > limit:
                 refusal = self.too_large(scope)
                 raise refusal
+            if probe is not None:
+                probe.feed(message.get("body", b""))
             complete = not message.get("more_body", False)
             return message
 
@@ -443,7 +615,7 @@ class BodySizeLimitMiddleware:
             if refusal is not None:
                 if not started:
                     started = True
-                    await self._reject(send, refusal)
+                    await self._reject(send, refusal, scope, probe)
                 return
             if message["type"] == "http.response.start":
                 started = True
@@ -455,10 +627,15 @@ class BodySizeLimitMiddleware:
             if refusal is None:
                 raise
         if refusal is not None and not started:
-            await self._reject(send, refusal)
+            await self._reject(send, refusal, scope, probe)
 
     @staticmethod
-    async def _reject(send: Send, error: ServiceError) -> None:
+    async def _reject(send: Send, error: ServiceError, scope: Scope | None = None,
+                      probe: JsonRpcIdProbe | None = None) -> None:
+        if scope is not None and probe is not None:
+            probe.tail = b""  # corps incomplet : seul le début compte / incomplete body: the head only
+            await send_refusal(scope, send, error, [(b"connection", b"close")], probe)
+            return
         await send_json(send, error.status, error.to_dict(), [(b"connection", b"close")])
 
 

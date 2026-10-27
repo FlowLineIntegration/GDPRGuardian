@@ -10,7 +10,7 @@ Créer une skill > Téléverser une skill).
 
 | Archive | Skill | Contenu | Pour |
 |---|---|---|---|
-| `gdprguardian-online.zip` (environ 37 Ko) | `gdprguardian-online`, légère | `SKILL.md`, un script en bibliothèque standard, `LICENSE` | tous les clients : utilise le service public gratuit (MCP ou API REST), rien à installer |
+| `gdprguardian-online.zip` (environ 53 Ko) | `gdprguardian-online`, légère | `SKILL.md`, un script en bibliothèque standard, `LICENSE` | tous les clients : utilise le service public gratuit (MCP ou API REST), rien à installer |
 | `gdprguardian-local.zip` (environ 22 Mo) | `gdprguardian-local`, lourde | `SKILL.md`, le script, `LICENSE`, `THIRD_PARTY_NOTICES.md`, `wheels/` : Gardien RGPD, son noyau Rust et leurs dépendances pour **Linux x86_64 et aarch64** (glibc), Python 3.11 à 3.14 | claude.ai et la conversation de Claude Desktop (bac à sable Linux d'Anthropic, **même sur un poste Windows ou Mac**) ; Claude Code ou un agent sous Linux ou WSL |
 | `gdprguardian-local-windows-macos.zip` (environ 22 Mo) | `gdprguardian-local`, lourde | la même skill, roues pour **Windows x64 et macOS Apple Silicon** | **seulement** Claude Code (ou un autre agent) lancé directement sous Windows ou sur un Mac ; jamais pour claude.ai ni la conversation de Claude Desktop |
 
@@ -62,7 +62,7 @@ its root**, as claude.ai expects, and is uploaded as is (Customize > Skills > "+
 
 | Archive | Skill | Content | For |
 |---|---|---|---|
-| `gdprguardian-online.zip` (about 37 KB) | `gdprguardian-online`, light | `SKILL.md`, a standard-library script, `LICENSE` | every client: uses the free public service (MCP or REST API), nothing to install |
+| `gdprguardian-online.zip` (about 53 KB) | `gdprguardian-online`, light | `SKILL.md`, a standard-library script, `LICENSE` | every client: uses the free public service (MCP or REST API), nothing to install |
 | `gdprguardian-local.zip` (about 22 MB) | `gdprguardian-local`, heavy | `SKILL.md`, the script, `LICENSE`, `THIRD_PARTY_NOTICES.md`, `wheels/`: GDPR Guardian, its Rust core and their dependencies for **Linux x86_64 and aarch64** (glibc), Python 3.11 to 3.14 | claude.ai and the Claude Desktop chat (Anthropic's Linux sandbox, **even on a Windows or Mac computer**); Claude Code or an agent on Linux or WSL |
 | `gdprguardian-local-windows-macos.zip` (about 22 MB) | `gdprguardian-local`, heavy | the same skill, wheels for **Windows x64 and Apple-silicon macOS** | **only** Claude Code (or another agent) running directly on Windows or a Mac; never claude.ai or the Claude Desktop chat |
 

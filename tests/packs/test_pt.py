@@ -159,7 +159,9 @@ def test_labels_and_context(anonymizer_pt):
     assert anonymizer_pt.anonymize("NIF: 123456789").text == "NIF: [NIF_1]"
     assert anonymizer_pt.anonymize("NISS n.º 21865241240").text == "NISS n.º [NISS_1]"
     assert anonymizer_pt.anonymize("BI n.º 13201144").text == "BI n.º [NIC_1]"
-    assert "123456789" in anonymizer_pt.anonymize("Encomenda 123456789 enviada.").text
+    # 1.0.2 : sans contexte ce n'est pas un NIF, mais une suite nue de 8 chiffres ou plus est un identifiant
+    # générique. Without context no NIF, but a bare run of 8+ digits is a generic identifier.
+    assert anonymizer_pt.anonymize("Encomenda 123456789 enviada.").text == "Encomenda [IDENTIFIANT_1] enviada."
     assert "1000-001" in anonymizer_pt.anonymize("Referência 1000-001").text
 
 

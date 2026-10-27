@@ -176,11 +176,37 @@ pub fn alnum_mixed(candidate: &str) -> Option<String> {
     (pystr::any(&value, Is::Digit)? && pystr::any(&value, Is::Alpha)?).then_some(value)
 }
 
-/// Valeur après un libellé (« n° client : … ») : au moins un chiffre / at least one digit.
+/// Date ou plage d'années écrite avec « - », « / » ou « . » (« 2024-03-15 », « 12/03/2024 », « 2024-2025 »).
+/// Date or year range written with "-", "/" or "." (`_date_shaped`).
+fn date_shaped(value: &str) -> bool {
+    let parts: Vec<&str> = value.split(['-', '/', '.']).collect();
+    if !parts.iter().all(|p| !p.is_empty() && p.bytes().all(|b| b.is_ascii_digit())) {
+        return false;
+    }
+    let num = |p: &str| p.parse::<u32>().unwrap_or(0);
+    let century = |p: &str| p.starts_with("19") || p.starts_with("20");
+    match *parts.as_slice() {
+        [a, b] => a.len() == 4 && b.len() == 4 && century(a) && century(b),
+        [y, m, d] if y.len() == 4 && m.len() <= 2 && d.len() <= 2 => {
+            (1..=12).contains(&num(m)) && (1..=31).contains(&num(d))
+        }
+        [d, m, y] if d.len() <= 2 && m.len() <= 2 && (y.len() == 2 || y.len() == 4) => {
+            (1..=31).contains(&num(d)) && (1..=12).contains(&num(m))
+        }
+        _ => false,
+    }
+}
+
+/// Valeur après un libellé (« n° client : … ») : au moins un chiffre, jamais une date ni une plage d'années.
+/// Value after a label: at least one digit, never a date or a year range.
 pub fn contextual_id(candidate: &str) -> Option<String> {
     let value = candidate.trim_matches(|c| matches!(c, ' ' | '.' | '-' | '/'));
+    if date_shaped(value) {
+        return None;
+    }
     if pystr::any(value, Is::Digit)? && char_len(value) >= 4 {
-        return pystr::upper(value);
+        // 1.0.2 : squelette en majuscules / uppercase skeleton.
+        return pystr::upper(&strip_separators(value));
     }
     None
 }
@@ -213,9 +239,12 @@ pub fn phone_field(candidate: &str) -> Option<String> {
 /// French phone, E.164 form; digits as `isdigit()` sees them, as in Python.
 pub fn phone(candidate: &str) -> Option<String> {
     let mut digits = pystr::digits(candidate)?;
+    // « (+33) … » (1.0.2) : la parenthèse ouvrante ne cache pas le « + » / an opening bracket does not hide the "+".
+    let head = pystr::lstrip(candidate);
+    let head = head.strip_prefix('(').map_or(head, pystr::lstrip);
     if digits.starts_with("0033") {
         digits.drain(..4);
-    } else if digits.starts_with("33") && pystr::lstrip(candidate).starts_with('+') {
+    } else if digits.starts_with("33") && head.starts_with('+') {
         digits.drain(..2);
     }
     if digits.starts_with('0') && char_len(&digits) == 10 {

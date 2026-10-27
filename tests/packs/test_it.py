@@ -162,7 +162,9 @@ def test_french_document_does_not_activate_italy(anonymizer):
 
 
 def test_weak_tier_and_company_policy(anonymizer_it):
-    assert "00743110157" in anonymizer_it.anonymize("Ordine 00743110157 spedito.").text
+    # 1.0.2 : sans contexte ce n'est pas une P.IVA, mais une suite nue de 8 chiffres ou plus est un identifiant
+    # générique. Without context no P.IVA, but a bare run of 8+ digits is a generic identifier.
+    assert anonymizer_it.anonymize("Ordine 00743110157 spedito.").text == "Ordine [IDENTIFIANT_1] spedito."
     assert "00743110157" in anonymizer_it.anonymize("Rossi S.p.A., P.IVA 00743110157").text
     sole = anonymizer_it.anonymize("Mario Rossi, ditta individuale, P.IVA 00743110157").text
     assert "00743110157" not in sole
@@ -171,7 +173,8 @@ def test_weak_tier_and_company_policy(anonymizer_it):
 
 
 def test_context_only_documents_and_dates(anonymizer_it):
-    assert "CA00000AA" in anonymizer_it.anonymize("Codice prodotto CA00000AA").text
+    # 1.0.2 : pas une carte d'identité sans contexte, mais tout code est masqué / no ID card, but every code is masked.
+    assert anonymizer_it.anonymize("Codice prodotto CA00000AA").text == "Codice prodotto [IDENTIFIANT_1]"
     text = "Riunione del 06-12-2024 alle 10, numero di telefono 06 1234 5678."
     assert anonymizer_it.anonymize(text).text == "Riunione del 06-12-2024 alle 10, numero di telefono [TEL_1]."
 

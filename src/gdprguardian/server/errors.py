@@ -38,7 +38,11 @@ class ServiceError(Exception):
         self.retry_after = retry_after
         super().__init__(self.code)
 
-    def to_dict(self) -> dict[str, dict[str, str]]:
+    def to_dict(self) -> dict[str, dict[str, str | int]]:
+        # Attente en secondes dans le corps aussi (en plus de Retry-After), pour qui ne lit pas les en-têtes.
+        # Wait in seconds in the body too (besides Retry-After), for clients that do not read headers.
+        if self.retry_after:
+            return {"error": {"code": self.code, "message": self.message, "retry_after_s": self.retry_after}}
         return {"error": {"code": self.code, "message": self.message}}
 
 
@@ -75,7 +79,15 @@ class NotFound(ServiceError):
 class UploadTimeout(ServiceError):
     status = 408
     code = "upload_timeout"
-    message = "Envoi trop lent, interrompu / upload too slow, aborted"
+    message = ("Envoi trop lent, interrompu : renvoyez-le ; avec une URL d'envoi, demandez-en une nouvelle "
+               "(create_upload ou POST /v1/uploads), elle ne sert qu'une fois / upload too slow, aborted: send it "
+               "again; with an upload URL, request a new one (create_upload or POST /v1/uploads), it works only once")
+
+
+# Envoi perdu en route (client parti) / upload lost on the way (client gone).
+UPLOAD_INTERRUPTED_MESSAGE = ("Envoi interrompu : demandez une nouvelle URL d'envoi (create_upload ou POST "
+                              "/v1/uploads), elle ne sert qu'une fois / upload interrupted: request a new upload URL "
+                              "(create_upload or POST /v1/uploads), it works only once")
 
 
 class PayloadTooLarge(ServiceError):

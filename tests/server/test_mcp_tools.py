@@ -140,6 +140,14 @@ async def test_online_descriptions_never_mention_the_local_tool(server: FastMCP)
     assert "BE" in countries and "'all'" in countries and "not ';'" in countries
     labels = str(schemas["anonymize_text"]["properties"]["label_language"])
     assert "'auto'" in labels and "strict" in str(schemas["anonymize_text"]["properties"]["profile"])
+    # Trois modes : chaque outil d'anonymisation les décrit et conseille le défaut / three modes, default advised.
+    for name in ("anonymize_text", "create_upload"):
+        mode = schemas[name]["properties"]["mode"]
+        assert "Keep the default unless the user asked" in mode["description"]
+        assert {"fort", "essentiel", "personnalise", "strong", "essential", "custom"} <= set(
+            mode["anyOf"][0]["enum"])
+        assert "boites_fonctionnelles" in schemas[name]["properties"]["disable"]["description"]
+        assert "mode 'essentiel'" in tools[name].description and "SKU-[0-9]{6}" in tools[name].description
 
 
 async def test_unknown_tool_suggests_the_right_name(server: FastMCP) -> None:
@@ -212,10 +220,14 @@ async def test_engine_warning_reaches_the_model_without_france(server: FastMCP, 
         page = await client.call_tool("get_anonymized", {"upload_id": upload_id})
     warnings = result.structured_content["report"]["warnings"]
     assert any("French lexicons only" in warning for warning in warnings)
-    # Le texte anonymisé reste seul ; l'avertissement n'est que dans report.warnings, jamais ajouté au texte.
-    # The anonymised text stays alone; the warning is only in report.warnings, never appended to the text.
+    # Avertissement complet : chaque type laissé en clair sans FR, pas seulement noms et adresses.
+    # Full warning: every type left in clear without FR, not only names and addresses.
+    assert any("NIR" in warning and "SIRET" in warning and "plates" in warning for warning in warnings)
+    # Le texte anonymisé reste seul dans le premier bloc ; l'avertissement suit dans un second bloc (clients qui ne
+    # lisent que `content`). The anonymised text stays alone in the first block; the warning follows in a second one.
     assert EMAIL not in result.content[0].text and "French lexicons" not in result.content[0].text
-    assert len(result.content) == 1
+    assert len(result.content) == 2 and "French lexicons only" in result.content[1].text
+    assert result.content[1].text.startswith("[GDPR Guardian] Warning, not part of the text above")
     assert "French lexicons only" not in page.content[0].text  # téléversement en FR par défaut / FR by default
 
 
@@ -244,10 +256,18 @@ async def test_list_packs(server: FastMCP) -> None:
     ("get_anonymized", {"upload_id": "up_" + "a" * 43}, "not_found"),
     ("create_upload", {"filename": ""}, r"filename \(string_too_short; limit: 1\)"),
     ("create_upload", {"filename": "a.txt", "profile": "paranoid"},
-     r"profile \(literal_error; allowed: fast \| standard \| strict\)"),
+     r"profile \(literal_error; allowed: fast \| standard \| strict \(deprecated: use mode\)\)"),
+    ("create_upload", {"filename": "a.txt", "mode": "turbo"},
+     r"mode \(literal_error; allowed: fort \| essentiel \| personnalise"),
+    ("anonymize_text", {"text": "x", "mode": "fort", "disable": ["codes"]},
+     r"invalid_request: disable ne s'emploie qu'avec le mode personnalise"),
+    ("anonymize_text", {"text": "x", "disable": ["code"]},
+     r"invalid_request: disable : catégorie inconnue / unknown category; did you mean codes\?; allowed: personnes"),
+    ("anonymize_text", {"text": "x", "explain": "yes"}, r"explain \(bool_type; allowed: true \| false\)"),
     ("create_upload", {"filename": "a.txt", "country": "BE"},
      r"country \(unexpected_keyword_argument; unknown argument, did you mean countries\?\)"),
-    ("create_upload", {"filename": "a.txt", "dupont": "x"}, r"\? \(unexpected_keyword_argument; unknown argument"),
+    ("create_upload", {"filename": "a.txt", "dupont": "x"}, r"\? \(unexpected_keyword_argument; unknown argument; "
+                                                            r"allowed: filename, countries, mode, disable"),
     ("anonymize_text", {"text": "x" * 1_000_001}, r"text \(string_too_long; limit: 1000000; longer text: save it"),
     ("create_upload", {"filename": "a.txt", "countries": "ZZ"}, "invalid_request"),
     ("anonymize_text", {"text": "x", "countries": "FR,ZZ"}, "invalid_request"),

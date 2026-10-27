@@ -81,6 +81,20 @@ def _plan_args(parser: argparse.ArgumentParser) -> None:
     group.add_argument("--unit-synthetic", type=int, default=spec.UNIT_SYNTHETIC_DOCS)
     group.add_argument("--unit-redteam", type=int, default=spec.UNIT_REDTEAM_BASES)
     group.add_argument("--unit-real", type=int, default=spec.UNIT_REAL_DOCS)
+    group.add_argument("--modes", type=_mode_list, default=spec.MODES,
+                       help="modes notés, séparés par des virgules (1.2 : " + ",".join(spec.MODES) + ") / scored modes")
+
+
+def _mode_list(raw: str) -> tuple[str, ...]:
+    from tools.protocol.plan import check_modes
+
+    try:
+        modes = check_modes(tuple(x.strip() for x in raw.split(",") if x.strip()))
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(str(exc)) from None
+    if not modes:
+        raise argparse.ArgumentTypeError("au moins un mode / at least one mode")
+    return modes
 
 
 def _build_plan(args: argparse.Namespace, real_counts: dict[str, int]) -> Any:
@@ -89,14 +103,14 @@ def _build_plan(args: argparse.Namespace, real_counts: dict[str, int]) -> Any:
     return build_plan(synthetic_seeds=args.synthetic_seeds, synthetic_docs_per_seed=args.synthetic_docs,
                       redteam_seeds=args.redteam_seeds, redteam_bases_per_seed=args.redteam_bases,
                       real_counts=real_counts, unit_synthetic=args.unit_synthetic, unit_redteam=args.unit_redteam,
-                      unit_real=args.unit_real)
+                      unit_real=args.unit_real, modes=args.modes)
 
 
 def _standard_documents(args: argparse.Namespace) -> bool:
-    """Graines et tailles du plan enregistré / seeds and sizes of the registered plan."""
+    """Graines, tailles et modes du plan enregistré / seeds, sizes and modes of the registered plan."""
     return (tuple(args.synthetic_seeds) == spec.SYNTHETIC_SEEDS and args.synthetic_docs == spec.SYNTHETIC_DOCS_PER_SEED
             and tuple(args.redteam_seeds) == spec.REDTEAM_SEEDS
-            and args.redteam_bases == spec.REDTEAM_BASES_PER_SEED)
+            and args.redteam_bases == spec.REDTEAM_BASES_PER_SEED and tuple(args.modes) == spec.MODES)
 
 
 def _default_units(args: argparse.Namespace) -> bool:
@@ -220,7 +234,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     params = {"plan_id": plan.plan_id, "standard": standard, "real_counts": real_counts,
               "synthetic_seeds": list(args.synthetic_seeds), "synthetic_docs": args.synthetic_docs,
               "redteam_seeds": list(args.redteam_seeds), "redteam_bases": args.redteam_bases,
-              "units": [args.unit_synthetic, args.unit_redteam, args.unit_real]}
+              "units": [args.unit_synthetic, args.unit_redteam, args.unit_real], "modes": list(args.modes)}
     if saved is None:
         params_path.write_text(json.dumps(params, indent=1) + "\n", encoding="utf-8")
     elif saved["plan_id"] != plan.plan_id:
@@ -255,7 +269,7 @@ def _load(work: Path) -> tuple[Any, Any, dict[str, Any]]:
                       synthetic_docs_per_seed=params["synthetic_docs"],
                       redteam_seeds=tuple(params["redteam_seeds"]), redteam_bases_per_seed=params["redteam_bases"],
                       real_counts=params["real_counts"], unit_synthetic=unit_synthetic, unit_redteam=unit_redteam,
-                      unit_real=unit_real)
+                      unit_real=unit_real, modes=tuple(params.get("modes", ())))  # sans « modes » : plan 1.1
     return state, plan, params
 
 
@@ -357,6 +371,12 @@ def cmd_merge(args: argparse.Namespace) -> int:
 
     return merge(Path(args.results), Path(args.quality), force_guards=args.force_guards,
                  allow_scaled=args.allow_scaled, site_text_checked=args.site_text_checked)
+
+
+def cmd_modes_dev(args: argparse.Namespace) -> int:
+    from tools.protocol.modes_dev import main as modes_dev_main
+
+    return modes_dev_main(args)
 
 
 def cmd_crosscheck(args: argparse.Namespace) -> int:
@@ -480,6 +500,21 @@ def main(argv: list[str] | None = None) -> int:
 
     p = sub.add_parser("labels", help="régénère labels.json depuis le moteur / regenerates labels.json")
     p.set_defaults(func=cmd_labels)
+
+    p = sub.add_parser("modes-dev", help="mesure interne par mode, moitiés dev, moteur installé (jamais le serveur "
+                                         "public) / internal per-mode measure, dev halves, installed engine")
+    p.add_argument("--out", required=True, help="fichier JSON écrit (clés fort_*, ess_*, modes_*) / JSON written")
+    p.add_argument("--cache", help="cache des corpus réels (défaut : $GDPRG_CORPORA_CACHE ou "
+                                   "~/.cache/gdprguardian-corpora) / real-corpus cache")
+    # Tailles de la mesure de développement déjà publiée (docs/PROTOCOLE.md, « Version 1.1 ») : 20 000 documents,
+    # 600 bases mutées. Sizes of the development measure already published.
+    p.add_argument("--synthetic-docs", type=int, default=20_000, help="documents de la graine de développement")
+    p.add_argument("--redteam-bases", type=int, default=600, help="bases mutées par les 51 opérateurs")
+    p.add_argument("--real-limit", type=int, default=None, help="documents dev par corpus réel au plus (essais)")
+    p.add_argument("--modes", type=_mode_list, default=spec.MODES)
+    p.add_argument("--jobs", type=int, default=None, help="processus (défaut : moitié des cœurs) / processes")
+    p.add_argument("--resamples", type=int, default=spec.BOOTSTRAP_RESAMPLES)
+    p.set_defaults(func=cmd_modes_dev)
 
     p = sub.add_parser("crosscheck")
     service_args(p)

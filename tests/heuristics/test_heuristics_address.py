@@ -38,7 +38,8 @@ POSITIVES = [
     ("Adresse : 5 Contour des Essais CS 41234, 35044 Rennes cedex",
      ["5 Contour des Essais CS 41234, 35044 Rennes cedex"]),
     ("Monsieur Paul Essai\n15 rue des Essais\nAppartement 12 Escalier 3 Etage 2\n44300 NANTES",
-     ["15 rue des Essais", "Appartement 12 Escalier 3 Etage 2\n44300 NANTES"]),
+     # 1.0.2 (second test terrain, item C) : voie, ligne de complément et code postal en une seule zone.
+     ["15 rue des Essais\nAppartement 12 Escalier 3 Etage 2\n44300 NANTES"]),
     ("Bât. B, Résidence Les Lilas, 5 allée des Roses 13008 Marseille",
      ["Bât. B, Résidence Les Lilas, 5 allée des Roses 13008 Marseille"]),
     ("Le cabinet est au 4 place Bellecour, 69002 Lyon 2e.", ["4 place Bellecour, 69002 Lyon 2e"]),

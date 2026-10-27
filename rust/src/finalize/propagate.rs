@@ -119,12 +119,26 @@ fn automaton_matches<F: AsRef<str>>(forms: &[F], text: &str) -> Result<Vec<(usiz
 }
 
 /// `keywords.longest_matches`, en octets / in bytes.
-fn longest_matches<F: AsRef<str>>(forms: &[F], text: &str) -> Result<Vec<(usize, usize, usize)>, Unsupported> {
+pub(super) fn longest_matches<F: AsRef<str>>(
+    forms: &[F],
+    text: &str,
+) -> Result<Vec<(usize, usize, usize)>, Unsupported> {
     if forms.len().saturating_mul(text.len()) <= DIRECT_SCAN_BUDGET {
         Ok(direct_matches(forms, text))
     } else {
         automaton_matches(forms, text)
     }
+}
+
+/// `engine._after_saint` : occurrence collée à « Saint- » (« Saint-Claude »), un lieu jamais propagé (1.0.2).
+/// An occurrence glued to "Saint-" names a town and is never propagated.
+fn after_saint(chars: &Chars, haystack: &str, start_byte: usize) -> bool {
+    let Some(head) = haystack.get(..start_byte).and_then(|h| h.strip_suffix('-')) else {
+        return false;
+    };
+    let word_start =
+        head.char_indices().rev().take_while(|&(_, c)| chars.is(c, ALPHA)).last().map_or(head.len(), |(i, _)| i);
+    matches!(head[word_start..].to_lowercase().as_str(), "saint" | "sainte" | "st" | "ste")
 }
 
 /// `engine._propagate` : `spans` triées par début et disjointes ; le résultat l'est aussi.
@@ -150,20 +164,10 @@ pub fn propagate(
         if alnum(char_before(haystack, start_byte)) || alnum(char_at(haystack, end_byte)) {
             continue;
         }
+        if after_saint(chars, haystack, start_byte) {
+            continue; // « Saint-Claude » : une commune, pas la personne « CLAUDE Martin » (1.0.2) / a town
+        }
         let (start, end) = (text.char_index(start_byte), text.char_index(end_byte));
-        // Les occurrences sont croissantes et disjointes : seules les zones d'origine peuvent chevaucher.
-        // Matches are increasing and disjoint: only the original spans can overlap.
-        let next = spans.partition_point(|s| s.start <= start);
-        if next.checked_sub(1).and_then(|i| spans.get(i)).is_some_and(|s| s.end > start)
-            || spans.get(next).is_some_and(|s| s.start < end)
-        {
-            continue;
-        }
-        if let Some(segments) = segments {
-            if segments.locate(start).is_some_and(|(_, _, hi)| end > hi) {
-                continue;
-            }
-        }
         let Some((owner, source)) = owners.get(form).and_then(|&i| Some((i, spans.get(i)?))) else {
             continue;
         };
@@ -173,36 +177,90 @@ pub fn propagate(
         let Some(label) = label else {
             continue;
         };
-        added.push(Span {
-            start,
-            end,
-            entity: source.entity.clone(),
-            label: source.label.clone(),
-            source: label,
-            score: source.score * 0.95,
-            priority,
-            value: None,
-            personal: true,
-            forms: Vec::new(),
-            propagate: false,
-            reason: None,
-            origin: None,
-        });
+        added.push(propagated_span(source, label, start, end, None, priority));
     }
-    if added.is_empty() {
-        return Ok(spans);
+    drop(forms);
+    Ok(place_all(spans, added, segments))
+}
+
+/// Occurrence propagée d'une zone source (`engine._place`) / propagated occurrence of a source span.
+pub(super) fn propagated_span(
+    source: &Span,
+    label: Arc<str>,
+    start: usize,
+    end: usize,
+    value: Option<String>,
+    priority: i64,
+) -> Span {
+    Span {
+        start,
+        end,
+        entity: source.entity.clone(),
+        label: source.label.clone(),
+        source: label,
+        score: source.score * 0.95,
+        priority,
+        value,
+        personal: true,
+        forms: Vec::new(),
+        propagate: false,
+        reason: None,
+        origin: None,
     }
-    // Fusion par début (jamais égaux : une occurrence ne commence pas dans une zone) / merge by start.
-    let mut merged = Vec::with_capacity(spans.len() + added.len());
-    let mut added = added.into_iter().peekable();
-    for span in spans {
-        while let Some(next) = added.next_if(|a| a.start < span.start) {
-            merged.push(next);
+}
+
+/// `engine._place` pour des occurrences croissantes et disjointes, contre `spans` (triées, disjointes). Une
+/// occurrence remplace les zones de la même entité qu'elle contient strictement (« sohan [Kervadec] »), une date
+/// de naissance aussi une date ordinaire qu'elle couvre ; tout autre chevauchement l'écarte. Les occurrences étant
+/// disjointes, les comparer aux seules zones d'origine équivaut à l'insertion une à une de Python.
+/// For increasing, disjoint occurrences against sorted, disjoint `spans`: an occurrence replaces same-entity spans
+/// it strictly contains (a birth date also an ordinary date it covers); any other overlap drops it. Occurrences
+/// being disjoint, checking them against the original spans only equals Python's one-by-one insertion.
+pub(super) fn place_all(spans: Vec<Span>, candidates: Vec<Span>, segments: Option<&Segments>) -> Vec<Span> {
+    let mut accepted: Vec<(usize, usize, Span)> = Vec::new();
+    for candidate in candidates {
+        let (start, end) = (candidate.start, candidate.end);
+        if let Some(segments) = segments {
+            if segments.locate(start).is_some_and(|(_, _, hi)| end > hi) {
+                continue;
+            }
         }
-        merged.push(span);
+        let after = spans.partition_point(|s| s.start <= start);
+        let lo = match after.checked_sub(1).and_then(|i| spans.get(i)) {
+            Some(previous) if previous.end > start => after - 1,
+            _ => after,
+        };
+        let hi = spans.partition_point(|s| s.start < end).max(lo);
+        let fits = spans.get(lo..hi).unwrap_or_default().iter().all(|inner| {
+            if inner.start < start || inner.end > end {
+                return false;
+            }
+            if &*candidate.entity == "BIRTH_DATE" && &*inner.entity == "DATE" {
+                return true;
+            }
+            inner.entity == candidate.entity && inner.personal && inner.len() < end - start
+        });
+        if fits {
+            accepted.push((lo, hi, candidate));
+        }
     }
-    merged.extend(added);
-    Ok(merged)
+    if accepted.is_empty() {
+        return spans;
+    }
+    let mut merged = Vec::with_capacity(spans.len() + accepted.len());
+    let mut accepted = accepted.into_iter().peekable();
+    let mut skip_until = 0;
+    for (index, span) in spans.into_iter().enumerate() {
+        while let Some((_, hi, candidate)) = accepted.next_if(|(lo, _, _)| *lo <= index) {
+            merged.push(candidate);
+            skip_until = skip_until.max(hi);
+        }
+        if index >= skip_until {
+            merged.push(span);
+        }
+    }
+    merged.extend(accepted.map(|(_, _, candidate)| candidate));
+    merged
 }
 
 #[cfg(test)]
@@ -245,6 +303,21 @@ mod tests {
             }
             assert_eq!(direct_matches(&forms, &text), automaton_matches(&forms, &text).expect("small"), "{forms:?}");
         }
+    }
+
+    #[test]
+    fn a_longer_occurrence_replaces_the_spans_it_contains() {
+        // « sohan [Kervadec] » -> « [sohan Kervadec] » ; une autre entité dedans l'écarte / another entity drops it.
+        let inner = span(6, 14, "PERSON", 60);
+        let source = span(0, 14, "PERSON", 60);
+        let found = place_all(vec![inner.clone()], vec![propagated_span(&source, "p".into(), 0, 14, None, 50)], None);
+        assert_eq!(found.len(), 1);
+        assert_eq!((found[0].start, found[0].end, &*found[0].source), (0, 14, "p"));
+        let other = span(6, 14, "EMAIL", 60);
+        let kept = place_all(vec![other], vec![propagated_span(&source, "p".into(), 0, 14, None, 50)], None);
+        assert_eq!((kept.len(), &*kept[0].entity), (1, "EMAIL"));
+        let same = place_all(vec![inner], vec![propagated_span(&source, "p".into(), 6, 14, None, 50)], None);
+        assert_eq!(&*same[0].source, "test"); // même étendue : la zone d'origine reste / same extent: original stays
     }
 
     #[test]

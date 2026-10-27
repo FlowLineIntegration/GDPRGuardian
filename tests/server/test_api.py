@@ -12,6 +12,7 @@ from fastapi.testclient import TestClient
 from server_testkit import AUTH_A, AUTH_B, EMAIL, IBAN, KEY_A, NIR, SENSITIVE_TEXT
 
 import gdprguardian.documents as documents
+from gdprguardian.categories import MODES_HELP
 from gdprguardian.documents import ConversionTimeoutError, EncryptedDocumentError, MaliciousDocumentError
 from gdprguardian.server import ServerConfig, create_app
 from gdprguardian.server.limiter import LimitPolicy
@@ -111,7 +112,8 @@ def test_rate_limit_applies_before_the_body_is_parsed(make_client: Callable[...,
     limited = client.post("/v1/anonymize/text", headers={**AUTH_A, "Content-Type": "application/json"},
                           content=b"{broken")
     assert limited.status_code == 429 and limited.json()["error"]["code"] == "rate_limited"
-    assert set(limited.json()["error"]) == {"code", "message"}
+    assert set(limited.json()["error"]) == {"code", "message", "retry_after_s"}
+    assert limited.json()["error"]["retry_after_s"] == int(limited.headers["retry-after"])
     assert int(limited.headers["retry-after"]) >= 1 and '"cpu"' in limited.headers["ratelimit"]
     assert_secure(limited)
 
@@ -131,7 +133,8 @@ def test_anonymize_text(client: TestClient) -> None:
         assert secret not in body["text"]
     assert "[NIR_1]" in body["text"] and "[EMAIL_1]" in body["text"]
     assert body["report"]["irreversible"] is True
-    assert body["report"]["profile"] == "strict"
+    # Profil déprécié « strict » -> mode fort / deprecated profile "strict" -> mode fort.
+    assert body["report"]["mode"] == "fort" and body["report"]["disable"] == []
     assert_secure(response)
 
 
@@ -164,7 +167,9 @@ def test_validation_errors_never_echo_input(client: TestClient, payload: dict[st
         assert secret not in response.text
 
 
-@pytest.mark.parametrize(("payload", "allowed"), [({"profile": "paranoid"}, "profile: fast | standard | strict"),
+@pytest.mark.parametrize(("payload", "allowed"), [({"profile": "paranoid"},
+                                                   "profile: fast | standard | strict (deprecated: use mode)"),
+                                                  ({"mode": "turbo"}, f"mode: {MODES_HELP}"),
                                                   ({"label_language": "de"}, "label_language: fr | en | auto")])
 def test_closed_options_list_their_allowed_values(client: TestClient, payload: dict[str, str], allowed: str) -> None:
     response = client.post("/v1/anonymize/text", headers=AUTH_A, json={"text": "x", **payload})
@@ -248,7 +253,7 @@ def test_anonymize_file_multipart(client: TestClient) -> None:
                        "anonymised nor returned")
     assert body["warnings"] == ["note", dropped_warning] and body["dropped"] == {"comments": 1}
     assert body["report"]["warnings"][-2:] == ["note", dropped_warning]
-    assert body["report"]["profile"] == "strict"
+    assert body["report"]["mode"] == "fort"
 
 
 @pytest.mark.parametrize("filename", ["C:\\Users\\jdupont\\Documents\\cv_jean_dupont.txt",

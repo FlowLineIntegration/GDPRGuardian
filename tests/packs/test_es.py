@@ -184,7 +184,9 @@ def test_french_document_does_not_activate_spain(anonymizer):
 
 
 def test_weak_tier_needs_context(anonymizer_es):
-    assert "281234567840" in anonymizer_es.anonymize("Pedido 281234567840 enviado.").text
+    # 1.0.2 : sans son contexte ce n'est pas un NSS, mais une suite nue de 8 chiffres ou plus est un identifiant
+    # générique (`ID_LONG_NUMBER`). Without its context it is no NSS, but a bare run of 8+ digits is a generic ID.
+    assert anonymizer_es.anonymize("Pedido 281234567840 enviado.").text == "Pedido [IDENTIFIANT_1] enviado."
     assert "[NSS_1]" in anonymizer_es.anonymize("Seguridad Social: 281234567840").text
     assert "[NSS_1]" in anonymizer_es.anonymize("NUSS: 28 12345678 40").text
     assert "612 345 678" in anonymizer_es.anonymize("Importe: 612 345 678 euros").text
@@ -198,9 +200,11 @@ def test_units_are_not_dni_letters(anonymizer_es):
 @pytest.mark.parametrize(("text", "expected"), [
     ("N. S. S. 28 12345678 40", "N. S. S. [NSS_1]"),
     ("Teléfono (móvil): 612 345 678", "Teléfono (móvil): [TEL_1]"),
-    # Fenêtres valides prises dans des nombres plus longs, contexte présent / valid windows in longer numbers.
+    # Fenêtres valides prises dans des nombres plus longs, contexte présent : jamais un TEL ni un NSS ; depuis 1.0.2
+    # le nombre entier est un identifiant générique. Valid windows in longer numbers: never a TEL or an NSS; since
+    # 1.0.2 the whole number is a generic identifier (`ID_LONG_NUMBER`).
     ("Teléfono y Seguridad Social: ref. 9123456780123 / 128123456784012",
-     "Teléfono y Seguridad Social: ref. 9123456780123 / 128123456784012"),
+     "Teléfono y Seguridad Social: ref. [IDENTIFIANT_1] / [IDENTIFIANT_2]"),
 ])
 def test_labels_and_number_boundaries(anonymizer_es, text, expected):
     assert anonymizer_es.anonymize(text).text == expected

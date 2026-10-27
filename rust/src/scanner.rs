@@ -442,6 +442,22 @@ impl Context<'_> {
             || groups.iter().any(|&g| self.hits.near(g, start, end, before, after, lo, hi))
     }
 
+    /// `Anonymizer._sole_trader` : « entrepreneur individuel » dans le paragraphe du numéro (fenêtre 120/120, jamais
+    /// au-delà d'une ligne vide), ou ailleurs dans le document sans personne morale près du numéro (1.0.2). A
+    /// sole-trader cue in the number's paragraph, or anywhere in the document when no legal entity is near the number.
+    fn sole_trader(&self, settings: &Settings, text: &str, bytes: (usize, usize), chars: (usize, usize)) -> bool {
+        let (start, end) = chars;
+        let (before, after) = NATURAL_PERSON_WINDOW;
+        let block = block_bounds(text, bytes, chars, before, after);
+        if self.near_within(settings.ei_groups, start, end, before, after, block) {
+            return true;
+        }
+        let (entity_before, entity_after) = LEGAL_ENTITY_WINDOW;
+        self.any_context(settings.ei_groups)
+            && (settings.entity_groups.is_empty()
+                || !self.near_within(settings.entity_groups, start, end, entity_before, entity_after, block))
+    }
+
     /// `Anonymizer._civil_status` : état civil d'une personne physique à côté du numéro, sans personne morale plus
     /// près. Ligne du numéro d'abord (une personne morale l'emporte, sinon l'état civil suffit), puis le paragraphe.
     /// A natural person's civil status next to the number, with no closer legal entity: the number's line first,
@@ -479,6 +495,157 @@ impl Context<'_> {
         }
         veto_wins
     }
+}
+
+impl Context<'_> {
+    /// `DetectionContext.cue_spent` (1.0.2, modes fort et essentiel) : un indice de naissance ne vaut que pour la
+    /// première date qui le suit ; « nom de naissance » désigne un nom. `start_byte` : octet de `start` dans `text`.
+    /// A birth cue binds only to the first date after it; "nom de naissance" names a name.
+    #[allow(clippy::too_many_arguments)]
+    fn cue_spent(&self, groups: &[u32], start: usize, end: usize, after: usize, text: &str, start_byte: usize) -> bool {
+        let (index, lo, hi) = self.segment(start);
+        if self.header_context(groups, index, start, end) {
+            return false;
+        }
+        if groups.iter().any(|&g| self.hits.near(g, start, end, 0, after, lo, hi)) {
+            return false;
+        }
+        let Some(keyword) = groups.iter().filter_map(|&g| self.hits.last_end(g, start, lo)).max() else {
+            return false;
+        };
+        let mut byte = start_byte;
+        for _ in keyword..start {
+            byte = previous_char_boundary(text, byte);
+        }
+        let bytes = text.as_bytes();
+        if byte >= BIRTH_NAME.len() && bytes[byte - BIRTH_NAME.len()..byte].eq_ignore_ascii_case(BIRTH_NAME) {
+            return true;
+        }
+        date_seen(&bytes[byte..start_byte])
+    }
+}
+
+/// `engine._BIRTH_NAME` : « nom de naissance », un nom et non une date / a birth name, not a date.
+const BIRTH_NAME: &[u8] = b"nom de naissance";
+/// `engine._DATE_VETO` : groupe-veto des dates de naissance / the birth dates' veto group.
+const DATE_VETO: &str = "INTL:other_date";
+
+/// `engine._date_seen` : une année (4 chiffres 18xx, 19xx, 20xx) ou une date chiffrée à l'année sur deux chiffres
+/// (« 12/05/84 ») dans ces octets ; chiffres et séparateurs ASCII, donc positions d'octets = positions de caractères
+/// pour ce test. A year or a numeric date with a two-digit year in these bytes.
+fn date_seen(part: &[u8]) -> bool {
+    let mut runs: Vec<(usize, usize)> = Vec::new();
+    let mut i = 0;
+    while i < part.len() {
+        if part[i].is_ascii_digit() {
+            let a = i;
+            while i < part.len() && part[i].is_ascii_digit() {
+                i += 1;
+            }
+            runs.push((a, i));
+        } else {
+            i += 1;
+        }
+    }
+    let sep = |b: u8| matches!(b, b'/' | b'.' | b'-');
+    runs.iter().enumerate().any(|(k, &(a, b))| {
+        (b - a == 4 && matches!(&part[a..a + 2], b"18" | b"19" | b"20"))
+            // Troisième tour : forme compacte « 19751021 » / third round: compact form.
+            || compact_date(&part[a..b])
+            || (k >= 2 && b - a == 2 && {
+                let ((a1, b1), (a2, b2)) = (runs[k - 2], runs[k - 1]);
+                b1 - a1 <= 2 && b2 - a2 <= 2 && a2 == b1 + 1 && a == b2 + 1 && sep(part[b1]) && sep(part[b2])
+            })
+            // Troisième tour : mois en mots, année sur deux chiffres (« 3 mars 85 ») / month word, two-digit year.
+            || (k >= 1 && b - a == 2 && {
+                let (a1, b1) = runs[k - 1];
+                b1 - a1 <= 2 && std::str::from_utf8(&part[b1..a]).is_ok_and(month_gap)
+            })
+    })
+}
+
+/// Forme compacte aaaammjj plausible (18xx à 20xx, mois 01-12, jour 01-31), comme `engine._date_seen` / plausible
+/// compact yyyymmdd, as the Python twin.
+fn compact_date(run: &[u8]) -> bool {
+    run.len() == 8
+        && matches!(&run[..2], b"18" | b"19" | b"20")
+        && (b"01".as_slice()..=b"12".as_slice()).contains(&&run[4..6])
+        && (b"01".as_slice()..=b"31".as_slice()).contains(&&run[6..8])
+}
+
+/// `engine._SEEN_MONTHS` : mois en mots et abréviations, « jui » compris / month words and abbreviations.
+const SEEN_MONTHS: [&str; 28] = [
+    "janvier",
+    "février",
+    "fevrier",
+    "mars",
+    "avril",
+    "mai",
+    "juin",
+    "juillet",
+    "août",
+    "aout",
+    "septembre",
+    "octobre",
+    "novembre",
+    "décembre",
+    "decembre",
+    "janv",
+    "févr",
+    "fevr",
+    "fév",
+    "fev",
+    "avr",
+    "juil",
+    "jui",
+    "sept",
+    "oct",
+    "nov",
+    "déc",
+    "dec",
+];
+
+/// `engine._month_gap` : « er » facultatif, blancs, un mois (point final permis), blancs / optional "er", spaces,
+/// one month word (final dot allowed), spaces.
+fn month_gap(gap: &str) -> bool {
+    if gap.chars().count() > 18 {
+        return false;
+    }
+    let g = if gap.get(..2).is_some_and(|p| p.eq_ignore_ascii_case("er")) { &gap[2..] } else { gap };
+    let (Some(first), Some(last)) = (g.chars().next(), g.chars().next_back()) else {
+        return false;
+    };
+    if !py_space(first) || !py_space(last) {
+        return false;
+    }
+    let mut words = g.split(py_space).filter(|w| !w.is_empty());
+    match (words.next(), words.next()) {
+        (Some(word), None) => {
+            // Comparé à des mots minuscules : `to_lowercase` et `str.lower` s'accordent sur ces lettres / compared
+            // with lowercase words: both lowercasings agree on these letters.
+            let lower = word.to_lowercase();
+            SEEN_MONTHS.contains(&lower.strip_suffix('.').unwrap_or(&lower))
+        }
+        _ => false,
+    }
+}
+
+/// `str.isspace()` (même ensemble que `validators::pystr::is_space`) / same set as the validators' twin.
+fn py_space(c: char) -> bool {
+    matches!(
+        c,
+        '\t'..='\r'
+            | '\x1c'..=' '
+            | '\u{85}'
+            | '\u{a0}'
+            | '\u{1680}'
+            | '\u{2000}'..='\u{200a}'
+            | '\u{2028}'
+            | '\u{2029}'
+            | '\u{202f}'
+            | '\u{205f}'
+            | '\u{3000}'
+    )
 }
 
 /// `engine._VETO_ADJACENT` : écart maximal entre un mot-veto et la valeur quand le mot-clé suit la valeur
@@ -641,6 +808,8 @@ pub struct Scanner {
     plans: Vec<Option<Plan>>,
     gates: Vec<Gate>,
     literals: Literals,
+    /// Groupe `engine._DATE_VETO` s'il existe / the `_DATE_VETO` group, when present.
+    date_veto: Option<u32>,
 }
 
 impl Scanner {
@@ -671,7 +840,8 @@ impl Scanner {
             })
             .collect();
         let automaton = AhoCorasick::builder().match_kind(aho_corasick::MatchKind::Standard).build(&strings).ok();
-        Self { recognizers, keywords, windows, plans, gates, literals: Literals { strings, automaton } }
+        let date_veto = keywords.group_ids.get(DATE_VETO).copied();
+        Self { recognizers, keywords, windows, plans, gates, literals: Literals { strings, automaton }, date_veto }
     }
 
     /// `windowed = false` : balayage complet, référence des tests différentiels / full scan, test reference.
@@ -730,7 +900,9 @@ impl Scanner {
                 }
                 None => &[(0, text.len())][..],
             };
-            Self::run(rec_index, rec, text, ranges, &index, ctx, settings, classes, &mut found);
+            // `engine._DATE_VETO` dans les vetos : une date de naissance / a birth date.
+            let first_date = self.date_veto.is_some_and(|g| rec.vetoes.contains(&g));
+            Self::run(rec_index, rec, text, ranges, &index, ctx, settings, classes, first_date, &mut found);
         }
         found
     }
@@ -746,6 +918,7 @@ impl Scanner {
         ctx: &Context,
         settings: &Settings,
         classes: &Classes,
+        first_date: bool,
         out: &mut Vec<Found>,
     ) {
         let needs_context = matches!(rec.tier, Tier::B | Tier::C);
@@ -800,7 +973,9 @@ impl Scanner {
             };
             let has_context = !rec.contexts.is_empty()
                 && ctx.near(&rec.contexts, c_start, c_end, rec.before, rec.after)
-                && (rec.vetoes.is_empty() || !ctx.vetoed(&rec.contexts, &rec.vetoes, c_start, c_end, rec.after));
+                && (rec.vetoes.is_empty() || !ctx.vetoed(&rec.contexts, &rec.vetoes, c_start, c_end, rec.after))
+                // Une date de naissance : l'indice ne vaut que pour la première date / first date only.
+                && !(first_date && ctx.cue_spent(&rec.contexts, c_start, c_end, rec.after, text, start));
             if needs_context && !has_context {
                 if rec.tier == Tier::C || !settings.strict {
                     pos = next_start(rec.boundary, text, full_start, classes);
@@ -818,11 +993,13 @@ impl Scanner {
                     "mask" => (true, None),
                     "keep" => (false, None),
                     _ if settings.strict => (true, None),
-                    // « Entrepreneur individuel » n'importe où dans le document suffit : rappel d'abord. L'état civil
-                    // d'une personne physique à côté du numéro désigne aussi son titulaire, sauf personne morale
-                    // plus près. "Sole trader" anywhere is enough; a natural person's civil status next to the
-                    // number also names its holder, unless a legal entity is closer.
-                    _ if !settings.ei_groups.is_empty() && ctx.any_context(settings.ei_groups) => {
+                    // « Entrepreneur individuel » dans la ligne ou le paragraphe du numéro (1.0.2, `_sole_trader`).
+                    // L'état civil d'une personne physique à côté du numéro désigne aussi son titulaire, sauf
+                    // personne morale plus près. "Sole trader" in the number's line or paragraph; a natural
+                    // person's civil status next to the number also names its holder, unless a legal entity is closer.
+                    _ if !settings.ei_groups.is_empty()
+                        && ctx.sole_trader(settings, text, (start, end), (c_start, c_end)) =>
+                    {
                         (true, Some(SOLE_TRADER))
                     }
                     _ if !settings.person_groups.is_empty()

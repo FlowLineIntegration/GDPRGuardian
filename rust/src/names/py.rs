@@ -162,6 +162,7 @@ impl PyNameDetector {
             verb_tails: char_vecs(item(text_sets, "verb_tails")?.extract()?),
             skip_back: item(text_sets, "skip_back")?.extract::<String>()?.chars().collect(),
             sentence_end: item(text_sets, "sentence_end")?.extract::<String>()?.chars().collect(),
+            accented_words: char_vecs(item(text_sets, "accented_words")?.extract()?),
         };
         Ok(Self {
             inner: NameDetector {
@@ -210,5 +211,15 @@ impl PyNameDetector {
     /// `Lexicon.code` of a folded word: (given-name rank, surname rank, ambiguity), or `None` for a non-name.
     pub(crate) fn lexicon_ranks(&self, key: &[char]) -> Option<(u8, u8, u8)> {
         self.inner.code(key).map(|code| (given_rank(code), surname_rank(code), ambiguity(code)))
+    }
+
+    /// `organizations._is_form` : forme juridique de société (pas EI/EIRL), majuscule en tête (« SAS », pas
+    /// « sa »). `folded` est `fold(word)`. A company legal form (not a sole trader), starting with a capital.
+    pub(crate) fn is_company_form(&self, word: &str, folded: &str) -> bool {
+        let Some(first) = word.chars().next() else {
+            return false;
+        };
+        let key: Vec<char> = folded.chars().filter(|&c| c != '.').collect();
+        self.inner.chars.is_upper(&[first]) && self.inner.vocab.get(&key).has(flag::COMPANY_FORM)
     }
 }

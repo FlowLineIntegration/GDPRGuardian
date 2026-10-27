@@ -22,6 +22,10 @@
 *.odt binary
 *.msg binary
 
+# Pack d'évaluation reçu : octets d'origine (CRLF compris), ses empreintes SHA-256 sont publiées dans son README
+# Evaluation pack as received: original bytes (CRLF included), its README publishes their SHA-256
+datasets/audit/pack-v1/*.csv -text
+
 # Scripts Windows : CRLF / Windows scripts keep CRLF
 *.ps1 text eol=crlf
 *.bat text eol=crlf

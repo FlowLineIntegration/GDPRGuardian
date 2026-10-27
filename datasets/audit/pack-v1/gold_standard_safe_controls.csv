@@ -1,0 +1,1101 @@
+﻿mention_id,doc_id,category,text,start_char,end_char,line_number,note
+S-000001,CAS-001,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0042,5652,5666,40,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000002,CAS-001,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-042,5692,5710,40,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000003,CAS-001,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,5775,5806,40,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000004,CAS-001,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,5846,5877,40,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000005,CAS-001,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0042,6322,6336,52,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000006,CAS-002,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0055,9570,9584,71,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000007,CAS-002,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-059,9610,9628,71,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000008,CAS-002,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,9693,9724,71,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000009,CAS-002,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,9764,9795,71,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000010,CAS-002,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0055,10234,10248,83,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000011,CAS-003,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0068,13537,13551,102,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000012,CAS-003,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-076,13577,13595,102,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000013,CAS-003,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,13660,13691,102,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000014,CAS-003,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,13731,13762,102,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000015,CAS-003,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0068,14204,14218,114,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000016,CAS-004,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0081,17500,17514,133,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000017,CAS-004,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-093,17540,17558,133,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000018,CAS-004,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,17623,17654,133,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000019,CAS-004,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,17694,17725,133,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000020,CAS-004,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0081,18187,18201,145,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000021,CAS-005,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0094,21466,21480,164,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000022,CAS-005,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-110,21506,21524,164,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000023,CAS-005,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,21589,21620,164,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000024,CAS-005,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,21660,21691,164,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000025,CAS-005,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0094,22138,22152,176,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000026,CAS-006,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0107,25591,25605,197,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000027,CAS-006,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-127,25631,25649,197,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000028,CAS-006,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,25714,25745,197,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000029,CAS-006,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,25785,25816,197,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000030,CAS-006,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0107,26257,26271,209,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000031,CAS-007,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0120,29538,29552,228,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000032,CAS-007,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-144,29578,29596,228,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000033,CAS-007,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,29661,29692,228,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000034,CAS-007,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,29732,29763,228,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000035,CAS-007,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0120,30198,30212,240,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000036,CAS-008,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0133,33593,33607,261,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000037,CAS-008,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-161,33633,33651,261,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000038,CAS-008,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,33716,33747,261,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000039,CAS-008,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,33787,33818,261,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000040,CAS-008,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0133,34254,34268,273,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000041,CAS-009,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0146,37526,37540,292,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000042,CAS-009,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-178,37566,37584,292,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000043,CAS-009,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,37649,37680,292,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000044,CAS-009,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,37720,37751,292,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000045,CAS-009,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0146,38203,38217,304,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000046,CAS-010,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0159,41458,41472,323,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000047,CAS-010,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-195,41498,41516,323,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000048,CAS-010,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,41581,41612,323,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000049,CAS-010,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,41652,41683,323,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000050,CAS-010,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0159,42124,42138,335,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000051,CAS-011,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0172,45576,45590,356,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000052,CAS-011,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-212,45616,45634,356,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000053,CAS-011,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,45699,45730,356,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000054,CAS-011,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,45770,45801,356,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000055,CAS-011,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0172,46242,46256,368,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000056,CAS-012,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0185,49591,49605,387,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000057,CAS-012,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-229,49631,49649,387,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000058,CAS-012,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,49714,49745,387,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000059,CAS-012,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,49785,49816,387,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000060,CAS-012,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0185,50259,50273,399,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000061,CAS-013,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0198,53543,53557,418,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000062,CAS-013,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-246,53583,53601,418,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000063,CAS-013,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,53666,53697,418,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000064,CAS-013,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,53737,53768,418,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000065,CAS-013,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0198,54200,54214,430,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000066,CAS-014,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0211,57465,57479,449,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000067,CAS-014,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-263,57505,57523,449,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000068,CAS-014,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,57588,57619,449,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000069,CAS-014,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,57659,57690,449,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000070,CAS-014,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0211,58150,58164,461,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000071,CAS-015,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0224,61662,61676,482,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000072,CAS-015,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-280,61702,61720,482,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000073,CAS-015,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,61785,61816,482,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000074,CAS-015,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,61856,61887,482,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000075,CAS-015,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0224,62336,62350,494,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000076,CAS-016,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0237,65752,65766,515,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000077,CAS-016,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-297,65792,65810,515,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000078,CAS-016,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,65875,65906,515,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000079,CAS-016,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,65946,65977,515,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000080,CAS-016,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0237,66414,66428,527,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000081,CAS-017,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0250,69701,69715,546,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000082,CAS-017,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-314,69741,69759,546,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000083,CAS-017,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,69824,69855,546,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000084,CAS-017,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,69895,69926,546,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000085,CAS-017,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0250,70367,70381,558,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000086,CAS-018,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0263,73667,73681,577,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000087,CAS-018,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-331,73707,73725,577,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000088,CAS-018,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,73790,73821,577,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000089,CAS-018,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,73861,73892,577,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000090,CAS-018,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0263,74328,74342,589,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000091,CAS-019,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0276,77645,77659,608,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000092,CAS-019,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-348,77685,77703,608,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000093,CAS-019,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,77768,77799,608,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000094,CAS-019,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,77839,77870,608,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000095,CAS-019,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0276,78326,78340,620,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000096,CAS-020,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0289,81534,81548,639,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000097,CAS-020,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-365,81574,81592,639,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000098,CAS-020,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,81657,81688,639,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000099,CAS-020,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,81728,81759,639,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000100,CAS-020,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0289,82202,82216,651,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000101,CAS-021,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0302,85634,85648,672,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000102,CAS-021,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-382,85674,85692,672,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000103,CAS-021,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,85757,85788,672,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000104,CAS-021,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,85828,85859,672,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000105,CAS-021,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0302,86304,86318,684,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000106,CAS-022,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0315,89735,89749,705,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000107,CAS-022,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-399,89775,89793,705,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000108,CAS-022,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,89858,89889,705,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000109,CAS-022,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,89929,89960,705,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000110,CAS-022,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0315,90399,90413,717,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000111,CAS-023,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0328,93671,93685,736,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000112,CAS-023,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-416,93711,93729,736,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000113,CAS-023,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,93794,93825,736,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000114,CAS-023,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,93865,93896,736,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000115,CAS-023,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0328,94334,94348,748,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000116,CAS-024,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0341,97703,97717,767,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000117,CAS-024,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-433,97743,97761,767,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000118,CAS-024,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,97826,97857,767,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000119,CAS-024,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,97897,97928,767,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000120,CAS-024,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0341,98386,98400,779,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000121,CAS-025,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0354,101733,101747,798,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000122,CAS-025,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-450,101773,101791,798,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000123,CAS-025,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,101856,101887,798,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000124,CAS-025,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,101927,101958,798,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000125,CAS-025,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0354,102407,102421,810,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000126,CAS-026,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0367,105811,105825,831,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000127,CAS-026,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-467,105851,105869,831,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000128,CAS-026,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,105934,105965,831,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000129,CAS-026,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,106005,106036,831,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000130,CAS-026,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0367,106475,106489,843,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000131,CAS-027,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0380,109787,109801,862,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000132,CAS-027,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-484,109827,109845,862,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000133,CAS-027,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,109910,109941,862,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000134,CAS-027,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,109981,110012,862,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000135,CAS-027,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0380,110453,110467,874,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000136,CAS-028,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0393,113718,113732,893,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000137,CAS-028,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-501,113758,113776,893,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000138,CAS-028,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,113841,113872,893,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000139,CAS-028,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,113912,113943,893,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000140,CAS-028,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0393,114387,114401,905,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000141,CAS-029,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0406,117856,117870,926,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000142,CAS-029,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-518,117896,117914,926,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000143,CAS-029,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,117979,118010,926,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000144,CAS-029,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,118050,118081,926,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000145,CAS-029,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0406,118531,118545,938,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000146,CAS-030,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0419,121824,121838,957,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000147,CAS-030,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-535,121864,121882,957,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000148,CAS-030,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,121947,121978,957,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000149,CAS-030,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,122018,122049,957,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000150,CAS-030,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0419,122490,122504,969,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000151,CAS-031,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0432,125941,125955,990,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000152,CAS-031,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-552,125981,125999,990,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000153,CAS-031,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,126064,126095,990,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000154,CAS-031,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,126135,126166,990,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000155,CAS-031,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0432,126605,126619,1002,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000156,CAS-032,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0445,129835,129849,1021,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000157,CAS-032,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-569,129875,129893,1021,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000158,CAS-032,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,129958,129989,1021,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000159,CAS-032,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,130029,130060,1021,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000160,CAS-032,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0445,130505,130519,1033,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000161,CAS-033,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0458,133774,133788,1052,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000162,CAS-033,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-586,133814,133832,1052,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000163,CAS-033,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,133897,133928,1052,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000164,CAS-033,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,133968,133999,1052,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000165,CAS-033,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0458,134437,134451,1064,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000166,CAS-034,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0471,137657,137671,1083,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000167,CAS-034,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-603,137697,137715,1083,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000168,CAS-034,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,137780,137811,1083,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000169,CAS-034,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,137851,137882,1083,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000170,CAS-034,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0471,138324,138338,1095,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000171,CAS-035,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0484,141605,141619,1114,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000172,CAS-035,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-620,141645,141663,1114,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000173,CAS-035,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,141728,141759,1114,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000174,CAS-035,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,141799,141830,1114,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000175,CAS-035,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0484,142275,142289,1126,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000176,CAS-036,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0497,145992,146006,1149,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000177,CAS-036,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-637,146032,146050,1149,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000178,CAS-036,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,146115,146146,1149,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000179,CAS-036,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,146186,146217,1149,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000180,CAS-036,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0497,146666,146680,1161,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000181,CAS-037,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0510,149982,149996,1180,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000182,CAS-037,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-654,150022,150040,1180,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000183,CAS-037,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,150105,150136,1180,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000184,CAS-037,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,150176,150207,1180,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000185,CAS-037,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0510,150650,150664,1192,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000186,CAS-038,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0523,153897,153911,1211,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000187,CAS-038,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-671,153937,153955,1211,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000188,CAS-038,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,154020,154051,1211,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000189,CAS-038,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,154091,154122,1211,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000190,CAS-038,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0523,154562,154576,1223,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000191,CAS-039,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0536,157872,157886,1242,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000192,CAS-039,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-688,157912,157930,1242,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000193,CAS-039,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,157995,158026,1242,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000194,CAS-039,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,158066,158097,1242,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000195,CAS-039,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0536,158551,158565,1254,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000196,CAS-040,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0549,161803,161817,1273,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000197,CAS-040,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-705,161843,161861,1273,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000198,CAS-040,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,161926,161957,1273,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000199,CAS-040,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,161997,162028,1273,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000200,CAS-040,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0549,162475,162489,1285,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000201,CAS-041,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0562,165940,165954,1306,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000202,CAS-041,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-722,165980,165998,1306,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000203,CAS-041,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,166063,166094,1306,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000204,CAS-041,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,166134,166165,1306,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000205,CAS-041,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0562,166610,166624,1318,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000206,CAS-042,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0575,169923,169937,1337,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000207,CAS-042,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-739,169963,169981,1337,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000208,CAS-042,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,170046,170077,1337,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000209,CAS-042,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,170117,170148,1337,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000210,CAS-042,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0575,170587,170601,1349,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000211,CAS-043,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0588,174086,174100,1370,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000212,CAS-043,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-756,174126,174144,1370,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000213,CAS-043,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,174209,174240,1370,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000214,CAS-043,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,174280,174311,1370,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000215,CAS-043,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0588,174753,174767,1382,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000216,CAS-044,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0601,178013,178027,1401,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000217,CAS-044,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-773,178053,178071,1401,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000218,CAS-044,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,178136,178167,1401,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000219,CAS-044,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,178207,178238,1401,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000220,CAS-044,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0601,178700,178714,1413,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000221,CAS-045,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0614,181974,181988,1432,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000222,CAS-045,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-790,182014,182032,1432,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000223,CAS-045,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,182097,182128,1432,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000224,CAS-045,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,182168,182199,1432,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000225,CAS-045,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0614,182646,182660,1444,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000226,CAS-046,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0627,186053,186067,1465,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000227,CAS-046,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-807,186093,186111,1465,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000228,CAS-046,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,186176,186207,1465,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000229,CAS-046,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,186247,186278,1465,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000230,CAS-046,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0627,186719,186733,1477,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000231,CAS-047,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0640,189989,190003,1496,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000232,CAS-047,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-824,190029,190047,1496,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000233,CAS-047,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,190112,190143,1496,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000234,CAS-047,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,190183,190214,1496,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000235,CAS-047,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0640,190649,190663,1508,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000236,CAS-048,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0653,193967,193981,1527,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000237,CAS-048,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-841,194007,194025,1527,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000238,CAS-048,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,194090,194121,1527,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000239,CAS-048,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,194161,194192,1527,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000240,CAS-048,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0653,194628,194642,1539,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000241,CAS-049,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0666,197935,197949,1558,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000242,CAS-049,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-858,197975,197993,1558,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000243,CAS-049,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,198058,198089,1558,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000244,CAS-049,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,198129,198160,1558,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000245,CAS-049,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0666,198612,198626,1570,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000246,CAS-050,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0679,202058,202072,1591,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000247,CAS-050,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-875,202098,202116,1591,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000248,CAS-050,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,202181,202212,1591,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000249,CAS-050,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,202252,202283,1591,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000250,CAS-050,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0679,202724,202738,1603,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000251,CAS-051,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0692,206195,206209,1624,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000252,CAS-051,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-892,206235,206253,1624,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000253,CAS-051,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,206318,206349,1624,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000254,CAS-051,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,206389,206420,1624,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000255,CAS-051,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0692,206861,206875,1636,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000256,CAS-052,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0705,210128,210142,1655,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000257,CAS-052,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-909,210168,210186,1655,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000258,CAS-052,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,210251,210282,1655,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000259,CAS-052,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,210322,210353,1655,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000260,CAS-052,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0705,210796,210810,1667,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000261,CAS-053,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0718,214049,214063,1686,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000262,CAS-053,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-926,214089,214107,1686,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000263,CAS-053,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,214172,214203,1686,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000264,CAS-053,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,214243,214274,1686,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000265,CAS-053,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0718,214706,214720,1698,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000266,CAS-054,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0731,218019,218033,1717,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000267,CAS-054,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-943,218059,218077,1717,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000268,CAS-054,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,218142,218173,1717,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000269,CAS-054,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,218213,218244,1717,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000270,CAS-054,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0731,218704,218718,1729,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000271,CAS-055,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0744,222027,222041,1748,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000272,CAS-055,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-960,222067,222085,1748,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000273,CAS-055,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,222150,222181,1748,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000274,CAS-055,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,222221,222252,1748,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000275,CAS-055,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0744,222701,222715,1760,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000276,CAS-056,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0757,226080,226094,1781,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000277,CAS-056,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-977,226120,226138,1781,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000278,CAS-056,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,226203,226234,1781,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000279,CAS-056,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,226274,226305,1781,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000280,CAS-056,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0757,226742,226756,1793,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000281,CAS-057,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0770,230214,230228,1814,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000282,CAS-057,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-994,230254,230272,1814,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000283,CAS-057,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,230337,230368,1814,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000284,CAS-057,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,230408,230439,1814,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000285,CAS-057,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0770,230880,230894,1826,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000286,CAS-058,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0783,234106,234120,1845,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000287,CAS-058,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-012,234146,234164,1845,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000288,CAS-058,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,234229,234260,1845,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000289,CAS-058,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,234300,234331,1845,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000290,CAS-058,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0783,234767,234781,1857,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000291,CAS-059,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0796,238063,238077,1876,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000292,CAS-059,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-029,238103,238121,1876,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000293,CAS-059,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,238186,238217,1876,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000294,CAS-059,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,238257,238288,1876,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000295,CAS-059,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0796,238744,238758,1888,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000296,CAS-060,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0809,242070,242084,1907,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000297,CAS-060,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-046,242110,242128,1907,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000298,CAS-060,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,242193,242224,1907,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000299,CAS-060,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,242264,242295,1907,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000300,CAS-060,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0809,242738,242752,1919,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000301,CAS-061,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0822,246203,246217,1940,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000302,CAS-061,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-063,246243,246261,1940,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000303,CAS-061,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,246326,246357,1940,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000304,CAS-061,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,246397,246428,1940,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000305,CAS-061,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0822,246873,246887,1952,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000306,CAS-062,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0835,250119,250133,1971,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000307,CAS-062,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-080,250159,250177,1971,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000308,CAS-062,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,250242,250273,1971,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000309,CAS-062,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,250313,250344,1971,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000310,CAS-062,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0835,250783,250797,1983,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000311,CAS-063,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0848,254077,254091,2002,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000312,CAS-063,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-097,254117,254135,2002,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000313,CAS-063,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,254200,254231,2002,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000314,CAS-063,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,254271,254302,2002,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000315,CAS-063,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0848,254740,254754,2014,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000316,CAS-064,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0861,258236,258250,2035,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000317,CAS-064,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-114,258276,258294,2035,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000318,CAS-064,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,258359,258390,2035,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000319,CAS-064,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,258430,258461,2035,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000320,CAS-064,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0861,258919,258933,2047,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000321,CAS-065,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0874,262221,262235,2066,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000322,CAS-065,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-131,262261,262279,2066,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000323,CAS-065,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,262344,262375,2066,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000324,CAS-065,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,262415,262446,2066,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000325,CAS-065,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0874,262895,262909,2078,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000326,CAS-066,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0887,266359,266373,2099,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000327,CAS-066,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-148,266399,266417,2099,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000328,CAS-066,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,266482,266513,2099,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000329,CAS-066,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,266553,266584,2099,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000330,CAS-066,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0887,267023,267037,2111,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000331,CAS-067,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0900,270321,270335,2130,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000332,CAS-067,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-165,270361,270379,2130,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000333,CAS-067,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,270444,270475,2130,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000334,CAS-067,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,270515,270546,2130,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000335,CAS-067,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0900,270987,271001,2142,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000336,CAS-068,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0913,274203,274217,2161,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000337,CAS-068,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-182,274243,274261,2161,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000338,CAS-068,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,274326,274357,2161,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000339,CAS-068,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,274397,274428,2161,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000340,CAS-068,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0913,274872,274886,2173,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000341,CAS-069,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0926,278136,278150,2192,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000342,CAS-069,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-199,278176,278194,2192,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000343,CAS-069,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,278259,278290,2192,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000344,CAS-069,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,278330,278361,2192,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000345,CAS-069,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0926,278811,278825,2204,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000346,CAS-070,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0939,282045,282059,2223,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000347,CAS-070,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-216,282085,282103,2223,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000348,CAS-070,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,282168,282199,2223,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000349,CAS-070,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,282239,282270,2223,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000350,CAS-070,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0939,282711,282725,2235,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000351,CAS-071,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0952,286343,286357,2258,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000352,CAS-071,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-233,286383,286401,2258,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000353,CAS-071,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,286466,286497,2258,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000354,CAS-071,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,286537,286568,2258,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000355,CAS-071,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0952,287007,287021,2270,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000356,CAS-072,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0965,290355,290369,2289,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000357,CAS-072,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-250,290395,290413,2289,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000358,CAS-072,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,290478,290509,2289,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000359,CAS-072,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,290549,290580,2289,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000360,CAS-072,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0965,291025,291039,2301,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000361,CAS-073,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0978,294350,294364,2320,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000362,CAS-073,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-267,294390,294408,2320,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000363,CAS-073,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,294473,294504,2320,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000364,CAS-073,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,294544,294575,2320,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000365,CAS-073,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0978,295013,295027,2332,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000366,CAS-074,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0991,298247,298261,2351,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000367,CAS-074,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-284,298287,298305,2351,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000368,CAS-074,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,298370,298401,2351,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000369,CAS-074,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,298441,298472,2351,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000370,CAS-074,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-0991,298914,298928,2363,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000371,CAS-075,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1004,302217,302231,2382,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000372,CAS-075,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-301,302257,302275,2382,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000373,CAS-075,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,302340,302371,2382,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000374,CAS-075,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,302411,302442,2382,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000375,CAS-075,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1004,302887,302901,2394,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000376,CAS-076,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1017,306328,306342,2415,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000377,CAS-076,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-318,306368,306386,2415,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000378,CAS-076,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,306451,306482,2415,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000379,CAS-076,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,306522,306553,2415,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000380,CAS-076,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1017,307002,307016,2427,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000381,CAS-077,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1030,310279,310293,2446,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000382,CAS-077,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-335,310319,310337,2446,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000383,CAS-077,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,310402,310433,2446,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000384,CAS-077,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,310473,310504,2446,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000385,CAS-077,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1030,310947,310961,2458,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000386,CAS-078,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1043,314431,314445,2479,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000387,CAS-078,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-352,314471,314489,2479,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000388,CAS-078,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,314554,314585,2479,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000389,CAS-078,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,314625,314656,2479,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000390,CAS-078,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1043,315096,315110,2491,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000391,CAS-079,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1056,318395,318409,2510,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000392,CAS-079,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-369,318435,318453,2510,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000393,CAS-079,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,318518,318549,2510,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000394,CAS-079,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,318589,318620,2510,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000395,CAS-079,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1056,319074,319088,2522,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000396,CAS-080,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1069,322286,322300,2541,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000397,CAS-080,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-386,322326,322344,2541,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000398,CAS-080,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,322409,322440,2541,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000399,CAS-080,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,322480,322511,2541,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000400,CAS-080,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1069,322958,322972,2553,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000401,CAS-081,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1082,326412,326426,2574,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000402,CAS-081,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-403,326452,326470,2574,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000403,CAS-081,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,326535,326566,2574,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000404,CAS-081,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,326606,326637,2574,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000405,CAS-081,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1082,327082,327096,2586,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000406,CAS-082,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1095,330334,330348,2605,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000407,CAS-082,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-420,330374,330392,2605,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000408,CAS-082,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,330457,330488,2605,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000409,CAS-082,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,330528,330559,2605,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000410,CAS-082,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1095,330998,331012,2617,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000411,CAS-083,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1108,334284,334298,2636,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000412,CAS-083,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-437,334324,334342,2636,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000413,CAS-083,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,334407,334438,2636,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000414,CAS-083,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,334478,334509,2636,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000415,CAS-083,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1108,334951,334965,2648,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000416,CAS-084,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1121,338330,338344,2667,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000417,CAS-084,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-454,338370,338388,2667,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000418,CAS-084,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,338453,338484,2667,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000419,CAS-084,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,338524,338555,2667,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000420,CAS-084,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1121,339017,339031,2679,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000421,CAS-085,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1134,342539,342553,2700,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000422,CAS-085,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-471,342579,342597,2700,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000423,CAS-085,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,342662,342693,2700,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000424,CAS-085,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,342733,342764,2700,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000425,CAS-085,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1134,343211,343225,2712,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000426,CAS-086,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1147,346621,346635,2733,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000427,CAS-086,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-488,346661,346679,2733,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000428,CAS-086,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,346744,346775,2733,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000429,CAS-086,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,346815,346846,2733,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000430,CAS-086,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1147,347287,347301,2745,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000431,CAS-087,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1160,350581,350595,2764,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000432,CAS-087,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-505,350621,350639,2764,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000433,CAS-087,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,350704,350735,2764,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000434,CAS-087,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,350775,350806,2764,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000435,CAS-087,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1160,351241,351255,2776,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000436,CAS-088,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1173,354476,354490,2795,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000437,CAS-088,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-522,354516,354534,2795,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000438,CAS-088,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,354599,354630,2795,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000439,CAS-088,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,354670,354701,2795,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000440,CAS-088,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1173,355137,355151,2807,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000441,CAS-089,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1186,358421,358435,2826,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000442,CAS-089,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-539,358461,358479,2826,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000443,CAS-089,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,358544,358575,2826,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000444,CAS-089,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,358615,358646,2826,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000445,CAS-089,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1186,359098,359112,2838,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000446,CAS-090,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1199,362413,362427,2857,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000447,CAS-090,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-556,362453,362471,2857,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000448,CAS-090,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,362536,362567,2857,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000449,CAS-090,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,362607,362638,2857,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000450,CAS-090,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1199,363079,363093,2869,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000451,CAS-091,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1212,366554,366568,2890,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000452,CAS-091,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-573,366594,366612,2890,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000453,CAS-091,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,366677,366708,2890,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000454,CAS-091,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,366748,366779,2890,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000455,CAS-091,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1212,367220,367234,2902,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000456,CAS-092,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1225,370644,370658,2923,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000457,CAS-092,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-590,370684,370702,2923,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000458,CAS-092,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,370767,370798,2923,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000459,CAS-092,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,370838,370869,2923,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000460,CAS-092,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1225,371312,371326,2935,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000461,CAS-093,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1238,374554,374568,2954,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000462,CAS-093,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-607,374594,374612,2954,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000463,CAS-093,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,374677,374708,2954,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000464,CAS-093,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,374748,374779,2954,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000465,CAS-093,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1238,375211,375225,2966,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000466,CAS-094,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1251,378461,378475,2985,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000467,CAS-094,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-624,378501,378519,2985,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000468,CAS-094,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,378584,378615,2985,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000469,CAS-094,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,378655,378686,2985,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000470,CAS-094,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1251,379146,379160,2997,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000471,CAS-095,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1264,382439,382453,3016,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000472,CAS-095,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-641,382479,382497,3016,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000473,CAS-095,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,382562,382593,3016,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000474,CAS-095,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,382633,382664,3016,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000475,CAS-095,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1264,383113,383127,3028,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000476,CAS-096,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1277,386605,386619,3049,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000477,CAS-096,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-658,386645,386663,3049,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000478,CAS-096,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,386728,386759,3049,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000479,CAS-096,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,386799,386830,3049,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000480,CAS-096,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1277,387267,387281,3061,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000481,CAS-097,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1290,390577,390591,3080,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000482,CAS-097,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-675,390617,390635,3080,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000483,CAS-097,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,390700,390731,3080,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000484,CAS-097,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,390771,390802,3080,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000485,CAS-097,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1290,391243,391257,3092,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000486,CAS-098,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1303,394480,394494,3111,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000487,CAS-098,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-692,394520,394538,3111,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000488,CAS-098,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,394603,394634,3111,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000489,CAS-098,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,394674,394705,3111,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000490,CAS-098,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1303,395141,395155,3123,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000491,CAS-099,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1316,398651,398665,3144,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000492,CAS-099,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-709,398691,398709,3144,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000493,CAS-099,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,398774,398805,3144,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000494,CAS-099,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,398845,398876,3144,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000495,CAS-099,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1316,399332,399346,3156,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000496,CAS-100,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1329,402590,402604,3175,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000497,CAS-100,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-726,402630,402648,3175,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000498,CAS-100,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,402713,402744,3175,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000499,CAS-100,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,402784,402815,3175,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000500,CAS-100,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1329,403258,403272,3187,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000501,CAS-101,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1342,406702,406716,3208,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000502,CAS-101,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-743,406742,406760,3208,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000503,CAS-101,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,406825,406856,3208,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000504,CAS-101,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,406896,406927,3208,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000505,CAS-101,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1342,407372,407386,3220,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000506,CAS-102,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1355,410662,410676,3239,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000507,CAS-102,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-760,410702,410720,3239,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000508,CAS-102,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,410785,410816,3239,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000509,CAS-102,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,410856,410887,3239,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000510,CAS-102,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1355,411326,411340,3251,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000511,CAS-103,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1368,414619,414633,3270,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000512,CAS-103,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-777,414659,414677,3270,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000513,CAS-103,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,414742,414773,3270,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000514,CAS-103,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,414813,414844,3270,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000515,CAS-103,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1368,415282,415296,3282,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000516,CAS-104,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1381,418536,418550,3301,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000517,CAS-104,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-794,418576,418594,3301,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000518,CAS-104,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,418659,418690,3301,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000519,CAS-104,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,418730,418761,3301,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000520,CAS-104,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1381,419219,419233,3313,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000521,CAS-105,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1394,422517,422531,3332,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000522,CAS-105,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-811,422557,422575,3332,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000523,CAS-105,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,422640,422671,3332,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000524,CAS-105,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,422711,422742,3332,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000525,CAS-105,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1394,423191,423205,3344,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000526,CAS-106,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1407,426780,426794,3367,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000527,CAS-106,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-828,426820,426838,3367,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000528,CAS-106,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,426903,426934,3367,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000529,CAS-106,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,426974,427005,3367,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000530,CAS-106,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1407,427444,427458,3379,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000531,CAS-107,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1420,430731,430745,3398,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000532,CAS-107,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-845,430771,430789,3398,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000533,CAS-107,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,430854,430885,3398,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000534,CAS-107,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,430925,430956,3398,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000535,CAS-107,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1420,431397,431411,3410,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000536,CAS-108,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1433,434731,434745,3429,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000537,CAS-108,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-862,434771,434789,3429,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000538,CAS-108,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,434854,434885,3429,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000539,CAS-108,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,434925,434956,3429,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000540,CAS-108,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1433,435400,435414,3441,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000541,CAS-109,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1446,438714,438728,3460,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000542,CAS-109,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-879,438754,438772,3460,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000543,CAS-109,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,438837,438868,3460,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000544,CAS-109,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,438908,438939,3460,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000545,CAS-109,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1446,439389,439403,3472,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000546,CAS-110,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1459,442634,442648,3491,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000547,CAS-110,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-896,442674,442692,3491,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000548,CAS-110,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,442757,442788,3491,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000549,CAS-110,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,442828,442859,3491,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000550,CAS-110,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1459,443300,443314,3503,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000551,CAS-111,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1472,446758,446772,3524,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000552,CAS-111,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-913,446798,446816,3524,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000553,CAS-111,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,446881,446912,3524,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000554,CAS-111,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,446952,446983,3524,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000555,CAS-111,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1472,447422,447436,3536,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000556,CAS-112,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1485,450687,450701,3555,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000557,CAS-112,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-930,450727,450745,3555,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000558,CAS-112,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,450810,450841,3555,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000559,CAS-112,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,450881,450912,3555,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000560,CAS-112,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1485,451357,451371,3567,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000561,CAS-113,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1498,454832,454846,3588,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000562,CAS-113,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-947,454872,454890,3588,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000563,CAS-113,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,454955,454986,3588,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000564,CAS-113,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,455026,455057,3588,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000565,CAS-113,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1498,455495,455509,3600,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000566,CAS-114,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1511,458793,458807,3619,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000567,CAS-114,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-964,458833,458851,3619,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000568,CAS-114,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,458916,458947,3619,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000569,CAS-114,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,458987,459018,3619,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000570,CAS-114,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1511,459460,459474,3631,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000571,CAS-115,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1524,462748,462762,3650,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000572,CAS-115,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-981,462788,462806,3650,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000573,CAS-115,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,462871,462902,3650,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000574,CAS-115,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,462942,462973,3650,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000575,CAS-115,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1524,463418,463432,3662,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000576,CAS-116,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1537,466824,466838,3683,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000577,CAS-116,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-998,466864,466882,3683,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000578,CAS-116,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,466947,466978,3683,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000579,CAS-116,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,467018,467049,3683,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000580,CAS-116,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1537,467498,467512,3695,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000581,CAS-117,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1550,470768,470782,3714,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000582,CAS-117,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-016,470808,470826,3714,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000583,CAS-117,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,470891,470922,3714,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000584,CAS-117,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,470962,470993,3714,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000585,CAS-117,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1550,471436,471450,3726,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000586,CAS-118,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1563,474685,474699,3745,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000587,CAS-118,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-033,474725,474743,3745,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000588,CAS-118,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,474808,474839,3745,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000589,CAS-118,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,474879,474910,3745,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000590,CAS-118,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1563,475350,475364,3757,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000591,CAS-119,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1576,478637,478651,3776,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000592,CAS-119,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-050,478677,478695,3776,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000593,CAS-119,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,478760,478791,3776,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000594,CAS-119,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,478831,478862,3776,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000595,CAS-119,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1576,479316,479330,3788,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000596,CAS-120,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1589,482837,482851,3809,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000597,CAS-120,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-067,482877,482895,3809,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000598,CAS-120,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,482960,482991,3809,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000599,CAS-120,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,483031,483062,3809,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000600,CAS-120,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1589,483509,483523,3821,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000601,CAS-121,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1602,486997,487011,3842,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000602,CAS-121,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-084,487037,487055,3842,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000603,CAS-121,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,487120,487151,3842,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000604,CAS-121,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,487191,487222,3842,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000605,CAS-121,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1602,487667,487681,3854,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000606,CAS-122,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1615,490916,490930,3873,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000607,CAS-122,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-101,490956,490974,3873,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000608,CAS-122,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,491039,491070,3873,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000609,CAS-122,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,491110,491141,3873,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000610,CAS-122,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1615,491580,491594,3885,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000611,CAS-123,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1628,494884,494898,3904,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000612,CAS-123,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-118,494924,494942,3904,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000613,CAS-123,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,495007,495038,3904,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000614,CAS-123,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,495078,495109,3904,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000615,CAS-123,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1628,495551,495565,3916,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000616,CAS-124,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1641,498849,498863,3935,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000617,CAS-124,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-135,498889,498907,3935,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000618,CAS-124,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,498972,499003,3935,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000619,CAS-124,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,499043,499074,3935,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000620,CAS-124,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1641,499536,499550,3947,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000621,CAS-125,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1654,502817,502831,3966,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000622,CAS-125,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-152,502857,502875,3966,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000623,CAS-125,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,502940,502971,3966,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000624,CAS-125,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,503011,503042,3966,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000625,CAS-125,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1654,503489,503503,3978,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000626,CAS-126,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1667,506945,506959,3999,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000627,CAS-126,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-169,506985,507003,3999,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000628,CAS-126,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,507068,507099,3999,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000629,CAS-126,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,507139,507170,3999,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000630,CAS-126,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1667,507611,507625,4011,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000631,CAS-127,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1680,511099,511113,4032,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000632,CAS-127,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-186,511139,511157,4032,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000633,CAS-127,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,511222,511253,4032,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000634,CAS-127,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,511293,511324,4032,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000635,CAS-127,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1680,511759,511773,4044,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000636,CAS-128,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1693,514961,514975,4063,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000637,CAS-128,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-203,515001,515019,4063,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000638,CAS-128,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,515084,515115,4063,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000639,CAS-128,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,515155,515186,4063,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000640,CAS-128,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1693,515622,515636,4075,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000641,CAS-129,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1706,518894,518908,4094,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000642,CAS-129,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-220,518934,518952,4094,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000643,CAS-129,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,519017,519048,4094,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000644,CAS-129,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,519088,519119,4094,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000645,CAS-129,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1706,519571,519585,4106,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000646,CAS-130,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1719,522812,522826,4125,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000647,CAS-130,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-237,522852,522870,4125,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000648,CAS-130,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,522935,522966,4125,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000649,CAS-130,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,523006,523037,4125,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000650,CAS-130,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1719,523478,523492,4137,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000651,CAS-131,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1732,526929,526943,4158,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000652,CAS-131,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-254,526969,526987,4158,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000653,CAS-131,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,527052,527083,4158,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000654,CAS-131,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,527123,527154,4158,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000655,CAS-131,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1732,527595,527609,4170,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000656,CAS-132,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1745,530945,530959,4189,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000657,CAS-132,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-271,530985,531003,4189,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000658,CAS-132,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,531068,531099,4189,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000659,CAS-132,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,531139,531170,4189,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000660,CAS-132,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1745,531613,531627,4201,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000661,CAS-133,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1758,534898,534912,4220,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000662,CAS-133,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-288,534938,534956,4220,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000663,CAS-133,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,535021,535052,4220,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000664,CAS-133,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,535092,535123,4220,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000665,CAS-133,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1758,535555,535569,4232,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000666,CAS-134,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1771,539016,539030,4253,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000667,CAS-134,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-305,539056,539074,4253,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000668,CAS-134,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,539139,539170,4253,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000669,CAS-134,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,539210,539241,4253,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000670,CAS-134,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1771,539701,539715,4265,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000671,CAS-135,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1784,543019,543033,4284,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000672,CAS-135,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-322,543059,543077,4284,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000673,CAS-135,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,543142,543173,4284,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000674,CAS-135,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,543213,543244,4284,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000675,CAS-135,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1784,543693,543707,4296,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000676,CAS-136,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1797,547120,547134,4317,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000677,CAS-136,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-339,547160,547178,4317,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000678,CAS-136,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,547243,547274,4317,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000679,CAS-136,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,547314,547345,4317,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000680,CAS-136,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1797,547782,547796,4329,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000681,CAS-137,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1810,551072,551086,4348,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000682,CAS-137,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-356,551112,551130,4348,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000683,CAS-137,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,551195,551226,4348,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000684,CAS-137,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,551266,551297,4348,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000685,CAS-137,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1810,551738,551752,4360,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000686,CAS-138,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1823,555039,555053,4379,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000687,CAS-138,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-373,555079,555097,4379,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000688,CAS-138,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,555162,555193,4379,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000689,CAS-138,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,555233,555264,4379,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000690,CAS-138,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1823,555700,555714,4391,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000691,CAS-139,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1836,559005,559019,4410,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000692,CAS-139,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-390,559045,559063,4410,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000693,CAS-139,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,559128,559159,4410,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000694,CAS-139,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,559199,559230,4410,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000695,CAS-139,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1836,559686,559700,4422,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000696,CAS-140,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1849,562894,562908,4441,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000697,CAS-140,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-407,562934,562952,4441,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000698,CAS-140,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,563017,563048,4441,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000699,CAS-140,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,563088,563119,4441,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000700,CAS-140,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1849,563562,563576,4453,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000701,CAS-141,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1862,567189,567203,4476,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000702,CAS-141,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-424,567229,567247,4476,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000703,CAS-141,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,567312,567343,4476,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000704,CAS-141,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,567383,567414,4476,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000705,CAS-141,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1862,567859,567873,4488,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000706,CAS-142,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1875,571096,571110,4507,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000707,CAS-142,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-441,571136,571154,4507,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000708,CAS-142,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,571219,571250,4507,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000709,CAS-142,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,571290,571321,4507,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000710,CAS-142,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1875,571760,571774,4519,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000711,CAS-143,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1888,575033,575047,4538,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000712,CAS-143,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-458,575073,575091,4538,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000713,CAS-143,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,575156,575187,4538,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000714,CAS-143,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,575227,575258,4538,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000715,CAS-143,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1888,575696,575710,4550,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000716,CAS-144,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1901,579066,579080,4569,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000717,CAS-144,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-475,579106,579124,4569,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000718,CAS-144,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,579189,579220,4569,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000719,CAS-144,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,579260,579291,4569,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000720,CAS-144,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1901,579749,579763,4581,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000721,CAS-145,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1914,583111,583125,4600,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000722,CAS-145,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-492,583151,583169,4600,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000723,CAS-145,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,583234,583265,4600,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000724,CAS-145,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,583305,583336,4600,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000725,CAS-145,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1914,583785,583799,4612,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000726,CAS-146,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1927,587191,587205,4633,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000727,CAS-146,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-509,587231,587249,4633,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000728,CAS-146,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,587314,587345,4633,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000729,CAS-146,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,587385,587416,4633,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000730,CAS-146,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1927,587855,587869,4645,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000731,CAS-147,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1940,591169,591183,4664,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000732,CAS-147,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-526,591209,591227,4664,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000733,CAS-147,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,591292,591323,4664,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000734,CAS-147,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,591363,591394,4664,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000735,CAS-147,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1940,591835,591849,4676,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000736,CAS-148,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1953,595284,595298,4697,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000737,CAS-148,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-543,595324,595342,4697,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000738,CAS-148,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,595407,595438,4697,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000739,CAS-148,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,595478,595509,4697,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000740,CAS-148,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1953,595953,595967,4709,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000741,CAS-149,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1966,599229,599243,4728,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000742,CAS-149,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-560,599269,599287,4728,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000743,CAS-149,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,599352,599383,4728,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000744,CAS-149,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,599423,599454,4728,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000745,CAS-149,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1966,599904,599918,4740,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000746,CAS-150,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1979,603195,603209,4759,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000747,CAS-150,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-577,603235,603253,4759,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000748,CAS-150,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,603318,603349,4759,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000749,CAS-150,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,603389,603420,4759,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000750,CAS-150,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1979,603861,603875,4771,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000751,CAS-151,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1992,607312,607326,4792,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000752,CAS-151,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-594,607352,607370,4792,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000753,CAS-151,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,607435,607466,4792,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000754,CAS-151,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,607506,607537,4792,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000755,CAS-151,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-1992,607976,607990,4804,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000756,CAS-152,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2005,611206,611220,4823,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000757,CAS-152,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-611,611246,611264,4823,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000758,CAS-152,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,611329,611360,4823,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000759,CAS-152,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,611400,611431,4823,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000760,CAS-152,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2005,611876,611890,4835,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000761,CAS-153,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2018,615147,615161,4854,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000762,CAS-153,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-628,615187,615205,4854,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000763,CAS-153,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,615270,615301,4854,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000764,CAS-153,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,615341,615372,4854,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000765,CAS-153,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2018,615810,615824,4866,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000766,CAS-154,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2031,619040,619054,4885,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000767,CAS-154,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-645,619080,619098,4885,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000768,CAS-154,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,619163,619194,4885,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000769,CAS-154,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,619234,619265,4885,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000770,CAS-154,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2031,619707,619721,4897,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000771,CAS-155,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2044,623183,623197,4918,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000772,CAS-155,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-662,623223,623241,4918,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000773,CAS-155,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,623306,623337,4918,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000774,CAS-155,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,623377,623408,4918,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000775,CAS-155,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2044,623853,623867,4930,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000776,CAS-156,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2057,627379,627393,4951,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000777,CAS-156,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-679,627419,627437,4951,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000778,CAS-156,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,627502,627533,4951,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000779,CAS-156,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,627573,627604,4951,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000780,CAS-156,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2057,628053,628067,4963,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000781,CAS-157,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2070,631362,631376,4982,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000782,CAS-157,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-696,631402,631420,4982,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000783,CAS-157,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,631485,631516,4982,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000784,CAS-157,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,631556,631587,4982,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000785,CAS-157,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2070,632030,632044,4994,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000786,CAS-158,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2083,635279,635293,5013,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000787,CAS-158,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-713,635319,635337,5013,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000788,CAS-158,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,635402,635433,5013,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000789,CAS-158,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,635473,635504,5013,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000790,CAS-158,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2083,635944,635958,5025,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000791,CAS-159,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2096,639255,639269,5044,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000792,CAS-159,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-730,639295,639313,5044,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000793,CAS-159,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,639378,639409,5044,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000794,CAS-159,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,639449,639480,5044,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000795,CAS-159,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2096,639934,639948,5056,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000796,CAS-160,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2109,643185,643199,5075,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000797,CAS-160,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-747,643225,643243,5075,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000798,CAS-160,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,643308,643339,5075,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000799,CAS-160,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,643379,643410,5075,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000800,CAS-160,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2109,643857,643871,5087,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000801,CAS-161,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2122,647322,647336,5108,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000802,CAS-161,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-764,647362,647380,5108,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000803,CAS-161,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,647445,647476,5108,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000804,CAS-161,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,647516,647547,5108,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000805,CAS-161,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2122,647992,648006,5120,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000806,CAS-162,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2135,651499,651513,5141,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000807,CAS-162,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-781,651539,651557,5141,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000808,CAS-162,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,651622,651653,5141,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000809,CAS-162,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,651693,651724,5141,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000810,CAS-162,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2135,652163,652177,5153,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000811,CAS-163,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2148,655476,655490,5172,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000812,CAS-163,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-798,655516,655534,5172,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000813,CAS-163,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,655599,655630,5172,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000814,CAS-163,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,655670,655701,5172,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000815,CAS-163,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2148,656143,656157,5184,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000816,CAS-164,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2161,659404,659418,5203,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000817,CAS-164,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-815,659444,659462,5203,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000818,CAS-164,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,659527,659558,5203,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000819,CAS-164,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,659598,659629,5203,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000820,CAS-164,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2161,660091,660105,5215,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000821,CAS-165,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2174,663364,663378,5234,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000822,CAS-165,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-832,663404,663422,5234,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000823,CAS-165,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,663487,663518,5234,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000824,CAS-165,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,663558,663589,5234,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000825,CAS-165,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2174,664036,664050,5246,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000826,CAS-166,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2187,667438,667452,5267,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000827,CAS-166,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-849,667478,667496,5267,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000828,CAS-166,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,667561,667592,5267,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000829,CAS-166,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,667632,667663,5267,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000830,CAS-166,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2187,668104,668118,5279,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000831,CAS-167,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2200,671377,671391,5298,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000832,CAS-167,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-866,671417,671435,5298,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000833,CAS-167,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,671500,671531,5298,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000834,CAS-167,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,671571,671602,5298,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000835,CAS-167,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2200,672037,672051,5310,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000836,CAS-168,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2213,675357,675371,5329,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000837,CAS-168,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-883,675397,675415,5329,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000838,CAS-168,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,675480,675511,5329,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000839,CAS-168,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,675551,675582,5329,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000840,CAS-168,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2213,676018,676032,5341,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000841,CAS-169,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2226,679522,679536,5362,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000842,CAS-169,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-900,679562,679580,5362,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000843,CAS-169,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,679645,679676,5362,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000844,CAS-169,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,679716,679747,5362,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000845,CAS-169,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2226,680199,680213,5374,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000846,CAS-170,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2239,683452,683466,5393,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000847,CAS-170,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-917,683492,683510,5393,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000848,CAS-170,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,683575,683606,5393,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000849,CAS-170,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,683646,683677,5393,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000850,CAS-170,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2239,684118,684132,5405,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000851,CAS-171,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2252,687590,687604,5426,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000852,CAS-171,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-934,687630,687648,5426,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000853,CAS-171,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,687713,687744,5426,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000854,CAS-171,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,687784,687815,5426,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000855,CAS-171,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2252,688256,688270,5438,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000856,CAS-172,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2265,691535,691549,5457,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000857,CAS-172,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-951,691575,691593,5457,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000858,CAS-172,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,691658,691689,5457,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000859,CAS-172,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,691729,691760,5457,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000860,CAS-172,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2265,692203,692217,5469,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000861,CAS-173,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2278,695456,695470,5488,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000862,CAS-173,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-968,695496,695514,5488,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000863,CAS-173,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,695579,695610,5488,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000864,CAS-173,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,695650,695681,5488,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000865,CAS-173,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2278,696113,696127,5500,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000866,CAS-174,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2291,699428,699442,5519,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000867,CAS-174,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-985,699468,699486,5519,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000868,CAS-174,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,699551,699582,5519,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000869,CAS-174,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,699622,699653,5519,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000870,CAS-174,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2291,700113,700127,5531,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000871,CAS-175,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2304,703425,703439,5550,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000872,CAS-175,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-003,703465,703483,5550,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000873,CAS-175,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,703548,703579,5550,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000874,CAS-175,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,703619,703650,5550,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000875,CAS-175,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2304,704099,704113,5562,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000876,CAS-176,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2317,707673,707687,5585,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000877,CAS-176,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-020,707713,707731,5585,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000878,CAS-176,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,707796,707827,5585,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000879,CAS-176,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,707867,707898,5585,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000880,CAS-176,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2317,708335,708349,5597,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000881,CAS-177,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2330,711615,711629,5616,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000882,CAS-177,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-037,711655,711673,5616,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000883,CAS-177,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,711738,711769,5616,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000884,CAS-177,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,711809,711840,5616,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000885,CAS-177,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2330,712281,712295,5628,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000886,CAS-178,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2343,715509,715523,5647,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000887,CAS-178,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-054,715549,715567,5647,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000888,CAS-178,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,715632,715663,5647,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000889,CAS-178,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,715703,715734,5647,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000890,CAS-178,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2343,716170,716184,5659,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000891,CAS-179,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2356,719468,719482,5678,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000892,CAS-179,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-071,719508,719526,5678,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000893,CAS-179,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,719591,719622,5678,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000894,CAS-179,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,719662,719693,5678,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000895,CAS-179,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2356,720149,720163,5690,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000896,CAS-180,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2369,723474,723488,5709,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000897,CAS-180,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-088,723514,723532,5709,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000898,CAS-180,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,723597,723628,5709,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000899,CAS-180,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,723668,723699,5709,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000900,CAS-180,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2369,724142,724156,5721,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000901,CAS-181,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2382,727615,727629,5742,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000902,CAS-181,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-105,727655,727673,5742,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000903,CAS-181,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,727738,727769,5742,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000904,CAS-181,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,727809,727840,5742,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000905,CAS-181,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2382,728285,728299,5754,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000906,CAS-182,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2395,731531,731545,5773,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000907,CAS-182,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-122,731571,731589,5773,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000908,CAS-182,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,731654,731685,5773,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000909,CAS-182,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,731725,731756,5773,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000910,CAS-182,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2395,732195,732209,5785,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000911,CAS-183,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2408,735683,735697,5806,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000912,CAS-183,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-139,735723,735741,5806,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000913,CAS-183,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,735806,735837,5806,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000914,CAS-183,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,735877,735908,5806,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000915,CAS-183,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2408,736346,736360,5818,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000916,CAS-184,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2421,739635,739649,5837,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000917,CAS-184,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-156,739675,739693,5837,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000918,CAS-184,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,739758,739789,5837,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000919,CAS-184,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,739829,739860,5837,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000920,CAS-184,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2421,740318,740332,5849,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000921,CAS-185,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2434,743622,743636,5868,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000922,CAS-185,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-173,743662,743680,5868,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000923,CAS-185,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,743745,743776,5868,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000924,CAS-185,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,743816,743847,5868,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000925,CAS-185,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2434,744296,744310,5880,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000926,CAS-186,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2447,747762,747776,5901,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000927,CAS-186,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-190,747802,747820,5901,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000928,CAS-186,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,747885,747916,5901,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000929,CAS-186,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,747956,747987,5901,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000930,CAS-186,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2447,748426,748440,5913,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000931,CAS-187,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2460,751726,751740,5932,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000932,CAS-187,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-207,751766,751784,5932,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000933,CAS-187,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,751849,751880,5932,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000934,CAS-187,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,751920,751951,5932,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000935,CAS-187,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2460,752392,752406,5944,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000936,CAS-188,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2473,755610,755624,5963,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000937,CAS-188,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-224,755650,755668,5963,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000938,CAS-188,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,755733,755764,5963,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000939,CAS-188,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,755804,755835,5963,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000940,CAS-188,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2473,756279,756293,5975,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000941,CAS-189,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2486,759545,759559,5994,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000942,CAS-189,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-241,759585,759603,5994,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000943,CAS-189,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,759668,759699,5994,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000944,CAS-189,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,759739,759770,5994,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000945,CAS-189,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2486,760220,760234,6006,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000946,CAS-190,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2499,763659,763673,6027,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000947,CAS-190,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-258,763699,763717,6027,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000948,CAS-190,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,763782,763813,6027,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000949,CAS-190,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,763853,763884,6027,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000950,CAS-190,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2499,764325,764339,6039,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000951,CAS-191,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2512,767764,767778,6060,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000952,CAS-191,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-275,767804,767822,6060,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000953,CAS-191,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,767887,767918,6060,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000954,CAS-191,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,767958,767989,6060,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000955,CAS-191,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2512,768428,768442,6072,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000956,CAS-192,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2525,771775,771789,6091,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000957,CAS-192,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-292,771815,771833,6091,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000958,CAS-192,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,771898,771929,6091,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000959,CAS-192,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,771969,772000,6091,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000960,CAS-192,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2525,772445,772459,6103,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000961,CAS-193,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2538,775760,775774,6122,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000962,CAS-193,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-309,775800,775818,6122,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000963,CAS-193,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,775883,775914,6122,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000964,CAS-193,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,775954,775985,6122,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000965,CAS-193,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2538,776423,776437,6134,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000966,CAS-194,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2551,779657,779671,6153,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000967,CAS-194,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-326,779697,779715,6153,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000968,CAS-194,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,779780,779811,6153,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000969,CAS-194,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,779851,779882,6153,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000970,CAS-194,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2551,780324,780338,6165,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000971,CAS-195,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2564,783626,783640,6184,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000972,CAS-195,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-343,783666,783684,6184,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000973,CAS-195,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,783749,783780,6184,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000974,CAS-195,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,783820,783851,6184,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000975,CAS-195,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2564,784296,784310,6196,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000976,CAS-196,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2577,787738,787752,6217,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000977,CAS-196,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-360,787778,787796,6217,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000978,CAS-196,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,787861,787892,6217,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000979,CAS-196,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,787932,787963,6217,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000980,CAS-196,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2577,788412,788426,6229,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000981,CAS-197,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2590,791884,791898,6250,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000982,CAS-197,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-377,791924,791942,6250,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000983,CAS-197,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,792007,792038,6250,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000984,CAS-197,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,792078,792109,6250,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000985,CAS-197,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2590,792552,792566,6262,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000986,CAS-198,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2603,795844,795858,6281,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000987,CAS-198,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-394,795884,795902,6281,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000988,CAS-198,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,795967,795998,6281,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000989,CAS-198,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,796038,796069,6281,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000990,CAS-198,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2603,796509,796523,6293,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000991,CAS-199,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2616,799820,799834,6312,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000992,CAS-199,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-411,799860,799878,6312,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000993,CAS-199,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,799943,799974,6312,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000994,CAS-199,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,800014,800045,6312,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-000995,CAS-199,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2616,800499,800513,6324,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000996,CAS-200,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2629,803713,803727,6343,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000997,CAS-200,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-428,803753,803771,6343,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-000998,CAS-200,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,803836,803867,6343,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-000999,CAS-200,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,803907,803938,6343,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-001000,CAS-200,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2629,804385,804399,6355,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001001,CAS-201,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2642,807841,807855,6376,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001002,CAS-201,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-445,807881,807899,6376,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001003,CAS-201,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,807964,807995,6376,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-001004,CAS-201,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,808035,808066,6376,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-001005,CAS-201,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2642,808511,808525,6388,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001006,CAS-202,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2655,811753,811767,6407,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001007,CAS-202,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-462,811793,811811,6407,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001008,CAS-202,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,811876,811907,6407,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-001009,CAS-202,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,811947,811978,6407,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-001010,CAS-202,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2655,812417,812431,6419,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001011,CAS-203,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2668,815703,815717,6438,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001012,CAS-203,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-479,815743,815761,6438,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001013,CAS-203,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,815826,815857,6438,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-001014,CAS-203,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,815897,815928,6438,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-001015,CAS-203,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2668,816370,816384,6450,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001016,CAS-204,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2681,819943,819957,6471,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001017,CAS-204,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-496,819983,820001,6471,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001018,CAS-204,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,820066,820097,6471,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-001019,CAS-204,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,820137,820168,6471,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-001020,CAS-204,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2681,820630,820644,6483,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001021,CAS-205,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2694,823957,823971,6502,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001022,CAS-205,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-513,823997,824015,6502,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001023,CAS-205,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,824080,824111,6502,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-001024,CAS-205,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,824151,824182,6502,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-001025,CAS-205,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2694,824629,824643,6514,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001026,CAS-206,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2707,828041,828055,6535,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001027,CAS-206,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-530,828081,828099,6535,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001028,CAS-206,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,828164,828195,6535,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-001029,CAS-206,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,828235,828266,6535,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-001030,CAS-206,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2707,828707,828721,6547,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001031,CAS-207,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2720,832002,832016,6566,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001032,CAS-207,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-547,832042,832060,6566,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001033,CAS-207,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,832125,832156,6566,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-001034,CAS-207,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,832196,832227,6566,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-001035,CAS-207,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2720,832662,832676,6578,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001036,CAS-208,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2733,835911,835925,6597,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001037,CAS-208,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-564,835951,835969,6597,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001038,CAS-208,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,836034,836065,6597,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-001039,CAS-208,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,836105,836136,6597,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-001040,CAS-208,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2733,836572,836586,6609,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001041,CAS-209,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2746,839858,839872,6628,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001042,CAS-209,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-581,839898,839916,6628,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001043,CAS-209,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,839981,840012,6628,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-001044,CAS-209,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,840052,840083,6628,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-001045,CAS-209,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2746,840535,840549,6640,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001046,CAS-210,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2759,843851,843865,6659,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001047,CAS-210,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-598,843891,843909,6659,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001048,CAS-210,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,843974,844005,6659,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-001049,CAS-210,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,844045,844076,6659,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-001050,CAS-210,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2759,844517,844531,6671,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001051,CAS-211,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2772,848177,848191,6694,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001052,CAS-211,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-615,848217,848235,6694,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001053,CAS-211,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,848300,848331,6694,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-001054,CAS-211,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,848371,848402,6694,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-001055,CAS-211,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2772,848843,848857,6706,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001056,CAS-212,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2785,852074,852088,6725,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001057,CAS-212,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-632,852114,852132,6725,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001058,CAS-212,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,852197,852228,6725,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-001059,CAS-212,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,852268,852299,6725,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-001060,CAS-212,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2785,852742,852756,6737,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001061,CAS-213,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2798,855983,855997,6756,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001062,CAS-213,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-649,856023,856041,6756,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001063,CAS-213,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,856106,856137,6756,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-001064,CAS-213,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,856177,856208,6756,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-001065,CAS-213,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2798,856640,856654,6768,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001066,CAS-214,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2811,859890,859904,6787,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001067,CAS-214,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-666,859930,859948,6787,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001068,CAS-214,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,860013,860044,6787,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-001069,CAS-214,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,860084,860115,6787,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-001070,CAS-214,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2811,860575,860589,6799,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001071,CAS-215,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2824,863868,863882,6818,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001072,CAS-215,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-683,863908,863926,6818,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001073,CAS-215,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,863991,864022,6818,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-001074,CAS-215,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,864062,864093,6818,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-001075,CAS-215,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2824,864542,864556,6830,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001076,CAS-216,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2837,868035,868049,6851,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001077,CAS-216,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-700,868075,868093,6851,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001078,CAS-216,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,868158,868189,6851,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-001079,CAS-216,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,868229,868260,6851,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-001080,CAS-216,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2837,868697,868711,6863,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001081,CAS-217,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2850,872015,872029,6882,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001082,CAS-217,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-717,872055,872073,6882,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001083,CAS-217,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,872138,872169,6882,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-001084,CAS-217,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,872209,872240,6882,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-001085,CAS-217,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2850,872681,872695,6894,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001086,CAS-218,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2863,876113,876127,6915,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001087,CAS-218,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-734,876153,876171,6915,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001088,CAS-218,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,876236,876267,6915,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-001089,CAS-218,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,876307,876338,6915,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-001090,CAS-218,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2863,876774,876788,6927,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001091,CAS-219,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2876,880092,880106,6946,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001092,CAS-219,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-751,880132,880150,6946,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001093,CAS-219,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,880215,880246,6946,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-001094,CAS-219,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,880286,880317,6946,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-001095,CAS-219,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2876,880773,880787,6958,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001096,CAS-220,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2889,884022,884036,6977,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001097,CAS-220,REFERENCE_LOT_NON_PERSONNEL,BATCH-OPS-2026-768,884062,884080,6977,Contrôle négatif : valeur non personnelle dans le contexte annoncé.
+S-001098,CAS-220,BOITE_FONCTIONNELLE_NON_PERSONNELLE,support@atelier-exemple.invalid,884145,884176,6977,"Adresse fonctionnelle générique partagée par un service, non associée à une personne."
+S-001099,CAS-220,RAISON_SOCIALE_FICTIVE,Atelier Exemple Fonctionnel SAS,884216,884247,6977,"Raison sociale fictive de l’organisation, contexte de test non rattaché à un individu."
+S-001100,CAS-220,REFERENCE_PRODUIT_NON_PERSONNEL,SKU-ALPHA-2889,884690,884704,6989,Contrôle négatif : valeur non personnelle dans le contexte annoncé.

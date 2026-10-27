@@ -1,6 +1,6 @@
 GDPR Guardian · launch video · all on-screen text, in order
 Silent video (no voice, no music): this file lists every on-screen text at the moment it appears.
-169.8 s · 1920 x 1080 · 30 fps
+170.1 s · 1920 x 1080 · 30 fps
 
 [00:00] GDPR Guardian
 [00:00] Mr Jean Dupont, 06 12 34 56 78
@@ -23,7 +23,7 @@ Silent video (no voice, no music): this file lists every on-screen text at the m
 [00:29] Black boxes — Nothing explains the masking.
 [00:33] Remove the names, keep the meaning.
 [00:33] Mr Jean Dupont · jean.dupont@example.com · 06 12 34 56 78 / IBAN FR76 3000 6000 0112 3456 7890 189 / Mr Dupont will call Ms Claire Martin back. / DUPONT Jean will pay invoice no. 2026-0042.
-[00:34] real output, version 1.0.0
+[00:34] real output, version 1.0.1
 [00:34] Random 256-bit key, for this document only
 [00:39] Mr [PERSON_1] · [EMAIL_1] · [PHONE_1] / IBAN [IBAN_1] / Mr [PERSON_1] will call Ms [PERSON_2] back. / [PERSON_1] will pay invoice no. 2026-0042.
 [00:39] Key destroyed: no way back.
@@ -57,31 +57,31 @@ Silent video (no voice, no music): this file lists every on-screen text at the m
 [01:41] Your server — docker compose deploy/README.md
 [01:42] Contribute — Improve, propose: /issues
 [01:46] Tested, measured, published
-[01:46] 4,200+ — automated tests, Windows and Linux
-[01:48] 91.9% — of 450,000 synthetic documents with no leak
-[01:51] 63.7% — of adversarial documents with no leak, 51 ways to disguise an identifier
+[01:46] 6,600+ — automated tests, Windows and Linux
+[01:48] 97.2% — of 450,000 synthetic documents with no leak
+[01:51] 84% — of difficult documents with no leak: 51 ways to trap a text
 [01:56] 14 — annotated real-text datasets, 6 of them French, 8,178 documents
-[01:59] 16.5–93% — of real French documents with no leak, by family
-[02:03] 89.9% — of BODACC notices with no leak, 97.8% of mentions masked
+[01:59] 95.1% — of BOAMP notices with no leak, 98.3% of mentions masked
+[02:03] 97.5% — of BODACC notices with no leak, 99.5% of mentions masked
 [02:08] How we grade ourselves
 [02:08] Confidence index
-[02:08] 61.8%
-[02:08] 95% CI: 58.6–66.9%
-[02:09] Mentions masked: 79.8% · precision: 99.1% BODACC, 87.3% BOAMP · neutral text masked by mistake: 0.07%
-[02:15] Share of documents with no readable direct identifier.
-[02:15] Run of 26 October 2026: 1,019,385 documents, protocol written beforehand.
-[02:21] Known limits
-[02:22] Old newspapers, MAPA FR: one document in six with no leak.
-[02:26] BOAMP: 4 notices in 10 keep a readable mention.
+[02:09] 96.9%
+[02:09] 95% CI: 96.2–97.6%
+[02:09] Mentions masked: 99.3% · precision: 99.2% BODACC, 87.7% BOAMP · neutral text masked by mistake: 0.07%
+[02:15] Normalised documents: share with no readable direct identifier, protocol 1.1.
+[02:16] Run of 26 October 2026: 1,019,385 documents, protocol published beforehand.
+[02:22] Known limits
+[02:23] Published apart: old newspapers (low-quality OCR), MAPA FR, other languages.
+[02:26] Real corpora already seen while tuning: optimistic figures.
 [02:29] German, Spanish, Italian, Dutch, Portuguese names: not detected.
 [02:32] A first barrier, not a GDPR certification.
 [02:35] The protocol: gdprguardian.com/#protocol
 [02:38] GDPR Guardian
-[02:38] The best open-source tool for GDPR and AI!
-[02:41] You be the judge.
-[02:43] gdprguardian.com · gardienrgpd.fr
-[02:43] github.com/FlowLineIntegration/GDPRGuardian
-[02:44] Offered by Flow Line Intégration
+[02:39] The best open-source tool for GDPR and AI!
+[02:42] You be the judge.
+[02:44] gdprguardian.com · gardienrgpd.fr
+[02:44] github.com/FlowLineIntegration/GDPRGuardian
+[02:45] Offered by Flow Line Intégration
 [02:45] Guillaume CLEMENT, CTO Data & AI
 [02:45] Design: Claude Design
-[02:45] MIT licence · version 1.0.0
+[02:45] MIT licence · version 1.0.1

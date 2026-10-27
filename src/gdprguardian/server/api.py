@@ -20,15 +20,28 @@ from .config import MAX_PAGE_CHARS, MIN_PAGE_CHARS
 from .errors import InvalidRequest, ServiceBusy, Unauthorized
 from .middleware import DEEP_HEALTH, PRINCIPAL_STATE_KEY
 from .multipart import read_multipart
-from .options import AnonymizeOptions, LabelLanguage, Profile
+from .options import (
+    DISABLE_DESCRIPTION,
+    MODE_DESCRIPTION,
+    PROFILE_DESCRIPTION,
+    AnonymizeOptions,
+    LabelLanguage,
+    Mode,
+    Profile,
+)
 from .security import result_id
 from .service import Service, check_upload_name
 
-_OPTION_FIELDS = frozenset({"countries", "profile", "label_language", "rules", "explain"})
+_OPTION_FIELDS = frozenset({"countries", "mode", "disable", "profile", "label_language", "rules", "explain"})
 _RULES_DESCRIPTION = (
-    "Jeu de règles de l'organisation (masquer, conserver, termes imposés ou permis), jamais conservé ni "
-    "journalisé ; voir docs/REGLES.md / the organisation's rule set, never kept nor logged. "
-    'Exemple / example: {"rules": [{"label": "CLIENT_ID", "pattern": "CLT-[0-9]{6}"}]}')
+    "Jeu de règles de l'organisation (masquer, conserver, termes imposés ou permis), appliqué dans tous les modes, "
+    "jamais conservé ni journalisé ; voir docs/REGLES.md / the organisation's rule set, applied in every mode, never "
+    'kept nor logged. Exemple / example: {"rules": [{"label": "CLIENT_ID", "pattern": "CLT-[0-9]{6}"}, '
+    '{"label": "SKU", "pattern": "SKU-[0-9]{6}", "action": "keep"}]} : SKU-123456 reste lisible, CLT-204518 est '
+    "masqué / SKU-123456 stays readable, CLT-204518 is masked.")
+# Mêmes descriptions que les outils MCP / same descriptions as the MCP tools.
+_MODE_DESCRIPTION = MODE_DESCRIPTION
+_DISABLE_DESCRIPTION = DISABLE_DESCRIPTION
 
 
 async def _principal(request: Request) -> str:
@@ -54,14 +67,17 @@ class OptionsBody(BaseModel):
 
     countries: str | list[str] | None = Field(None, description="'FR' (défaut), 'FR,BE', ['FR', 'BE'], 'all' ou "
                                                                  "'auto' (expérimental)")
-    profile: Profile = "standard"
+    mode: Mode | None = Field(None, description=_MODE_DESCRIPTION)
+    disable: list[str] | str | None = Field(None, description=_DISABLE_DESCRIPTION)
+    profile: Profile | None = Field(None, description=PROFILE_DESCRIPTION, json_schema_extra={"deprecated": True})
     label_language: LabelLanguage = "fr"
     rules: dict[str, Any] | None = Field(None, description=_RULES_DESCRIPTION)
     explain: bool = Field(False, description="Rapport : pour chaque balise, la règle et la raison (jamais la "
                                              "valeur) / per-tag rule and reason, never the value")
 
     def options(self) -> AnonymizeOptions:
-        return _options(self.countries, self.profile, self.label_language, self.rules, self.explain)
+        return _options(self.countries, self.profile, self.label_language, self.rules, self.explain,
+                        mode=self.mode, disable=self.disable)
 
 
 class TextBody(OptionsBody):
@@ -175,9 +191,10 @@ class PacksOut(BaseModel):
 
 
 def _options(countries: str | list[str] | None, profile: str | None, label_language: str | None,
-             rules: dict[str, Any] | str | None = None, explain: bool | str | None = False) -> AnonymizeOptions:
+             rules: dict[str, Any] | str | None = None, explain: bool | str | None = False, *,
+             mode: str | None = None, disable: list[str] | str | None = None) -> AnonymizeOptions:
     try:
-        return AnonymizeOptions.build(countries, profile, label_language, rules, explain)
+        return AnonymizeOptions.build(countries, profile, label_language, rules, explain, mode=mode, disable=disable)
     except ValueError as exc:
         # Message construit par nous, sans donnée d'entrée / our own message, no input data.
         raise InvalidRequest(f"Option invalide / invalid option: {exc}") from None
@@ -230,7 +247,11 @@ def build_router(service: Service) -> APIRouter:
                  openapi_extra={"requestBody": {"required": True, "content": {"multipart/form-data": {"schema": {
                      "type": "object", "required": ["file"],
                      "properties": {"file": {"type": "string", "format": "binary"},
-                                    "countries": {"type": "string"}, "profile": {"type": "string"},
+                                    "countries": {"type": "string"},
+                                    "mode": {"type": "string", "description": _MODE_DESCRIPTION},
+                                    "disable": {"type": "string", "description": "Comma-separated / séparées par "
+                                                "des virgules. " + _DISABLE_DESCRIPTION},
+                                    "profile": {"type": "string", "deprecated": True},
                                     "label_language": {"type": "string"},
                                     "rules": {"type": "string", "description": "JSON"},
                                     "explain": {"type": "string"}}}}}}})
@@ -239,9 +260,10 @@ def build_router(service: Service) -> APIRouter:
         form = await service.within_deadline(read_multipart(
             request.headers.get("content-type"), request.stream(), max_file_bytes=config.max_upload_bytes))
         if set(form.fields) - _OPTION_FIELDS:
-            raise InvalidRequest("Champ inconnu / unknown field")
+            raise InvalidRequest(f"Champ inconnu / unknown field; allowed: file, {', '.join(sorted(_OPTION_FIELDS))}")
         options = _options(form.fields.get("countries"), form.fields.get("profile"),
-                           form.fields.get("label_language"), form.fields.get("rules"), form.fields.get("explain"))
+                           form.fields.get("label_language"), form.fields.get("rules"), form.fields.get("explain"),
+                           mode=form.fields.get("mode"), disable=form.fields.get("disable"))
         result = await service.anonymize_document(form.data, form.filename or "document", options, principal)
         return DocumentOut(markdown=result.markdown, kind=result.kind, pages=result.pages, report=result.report,
                            warnings=result.warnings, dropped=result.dropped)

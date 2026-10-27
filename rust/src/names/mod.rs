@@ -46,6 +46,8 @@ const T_CLOSING: u32 = 4;
 const T_ROLE: u32 = 8;
 const T_EPONYM: u32 = 16;
 const T_EPONYM_DIRECT: u32 = 32;
+/// Civilité d'une personne vivante (1.0.2) : n'hérite pas d'un éponyme / a living person's civility.
+const T_CIVILITY: u32 = 64;
 
 // Seuils de rang (log2 du nombre de naissances), vérifiés contre Python / rank thresholds, checked.
 const GIVEN_ALONE_MIN: u8 = 9;
@@ -54,13 +56,15 @@ const GIVEN_START_MIN: u8 = 14;
 const COMMUNE_SURNAME_MIN: u8 = 12;
 const ENTITY_GIVEN_MIN: u8 = 12;
 const CAPS_ALONE_MIN: u8 = 10;
+/// Nom homonyme d'un mot après un prénom en minuscules, sans indice (1.0.2) / homonym surname, lowercase pair.
+const PAIR_HOMONYM_MIN: u8 = 12;
 const MAX_RUN: usize = 6;
 
 /// Taille de texte prise en charge (octets UTF-8, donc caractères au plus) / supported text size.
 const MAX_TEXT_BYTES: usize = (u32::MAX / 4) as usize;
 
 /// Constantes partagées avec Python, comparées à la construction / constants shared with Python.
-pub(crate) const CONTRACT: [(&str, i64); 21] = [
+pub(crate) const CONTRACT: [(&str, i64); 23] = [
     ("GIVEN_MASK", lexicon::GIVEN_MASK as i64),
     ("SURNAME_SHIFT", lexicon::SURNAME_SHIFT as i64),
     ("AMB_SHIFT", lexicon::AMB_SHIFT as i64),
@@ -75,12 +79,14 @@ pub(crate) const CONTRACT: [(&str, i64); 21] = [
     ("T_ROLE", T_ROLE as i64),
     ("T_EPONYM", T_EPONYM as i64),
     ("T_EPONYM_DIRECT", T_EPONYM_DIRECT as i64),
+    ("T_CIVILITY", T_CIVILITY as i64),
     ("GIVEN_ALONE_MIN", GIVEN_ALONE_MIN as i64),
     ("SURNAME_ALONE_MIN", SURNAME_ALONE_MIN as i64),
     ("GIVEN_START_MIN", GIVEN_START_MIN as i64),
     ("COMMUNE_SURNAME_MIN", COMMUNE_SURNAME_MIN as i64),
     ("_ENTITY_GIVEN_MIN", ENTITY_GIVEN_MIN as i64),
     ("CAPS_ALONE_MIN", CAPS_ALONE_MIN as i64),
+    ("PAIR_HOMONYM_MIN", PAIR_HOMONYM_MIN as i64),
     ("MAX_RUN", MAX_RUN as i64),
 ];
 
@@ -106,6 +112,8 @@ pub(crate) struct TextSets {
     skip_back: Vec<char>,
     /// `_SENTENCE_END`.
     sentence_end: Vec<char>,
+    /// `_vocab.ACCENTED_WORDS` : mots dont l'accent les distingue d'un prénom (« Marié ») / accent-distinct words.
+    accented_words: Vec<Vec<char>>,
 }
 
 /// Détecteur compilé une fois, partagé en lecture seule entre threads / compiled once, shared read-only.
@@ -315,6 +323,11 @@ impl Doc<'_> {
         let tokens = self.tokens(&mut keys);
         let cues = self.cues(strong_zones, &labels);
         self.lowercase_after_cues(&cues, &mut found);
+        self.lowercase_pairs(&mut found);
+        self.lowercase_after_prepositions(&mut found);
+        if self.text.contains(&'_') {
+            self.file_name_people(&mut found);
+        }
         if !tokens.is_empty() {
             if self.text.contains(&'@') {
                 self.email_names(&mut confirmed);

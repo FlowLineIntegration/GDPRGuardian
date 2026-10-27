@@ -12,7 +12,7 @@ document **sans le lire**, puis ne travaille que sur le Markdown anonymisé (`[P
 | Élément | Rôle |
 |---|---|
 | `.mcp.json` | Serveur MCP en ligne, en HTTP : `https://api.gardienrgpd.fr/mcp`, sans en-tête ni clé. Outils `create_upload`, `get_anonymized`, `anonymize_text`, `list_packs`. |
-| `skills/gdprguardian-online` | Dit à Claude de ne jamais ouvrir l'original, de préférer la skill locale si elle est là et de prévenir l'utilisateur avant le premier envoi ; envoie le fichier avec son script (Python 3.9+, bibliothèque standard seule, depuis le disque, seule l'extension du nom part) ou avec les outils MCP ; explications (`--explain`), erreurs (429 et 503 avec `Retry-After`), limites. |
+| `skills/gdprguardian-online` | Dit à Claude de ne jamais ouvrir l'original, de préférer la skill locale si elle est là et de prévenir l'utilisateur avant le premier envoi ; envoie le fichier avec son script (Python 3.9+, bibliothèque standard seule, depuis le disque, seule l'extension du nom part) ou avec les outils MCP ; explications (`--explain`), erreurs (429 et 503 avec `Retry-After`), limites ; puis une seconde passe pour les données sensibles (RGPD, art. 9 et 10 : santé, origine, opinions, religion, syndicat, génétique, biométrie, vie sexuelle, infractions), faite par un modèle léger de l'IA de l'utilisateur (sous-agent `haiku` dans Claude Code ; sans sous-agent, l'agent lui-même, qui lit alors ces faits) sur une copie du Markdown (`[SANTE_1]`, `[INFRACTION_1]`…), sauf si la tâche en a besoin : faite par votre IA, pas par Gardien RGPD, probabiliste, non mesurée par le protocole public, hors des garanties déterministes, et rien n'est renvoyé au service. |
 
 ### Installer
 
@@ -51,7 +51,12 @@ reading it**, then works only from the anonymised Markdown, whose placeholders a
   `skills/gdprguardian-online`: never open the original, prefer the local skill when present, tell the user before
   the first upload; send the file with the skill's script (Python 3.9+, standard library only, streamed from disk,
   only the name's extension is sent) or the MCP tools; explanations, errors (429 and 503 with `Retry-After`) and
-  limits.
+  limits; then a second pass for sensitive data (GDPR art. 9 and 10: health, origin, opinions, religion, trade
+  union, genetic, biometric, sex life, offences), done by a light model of the user's own AI (a `haiku` subagent in
+  Claude Code; without subagents, the agent itself, which then reads those facts) on a copy of the Markdown
+  (`[SANTE_1]`, `[INFRACTION_1]`...), unless the task needs those facts: done by your AI, not by GDPR Guardian,
+  probabilistic, not measured by the public protocol, outside the deterministic guarantees, and nothing goes back to
+  the service.
 - **Install in claude.ai, Claude Desktop and Cowork.** Customize > Plugins > Add > Add marketplace
   `FlowLineIntegration/GDPRGuardian`, then add `gdprguardian-online`. **Adding the plugin does not add its
   connector**: open the plugin's **Connectors** tab, then add and connect the GDPR Guardian connector. On Team and

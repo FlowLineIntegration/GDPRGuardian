@@ -114,12 +114,70 @@ impl Cursor<'_> {
 
 /// `markdown_table_zones` : cellules sous un en-tête de colonne porteur de contexte, triées et disjointes,
 /// en positions de caractères. `groups_of` : groupes de contexte d'un texte d'en-tête (`context_groups`).
-/// Cells under a context-bearing column header, sorted and disjoint, in character positions.
+/// Cells under a context-bearing column header, sorted and disjoint, in character positions. Depuis 1.0.2, aussi
+/// les tableaux CSV et TSV ; une cellule déjà couverte par un tableau Markdown reste à lui. Since 1.0.2, CSV and
+/// TSV tables too; a cell already covered by a Markdown table stays with it.
 pub(crate) fn zones(text: &str, groups_of: impl Fn(&str) -> Vec<u32>, is_space: impl Fn(char) -> bool) -> Vec<Zone> {
+    let mut zones = if text.as_bytes().contains(&b'|') { gfm_zones(text, &groups_of, &is_space) } else { Vec::new() };
+    let extra = csv_zones(text, &groups_of, &is_space);
+    if extra.is_empty() {
+        return zones;
+    }
+    if zones.is_empty() {
+        return extra;
+    }
+    let extra: Vec<Zone> = extra.into_iter().filter(|z| !overlaps(&zones, z.start, z.end)).collect();
+    zones.extend(extra);
+    zones.sort_by_key(|z| z.start);
+    zones
+}
+
+/// `engine._overlaps` : [start, end) chevauche-t-il une zone (triées, disjointes) ? / overlaps a zone?
+fn overlaps(zones: &[Zone], start: usize, end: usize) -> bool {
+    let after = zones.partition_point(|z| z.start <= start);
+    if after.checked_sub(1).and_then(|i| zones.get(i)).is_some_and(|z| z.end > start) {
+        return true;
+    }
+    zones.get(after).is_some_and(|z| z.start < end)
+}
+
+/// Tableaux CSV et TSV (`_text.delimited_tables`) : en-têtes lus avec « _ » et « - » changés en espaces.
+/// CSV and TSV tables: headers read with "_" and "-" as spaces.
+fn csv_zones(text: &str, groups_of: &impl Fn(&str) -> Vec<u32>, is_space: &impl Fn(char) -> bool) -> Vec<Zone> {
     let bytes = text.as_bytes();
-    if !bytes.contains(&b'|') {
+    if !bytes.contains(&b'\n') || !bytes.iter().any(|b| matches!(b, b';' | b'\t' | b',')) {
         return Vec::new();
     }
+    let chars: Vec<char> = text.chars().collect();
+    let mut zones = Vec::new();
+    for table in crate::text::delimited_tables(&chars, is_space) {
+        let Some((header, rows)) = table.split_first() else {
+            continue;
+        };
+        let columns: Vec<Vec<u32>> = header
+            .iter()
+            .map(|&(s, e)| {
+                let label: String = chars[s..e].iter().map(|&c| if c == '_' || c == '-' { ' ' } else { c }).collect();
+                groups_of(&label)
+            })
+            .collect();
+        if columns.iter().all(Vec::is_empty) {
+            continue;
+        }
+        for row in rows {
+            for (column, &(s, e)) in row.iter().enumerate() {
+                if let Some(groups) = columns.get(column).filter(|g| !g.is_empty() && e > s) {
+                    zones.push(Zone { start: s, end: e, groups: groups.clone() });
+                }
+            }
+        }
+    }
+    zones
+}
+
+/// Tableaux Markdown (GFM) / Markdown tables.
+fn gfm_zones(text: &str, groups_of: &impl Fn(&str) -> Vec<u32>, is_space: &impl Fn(char) -> bool) -> Vec<Zone> {
+    let bytes = text.as_bytes();
     let line_end = |from: usize| {
         bytes.get(from..).and_then(|rest| rest.iter().position(|&b| b == b'\n')).map_or(bytes.len(), |i| from + i)
     };

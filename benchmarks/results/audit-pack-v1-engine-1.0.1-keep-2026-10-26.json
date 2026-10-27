@@ -1,0 +1,258 @@
+{
+ "engine": "1.0.1",
+ "mode": "whole-file",
+ "keep_rules": true,
+ "seconds": 0.84,
+ "cases": 220,
+ "cases_missing_in_output": [],
+ "cases_without_direct_leak": 0,
+ "direct_occurrences": 8614,
+ "direct_left_in_clear": 3366,
+ "direct_protection_pct": 60.92,
+ "direct_by_category": {
+  "date de naissance": {
+   "total": 501,
+   "left": 256
+  },
+  "adresse (rue)": {
+   "total": 256,
+   "left": 0
+  },
+  "adresse (code postal + ville)": {
+   "total": 256,
+   "left": 245
+  },
+  "courriel": {
+   "total": 513,
+   "left": 0
+  },
+  "téléphone": {
+   "total": 293,
+   "left": 0
+  },
+  "téléphone international": {
+   "total": 220,
+   "left": 0
+  },
+  "pseudonyme": {
+   "total": 257,
+   "left": 257
+  },
+  "compte client CLT": {
+   "total": 697,
+   "left": 697
+  },
+  "référence RH EMP": {
+   "total": 220,
+   "left": 220
+  },
+  "dossier INC": {
+   "total": 477,
+   "left": 477
+  },
+  "numéro national (NIR)": {
+   "total": 220,
+   "left": 0
+  },
+  "IBAN": {
+   "total": 220,
+   "left": 0
+  },
+  "carte de paiement": {
+   "total": 220,
+   "left": 0
+  },
+  "IPv4": {
+   "total": 257,
+   "left": 0
+  },
+  "IPv6": {
+   "total": 220,
+   "left": 220
+  },
+  "UUID poste": {
+   "total": 257,
+   "left": 257
+  },
+  "cookie": {
+   "total": 220,
+   "left": 220
+  },
+  "gabarit biométrique BIO": {
+   "total": 220,
+   "left": 220
+  },
+  "référence vocale VOICE": {
+   "total": 220,
+   "left": 220
+  },
+  "plaque": {
+   "total": 220,
+   "left": 1
+  },
+  "variante de casse": {
+   "total": 206,
+   "left": 0
+  },
+  "prénom (personne)": {
+   "total": 851,
+   "left": 44
+  },
+  "nom (personne)": {
+   "total": 1071,
+   "left": 0
+  },
+  "prénom (proche)": {
+   "total": 245,
+   "left": 0
+  },
+  "nom (proche)": {
+   "total": 245,
+   "left": 0
+  }
+ },
+ "phone_fragment": {
+  "total": 32,
+  "left": 32
+ },
+ "leak_examples": {
+  "date de naissance": [
+   "cas 001: 2010-01-01",
+   "cas 002: 1970-06-14",
+   "cas 003: 1977-11-27"
+  ],
+  "adresse (code postal + ville)": [
+   "cas 001: 99900 Val-des-Nuages",
+   "cas 002: 99900 Bellecombe-des-Ormes",
+   "cas 003: 99900 Mirebrise"
+  ],
+  "pseudonyme": [
+   "cas 001: s.clairclaire_000",
+   "cas 002: l.ormeplaine_023",
+   "cas 003: y.pluvivelin_046"
+  ],
+  "compte client CLT": [
+   "cas 001: CLT-000001-Q",
+   "cas 002: CLT-000002-Q",
+   "cas 003: CLT-000003-Q"
+  ],
+  "référence RH EMP": [
+   "cas 001: EMP-100101",
+   "cas 002: EMP-100120",
+   "cas 003: EMP-100139"
+  ],
+  "dossier INC": [
+   "cas 001: INC-2026-00017",
+   "cas 002: INC-2026-00058",
+   "cas 003: INC-2026-00099"
+  ],
+  "IPv6": [
+   "cas 001: 2001:db8:00::0",
+   "cas 002: 2001:db8:01::1f",
+   "cas 003: 2001:db8:02::3e"
+  ],
+  "UUID poste": [
+   "cas 001: 12345678-1234-4000-a000-0123456789ab",
+   "cas 002: 12345689-123b-4001-a00d-0123456789ca",
+   "cas 003: 1234569a-1242-4002-a01a-0123456789e9"
+  ],
+  "cookie": [
+   "cas 001: cookie-demo-00001-00000",
+   "cas 002: cookie-demo-00002-00097",
+   "cas 003: cookie-demo-00003-00194"
+  ],
+  "gabarit biométrique BIO": [
+   "cas 001: BIO-DEMO-000007",
+   "cas 002: BIO-DEMO-000060",
+   "cas 003: BIO-DEMO-000113"
+  ],
+  "référence vocale VOICE": [
+   "cas 001: VOICE-TEST-00001",
+   "cas 002: VOICE-TEST-00002",
+   "cas 003: VOICE-TEST-00003"
+  ],
+  "plaque": [
+   "cas 001: ZZ-000-ZZ"
+  ],
+  "prénom (personne)": [
+   "cas 001: …es/majuscules, le champ source contient sohan [PERSONNE_1]; vérifier q…",
+   "cas 006: …es/majuscules, le champ source contient ambre [PERSONNE_11]; vérifier …",
+   "cas 011: …es/majuscules, le champ source contient mila [PERSONNE_22]; vérifier …"
+  ]
+ },
+ "negative_controls_kept": {
+  "référence produit SKU": "440/440",
+  "lot BATCH": "220/220",
+  "boîte partagée support@": "220/220",
+  "éditeur (raison sociale)": "220/220"
+ },
+ "quasi_identifiers_left": {
+  "profession": "220/220",
+  "rémunération": "220/220",
+  "date d'événement": "257/257",
+  "organisation": "256/256"
+ },
+ "sensitive_left_for_skills": {
+  "motif de santé": "440/440",
+  "donnée sensible supplémentaire": "256/256"
+ },
+ "ordinary_words_lost_total": 0,
+ "ordinary_words_lost_top": [],
+ "warnings": [],
+ "official_pack_metrics": {
+  "protection_pct": 45.71,
+  "leaked": 4726,
+  "total": 8705,
+  "controls_kept_pct": 100.0,
+  "balanced_pct": 62.74,
+  "by_scope": {
+   "engine_direct": {
+    "total": 7092,
+    "leaked": 3113,
+    "protection_pct": 56.11
+   },
+   "quasi_identifiers": {
+    "total": 953,
+    "leaked": 953,
+    "protection_pct": 0.0
+   },
+   "sensitive_skills_pass": {
+    "total": 660,
+    "leaked": 660,
+    "protection_pct": 0.0
+   }
+  },
+  "leaks_by_category": {
+   "ADRESSE_IPV6_TEST": "220/220",
+   "APPARTENANCE_SYNDICALE": "27/27",
+   "COOKIE_IDENTIFIANT": "220/220",
+   "DATE_EVENEMENT_PERSONNEL": "257/257",
+   "DATE_NAISSANCE": "256/501",
+   "DONNEE_BIOMETRIQUE": "256/256",
+   "DONNEE_JUDICIAIRE": "27/27",
+   "DONNEE_SANTE": "440/440",
+   "DONNEE_SOCIALE": "36/36",
+   "EMPLOYEUR_OU_ORGANISME": "256/256",
+   "FRAGMENT_TELEPHONE": "32/32",
+   "HANDICAP": "28/28",
+   "IDENTIFIANT_BIOMETRIQUE": "220/220",
+   "IDENTIFIANT_CLIENT": "697/697",
+   "IDENTIFIANT_SALARIE": "220/220",
+   "IDENTIFIANT_TERMINAL": "257/257",
+   "IMMATRICULATION_TEST": "1/220",
+   "OPINION_POLITIQUE": "28/28",
+   "ORIENTATION_SEXUELLE": "37/37",
+   "PROFESSION_ASSOCIEE": "220/220",
+   "PSEUDONYME": "257/257",
+   "REFERENCE_DOSSIER_PERSONNEL": "477/477",
+   "RELIGION_CROYANCE": "37/37",
+   "REMUNERATION": "220/220"
+  },
+  "controls_by_category": {
+   "BOITE_FONCTIONNELLE_NON_PERSONNELLE": "220/220",
+   "RAISON_SOCIALE_FICTIVE": "220/220",
+   "REFERENCE_LOT_NON_PERSONNEL": "220/220",
+   "REFERENCE_PRODUIT_NON_PERSONNEL": "440/440"
+  }
+ }
+}

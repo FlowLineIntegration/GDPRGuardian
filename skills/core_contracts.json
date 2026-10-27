@@ -16,6 +16,14 @@
   "gdprguardian_core-1.0.1-cp311-abi3-win_amd64.whl": {
    "sha256": "a020f42616cf2e0e0b49e5e9b45e7e2e3f70cdb8629f708f6620d73cedb5ebc0",
    "contract": 5
+  },
+  "gdprguardian_core-1.0.2-cp311-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": {
+   "sha256": "fc843e1d89ad66bc877ef470dbe59ce7393cf552a141b2e1cea56478beeb58c3",
+   "contract": 5
+  },
+  "gdprguardian_core-1.0.2-cp311-abi3-win_amd64.whl": {
+   "sha256": "be0507aba84b9c033a79cf6f546188f4af3067233e35418b16bed6bf861b3af6",
+   "contract": 5
   }
  }
 }

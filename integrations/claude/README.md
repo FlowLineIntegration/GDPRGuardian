@@ -20,7 +20,7 @@ travaille que sur le **Markdown anonymisé** (`[PERSONNE_1]`, `[EMAIL_1]`, `[NIR
 | À installer | rien (Python 3.9+ pour son script, sinon le connecteur MCP) | l'archive avec le moteur (22 Mo), Python 3.11 à 3.14 ; ou le plugin local |
 | Où va le document | vers le service Gardien RGPD (UE, en mémoire, rien conservé), un tiers ; jamais vers Claude | nulle part ailleurs : sur le poste (Claude Code, Cowork) ; dans claude.ai et la conversation de Claude Desktop, le bac à sable d'Anthropic, où un fichier joint est déjà parti |
 | Quand | aucune voie locale possible, avec l'accord de l'utilisateur | **toujours, dès qu'elle peut tourner** ; santé, RH, juridique, secret professionnel ; hors ligne |
-| Archive à téléverser ([`skills/`](../../skills/README.md)) | `gdprguardian-online.zip` (37 Ko) | `gdprguardian-local.zip` (Linux x86_64 et aarch64) : claude.ai et conversation de Claude Desktop (bac à sable Linux d'Anthropic, **même sur un poste Windows ou Mac**), Claude Code sous Linux ou WSL ; `gdprguardian-local-windows-macos.zip` (Windows x64, macOS Apple Silicon) : **seulement** Claude Code ou un agent lancé directement sous Windows ou macOS |
+| Archive à téléverser ([`skills/`](../../skills/README.md)) | `gdprguardian-online.zip` (53 Ko) | `gdprguardian-local.zip` (Linux x86_64 et aarch64) : claude.ai et conversation de Claude Desktop (bac à sable Linux d'Anthropic, **même sur un poste Windows ou Mac**), Claude Code sous Linux ou WSL ; `gdprguardian-local-windows-macos.zip` (Windows x64, macOS Apple Silicon) : **seulement** Claude Code ou un agent lancé directement sous Windows ou macOS |
 | Plugin | `gdprguardian-online` : MCP en ligne (HTTP) + skill | `gdprguardian` : MCP local + skill + garde-fou (Claude Code, Cowork) |
 
 Installées ensemble, la skill locale passe **toujours** en premier ; la skill légère n'envoie un document qu'après
@@ -28,6 +28,22 @@ avoir prévenu l'utilisateur (service tiers, sans contrat de traitement) et obte
 demandée lui-même. Les deux skills ont les mêmes options (`countries`, `profile`, `label_language`, `rules`,
 `explain`), les mêmes balises, les mêmes explications (règle et raison de chaque balise, jamais la valeur) et la
 même règle : ne jamais lire l'original.
+
+**Seconde passe : données sensibles (RGPD, art. 9 et 10).** Gardien RGPD masque les identifiants, pas les faits
+sensibles (santé, origine, opinions politiques, religion, syndicat, génétique, biométrie, vie sexuelle,
+infractions). Après l'anonymisation, sauf si la tâche en a besoin (un soignant qui résume un dossier médical garde
+la santé, pas la religion), les deux skills font remplacer chaque mention, dans une copie du Markdown faite par le
+shell, par `[SANTE_1]`, `[ORIGINE_1]`, `[OPINION_POLITIQUE_1]`, `[RELIGION_1]`, `[SYNDICAT_1]`, `[GENETIQUE_1]`,
+`[BIOMETRIE_1]`, `[VIE_SEXUELLE_1]` ou `[INFRACTION_1]` ; l'agent ne travaille ensuite que sur cette copie. Les
+balises ne gardent aucune table de correspondance, mais le premier `.anon.md` contient toujours ces faits : à
+l'utilisateur de le supprimer. Cette passe est faite par votre IA, pas par Gardien RGPD : probabiliste, non mesurée
+par le protocole public, hors des garanties déterministes du produit, et `--explain` ne la couvre pas. Avec un
+sous-agent léger chez le même fournisseur (`haiku` dans Claude Code), elle tient ces faits hors du contexte de
+l'agent principal, de ses réponses et des outils appelés ensuite, pas hors de portée du fournisseur. Sans sous-agent
+(claude.ai, conversation de Claude Desktop), l'agent fait la passe lui-même et lit donc ces faits : elle ne les tient
+alors que hors de ses réponses et des outils appelés ensuite. Rien n'est envoyé au service Gardien RGPD.
+L'anonymisation reste la barrière ; pour un document très sensible, la skill locale et une relecture humaine restent
+conseillées.
 
 ### Installer, client par client
 
@@ -39,7 +55,7 @@ même règle : ne jamais lire l'original.
 | **Autres agents** (format Agent Skills) | dossier `gdprguardian-online/` de l'archive | dossier `gdprguardian-local/` de l'archive |
 
 - **Avant la publication sur PyPI** : le plugin `gdprguardian` lance
-  `uvx --from "gdprguardian[local]==1.0.1"`, qui exige le paquet sur PyPI (la marketplace,
+  `uvx --from "gdprguardian[local]==1.0.2"`, qui exige le paquet sur PyPI (la marketplace,
   elle, fonctionne : le dépôt est public). D'ici là, ou si `uv tool install` échoue : téléverser ou dézipper les
   archives de [`skills/`](../../skills/README.md).
 - claude.ai et Claude Desktop : les skills exigent l'exécution de code (Paramètres > Capacités ; pour Team et
@@ -64,7 +80,7 @@ même règle : ne jamais lire l'original.
 ### Plugin Claude local (recommandé pour les documents sensibles)
 
 Prérequis : [uv](https://docs.astral.sh/uv/getting-started/installation/), puis, une fois avec le réseau,
-`uv tool install "gdprguardian[local]==1.0.1"` : le serveur démarre ensuite sans réseau (sans cette étape, `uvx`
+`uv tool install "gdprguardian[local]==1.0.2"` : le serveur démarre ensuite sans réseau (sans cette étape, `uvx`
 revérifie l'index des paquets à chaque démarrage dès que sa copie date de quelques minutes). Le plugin apporte le
 serveur MCP local, la skill `gdprguardian-local` et le hook qui bloque la lecture des documents bruts. Seuls les
 fichiers du dossier autorisé sont acceptés : par défaut `~/GDPRGuardian`, **à créer**. Le serveur local et le hook
@@ -79,7 +95,7 @@ s'affiche sur la sortie d'erreur). Exemple pour VS Code (`.vscode/mcp.json`) :
 
 ```json
 {"servers": {"gdprguardian": {"type": "stdio", "command": "uvx",
-  "args": ["--from", "gdprguardian[local]==1.0.1", "gdprguardian", "mcp", "--stdio", "--allow-dir", "${workspaceFolder}/Documents"]}}}
+  "args": ["--from", "gdprguardian[local]==1.0.2", "gdprguardian", "mcp", "--stdio", "--allow-dir", "${workspaceFolder}/Documents"]}}}
 ```
 
 Claude Desktop (`claude_desktop_config.json`) et Cursor (`mcp.json`) utilisent la clé `mcpServers` ;
@@ -228,11 +244,26 @@ differs (`anonymize_file` reads a local file, `create_upload` receives an upload
 | Install | nothing (Python 3.9+ for its script, else the MCP connector) | the archive with the engine (22 MB), Python 3.11 to 3.14; or the local plugin |
 | The document goes to | the GDPR Guardian service (EU, in memory, nothing kept), a third party; never to Claude | nowhere else: the computer (Claude Code, Cowork); in claude.ai and the Claude Desktop chat, Anthropic's sandbox, where an attached file already is |
 | When | no local route is possible, with the user's agreement | **always, whenever it can run**; health, HR, legal, professional secrecy; offline |
-| Archive ([`skills/`](../../skills/README.md)) | `gdprguardian-online.zip` (37 KB) | `gdprguardian-local.zip` (Linux x86_64 and aarch64): claude.ai and the Claude Desktop chat (Anthropic's Linux sandbox, **even on a Windows or Mac computer**), Claude Code on Linux or WSL; `gdprguardian-local-windows-macos.zip` (Windows x64, Apple-silicon macOS): **only** Claude Code or an agent running directly on Windows or macOS |
+| Archive ([`skills/`](../../skills/README.md)) | `gdprguardian-online.zip` (53 KB) | `gdprguardian-local.zip` (Linux x86_64 and aarch64): claude.ai and the Claude Desktop chat (Anthropic's Linux sandbox, **even on a Windows or Mac computer**), Claude Code on Linux or WSL; `gdprguardian-local-windows-macos.zip` (Windows x64, Apple-silicon macOS): **only** Claude Code or an agent running directly on Windows or macOS |
 | Plugin | `gdprguardian-online`: online MCP (HTTP) + skill | `gdprguardian`: local MCP + skill + guardrail (Claude Code, Cowork) |
 
 Installed together, the local skill **always** comes first; the light skill sends a document only after telling
 the user (a third-party service, no processing agreement) and getting their agreement, unless they asked for it.
+
+**Second pass: sensitive data (GDPR art. 9 and 10).** GDPR Guardian masks identifiers, not the sensitive facts
+(health, origin, political opinions, religion, trade union, genetic, biometric, sex life, offences). After the
+anonymisation, unless the task needs them (a clinician summarising a medical file keeps health, not religion), both
+skills have each mention replaced, in a shell copy of the Markdown, with `[SANTE_1]`, `[ORIGINE_1]`,
+`[OPINION_POLITIQUE_1]`, `[RELIGION_1]`, `[SYNDICAT_1]`, `[GENETIQUE_1]`, `[BIOMETRIE_1]`, `[VIE_SEXUELLE_1]` or
+`[INFRACTION_1]` (English tags with English labels); the agent then works only on that copy. The tags keep no
+mapping, but the first `.anon.md` still holds those facts: deleting it is the user's decision. The pass is done by
+your AI, not by GDPR Guardian: probabilistic, not measured by the public protocol, outside the product's
+deterministic guarantees, and `--explain` does not cover it. With a light subagent from the same provider (`haiku`
+in Claude Code), it keeps those facts out of the main agent's context, its answers and the tools it calls next, not
+out of the provider's reach. Without subagents (claude.ai, the Claude Desktop chat), the agent does the pass itself
+and so reads those facts: the pass then only keeps them out of its answers and of the tools it calls next. Nothing
+goes to the GDPR Guardian service. The anonymisation remains the barrier; for a very sensitive document, the local
+skill and a human check remain advised.
 
 **Install per client.**
 
@@ -254,7 +285,7 @@ the user (a third-party service, no processing agreement) and getting their agre
   and WSL).
 - **Other agents.** The skill folder from the archive (Agent Skills format).
 - **Before the package is on PyPI**, the `gdprguardian` plugin
-  (`uvx --from "gdprguardian[local]==1.0.1"`) does not work yet (the marketplace itself works: the
+  (`uvx --from "gdprguardian[local]==1.0.2"`) does not work yet (the marketplace itself works: the
   repository is public): upload or unzip the [`skills/`](../../skills/README.md) archives instead,
   which is also the fallback whenever `uv tool install` fails.
 - **Sync.** A plugin or skill added to the claude.ai account also appears in Cowork and, at the next session, in
@@ -271,7 +302,7 @@ available formats. For a dedicated Python environment: `pip install --no-index -
 wheels/requirements.txt` (Linux x86_64, Windows x64) or `python scripts/gdprguardian_local.py --setup --pip` (every
 covered platform). The local plugin carries no wheels (only the archives do): it first uses the local MCP tool
 `anonymize_file`, started by `uvx` (prerequisite: [uv](https://docs.astral.sh/uv/), then once, online,
-`uv tool install "gdprguardian[local]==1.0.1"`; allowed folder `~/GDPRGuardian`, to create; see
+`uv tool install "gdprguardian[local]==1.0.2"`; allowed folder `~/GDPRGuardian`, to create; see
 [`plugin/README.md`](plugin/README.md)). Its local server and hook run in Claude Code and Cowork, not in the claude.ai
 or Claude Desktop chat.
 

@@ -12,7 +12,7 @@ modèle (détails plus bas).
 
 | Élément | Rôle |
 |---|---|
-| `.mcp.json` | Lance le serveur local : `uvx --from "gdprguardian[local]==1.0.1" gdprguardian mcp --stdio --allow-dir <dossier>`. Même logiciel, même version que le service en ligne. |
+| `.mcp.json` | Lance le serveur local : `uvx --from "gdprguardian[local]==1.0.2" gdprguardian mcp --stdio --allow-dir <dossier>`. Même logiciel, même version que le service en ligne. |
 | `skills/gdprguardian-local` | Dit à Claude d'utiliser `anonymize_file`, sans jamais ouvrir l'original ; à défaut, le script de la skill, qui anonymise sur le poste avec le moteur embarqué (roues fournies dans les archives de [`skills/`](../../../skills/README.md), absentes du plugin) ou un Gardien RGPD déjà installé. Jamais de service en ligne sans l'accord de l'utilisateur. |
 | `hooks/hooks.json` | Hook `PreToolUse` : refuse `Read`, `Grep`, `cat`, `Get-Content`, `Import-Csv`… et les outils MCP tiers sur un document brut. |
 
@@ -23,7 +23,7 @@ Version légère, sans rien installer (service public, MCP en HTTP) : le plugin 
 
 - **uv** ([installation](https://docs.astral.sh/uv/getting-started/installation/)), qui installe Python et
   Gardien RGPD.
-- **Une fois, avec le réseau**, dans un terminal : `uv tool install "gdprguardian[local]==1.0.1"` (environ 40 Mo,
+- **Une fois, avec le réseau**, dans un terminal : `uv tool install "gdprguardian[local]==1.0.2"` (environ 40 Mo,
   plus Python si uv doit l'installer). Le serveur démarre ensuite **sans réseau**, et sans dépasser le délai de
   démarrage du client. Sans cette étape, le plugin fonctionne aussi, mais `uvx` télécharge Gardien RGPD au premier
   lancement, puis a besoin du réseau à chaque démarrage dès que sa copie de l'index des paquets (PyPI) date de
@@ -71,6 +71,14 @@ session.
 - **Part vers le modèle** : le Markdown anonymisé, le chemin du fichier que Claude passe à l'outil (donc son
   nom : préférez des noms neutres) et, dans les messages d'erreur, le nom du dossier autorisé tel que vous
   l'avez écrit.
+- **Seconde passe, données sensibles (RGPD, art. 9 et 10)** : après l'anonymisation, sauf si la tâche en a besoin,
+  la skill fait remplacer par un modèle léger de votre IA (sous-agent `haiku` dans Claude Code) les faits sensibles
+  restants (santé, origine, opinions, religion, syndicat, génétique, biométrie, vie sexuelle, infractions) par
+  `[SANTE_1]`, `[INFRACTION_1]`… dans une copie faite par le shell, seule lue ensuite. Ce modèle, chez le même
+  fournisseur que le modèle principal, reçoit le Markdown anonymisé ; sans sous-agent, l'agent fait la passe
+  lui-même et lit donc ces faits. Rien ne part vers un service Gardien RGPD. Passe faite par votre IA, pas par
+  Gardien RGPD : probabiliste, non mesurée par le protocole public, hors des garanties déterministes ; le premier
+  `.anon.md` garde ces faits (à vous de le supprimer) ; une relecture humaine reste conseillée.
 - Le hook est un garde-fou, pas un bac à sable ; un texte collé dans la conversation a déjà été lu. Voir les
   limites dans [`../README.md`](../README.md).
 
@@ -91,7 +99,7 @@ Claude anonymises a document with the `anonymize_file` tool **without ever readi
 the anonymised Markdown (`[PERSONNE_1]`, `[EMAIL_1]`…). Placeholders are irreversible: no mapping table exists.
 **The document never leaves the machine**: only its anonymised Markdown goes to the model (details below).
 
-- **Contents.** `.mcp.json` starts the local server (`uvx --from "gdprguardian[local]==1.0.1" gdprguardian mcp --stdio
+- **Contents.** `.mcp.json` starts the local server (`uvx --from "gdprguardian[local]==1.0.2" gdprguardian mcp --stdio
   --allow-dir <folder>`, the same software and version as the online service); the `gdprguardian-local` skill
   tells Claude to use `anonymize_file` and never open the original, falling back to the skill's script, which
   anonymises on the computer with the bundled engine (wheels shipped in the `skills/` archives, not in the plugin)
@@ -100,7 +108,7 @@ the anonymised Markdown (`[PERSONNE_1]`, `[EMAIL_1]`…). Placeholders are irrev
   readers and third-party MCP tools on raw documents. The light plugin `gdprguardian-online` (online MCP over HTTP,
   nothing to install) lives in [`../plugin-online`](../plugin-online/README.md).
 - **Prerequisite.** [uv](https://docs.astral.sh/uv/getting-started/installation/). Once, with the network, run
-  `uv tool install "gdprguardian[local]==1.0.1"` in a terminal: the server then starts **without any network** and
+  `uv tool install "gdprguardian[local]==1.0.2"` in a terminal: the server then starts **without any network** and
   within the client's start-up timeout. Without this step the plugin still works, but `uvx` downloads GDPR Guardian
   at first start and then needs the network at every start once its copy of the package index (PyPI) is more
   than a few minutes old: offline, the server does not start. After a plugin update, run `uv tool install` again
@@ -126,3 +134,11 @@ the anonymised Markdown (`[PERSONNE_1]`, `[EMAIL_1]`…). Placeholders are irrev
   file name: prefer neutral names; the name never appears in the result) and, in error messages, the allowed
   folder as you wrote it. The hook is a guardrail, not a sandbox; see the limits in
   [`../README.md`](../README.md).
+- **Second pass: sensitive data (GDPR art. 9 and 10).** After the anonymisation, unless the task needs them, the
+  skill has a light model of your AI (a `haiku` subagent in Claude Code) replace the remaining sensitive facts
+  (health, origin, opinions, religion, trade union, genetic, biometric, sex life, offences) with `[SANTE_1]`,
+  `[INFRACTION_1]`... in a shell copy, the only one read afterwards. That model, from the same provider as the main
+  model, receives the anonymised Markdown; without subagents, the agent does the pass itself and so reads those
+  facts. Nothing goes to a GDPR Guardian service. The pass is done by your AI, not by GDPR Guardian: probabilistic,
+  not measured by the public protocol, outside the deterministic guarantees; the first `.anon.md` keeps those facts
+  (deleting it is your decision); a human check remains advised.

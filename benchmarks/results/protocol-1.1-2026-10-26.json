@@ -1,0 +1,4596 @@
+{
+ "protocol": {
+  "version": "1.1",
+  "registered": "2026-10-26",
+  "definition": "docs/PROTOCOLE.md",
+  "spec": "tools/protocol/spec.py",
+  "use_case": {
+   "fr": "textes que les organisations envoient à une IA : courriels (en-têtes, signatures, fils cités), demandes collées dans une conversation, documents internes (comptes rendus, courriers RH, contrats, factures, notes CRM, tickets), en français, en texte ou en fichiers bureautiques, écrits de bonne foi",
+   "en": "texts organisations send to an AI: e-mails (headers, signatures, quoted threads), requests pasted into a chat, internal documents (minutes, HR letters, contracts, invoices, CRM notes, tickets), in French, as text or office files, written in good faith"
+  },
+  "previous_versions": [
+   {
+    "version": "1.0",
+    "registered": "2026-10-25",
+    "campaign": "2026-10-26",
+    "engine": "1.0.0+0c3ff9fc1fb0",
+    "confidence_index": "61.8 % [58.6-66.9]",
+    "families": "7",
+    "results": "benchmarks/results/protocol-2026-10-26.md",
+    "registration": "PROTOCOL-REGISTRATION.json"
+   }
+  ]
+ },
+ "registration": {
+  "expected": {
+   "faker": "40.43.0",
+   "documents": {
+    "synthetic_fr": 450000,
+    "redteam_bases": 12000,
+    "redteam_fr": 548907
+   },
+   "synthetic_sha256": "0b91be78435e5434ee5a3b136ab8f08dd10a2c3673dad56fc6dca469c87a955b",
+   "redteam_sha256": "d984ee1bf9dba70bf2ccf32957cab9da9bbf1fdf02adf5b7444956fa0137760b"
+  },
+  "observed": {
+   "faker": "40.43.0",
+   "documents": {
+    "synthetic_fr": 450000,
+    "redteam_bases": 12000,
+    "redteam_fr": 548907
+   },
+   "synthetic_sha256": "0b91be78435e5434ee5a3b136ab8f08dd10a2c3673dad56fc6dca469c87a955b",
+   "redteam_sha256": "d984ee1bf9dba70bf2ccf32957cab9da9bbf1fdf02adf5b7444956fa0137760b"
+  },
+  "fingerprints_match_registration": true,
+  "tool": {
+   "source": "bundle",
+   "bundle_sha256": "b64d1bac1898e35bbcdb5a895c8aef13b0cd49724abfe643ce3ff562db1cb1b9",
+   "tools_sha256": "306e2ee67dcb7fd11a9dc0f7991be2cab83be6c3f5b5e4c8baff2b047c9e859b",
+   "spec_sha256": "035a231d523838f147724671990cdae8ade1a17abbaa341bf176fe861f2592b8",
+   "protocole_md_sha256": "0fb9254c4511768803f3d94a34f25ad044f95824d96fe6402f5b93ebd4596941",
+   "faker": "40.43.0"
+  },
+  "test_halves_measured_before": [
+   {
+    "utc": "2026-10-25",
+    "by": "corpus analysis",
+    "engine": "1.0.0",
+    "what": "whole-corpus analysis before the split (docs/CORPUS_REELS.md, sections 1 to 7)"
+   },
+   {
+    "utc": "2026-10-25T20:21",
+    "by": "engine tuning",
+    "engine": "1.0.0",
+    "what": "in-process evaluation of the dev and test halves (docs/CORPUS_REELS.md, section 12, 'before' column)"
+   },
+   {
+    "utc": "2026-10-25T21:04",
+    "by": "protocol tool trial",
+    "engine": "sources of that moment",
+    "what": "scaled plan, full real corpora: index 45.3%"
+   },
+   {
+    "utc": "2026-10-25T21:18",
+    "by": "protocol tool trial",
+    "engine": "sources of that moment",
+    "what": "scaled plan, full real corpora: index 45.2%"
+   },
+   {
+    "utc": "2026-10-25T21:36/22:20",
+    "by": "engine tuning",
+    "engine": "rules2 iterations, and 1.0.0 at 21:53",
+    "what": "in-process evaluations of the test halves and whole corpora at each of four rules2 iterations, and of 1.0.0 on whole corpora; the last one published at 22:22 (benchmarks/results/real-rules2-comparison-2026-10-25)"
+   },
+   {
+    "utc": "2026-10-25T21:42",
+    "by": "independent audit of the tool",
+    "engine": "sources of that moment",
+    "what": "scaled plan, full real corpora: index 61.2%"
+   },
+   {
+    "utc": "2026-10-25T22:59",
+    "by": "independent review of the engine tuning",
+    "engine": "1.0.0 and rules2",
+    "what": "in-process evaluation of the test halves and whole corpora, same figures as 22:22, not published"
+   },
+   {
+    "utc": "2026-10-26",
+    "by": "engine tuning (independent review, rules3)",
+    "engine": "rules2 and rules3",
+    "what": "in-process evaluation of the dev and test halves and unseen sets, rules2 against rules3 (benchmarks/results/real-rules3-comparison-2026-10-26, docs/CORPUS_REELS.md section 13)"
+   },
+   {
+    "utc": "2026-10-26",
+    "by": "public protocol campaign 1.0",
+    "engine": "1.0.0+0c3ff9fc1fb0",
+    "what": "standard campaign, published: index 61.8% [58.6-66.9] under protocol 1.0, scores per family, corpus, label and red-team operator (benchmarks/results/protocol-2026-10-26)"
+   }
+  ],
+  "earlier_campaigns": [
+   {
+    "date": "2026-10-26",
+    "engine": "1.0.0+0c3ff9fc1fb0",
+    "protocol": "1.0",
+    "confidence_index": "61.8 % [58.6-66.9]"
+   }
+  ]
+ },
+ "campaign": {
+  "complete": true,
+  "standard_plan": true,
+  "date": "2026-10-26",
+  "engine": {
+   "version": "1.0.1",
+   "packs_sha256": "c92770ff020a517756204e35f1f497993a7e3879bb959e2b77290d626662e097",
+   "image": "sha256:4bb5c465425e0e99dd672118e67d6b14c3bc8fbbd95a71c7b50a982e09666b3e",
+   "probe_docs": 200,
+   "probe_sha256": "df6f7a380268df3459d57625c4ca3aaf464dc9e8586ed4a28e4d8f9e8b85e561"
+  },
+  "plan_id": "d5676bcfe40afa96",
+  "units_done": 793,
+  "units_planned": 793,
+  "docs": 1019385,
+  "local_principal": true,
+  "engine_checks": 155,
+  "engine_check_docs": 31000,
+  "real_pack_wiped": true,
+  "disclosures": [],
+  "active_seconds": 10088.3,
+  "docs_per_second": 101.0,
+  "throttled_seconds": 0.0,
+  "retries": {},
+  "errors": {},
+  "ambiguous_docs": 0,
+  "runs": [
+   {
+    "started": "2026-10-26T17:09:42+00:00",
+    "units_pending": 793,
+    "threads": 3,
+    "local_principal": true,
+    "ended": "2026-10-26T19:57:50+00:00",
+    "docs": 1019385,
+    "seconds": 10088.3
+   }
+  ],
+  "route": "POST /v1/anonymize/text on the service Unix socket, LOCAL principal (local token): counted as \"protocol\" in the public statistics",
+  "options": {
+   "profile": "standard",
+   "label_language": "fr",
+   "countries_french_scope": "FR"
+  }
+ },
+ "confidence_index": {
+  "index": "normalised",
+  "title_fr": "Documents normalisés",
+  "title_en": "Normalised documents",
+  "target": 0.95,
+  "value": 0.9691234497688641,
+  "ci95": [
+   0.962370128050301,
+   0.9755104059307969
+  ],
+  "mention_recall": 0.9928087611581556,
+  "mention_recall_ci95": [
+   0.9877747733209062,
+   0.9957612515646272
+  ],
+  "families": [
+   "synthetic_fr",
+   "bodacc_fr",
+   "boamp_fr",
+   "parlamint_fr"
+  ],
+  "weights": "equal (1/4 each)",
+  "real_split": "test",
+  "bootstrap": {
+   "resamples": 2000,
+   "seed": 20261025,
+   "method": "stratified by family, multinomial over per-document outcomes (exact)"
+  }
+ },
+ "hard_index": {
+  "index": "hard",
+  "title_fr": "Documents difficiles",
+  "title_en": "Difficult documents",
+  "value": 0.8401641808175155,
+  "ci95": [
+   0.8392330576946551,
+   0.8410186516112931
+  ],
+  "mention_recall": 0.9503322729661114,
+  "mention_recall_ci95": [
+   0.9499243017950387,
+   0.9507062300887288
+  ],
+  "docs": 548907,
+  "families": [
+   "redteam_fr",
+   "redteam_obfuscation_fr",
+   "redteam_ocr_fr"
+  ],
+  "operators": 51,
+  "weights": "every mutated document counts once (all operators pooled; a group weighs its share of the documents)",
+  "groups": {
+   "everyday": {
+    "family": "redteam_fr",
+    "operators": 25,
+    "scored": 284081,
+    "passed": 241078,
+    "weight": 0.5175394010278608,
+    "no_leak_rate": 0.8486241600107012,
+    "no_leak_ci95_wilson": [
+     0.8473014537047799,
+     0.8499374379687549
+    ],
+    "mention_recall": 0.9645982931828941
+   },
+   "obfuscation": {
+    "family": "redteam_obfuscation_fr",
+    "operators": 25,
+    "scored": 252895,
+    "passed": 218999,
+    "weight": 0.46072467649346793,
+    "no_leak_rate": 0.8659680895233199,
+    "no_leak_ci95_wilson": [
+     0.8646347279427564,
+     0.8672903332091753
+    ],
+    "mention_recall": 0.944926222590337
+   },
+   "ocr": {
+    "family": "redteam_ocr_fr",
+    "operators": 1,
+    "scored": 11931,
+    "passed": 1095,
+    "weight": 0.02173592247867125,
+    "no_leak_rate": 0.09177772190093035,
+    "no_leak_ci95_wilson": [
+     0.08672775139171938,
+     0.09709048083115525
+    ],
+    "mention_recall": 0.728357178095708
+   }
+  },
+  "bootstrap": {
+   "resamples": 2000,
+   "seed": 20261025,
+   "method": "stratified by red-team group, multinomial over per-document outcomes (exact); mutated documents of one base document are not resampled together"
+  }
+ },
+ "confidence_index_all_real_docs": {
+  "value": 0.9649293961343884,
+  "mention_recall": 0.9936041628718385
+ },
+ "confidence_index_dev_real_docs": {
+  "value": 0.9610136927409993,
+  "mention_recall": 0.9944075964531146
+ },
+ "families": {
+  "synthetic_fr": {
+   "title_fr": "Synthétique FR (10 graines, leurres)",
+   "title_en": "Synthetic FR (10 seeds, decoys)",
+   "kind": "synthetic",
+   "corpora": [],
+   "headline": {
+    "docs": 450000,
+    "chars": 260506107,
+    "scored": 450000,
+    "no_direct": 0,
+    "passed": 437376,
+    "no_leak_rate": 0.9719466666666666,
+    "no_leak_ci95_wilson": [
+     0.9714601698241327,
+     0.972425105961604
+    ],
+    "mentions": 3795385,
+    "mentions_masked": 3778534,
+    "mention_recall": 0.9955601342156329,
+    "errors": {},
+    "ambiguous_docs": 0,
+    "ambiguous_segments": 99839,
+    "placeholders": 4243532,
+    "per_label": {
+     "ADDRESS": {
+      "mentions": 318092,
+      "masked": 317203,
+      "recall": 0.9972052110710109
+     },
+     "CAF": {
+      "mentions": 7139,
+      "masked": 7139,
+      "recall": 1.0
+     },
+     "CARD": {
+      "mentions": 29176,
+      "masked": 29176,
+      "recall": 1.0
+     },
+     "EMAIL": {
+      "mentions": 397847,
+      "masked": 397847,
+      "recall": 1.0
+     },
+     "FRANCE_TRAVAIL": {
+      "mentions": 7148,
+      "masked": 7148,
+      "recall": 1.0
+     },
+     "IBAN": {
+      "mentions": 257162,
+      "masked": 257162,
+      "recall": 1.0
+     },
+     "ID_CARD": {
+      "mentions": 33133,
+      "masked": 33133,
+      "recall": 1.0
+     },
+     "IP": {
+      "mentions": 16464,
+      "masked": 16464,
+      "recall": 1.0
+     },
+     "NIR": {
+      "mentions": 202354,
+      "masked": 202354,
+      "recall": 1.0
+     },
+     "PASSPORT": {
+      "mentions": 33329,
+      "masked": 33329,
+      "recall": 1.0
+     },
+     "PERSON": {
+      "mentions": 1717080,
+      "masked": 1708462,
+      "recall": 0.9949810142800568
+     },
+     "PHONE": {
+      "mentions": 552429,
+      "masked": 548760,
+      "recall": 0.9933584225303161
+     },
+     "PLATE": {
+      "mentions": 40830,
+      "masked": 40830,
+      "recall": 1.0
+     },
+     "RIB": {
+      "mentions": 33133,
+      "masked": 33133,
+      "recall": 1.0
+     },
+     "RIB_SPLIT": {
+      "mentions": 28756,
+      "masked": 28756,
+      "recall": 1.0
+     },
+     "RPPS": {
+      "mentions": 50000,
+      "masked": 50000,
+      "recall": 1.0
+     },
+     "SIREN": {
+      "mentions": 7085,
+      "masked": 7085,
+      "recall": 1.0
+     },
+     "SIRET": {
+      "mentions": 33288,
+      "masked": 33285,
+      "recall": 0.9999098774333093
+     },
+     "TAX_ID": {
+      "mentions": 14230,
+      "masked": 14230,
+      "recall": 1.0
+     },
+     "VAT": {
+      "mentions": 16710,
+      "masked": 13038,
+      "recall": 0.7802513464991023
+     }
+    }
+   },
+   "measures": {
+    "docs_scored": 450000,
+    "recall_direct_chars": 0.9974535939286882,
+    "recall_structured_chars": 0.9971297943159133,
+    "recall_chars": 0.937489559883589,
+    "precision": 0.9879787397452768,
+    "over_masking": 0.0006364495731559643,
+    "decoy_false_mask_rate": 0.037069586491449674,
+    "decoys": 1842211,
+    "doc_leak_rate_eval": 0.028053333333333333,
+    "doc_leak_rate_structured_eval": 0.008162222222222222,
+    "doc_literal_leak_rate_eval": 0.010942222222222223,
+    "entity_recall_direct": 0.9948776397759372
+   }
+  },
+  "bodacc_fr": {
+   "title_fr": "BODACC",
+   "title_en": "BODACC",
+   "kind": "real",
+   "corpora": [
+    "bodacc_fr"
+   ],
+   "headline": {
+    "docs": 1335,
+    "chars": 1058222,
+    "scored": 1335,
+    "no_direct": 0,
+    "passed": 1301,
+    "no_leak_rate": 0.9745318352059925,
+    "no_leak_ci95_wilson": [
+     0.9646223627887774,
+     0.98171821521814
+    ],
+    "mentions": 7057,
+    "mentions_masked": 7021,
+    "mention_recall": 0.9948986821595579,
+    "errors": {},
+    "ambiguous_docs": 0,
+    "ambiguous_segments": 152,
+    "placeholders": 6749,
+    "per_label": {
+     "ADDRESS": {
+      "mentions": 1387,
+      "masked": 1362,
+      "recall": 0.9819754866618601
+     },
+     "ID": {
+      "mentions": 1325,
+      "masked": 1325,
+      "recall": 1.0
+     },
+     "PERSON": {
+      "mentions": 4345,
+      "masked": 4334,
+      "recall": 0.9974683544303797
+     }
+    }
+   },
+   "all_docs": {
+    "docs": 2693,
+    "chars": 2163537,
+    "scored": 2693,
+    "no_direct": 0,
+    "passed": 2613,
+    "no_leak_rate": 0.9702933531377645,
+    "no_leak_ci95_wilson": [
+     0.9631808817374201,
+     0.9760660256828104
+    ],
+    "mentions": 14207,
+    "mentions_masked": 14122,
+    "mention_recall": 0.9940170338565496,
+    "errors": {},
+    "ambiguous_docs": 0,
+    "ambiguous_segments": 322,
+    "placeholders": 13700,
+    "per_label": {
+     "ADDRESS": {
+      "mentions": 2812,
+      "masked": 2758,
+      "recall": 0.980796586059744
+     },
+     "ID": {
+      "mentions": 2667,
+      "masked": 2667,
+      "recall": 1.0
+     },
+     "PERSON": {
+      "mentions": 8728,
+      "masked": 8697,
+      "recall": 0.9964482126489459
+     }
+    }
+   },
+   "dev_half": {
+    "docs": 1358,
+    "chars": 1105315,
+    "scored": 1358,
+    "no_direct": 0,
+    "passed": 1312,
+    "no_leak_rate": 0.9661266568483063,
+    "no_leak_ci95_wilson": [
+     0.9551143113421307,
+     0.9745093183396317
+    ],
+    "mentions": 7150,
+    "mentions_masked": 7101,
+    "mention_recall": 0.9931468531468531,
+    "errors": {},
+    "ambiguous_docs": 0,
+    "ambiguous_segments": 170,
+    "placeholders": 6951,
+    "per_label": {
+     "ADDRESS": {
+      "mentions": 1425,
+      "masked": 1396,
+      "recall": 0.9796491228070175
+     },
+     "ID": {
+      "mentions": 1342,
+      "masked": 1342,
+      "recall": 1.0
+     },
+     "PERSON": {
+      "mentions": 4383,
+      "masked": 4363,
+      "recall": 0.9954369153547798
+     }
+    }
+   },
+   "measures": {
+    "metrics": {
+     "mention_recall": 0.9948986821595579,
+     "mention_recall_at80": 0.9970242312597422,
+     "char_recall": 0.9957772297754403,
+     "precision": 0.9916301269754271,
+     "over_masking": 0.001043908245959434,
+     "doc_leak_rate": 0.02546816479400749,
+     "doc_literal_leak_rate": 0.017228464419475654,
+     "mention_literal_leak_rate": 0.005393896380411639,
+     "kept_touched_rate": 0.0042184724689165185,
+     "detections_per_10k_chars": 63.776787857368305,
+     "docs_with_detection": 1.0,
+     "recall_PERSON": 0.9974683544303797,
+     "recall_ADDRESS": 0.9819754866618601,
+     "recall_ID": 1.0
+    },
+    "precision_ci95": [
+     0.9895742502675254,
+     0.9936158790571544
+    ],
+    "detections": 6749,
+    "chars": 1058222
+   },
+   "measures_all_docs": {
+    "metrics": {
+     "mention_recall": 0.9940170338565496,
+     "mention_recall_at80": 0.9964806081509116,
+     "char_recall": 0.995960789841793,
+     "precision": 0.9923768379306601,
+     "over_masking": 0.000909329650756673,
+     "doc_leak_rate": 0.029706646862235425,
+     "doc_literal_leak_rate": 0.0181953212031192,
+     "mention_literal_leak_rate": 0.005360795654934048,
+     "kept_touched_rate": 0.003951701427003293,
+     "detections_per_10k_chars": 63.32223576486096,
+     "docs_with_detection": 1.0,
+     "recall_PERSON": 0.9964482126489459,
+     "recall_ADDRESS": 0.980796586059744,
+     "recall_ID": 1.0
+    },
+    "precision_ci95": [
+     0.9909567998523727,
+     0.99374229803692
+    ],
+    "detections": 13700,
+    "chars": 2163537
+   }
+  },
+  "boamp_fr": {
+   "title_fr": "BOAMP",
+   "title_en": "BOAMP",
+   "kind": "real",
+   "corpora": [
+    "boamp_fr"
+   ],
+   "headline": {
+    "docs": 1477,
+    "chars": 9040245,
+    "scored": 1408,
+    "no_direct": 69,
+    "passed": 1339,
+    "no_leak_rate": 0.9509943181818182,
+    "no_leak_ci95_wilson": [
+     0.938439802114156,
+     0.9610946265325466
+    ],
+    "mentions": 12045,
+    "mentions_masked": 11840,
+    "mention_recall": 0.9829804898298049,
+    "errors": {},
+    "ambiguous_docs": 0,
+    "ambiguous_segments": 77,
+    "placeholders": 18155,
+    "per_label": {
+     "ADDRESS": {
+      "mentions": 5023,
+      "masked": 4857,
+      "recall": 0.9669520207047582
+     },
+     "EMAIL": {
+      "mentions": 3418,
+      "masked": 3418,
+      "recall": 1.0
+     },
+     "PERSON": {
+      "mentions": 353,
+      "masked": 316,
+      "recall": 0.8951841359773371
+     },
+     "PHONE": {
+      "mentions": 3251,
+      "masked": 3249,
+      "recall": 0.9993848046754845
+     }
+    }
+   },
+   "all_docs": {
+    "docs": 3000,
+    "chars": 18212053,
+    "scored": 2873,
+    "no_direct": 127,
+    "passed": 2732,
+    "no_leak_rate": 0.9509223807866342,
+    "no_leak_ci95_wilson": [
+     0.942403200059739,
+     0.9582373243096959
+    ],
+    "mentions": 24506,
+    "mentions_masked": 24216,
+    "mention_recall": 0.9881661633885579,
+    "errors": {},
+    "ambiguous_docs": 0,
+    "ambiguous_segments": 133,
+    "placeholders": 37102,
+    "per_label": {
+     "ADDRESS": {
+      "mentions": 9782,
+      "masked": 9574,
+      "recall": 0.9787364547127377
+     },
+     "EMAIL": {
+      "mentions": 7230,
+      "masked": 7229,
+      "recall": 0.9998616874135546
+     },
+     "PERSON": {
+      "mentions": 728,
+      "masked": 649,
+      "recall": 0.8914835164835165
+     },
+     "PHONE": {
+      "mentions": 6766,
+      "masked": 6764,
+      "recall": 0.9997044043748152
+     }
+    }
+   },
+   "dev_half": {
+    "docs": 1523,
+    "chars": 9171808,
+    "scored": 1465,
+    "no_direct": 58,
+    "passed": 1393,
+    "no_leak_rate": 0.9508532423208191,
+    "no_leak_ci95_wilson": [
+     0.9385562691598232,
+     0.9607919838916715
+    ],
+    "mentions": 12461,
+    "mentions_masked": 12376,
+    "mention_recall": 0.9931787175989086,
+    "errors": {},
+    "ambiguous_docs": 0,
+    "ambiguous_segments": 56,
+    "placeholders": 18947,
+    "per_label": {
+     "ADDRESS": {
+      "mentions": 4759,
+      "masked": 4717,
+      "recall": 0.9911746165160749
+     },
+     "EMAIL": {
+      "mentions": 3812,
+      "masked": 3811,
+      "recall": 0.9997376705141658
+     },
+     "PERSON": {
+      "mentions": 375,
+      "masked": 333,
+      "recall": 0.888
+     },
+     "PHONE": {
+      "mentions": 3515,
+      "masked": 3515,
+      "recall": 1.0
+     }
+    }
+   },
+   "measures": {
+    "metrics": {
+     "mention_recall": 0.9829804898298049,
+     "mention_recall_at80": 0.9846409298464093,
+     "char_recall": 0.9873817034700315,
+     "precision": 0.8768600227909563,
+     "over_masking": 0.004362118025344756,
+     "doc_leak_rate": 0.049005681818181816,
+     "doc_literal_leak_rate": 0.0234375,
+     "mention_literal_leak_rate": 0.003654485049833887,
+     "kept_touched_rate": 0.16223435830464206,
+     "detections_per_10k_chars": 20.08242033263479,
+     "docs_with_detection": 0.989844278943805,
+     "recall_PERSON": 0.8951841359773371,
+     "recall_ADDRESS": 0.9669520207047582,
+     "recall_EMAIL": 1.0,
+     "recall_PHONE": 0.9993848046754845
+    },
+    "precision_ci95": [
+     0.8560116565439599,
+     0.8938318255066334
+    ],
+    "detections": 18155,
+    "chars": 9040245
+   },
+   "measures_all_docs": {
+    "metrics": {
+     "mention_recall": 0.9881661633885579,
+     "mention_recall_at80": 0.9892679343834163,
+     "char_recall": 0.9890087286809237,
+     "precision": 0.8737194344254426,
+     "over_masking": 0.004595996922487571,
+     "doc_leak_rate": 0.04907761921336582,
+     "doc_literal_leak_rate": 0.024016707274625827,
+     "mention_literal_leak_rate": 0.0035918367346938775,
+     "kept_touched_rate": 0.1592036963093948,
+     "detections_per_10k_chars": 20.372222725246846,
+     "docs_with_detection": 0.9903333333333333,
+     "recall_PERSON": 0.8914835164835165,
+     "recall_ADDRESS": 0.9787364547127377,
+     "recall_EMAIL": 0.9998616874135546,
+     "recall_PHONE": 0.9997044043748152
+    },
+    "precision_ci95": [
+     0.8590263088986908,
+     0.8862755553890161
+    ],
+    "detections": 37102,
+    "chars": 18212053
+   }
+  },
+  "parlamint_fr": {
+   "title_fr": "ParlaMint-FR",
+   "title_en": "ParlaMint-FR",
+   "kind": "real",
+   "corpora": [
+    "parlamint_fr"
+   ],
+   "headline": {
+    "docs": 144,
+    "chars": 486462,
+    "scored": 143,
+    "no_direct": 1,
+    "passed": 140,
+    "no_leak_rate": 0.9790209790209791,
+    "no_leak_ci95_wilson": [
+     0.940139034865942,
+     0.9928399827784458
+    ],
+    "mentions": 1361,
+    "mentions_masked": 1358,
+    "mention_recall": 0.9977957384276267,
+    "errors": {},
+    "ambiguous_docs": 0,
+    "ambiguous_segments": 0,
+    "placeholders": 1451,
+    "per_label": {
+     "PERSON": {
+      "mentions": 1361,
+      "masked": 1358,
+      "recall": 0.9977957384276267
+     }
+    }
+   },
+   "all_docs": {
+    "docs": 300,
+    "chars": 1029684,
+    "scored": 299,
+    "no_direct": 1,
+    "passed": 289,
+    "no_leak_rate": 0.9665551839464883,
+    "no_leak_ci95_wilson": [
+     0.9395402928281286,
+     0.9817338322089914
+    ],
+    "mentions": 3006,
+    "mentions_masked": 2996,
+    "mention_recall": 0.9966733200266135,
+    "errors": {},
+    "ambiguous_docs": 0,
+    "ambiguous_segments": 0,
+    "placeholders": 3178,
+    "per_label": {
+     "PERSON": {
+      "mentions": 3006,
+      "masked": 2996,
+      "recall": 0.9966733200266135
+     }
+    }
+   },
+   "dev_half": {
+    "docs": 156,
+    "chars": 543222,
+    "scored": 156,
+    "no_direct": 0,
+    "passed": 149,
+    "no_leak_rate": 0.9551282051282052,
+    "no_leak_ci95_wilson": [
+     0.9102836178517977,
+     0.9780966625064529
+    ],
+    "mentions": 1645,
+    "mentions_masked": 1638,
+    "mention_recall": 0.9957446808510638,
+    "errors": {},
+    "ambiguous_docs": 0,
+    "ambiguous_segments": 0,
+    "placeholders": 1727,
+    "per_label": {
+     "PERSON": {
+      "mentions": 1645,
+      "masked": 1638,
+      "recall": 0.9957446808510638
+     }
+    }
+   },
+   "measures": {
+    "metrics": {
+     "mention_recall": 0.9977957384276267,
+     "mention_recall_at80": 0.9977957384276267,
+     "char_recall": 0.9983422666740344,
+     "precision": null,
+     "over_masking": null,
+     "doc_leak_rate": 0.02097902097902098,
+     "doc_literal_leak_rate": 0.013986013986013986,
+     "mention_literal_leak_rate": 0.0014695077149155032,
+     "kept_touched_rate": null,
+     "detections_per_10k_chars": 29.827612434270304,
+     "docs_with_detection": 0.9930555555555556,
+     "recall_PERSON": 0.9977957384276267
+    },
+    "precision_ci95": null,
+    "detections": 1451,
+    "chars": 486462
+   },
+   "measures_all_docs": {
+    "metrics": {
+     "mention_recall": 0.9966733200266135,
+     "mention_recall_at80": 0.9966733200266135,
+     "char_recall": 0.9977516300682006,
+     "precision": null,
+     "over_masking": null,
+     "doc_leak_rate": 0.033444816053511704,
+     "doc_literal_leak_rate": 0.013377926421404682,
+     "mention_literal_leak_rate": 0.0013306719893546241,
+     "kept_touched_rate": null,
+     "detections_per_10k_chars": 30.863837837627855,
+     "docs_with_detection": 0.9966666666666667,
+     "recall_PERSON": 0.9966733200266135
+    },
+    "precision_ci95": null,
+    "detections": 3178,
+    "chars": 1029684
+   }
+  }
+ },
+ "families_apart": {
+  "redteam_fr": {
+   "title_fr": "Équipe rouge FR, formats du quotidien abîmés (25 opérateurs)",
+   "title_en": "Red team FR, damaged everyday formats (25 operators)",
+   "kind": "redteam",
+   "corpora": [],
+   "headline": {
+    "docs": 284081,
+    "chars": 168447598,
+    "scored": 284081,
+    "no_direct": 0,
+    "passed": 241078,
+    "no_leak_rate": 0.8486241600107012,
+    "no_leak_ci95_wilson": [
+     0.8473014537047799,
+     0.8499374379687549
+    ],
+    "mentions": 2420646,
+    "mentions_masked": 2334951,
+    "mention_recall": 0.9645982931828941,
+    "errors": {},
+    "ambiguous_docs": 0,
+    "ambiguous_segments": 49114,
+    "placeholders": 2683854,
+    "per_label": {
+     "ADDRESS": {
+      "mentions": 201079,
+      "masked": 188697,
+      "recall": 0.9384222121653678
+     },
+     "CAF": {
+      "mentions": 3875,
+      "masked": 3875,
+      "recall": 1.0
+     },
+     "CARD": {
+      "mentions": 17011,
+      "masked": 16738,
+      "recall": 0.9839515607548057
+     },
+     "EMAIL": {
+      "mentions": 256049,
+      "masked": 254501,
+      "recall": 0.9939542821881749
+     },
+     "FRANCE_TRAVAIL": {
+      "mentions": 4423,
+      "masked": 2927,
+      "recall": 0.6617680307483609
+     },
+     "IBAN": {
+      "mentions": 161705,
+      "masked": 161272,
+      "recall": 0.9973222844067902
+     },
+     "ID_CARD": {
+      "mentions": 20746,
+      "masked": 19976,
+      "recall": 0.9628844114528102
+     },
+     "IP": {
+      "mentions": 10875,
+      "masked": 9947,
+      "recall": 0.9146666666666666
+     },
+     "NIR": {
+      "mentions": 129150,
+      "masked": 126774,
+      "recall": 0.981602787456446
+     },
+     "PASSPORT": {
+      "mentions": 20750,
+      "masked": 20558,
+      "recall": 0.9907469879518073
+     },
+     "PERSON": {
+      "mentions": 1100139,
+      "masked": 1046891,
+      "recall": 0.951598843418877
+     },
+     "PHONE": {
+      "mentions": 354139,
+      "masked": 346587,
+      "recall": 0.9786750400266562
+     },
+     "PLATE": {
+      "mentions": 27143,
+      "masked": 25276,
+      "recall": 0.9312161514939395
+     },
+     "RIB": {
+      "mentions": 20746,
+      "masked": 20554,
+      "recall": 0.9907452038947266
+     },
+     "RIB_SPLIT": {
+      "mentions": 14976,
+      "masked": 14802,
+      "recall": 0.9883814102564102
+     },
+     "RPPS": {
+      "mentions": 31439,
+      "masked": 31439,
+      "recall": 1.0
+     },
+     "SIREN": {
+      "mentions": 4677,
+      "masked": 4075,
+      "recall": 0.871285011759675
+     },
+     "SIRET": {
+      "mentions": 20823,
+      "masked": 20810,
+      "recall": 0.9993756903424098
+     },
+     "TAX_ID": {
+      "mentions": 10138,
+      "masked": 10138,
+      "recall": 1.0
+     },
+     "VAT": {
+      "mentions": 10763,
+      "masked": 9114,
+      "recall": 0.8467899284586082
+     }
+    }
+   },
+   "operators": [
+    "crlf",
+    "line_break",
+    "letter_spacing",
+    "nbsp",
+    "narrow_nbsp",
+    "thin_space",
+    "figure_space",
+    "ideographic_space",
+    "tab",
+    "double_space",
+    "dots",
+    "hyphens",
+    "slashes",
+    "compact",
+    "regroup",
+    "en_dash_groups",
+    "nb_hyphen",
+    "pdf_hyphenation",
+    "soft_hyphen",
+    "upper",
+    "lower",
+    "surname_first",
+    "strip_accents",
+    "nfd",
+    "markdown_bold"
+   ],
+   "measures": {
+    "docs_scored": 284081,
+    "recall_direct_chars": 0.9801677725978172,
+    "recall_structured_chars": 0.9889458880577344,
+    "recall_chars": 0.918843041355604,
+    "precision": 0.9879123208373984,
+    "over_masking": 0.0007094576606717726,
+    "decoy_false_mask_rate": 0.03614283673859211,
+    "decoys": 1162222,
+    "doc_leak_rate_eval": 0.15137583998929882,
+    "doc_leak_rate_structured_eval": 0.055589778971490526,
+    "doc_literal_leak_rate_eval": 0.09269539321531535,
+    "entity_recall_direct": 0.9623850310289774
+   },
+   "index": "hard"
+  },
+  "redteam_obfuscation_fr": {
+   "title_fr": "Équipe rouge FR, déguisements volontaires (25 opérateurs)",
+   "title_en": "Red team FR, deliberate obfuscations (25 operators)",
+   "kind": "redteam",
+   "corpora": [],
+   "headline": {
+    "docs": 252895,
+    "chars": 153064751,
+    "scored": 252895,
+    "no_direct": 0,
+    "passed": 218999,
+    "no_leak_rate": 0.8659680895233199,
+    "no_leak_ci95_wilson": [
+     0.8646347279427564,
+     0.8672903332091753
+    ],
+    "mentions": 2226359,
+    "mentions_masked": 2103745,
+    "mention_recall": 0.944926222590337,
+    "errors": {},
+    "ambiguous_docs": 0,
+    "ambiguous_segments": 44675,
+    "placeholders": 2369017,
+    "per_label": {
+     "ADDRESS": {
+      "mentions": 165059,
+      "masked": 147474,
+      "recall": 0.8934623377095463
+     },
+     "CAF": {
+      "mentions": 2924,
+      "masked": 2752,
+      "recall": 0.9411764705882353
+     },
+     "CARD": {
+      "mentions": 12410,
+      "masked": 11680,
+      "recall": 0.9411764705882353
+     },
+     "EMAIL": {
+      "mentions": 266794,
+      "masked": 256122,
+      "recall": 0.9599991004295448
+     },
+     "FRANCE_TRAVAIL": {
+      "mentions": 4675,
+      "masked": 4301,
+      "recall": 0.92
+     },
+     "IBAN": {
+      "mentions": 141648,
+      "masked": 127910,
+      "recall": 0.9030131029029708
+     },
+     "ID_CARD": {
+      "mentions": 14856,
+      "masked": 13538,
+      "recall": 0.9112816370490038
+     },
+     "IP": {
+      "mentions": 11598,
+      "masked": 11073,
+      "recall": 0.954733574754268
+     },
+     "NIR": {
+      "mentions": 117642,
+      "masked": 112053,
+      "recall": 0.9524914571326567
+     },
+     "PASSPORT": {
+      "mentions": 18631,
+      "masked": 16865,
+      "recall": 0.9052117438677473
+     },
+     "PERSON": {
+      "mentions": 1024619,
+      "masked": 979529,
+      "recall": 0.955993398521792
+     },
+     "PHONE": {
+      "mentions": 333672,
+      "masked": 317564,
+      "recall": 0.9517250473518905
+     },
+     "PLATE": {
+      "mentions": 19142,
+      "masked": 16890,
+      "recall": 0.8823529411764706
+     },
+     "RIB": {
+      "mentions": 14856,
+      "masked": 13893,
+      "recall": 0.9351777059773829
+     },
+     "RIB_SPLIT": {
+      "mentions": 11492,
+      "masked": 10793,
+      "recall": 0.9391750783153499
+     },
+     "RPPS": {
+      "mentions": 22610,
+      "masked": 21280,
+      "recall": 0.9411764705882353
+     },
+     "SIREN": {
+      "mentions": 3399,
+      "masked": 3199,
+      "recall": 0.9411591644601354
+     },
+     "SIRET": {
+      "mentions": 21600,
+      "masked": 20736,
+      "recall": 0.96
+     },
+     "TAX_ID": {
+      "mentions": 7582,
+      "masked": 7136,
+      "recall": 0.9411764705882353
+     },
+     "VAT": {
+      "mentions": 11150,
+      "masked": 8957,
+      "recall": 0.8033183856502242
+     }
+    }
+   },
+   "operators": [
+    "math_bold",
+    "fullwidth",
+    "superscript",
+    "arabic_indic",
+    "devanagari",
+    "cyrillic",
+    "greek",
+    "zero_width_space",
+    "zero_width_joiner",
+    "word_joiner",
+    "bom",
+    "bidi_mark",
+    "bidi_isolate",
+    "tag_chars",
+    "variation_selector",
+    "grapheme_joiner",
+    "hangul_filler",
+    "at_entity",
+    "at_percent",
+    "at_fullwidth",
+    "at_brackets",
+    "at_parens",
+    "arobase",
+    "dot_brackets",
+    "dot_point"
+   ],
+   "measures": {
+    "docs_scored": 252895,
+    "recall_direct_chars": 0.9446630913886985,
+    "recall_structured_chars": 0.9460797448608391,
+    "recall_chars": 0.8892159300602542,
+    "precision": 0.9875012235006388,
+    "over_masking": 0.0007597559897159365,
+    "decoy_false_mask_rate": 0.035394735474752935,
+    "decoys": 1058519,
+    "doc_leak_rate_eval": 0.13403191047668003,
+    "doc_leak_rate_structured_eval": 0.08902904367425216,
+    "doc_literal_leak_rate_eval": 0.10644338559481208,
+    "entity_recall_direct": 0.9419885999074862
+   },
+   "index": "hard"
+  },
+  "redteam_ocr_fr": {
+   "title_fr": "Équipe rouge FR, bruit d'OCR : performance dégradée",
+   "title_en": "Red team FR, OCR noise: degraded performance",
+   "kind": "redteam",
+   "corpora": [],
+   "headline": {
+    "docs": 11931,
+    "chars": 6914304,
+    "scored": 11931,
+    "no_direct": 0,
+    "passed": 1095,
+    "no_leak_rate": 0.09177772190093035,
+    "no_leak_ci95_wilson": [
+     0.08672775139171938,
+     0.09709048083115525
+    ],
+    "mentions": 101350,
+    "mentions_masked": 73819,
+    "mention_recall": 0.728357178095708,
+    "errors": {},
+    "ambiguous_docs": 0,
+    "ambiguous_segments": 2445,
+    "placeholders": 87244,
+    "per_label": {
+     "ADDRESS": {
+      "mentions": 8419,
+      "masked": 8392,
+      "recall": 0.9967929682860197
+     },
+     "CAF": {
+      "mentions": 172,
+      "masked": 2,
+      "recall": 0.011627906976744186
+     },
+     "CARD": {
+      "mentions": 730,
+      "masked": 1,
+      "recall": 0.0013698630136986301
+     },
+     "EMAIL": {
+      "mentions": 10657,
+      "masked": 10657,
+      "recall": 1.0
+     },
+     "FRANCE_TRAVAIL": {
+      "mentions": 187,
+      "masked": 7,
+      "recall": 0.0374331550802139
+     },
+     "IBAN": {
+      "mentions": 6869,
+      "masked": 6707,
+      "recall": 0.9764157810452759
+     },
+     "ID_CARD": {
+      "mentions": 874,
+      "masked": 411,
+      "recall": 0.4702517162471396
+     },
+     "IP": {
+      "mentions": 464,
+      "masked": 464,
+      "recall": 1.0
+     },
+     "NIR": {
+      "mentions": 5468,
+      "masked": 1,
+      "recall": 0.000182882223847842
+     },
+     "PASSPORT": {
+      "mentions": 883,
+      "masked": 343,
+      "recall": 0.3884484711211778
+     },
+     "PERSON": {
+      "mentions": 45929,
+      "masked": 45694,
+      "recall": 0.9948834069977575
+     },
+     "PHONE": {
+      "mentions": 14801,
+      "masked": 72,
+      "recall": 0.004864536179987839
+     },
+     "PLATE": {
+      "mentions": 1061,
+      "masked": 163,
+      "recall": 0.1536286522148916
+     },
+     "RIB": {
+      "mentions": 874,
+      "masked": 375,
+      "recall": 0.4290617848970252
+     },
+     "RIB_SPLIT": {
+      "mentions": 676,
+      "masked": 522,
+      "recall": 0.772189349112426
+     },
+     "RPPS": {
+      "mentions": 1330,
+      "masked": 0,
+      "recall": 0.0
+     },
+     "SIREN": {
+      "mentions": 200,
+      "masked": 2,
+      "recall": 0.01
+     },
+     "SIRET": {
+      "mentions": 864,
+      "masked": 0,
+      "recall": 0.0
+     },
+     "TAX_ID": {
+      "mentions": 446,
+      "masked": 1,
+      "recall": 0.002242152466367713
+     },
+     "VAT": {
+      "mentions": 446,
+      "masked": 5,
+      "recall": 0.011210762331838564
+     }
+    }
+   },
+   "operators": [
+    "ocr"
+   ],
+   "measures": {
+    "docs_scored": 11931,
+    "recall_direct_chars": 0.797211270627009,
+    "recall_structured_chars": 0.6039205772854713,
+    "recall_chars": 0.7607331866990572,
+    "precision": 0.9855851417335786,
+    "over_masking": 0.0006176875956103311,
+    "decoy_false_mask_rate": 0.03645415458042749,
+    "decoys": 48609,
+    "doc_leak_rate_eval": 0.9082222780990696,
+    "doc_leak_rate_structured_eval": 0.907467940658788,
+    "doc_literal_leak_rate_eval": 0.8950632805297125,
+    "entity_recall_direct": 0.6843677785299129
+   },
+   "index": "hard"
+  },
+  "old_press_fr": {
+   "title_fr": "Presse ancienne FR (Europeana + HIPE), OCR de mauvaise qualité : performance dégradée",
+   "title_en": "Old French press (Europeana + HIPE), low-quality OCR: degraded performance",
+   "kind": "real",
+   "corpora": [
+    "europeana_fr",
+    "hipe_newseye_fr"
+   ],
+   "headline": {
+    "docs": 317,
+    "chars": 1369036,
+    "scored": 272,
+    "no_direct": 45,
+    "passed": 47,
+    "no_leak_rate": 0.17279411764705882,
+    "no_leak_ci95_wilson": [
+     0.13250290377259072,
+     0.22219888485264355
+    ],
+    "mentions": 5592,
+    "mentions_masked": 3085,
+    "mention_recall": 0.5516809728183119,
+    "errors": {},
+    "ambiguous_docs": 0,
+    "ambiguous_segments": 37,
+    "placeholders": 5079,
+    "per_label": {
+     "PERSON": {
+      "mentions": 5592,
+      "masked": 3085,
+      "recall": 0.5516809728183119
+     }
+    }
+   },
+   "all_docs": {
+    "docs": 655,
+    "chars": 2580533,
+    "scored": 567,
+    "no_direct": 88,
+    "passed": 121,
+    "no_leak_rate": 0.21340388007054673,
+    "no_leak_ci95_wilson": [
+     0.18166731575420064,
+     0.24899772271126036
+    ],
+    "mentions": 10936,
+    "mentions_masked": 6150,
+    "mention_recall": 0.5623628383321141,
+    "errors": {},
+    "ambiguous_docs": 0,
+    "ambiguous_segments": 75,
+    "placeholders": 9714,
+    "per_label": {
+     "PERSON": {
+      "mentions": 10936,
+      "masked": 6150,
+      "recall": 0.5623628383321141
+     }
+    }
+   },
+   "dev_half": {
+    "docs": 338,
+    "chars": 1211497,
+    "scored": 295,
+    "no_direct": 43,
+    "passed": 74,
+    "no_leak_rate": 0.25084745762711863,
+    "no_leak_ci95_wilson": [
+     0.20479661510796793,
+     0.30330376500629036
+    ],
+    "mentions": 5344,
+    "mentions_masked": 3065,
+    "mention_recall": 0.5735404191616766,
+    "errors": {},
+    "ambiguous_docs": 0,
+    "ambiguous_segments": 38,
+    "placeholders": 4635,
+    "per_label": {
+     "PERSON": {
+      "mentions": 5344,
+      "masked": 3065,
+      "recall": 0.5735404191616766
+     }
+    }
+   },
+   "measures": {
+    "metrics": {
+     "mention_recall": 0.5516809728183119,
+     "mention_recall_at80": 0.5618741058655222,
+     "char_recall": 0.565304071033674,
+     "precision": 0.7552824782881189,
+     "over_masking": 0.0045023067177930014,
+     "doc_leak_rate": 0.8272058823529411,
+     "doc_literal_leak_rate": 0.7610294117647058,
+     "mention_literal_leak_rate": 0.2472885032537961,
+     "kept_touched_rate": 0.09720196260442912,
+     "detections_per_10k_chars": 37.09909746712285,
+     "docs_with_detection": 0.9148264984227129,
+     "recall_PERSON": 0.5516809728183119
+    },
+    "precision_ci95": [
+     0.7102879348647128,
+     0.7999012724224073
+    ],
+    "detections": 5079,
+    "chars": 1369036
+   },
+   "measures_all_docs": {
+    "metrics": {
+     "mention_recall": 0.5623628383321141,
+     "mention_recall_at80": 0.5731528895391368,
+     "char_recall": 0.5749719056028255,
+     "precision": 0.7518806638597637,
+     "over_masking": 0.005000501798015586,
+     "doc_leak_rate": 0.7865961199294532,
+     "doc_literal_leak_rate": 0.7178130511463845,
+     "mention_literal_leak_rate": 0.24965300268344592,
+     "kept_touched_rate": 0.09532710280373832,
+     "detections_per_10k_chars": 37.643386075667316,
+     "docs_with_detection": 0.9114503816793893,
+     "recall_PERSON": 0.5623628383321141
+    },
+    "precision_ci95": [
+     0.7204820976730946,
+     0.7806852321991251
+    ],
+    "detections": 9714,
+    "chars": 2580533
+   },
+   "index": null
+  },
+  "mapa_fr": {
+   "title_fr": "MAPA FR (6 documents notés : sans valeur statistique)",
+   "title_en": "MAPA FR (6 scored documents: statistically meaningless)",
+   "kind": "real",
+   "corpora": [
+    "mapa_fr"
+   ],
+   "headline": {
+    "docs": 8,
+    "chars": 308248,
+    "scored": 6,
+    "no_direct": 2,
+    "passed": 1,
+    "no_leak_rate": 0.16666666666666666,
+    "no_leak_ci95_wilson": [
+     0.030053369748306635,
+     0.5635028221864702
+    ],
+    "mentions": 163,
+    "mentions_masked": 54,
+    "mention_recall": 0.3312883435582822,
+    "errors": {},
+    "ambiguous_docs": 0,
+    "ambiguous_segments": 1,
+    "placeholders": 140,
+    "per_label": {
+     "ADDRESS": {
+      "mentions": 1,
+      "masked": 0,
+      "recall": 0.0
+     },
+     "PERSON": {
+      "mentions": 162,
+      "masked": 54,
+      "recall": 0.3333333333333333
+     }
+    }
+   },
+   "all_docs": {
+    "docs": 12,
+    "chars": 453160,
+    "scored": 9,
+    "no_direct": 3,
+    "passed": 1,
+    "no_leak_rate": 0.1111111111111111,
+    "no_leak_ci95_wilson": [
+     0.019890887638544907,
+     0.434999705576656
+    ],
+    "mentions": 282,
+    "mentions_masked": 99,
+    "mention_recall": 0.35106382978723405,
+    "errors": {},
+    "ambiguous_docs": 0,
+    "ambiguous_segments": 2,
+    "placeholders": 234,
+    "per_label": {
+     "ADDRESS": {
+      "mentions": 2,
+      "masked": 0,
+      "recall": 0.0
+     },
+     "PERSON": {
+      "mentions": 280,
+      "masked": 99,
+      "recall": 0.3535714285714286
+     }
+    }
+   },
+   "dev_half": {
+    "docs": 4,
+    "chars": 144912,
+    "scored": 3,
+    "no_direct": 1,
+    "passed": 0,
+    "no_leak_rate": 0.0,
+    "no_leak_ci95_wilson": [
+     0.0,
+     0.5614970317550454
+    ],
+    "mentions": 119,
+    "mentions_masked": 45,
+    "mention_recall": 0.37815126050420167,
+    "errors": {},
+    "ambiguous_docs": 0,
+    "ambiguous_segments": 1,
+    "placeholders": 94,
+    "per_label": {
+     "ADDRESS": {
+      "mentions": 1,
+      "masked": 0,
+      "recall": 0.0
+     },
+     "PERSON": {
+      "mentions": 118,
+      "masked": 45,
+      "recall": 0.3813559322033898
+     }
+    }
+   },
+   "measures": {
+    "metrics": {
+     "mention_recall": 0.3312883435582822,
+     "mention_recall_at80": 0.3803680981595092,
+     "char_recall": 0.43716679360243715,
+     "precision": 0.4678076609616952,
+     "over_masking": 0.0003014465187172814,
+     "doc_leak_rate": 0.8333333333333334,
+     "doc_literal_leak_rate": 0.8333333333333334,
+     "mention_literal_leak_rate": 0.5074626865671642,
+     "kept_touched_rate": 0.0665083135391924,
+     "detections_per_10k_chars": 4.541797513690275,
+     "docs_with_detection": 0.875,
+     "recall_PERSON": 0.3333333333333333,
+     "recall_ADDRESS": 0.0
+    },
+    "precision_ci95": [
+     0.29947572815533985,
+     0.5967390629385568
+    ],
+    "detections": 140,
+    "chars": 308248
+   },
+   "measures_all_docs": {
+    "metrics": {
+     "mention_recall": 0.35106382978723405,
+     "mention_recall_at80": 0.37943262411347517,
+     "char_recall": 0.4384920634920635,
+     "precision": 0.429126213592233,
+     "over_masking": 0.000279611426594794,
+     "doc_leak_rate": 0.8888888888888888,
+     "doc_literal_leak_rate": 0.8888888888888888,
+     "mention_literal_leak_rate": 0.5847457627118644,
+     "kept_touched_rate": 0.08354866494401378,
+     "detections_per_10k_chars": 5.1637390767058,
+     "docs_with_detection": 0.8333333333333334,
+     "recall_PERSON": 0.3535714285714286,
+     "recall_ADDRESS": 0.0
+    },
+    "precision_ci95": [
+     0.3235498917867187,
+     0.5384639898024219
+    ],
+    "detections": 234,
+    "chars": 453160
+   },
+   "index": null
+  }
+ },
+ "corpora": {
+  "bodacc_fr": {
+   "countries": "FR",
+   "scope": "french",
+   "test": {
+    "outcome": {
+     "docs": 1335,
+     "chars": 1058222,
+     "scored": 1335,
+     "no_direct": 0,
+     "passed": 1301,
+     "no_leak_rate": 0.9745318352059925,
+     "no_leak_ci95_wilson": [
+      0.9646223627887774,
+      0.98171821521814
+     ],
+     "mentions": 7057,
+     "mentions_masked": 7021,
+     "mention_recall": 0.9948986821595579,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 152,
+     "placeholders": 6749,
+     "per_label": {
+      "ADDRESS": {
+       "mentions": 1387,
+       "masked": 1362,
+       "recall": 0.9819754866618601
+      },
+      "ID": {
+       "mentions": 1325,
+       "masked": 1325,
+       "recall": 1.0
+      },
+      "PERSON": {
+       "mentions": 4345,
+       "masked": 4334,
+       "recall": 0.9974683544303797
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.9948986821595579,
+      "mention_recall_at80": 0.9970242312597422,
+      "char_recall": 0.9957772297754403,
+      "precision": 0.9916301269754271,
+      "over_masking": 0.001043908245959434,
+      "doc_leak_rate": 0.02546816479400749,
+      "doc_literal_leak_rate": 0.017228464419475654,
+      "mention_literal_leak_rate": 0.005393896380411639,
+      "kept_touched_rate": 0.0042184724689165185,
+      "detections_per_10k_chars": 63.776787857368305,
+      "docs_with_detection": 1.0,
+      "recall_PERSON": 0.9974683544303797,
+      "recall_ADDRESS": 0.9819754866618601,
+      "recall_ID": 1.0
+     },
+     "precision_ci95": [
+      0.9895742502675254,
+      0.9936158790571544
+     ],
+     "detections": 6749,
+     "chars": 1058222
+    }
+   },
+   "dev": {
+    "outcome": {
+     "docs": 1358,
+     "chars": 1105315,
+     "scored": 1358,
+     "no_direct": 0,
+     "passed": 1312,
+     "no_leak_rate": 0.9661266568483063,
+     "no_leak_ci95_wilson": [
+      0.9551143113421307,
+      0.9745093183396317
+     ],
+     "mentions": 7150,
+     "mentions_masked": 7101,
+     "mention_recall": 0.9931468531468531,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 170,
+     "placeholders": 6951,
+     "per_label": {
+      "ADDRESS": {
+       "mentions": 1425,
+       "masked": 1396,
+       "recall": 0.9796491228070175
+      },
+      "ID": {
+       "mentions": 1342,
+       "masked": 1342,
+       "recall": 1.0
+      },
+      "PERSON": {
+       "mentions": 4383,
+       "masked": 4363,
+       "recall": 0.9954369153547798
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.9931468531468531,
+      "mention_recall_at80": 0.995944055944056,
+      "char_recall": 0.9961420750894435,
+      "precision": 0.9931249070546919,
+      "over_masking": 0.000781194145926369,
+      "doc_leak_rate": 0.033873343151693665,
+      "doc_literal_leak_rate": 0.01914580265095729,
+      "mention_literal_leak_rate": 0.00532809871003926,
+      "kept_touched_rate": 0.0036908380373425966,
+      "detections_per_10k_chars": 62.887050297878886,
+      "docs_with_detection": 1.0,
+      "recall_PERSON": 0.9954369153547798,
+      "recall_ADDRESS": 0.9796491228070175,
+      "recall_ID": 1.0
+     },
+     "precision_ci95": [
+      0.9912433957038959,
+      0.9949397974386788
+     ],
+     "detections": 6951,
+     "chars": 1105315
+    }
+   },
+   "all": {
+    "outcome": {
+     "docs": 2693,
+     "chars": 2163537,
+     "scored": 2693,
+     "no_direct": 0,
+     "passed": 2613,
+     "no_leak_rate": 0.9702933531377645,
+     "no_leak_ci95_wilson": [
+      0.9631808817374201,
+      0.9760660256828104
+     ],
+     "mentions": 14207,
+     "mentions_masked": 14122,
+     "mention_recall": 0.9940170338565496,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 322,
+     "placeholders": 13700,
+     "per_label": {
+      "ADDRESS": {
+       "mentions": 2812,
+       "masked": 2758,
+       "recall": 0.980796586059744
+      },
+      "ID": {
+       "mentions": 2667,
+       "masked": 2667,
+       "recall": 1.0
+      },
+      "PERSON": {
+       "mentions": 8728,
+       "masked": 8697,
+       "recall": 0.9964482126489459
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.9940170338565496,
+      "mention_recall_at80": 0.9964806081509116,
+      "char_recall": 0.995960789841793,
+      "precision": 0.9923768379306601,
+      "over_masking": 0.000909329650756673,
+      "doc_leak_rate": 0.029706646862235425,
+      "doc_literal_leak_rate": 0.0181953212031192,
+      "mention_literal_leak_rate": 0.005360795654934048,
+      "kept_touched_rate": 0.003951701427003293,
+      "detections_per_10k_chars": 63.32223576486096,
+      "docs_with_detection": 1.0,
+      "recall_PERSON": 0.9964482126489459,
+      "recall_ADDRESS": 0.980796586059744,
+      "recall_ID": 1.0
+     },
+     "precision_ci95": [
+      0.9909567998523727,
+      0.99374229803692
+     ],
+     "detections": 13700,
+     "chars": 2163537
+    }
+   }
+  },
+  "boamp_fr": {
+   "countries": "FR",
+   "scope": "french",
+   "test": {
+    "outcome": {
+     "docs": 1477,
+     "chars": 9040245,
+     "scored": 1408,
+     "no_direct": 69,
+     "passed": 1339,
+     "no_leak_rate": 0.9509943181818182,
+     "no_leak_ci95_wilson": [
+      0.938439802114156,
+      0.9610946265325466
+     ],
+     "mentions": 12045,
+     "mentions_masked": 11840,
+     "mention_recall": 0.9829804898298049,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 77,
+     "placeholders": 18155,
+     "per_label": {
+      "ADDRESS": {
+       "mentions": 5023,
+       "masked": 4857,
+       "recall": 0.9669520207047582
+      },
+      "EMAIL": {
+       "mentions": 3418,
+       "masked": 3418,
+       "recall": 1.0
+      },
+      "PERSON": {
+       "mentions": 353,
+       "masked": 316,
+       "recall": 0.8951841359773371
+      },
+      "PHONE": {
+       "mentions": 3251,
+       "masked": 3249,
+       "recall": 0.9993848046754845
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.9829804898298049,
+      "mention_recall_at80": 0.9846409298464093,
+      "char_recall": 0.9873817034700315,
+      "precision": 0.8768600227909563,
+      "over_masking": 0.004362118025344756,
+      "doc_leak_rate": 0.049005681818181816,
+      "doc_literal_leak_rate": 0.0234375,
+      "mention_literal_leak_rate": 0.003654485049833887,
+      "kept_touched_rate": 0.16223435830464206,
+      "detections_per_10k_chars": 20.08242033263479,
+      "docs_with_detection": 0.989844278943805,
+      "recall_PERSON": 0.8951841359773371,
+      "recall_ADDRESS": 0.9669520207047582,
+      "recall_EMAIL": 1.0,
+      "recall_PHONE": 0.9993848046754845
+     },
+     "precision_ci95": [
+      0.8560116565439599,
+      0.8938318255066334
+     ],
+     "detections": 18155,
+     "chars": 9040245
+    }
+   },
+   "dev": {
+    "outcome": {
+     "docs": 1523,
+     "chars": 9171808,
+     "scored": 1465,
+     "no_direct": 58,
+     "passed": 1393,
+     "no_leak_rate": 0.9508532423208191,
+     "no_leak_ci95_wilson": [
+      0.9385562691598232,
+      0.9607919838916715
+     ],
+     "mentions": 12461,
+     "mentions_masked": 12376,
+     "mention_recall": 0.9931787175989086,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 56,
+     "placeholders": 18947,
+     "per_label": {
+      "ADDRESS": {
+       "mentions": 4759,
+       "masked": 4717,
+       "recall": 0.9911746165160749
+      },
+      "EMAIL": {
+       "mentions": 3812,
+       "masked": 3811,
+       "recall": 0.9997376705141658
+      },
+      "PERSON": {
+       "mentions": 375,
+       "masked": 333,
+       "recall": 0.888
+      },
+      "PHONE": {
+       "mentions": 3515,
+       "masked": 3515,
+       "recall": 1.0
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.9931787175989086,
+      "mention_recall_at80": 0.9937404702672338,
+      "char_recall": 0.990642531692651,
+      "precision": 0.8706008724458001,
+      "over_masking": 0.004829216095217627,
+      "doc_leak_rate": 0.049146757679180884,
+      "doc_literal_leak_rate": 0.024573378839590442,
+      "mention_literal_leak_rate": 0.003531300160513644,
+      "kept_touched_rate": 0.15640096618357488,
+      "detections_per_10k_chars": 20.657868110627696,
+      "docs_with_detection": 0.9908076165462902,
+      "recall_PERSON": 0.888,
+      "recall_ADDRESS": 0.9911746165160749,
+      "recall_EMAIL": 0.9997376705141658,
+      "recall_PHONE": 1.0
+     },
+     "precision_ci95": [
+      0.8474955326352586,
+      0.8890652542029371
+     ],
+     "detections": 18947,
+     "chars": 9171808
+    }
+   },
+   "all": {
+    "outcome": {
+     "docs": 3000,
+     "chars": 18212053,
+     "scored": 2873,
+     "no_direct": 127,
+     "passed": 2732,
+     "no_leak_rate": 0.9509223807866342,
+     "no_leak_ci95_wilson": [
+      0.942403200059739,
+      0.9582373243096959
+     ],
+     "mentions": 24506,
+     "mentions_masked": 24216,
+     "mention_recall": 0.9881661633885579,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 133,
+     "placeholders": 37102,
+     "per_label": {
+      "ADDRESS": {
+       "mentions": 9782,
+       "masked": 9574,
+       "recall": 0.9787364547127377
+      },
+      "EMAIL": {
+       "mentions": 7230,
+       "masked": 7229,
+       "recall": 0.9998616874135546
+      },
+      "PERSON": {
+       "mentions": 728,
+       "masked": 649,
+       "recall": 0.8914835164835165
+      },
+      "PHONE": {
+       "mentions": 6766,
+       "masked": 6764,
+       "recall": 0.9997044043748152
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.9881661633885579,
+      "mention_recall_at80": 0.9892679343834163,
+      "char_recall": 0.9890087286809237,
+      "precision": 0.8737194344254426,
+      "over_masking": 0.004595996922487571,
+      "doc_leak_rate": 0.04907761921336582,
+      "doc_literal_leak_rate": 0.024016707274625827,
+      "mention_literal_leak_rate": 0.0035918367346938775,
+      "kept_touched_rate": 0.1592036963093948,
+      "detections_per_10k_chars": 20.372222725246846,
+      "docs_with_detection": 0.9903333333333333,
+      "recall_PERSON": 0.8914835164835165,
+      "recall_ADDRESS": 0.9787364547127377,
+      "recall_EMAIL": 0.9998616874135546,
+      "recall_PHONE": 0.9997044043748152
+     },
+     "precision_ci95": [
+      0.8590263088986908,
+      0.8862755553890161
+     ],
+     "detections": 37102,
+     "chars": 18212053
+    }
+   }
+  },
+  "parlamint_fr": {
+   "countries": "FR",
+   "scope": "french",
+   "test": {
+    "outcome": {
+     "docs": 144,
+     "chars": 486462,
+     "scored": 143,
+     "no_direct": 1,
+     "passed": 140,
+     "no_leak_rate": 0.9790209790209791,
+     "no_leak_ci95_wilson": [
+      0.940139034865942,
+      0.9928399827784458
+     ],
+     "mentions": 1361,
+     "mentions_masked": 1358,
+     "mention_recall": 0.9977957384276267,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 1451,
+     "per_label": {
+      "PERSON": {
+       "mentions": 1361,
+       "masked": 1358,
+       "recall": 0.9977957384276267
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.9977957384276267,
+      "mention_recall_at80": 0.9977957384276267,
+      "char_recall": 0.9983422666740344,
+      "precision": null,
+      "over_masking": null,
+      "doc_leak_rate": 0.02097902097902098,
+      "doc_literal_leak_rate": 0.013986013986013986,
+      "mention_literal_leak_rate": 0.0014695077149155032,
+      "kept_touched_rate": null,
+      "detections_per_10k_chars": 29.827612434270304,
+      "docs_with_detection": 0.9930555555555556,
+      "recall_PERSON": 0.9977957384276267
+     },
+     "precision_ci95": null,
+     "detections": 1451,
+     "chars": 486462
+    }
+   },
+   "dev": {
+    "outcome": {
+     "docs": 156,
+     "chars": 543222,
+     "scored": 156,
+     "no_direct": 0,
+     "passed": 149,
+     "no_leak_rate": 0.9551282051282052,
+     "no_leak_ci95_wilson": [
+      0.9102836178517977,
+      0.9780966625064529
+     ],
+     "mentions": 1645,
+     "mentions_masked": 1638,
+     "mention_recall": 0.9957446808510638,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 1727,
+     "per_label": {
+      "PERSON": {
+       "mentions": 1645,
+       "masked": 1638,
+       "recall": 0.9957446808510638
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.9957446808510638,
+      "mention_recall_at80": 0.9957446808510638,
+      "char_recall": 0.9972642713842786,
+      "precision": null,
+      "over_masking": null,
+      "doc_leak_rate": 0.04487179487179487,
+      "doc_literal_leak_rate": 0.01282051282051282,
+      "mention_literal_leak_rate": 0.0012158054711246201,
+      "kept_touched_rate": null,
+      "detections_per_10k_chars": 31.791790465040076,
+      "docs_with_detection": 1.0,
+      "recall_PERSON": 0.9957446808510638
+     },
+     "precision_ci95": null,
+     "detections": 1727,
+     "chars": 543222
+    }
+   },
+   "all": {
+    "outcome": {
+     "docs": 300,
+     "chars": 1029684,
+     "scored": 299,
+     "no_direct": 1,
+     "passed": 289,
+     "no_leak_rate": 0.9665551839464883,
+     "no_leak_ci95_wilson": [
+      0.9395402928281286,
+      0.9817338322089914
+     ],
+     "mentions": 3006,
+     "mentions_masked": 2996,
+     "mention_recall": 0.9966733200266135,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 3178,
+     "per_label": {
+      "PERSON": {
+       "mentions": 3006,
+       "masked": 2996,
+       "recall": 0.9966733200266135
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.9966733200266135,
+      "mention_recall_at80": 0.9966733200266135,
+      "char_recall": 0.9977516300682006,
+      "precision": null,
+      "over_masking": null,
+      "doc_leak_rate": 0.033444816053511704,
+      "doc_literal_leak_rate": 0.013377926421404682,
+      "mention_literal_leak_rate": 0.0013306719893546241,
+      "kept_touched_rate": null,
+      "detections_per_10k_chars": 30.863837837627855,
+      "docs_with_detection": 0.9966666666666667,
+      "recall_PERSON": 0.9966733200266135
+     },
+     "precision_ci95": null,
+     "detections": 3178,
+     "chars": 1029684
+    }
+   }
+  }
+ },
+ "corpora_french_apart": {
+  "europeana_fr": {
+   "countries": "FR",
+   "scope": "french_apart",
+   "test": {
+    "outcome": {
+     "docs": 245,
+     "chars": 477846,
+     "scored": 209,
+     "no_direct": 36,
+     "passed": 45,
+     "no_leak_rate": 0.215311004784689,
+     "no_leak_ci95_wilson": [
+      0.16498996972845428,
+      0.27590843108428315
+     ],
+     "mentions": 2070,
+     "mentions_masked": 1483,
+     "mention_recall": 0.7164251207729468,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 8,
+     "placeholders": 1927,
+     "per_label": {
+      "PERSON": {
+       "mentions": 2070,
+       "masked": 1483,
+       "recall": 0.7164251207729468
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.7164251207729468,
+      "mention_recall_at80": 0.7198067632850241,
+      "char_recall": 0.7473536464120709,
+      "precision": 0.7624701670644392,
+      "over_masking": 0.004977651975637932,
+      "doc_leak_rate": 0.784688995215311,
+      "doc_literal_leak_rate": 0.7272727272727273,
+      "mention_literal_leak_rate": 0.2535279805352798,
+      "kept_touched_rate": 0.0936154949784792,
+      "detections_per_10k_chars": 40.32679984764966,
+      "docs_with_detection": 0.9061224489795918,
+      "recall_PERSON": 0.7164251207729468
+     },
+     "precision_ci95": [
+      0.7216866765424544,
+      0.7988494946738762
+     ],
+     "detections": 1927,
+     "chars": 477846
+    }
+   },
+   "dev": {
+    "outcome": {
+     "docs": 270,
+     "chars": 528090,
+     "scored": 236,
+     "no_direct": 34,
+     "passed": 71,
+     "no_leak_rate": 0.3008474576271186,
+     "no_leak_ci95_wilson": [
+      0.2459072685373392,
+      0.3621671633719723
+     ],
+     "mentions": 2202,
+     "mentions_masked": 1595,
+     "mention_recall": 0.7243415077202543,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 18,
+     "placeholders": 2055,
+     "per_label": {
+      "PERSON": {
+       "mentions": 2202,
+       "masked": 1595,
+       "recall": 0.7243415077202543
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.7243415077202543,
+      "mention_recall_at80": 0.726158038147139,
+      "char_recall": 0.7563964158479974,
+      "precision": 0.7670790453251587,
+      "over_masking": 0.004380887834632328,
+      "doc_leak_rate": 0.6991525423728814,
+      "doc_literal_leak_rate": 0.6440677966101694,
+      "mention_literal_leak_rate": 0.2451879010082493,
+      "kept_touched_rate": 0.09845490477901545,
+      "detections_per_10k_chars": 38.91382150769755,
+      "docs_with_detection": 0.9037037037037037,
+      "recall_PERSON": 0.7243415077202543
+     },
+     "precision_ci95": [
+      0.7278593653753781,
+      0.8043129184082082
+     ],
+     "detections": 2055,
+     "chars": 528090
+    }
+   },
+   "all": {
+    "outcome": {
+     "docs": 515,
+     "chars": 1005936,
+     "scored": 445,
+     "no_direct": 70,
+     "passed": 116,
+     "no_leak_rate": 0.2606741573033708,
+     "no_leak_ci95_wilson": [
+      0.2220575100826557,
+      0.3033873974362584
+     ],
+     "mentions": 4272,
+     "mentions_masked": 3078,
+     "mention_recall": 0.7205056179775281,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 26,
+     "placeholders": 3982,
+     "per_label": {
+      "PERSON": {
+       "mentions": 4272,
+       "masked": 3078,
+       "recall": 0.7205056179775281
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.7205056179775281,
+      "mention_recall_at80": 0.7230805243445693,
+      "char_recall": 0.7520561403508772,
+      "precision": 0.7648738152335275,
+      "over_masking": 0.0046629776442957144,
+      "doc_leak_rate": 0.7393258426966293,
+      "doc_literal_leak_rate": 0.6831460674157304,
+      "mention_literal_leak_rate": 0.24923294784045316,
+      "kept_touched_rate": 0.096033028181655,
+      "detections_per_10k_chars": 39.58502330168122,
+      "docs_with_detection": 0.9048543689320389,
+      "recall_PERSON": 0.7205056179775281
+     },
+     "precision_ci95": [
+      0.7378257526546859,
+      0.7904447473909038
+     ],
+     "detections": 3982,
+     "chars": 1005936
+    }
+   }
+  },
+  "hipe_newseye_fr": {
+   "countries": "FR",
+   "scope": "french_apart",
+   "test": {
+    "outcome": {
+     "docs": 72,
+     "chars": 891190,
+     "scored": 63,
+     "no_direct": 9,
+     "passed": 2,
+     "no_leak_rate": 0.031746031746031744,
+     "no_leak_ci95_wilson": [
+      0.008749527561580449,
+      0.10856477046607432
+     ],
+     "mentions": 3522,
+     "mentions_masked": 1602,
+     "mention_recall": 0.454855195911414,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 29,
+     "placeholders": 3152,
+     "per_label": {
+      "PERSON": {
+       "mentions": 3522,
+       "masked": 1602,
+       "recall": 0.454855195911414
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.454855195911414,
+      "mention_recall_at80": 0.4690516751845542,
+      "char_recall": 0.4922166654927097,
+      "precision": 0.750967187276114,
+      "over_masking": 0.00424637438107628,
+      "doc_leak_rate": 0.9682539682539683,
+      "doc_literal_leak_rate": 0.873015873015873,
+      "mention_literal_leak_rate": 0.24360080529191833,
+      "kept_touched_rate": 0.09930570166210814,
+      "detections_per_10k_chars": 35.36843995107665,
+      "docs_with_detection": 0.9444444444444444,
+      "recall_PERSON": 0.454855195911414
+     },
+     "precision_ci95": [
+      0.6886407950349854,
+      0.8243952727339826
+     ],
+     "detections": 3152,
+     "chars": 891190
+    }
+   },
+   "dev": {
+    "outcome": {
+     "docs": 68,
+     "chars": 683407,
+     "scored": 59,
+     "no_direct": 9,
+     "passed": 3,
+     "no_leak_rate": 0.05084745762711865,
+     "no_leak_ci95_wilson": [
+      0.01744271747299006,
+      0.139165022152769
+     ],
+     "mentions": 3142,
+     "mentions_masked": 1470,
+     "mention_recall": 0.4678548695098663,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 20,
+     "placeholders": 2580,
+     "per_label": {
+      "PERSON": {
+       "mentions": 3142,
+       "masked": 1470,
+       "recall": 0.4678548695098663
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.4678548695098663,
+      "mention_recall_at80": 0.4859961807765754,
+      "char_recall": 0.492862620185218,
+      "precision": 0.7330350484712901,
+      "over_masking": 0.006521011180740077,
+      "doc_leak_rate": 0.9491525423728814,
+      "doc_literal_leak_rate": 0.8135593220338984,
+      "mention_literal_leak_rate": 0.25703200775945684,
+      "kept_touched_rate": 0.08895705521472393,
+      "detections_per_10k_chars": 37.75202770823243,
+      "docs_with_detection": 0.9264705882352942,
+      "recall_PERSON": 0.4678548695098663
+     },
+     "precision_ci95": [
+      0.6495438263411584,
+      0.7801486221350618
+     ],
+     "detections": 2580,
+     "chars": 683407
+    }
+   },
+   "all": {
+    "outcome": {
+     "docs": 140,
+     "chars": 1574597,
+     "scored": 122,
+     "no_direct": 18,
+     "passed": 5,
+     "no_leak_rate": 0.040983606557377046,
+     "no_leak_ci95_wilson": [
+      0.01763071945527446,
+      0.09236052627890128
+     ],
+     "mentions": 6664,
+     "mentions_masked": 3072,
+     "mention_recall": 0.460984393757503,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 49,
+     "placeholders": 5732,
+     "per_label": {
+      "PERSON": {
+       "mentions": 6664,
+       "masked": 3072,
+       "recall": 0.460984393757503
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.460984393757503,
+      "mention_recall_at80": 0.4770408163265306,
+      "char_recall": 0.49250297397283554,
+      "precision": 0.742906158184292,
+      "over_masking": 0.005220335006410203,
+      "doc_leak_rate": 0.9590163934426229,
+      "doc_literal_leak_rate": 0.8442622950819673,
+      "mention_literal_leak_rate": 0.24992389649923896,
+      "kept_touched_rate": 0.09485549826118239,
+      "detections_per_10k_chars": 36.40296533017655,
+      "docs_with_detection": 0.9357142857142857,
+      "recall_PERSON": 0.460984393757503
+     },
+     "precision_ci95": [
+      0.6966880062836279,
+      0.7861138412389327
+     ],
+     "detections": 5732,
+     "chars": 1574597
+    }
+   }
+  },
+  "mapa_fr": {
+   "countries": "FR",
+   "scope": "french_apart",
+   "test": {
+    "outcome": {
+     "docs": 8,
+     "chars": 308248,
+     "scored": 6,
+     "no_direct": 2,
+     "passed": 1,
+     "no_leak_rate": 0.16666666666666666,
+     "no_leak_ci95_wilson": [
+      0.030053369748306635,
+      0.5635028221864702
+     ],
+     "mentions": 163,
+     "mentions_masked": 54,
+     "mention_recall": 0.3312883435582822,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 1,
+     "placeholders": 140,
+     "per_label": {
+      "ADDRESS": {
+       "mentions": 1,
+       "masked": 0,
+       "recall": 0.0
+      },
+      "PERSON": {
+       "mentions": 162,
+       "masked": 54,
+       "recall": 0.3333333333333333
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.3312883435582822,
+      "mention_recall_at80": 0.3803680981595092,
+      "char_recall": 0.43716679360243715,
+      "precision": 0.4678076609616952,
+      "over_masking": 0.0003014465187172814,
+      "doc_leak_rate": 0.8333333333333334,
+      "doc_literal_leak_rate": 0.8333333333333334,
+      "mention_literal_leak_rate": 0.5074626865671642,
+      "kept_touched_rate": 0.0665083135391924,
+      "detections_per_10k_chars": 4.541797513690275,
+      "docs_with_detection": 0.875,
+      "recall_PERSON": 0.3333333333333333,
+      "recall_ADDRESS": 0.0
+     },
+     "precision_ci95": [
+      0.29947572815533985,
+      0.5967390629385568
+     ],
+     "detections": 140,
+     "chars": 308248
+    }
+   },
+   "dev": {
+    "outcome": {
+     "docs": 4,
+     "chars": 144912,
+     "scored": 3,
+     "no_direct": 1,
+     "passed": 0,
+     "no_leak_rate": 0.0,
+     "no_leak_ci95_wilson": [
+      0.0,
+      0.5614970317550454
+     ],
+     "mentions": 119,
+     "mentions_masked": 45,
+     "mention_recall": 0.37815126050420167,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 1,
+     "placeholders": 94,
+     "per_label": {
+      "ADDRESS": {
+       "mentions": 1,
+       "masked": 0,
+       "recall": 0.0
+      },
+      "PERSON": {
+       "mentions": 118,
+       "masked": 45,
+       "recall": 0.3813559322033898
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.37815126050420167,
+      "mention_recall_at80": 0.37815126050420167,
+      "char_recall": 0.44096728307254623,
+      "precision": 0.37214885954381755,
+      "over_masking": 0.00023343718295190297,
+      "doc_leak_rate": 1.0,
+      "doc_literal_leak_rate": 1.0,
+      "mention_literal_leak_rate": 0.6862745098039216,
+      "kept_touched_rate": 0.12852664576802508,
+      "detections_per_10k_chars": 6.486695373744065,
+      "docs_with_detection": 0.75,
+      "recall_PERSON": 0.3813559322033898,
+      "recall_ADDRESS": 0.0
+     },
+     "precision_ci95": [
+      0.0,
+      0.3985185185185185
+     ],
+     "detections": 94,
+     "chars": 144912
+    }
+   },
+   "all": {
+    "outcome": {
+     "docs": 12,
+     "chars": 453160,
+     "scored": 9,
+     "no_direct": 3,
+     "passed": 1,
+     "no_leak_rate": 0.1111111111111111,
+     "no_leak_ci95_wilson": [
+      0.019890887638544907,
+      0.434999705576656
+     ],
+     "mentions": 282,
+     "mentions_masked": 99,
+     "mention_recall": 0.35106382978723405,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 2,
+     "placeholders": 234,
+     "per_label": {
+      "ADDRESS": {
+       "mentions": 2,
+       "masked": 0,
+       "recall": 0.0
+      },
+      "PERSON": {
+       "mentions": 280,
+       "masked": 99,
+       "recall": 0.3535714285714286
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.35106382978723405,
+      "mention_recall_at80": 0.37943262411347517,
+      "char_recall": 0.4384920634920635,
+      "precision": 0.429126213592233,
+      "over_masking": 0.000279611426594794,
+      "doc_leak_rate": 0.8888888888888888,
+      "doc_literal_leak_rate": 0.8888888888888888,
+      "mention_literal_leak_rate": 0.5847457627118644,
+      "kept_touched_rate": 0.08354866494401378,
+      "detections_per_10k_chars": 5.1637390767058,
+      "docs_with_detection": 0.8333333333333334,
+      "recall_PERSON": 0.3535714285714286,
+      "recall_ADDRESS": 0.0
+     },
+     "precision_ci95": [
+      0.3235498917867187,
+      0.5384639898024219
+     ],
+     "detections": 234,
+     "chars": 453160
+    }
+   }
+  }
+ },
+ "out_of_scope": {
+  "mapa_de": {
+   "countries": "DE",
+   "scope": "out_of_scope",
+   "test": {
+    "outcome": {
+     "docs": 6,
+     "chars": 332404,
+     "scored": 5,
+     "no_direct": 1,
+     "passed": 0,
+     "no_leak_rate": 0.0,
+     "no_leak_ci95_wilson": [
+      0.0,
+      0.43448246478317476
+     ],
+     "mentions": 284,
+     "mentions_masked": 0,
+     "mention_recall": 0.0,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 0,
+     "per_label": {
+      "ADDRESS": {
+       "mentions": 1,
+       "masked": 0,
+       "recall": 0.0
+      },
+      "PERSON": {
+       "mentions": 283,
+       "masked": 0,
+       "recall": 0.0
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.0,
+      "mention_recall_at80": 0.0,
+      "char_recall": 0.0,
+      "precision": null,
+      "over_masking": 0.0,
+      "doc_leak_rate": 1.0,
+      "doc_literal_leak_rate": 1.0,
+      "mention_literal_leak_rate": 1.0,
+      "kept_touched_rate": 0.0,
+      "detections_per_10k_chars": 0.0,
+      "docs_with_detection": 0.0,
+      "recall_PERSON": 0.0,
+      "recall_ADDRESS": 0.0
+     },
+     "precision_ci95": null,
+     "detections": 0,
+     "chars": 332404
+    }
+   },
+   "dev": {
+    "outcome": {
+     "docs": 6,
+     "chars": 117911,
+     "scored": 4,
+     "no_direct": 2,
+     "passed": 0,
+     "no_leak_rate": 0.0,
+     "no_leak_ci95_wilson": [
+      0.0,
+      0.4898908364545973
+     ],
+     "mentions": 53,
+     "mentions_masked": 0,
+     "mention_recall": 0.0,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 0,
+     "per_label": {
+      "PERSON": {
+       "mentions": 53,
+       "masked": 0,
+       "recall": 0.0
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.0,
+      "mention_recall_at80": 0.0,
+      "char_recall": 0.0,
+      "precision": null,
+      "over_masking": 0.0,
+      "doc_leak_rate": 1.0,
+      "doc_literal_leak_rate": 0.75,
+      "mention_literal_leak_rate": 1.0,
+      "kept_touched_rate": 0.0,
+      "detections_per_10k_chars": 0.0,
+      "docs_with_detection": 0.0,
+      "recall_PERSON": 0.0
+     },
+     "precision_ci95": null,
+     "detections": 0,
+     "chars": 117911
+    }
+   },
+   "all": {
+    "outcome": {
+     "docs": 12,
+     "chars": 450315,
+     "scored": 9,
+     "no_direct": 3,
+     "passed": 0,
+     "no_leak_rate": 0.0,
+     "no_leak_ci95_wilson": [
+      0.0,
+      0.2991450484195441
+     ],
+     "mentions": 337,
+     "mentions_masked": 0,
+     "mention_recall": 0.0,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 0,
+     "per_label": {
+      "ADDRESS": {
+       "mentions": 1,
+       "masked": 0,
+       "recall": 0.0
+      },
+      "PERSON": {
+       "mentions": 336,
+       "masked": 0,
+       "recall": 0.0
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.0,
+      "mention_recall_at80": 0.0,
+      "char_recall": 0.0,
+      "precision": null,
+      "over_masking": 0.0,
+      "doc_leak_rate": 1.0,
+      "doc_literal_leak_rate": 0.8888888888888888,
+      "mention_literal_leak_rate": 1.0,
+      "kept_touched_rate": 0.0,
+      "detections_per_10k_chars": 0.0,
+      "docs_with_detection": 0.0,
+      "recall_PERSON": 0.0,
+      "recall_ADDRESS": 0.0
+     },
+     "precision_ci95": null,
+     "detections": 0,
+     "chars": 450315
+    }
+   }
+  },
+  "mapa_es": {
+   "countries": "ES",
+   "scope": "out_of_scope",
+   "test": {
+    "outcome": {
+     "docs": 5,
+     "chars": 204434,
+     "scored": 3,
+     "no_direct": 2,
+     "passed": 0,
+     "no_leak_rate": 0.0,
+     "no_leak_ci95_wilson": [
+      0.0,
+      0.5614970317550454
+     ],
+     "mentions": 129,
+     "mentions_masked": 0,
+     "mention_recall": 0.0,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 0,
+     "per_label": {
+      "PERSON": {
+       "mentions": 129,
+       "masked": 0,
+       "recall": 0.0
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.0,
+      "mention_recall_at80": 0.0,
+      "char_recall": 0.0,
+      "precision": null,
+      "over_masking": 0.0,
+      "doc_leak_rate": 1.0,
+      "doc_literal_leak_rate": 1.0,
+      "mention_literal_leak_rate": 1.0,
+      "kept_touched_rate": 0.0,
+      "detections_per_10k_chars": 0.0,
+      "docs_with_detection": 0.0,
+      "recall_PERSON": 0.0
+     },
+     "precision_ci95": null,
+     "detections": 0,
+     "chars": 204434
+    }
+   },
+   "dev": {
+    "outcome": {
+     "docs": 4,
+     "chars": 139258,
+     "scored": 3,
+     "no_direct": 1,
+     "passed": 0,
+     "no_leak_rate": 0.0,
+     "no_leak_ci95_wilson": [
+      0.0,
+      0.5614970317550454
+     ],
+     "mentions": 142,
+     "mentions_masked": 0,
+     "mention_recall": 0.0,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 0,
+     "per_label": {
+      "PERSON": {
+       "mentions": 142,
+       "masked": 0,
+       "recall": 0.0
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.0,
+      "mention_recall_at80": 0.0,
+      "char_recall": 0.0,
+      "precision": null,
+      "over_masking": 0.0,
+      "doc_leak_rate": 1.0,
+      "doc_literal_leak_rate": 1.0,
+      "mention_literal_leak_rate": 1.0,
+      "kept_touched_rate": 0.0,
+      "detections_per_10k_chars": 0.0,
+      "docs_with_detection": 0.0,
+      "recall_PERSON": 0.0
+     },
+     "precision_ci95": null,
+     "detections": 0,
+     "chars": 139258
+    }
+   },
+   "all": {
+    "outcome": {
+     "docs": 9,
+     "chars": 343692,
+     "scored": 6,
+     "no_direct": 3,
+     "passed": 0,
+     "no_leak_rate": 0.0,
+     "no_leak_ci95_wilson": [
+      0.0,
+      0.3903342879021653
+     ],
+     "mentions": 271,
+     "mentions_masked": 0,
+     "mention_recall": 0.0,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 0,
+     "per_label": {
+      "PERSON": {
+       "mentions": 271,
+       "masked": 0,
+       "recall": 0.0
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.0,
+      "mention_recall_at80": 0.0,
+      "char_recall": 0.0,
+      "precision": null,
+      "over_masking": 0.0,
+      "doc_leak_rate": 1.0,
+      "doc_literal_leak_rate": 1.0,
+      "mention_literal_leak_rate": 1.0,
+      "kept_touched_rate": 0.0,
+      "detections_per_10k_chars": 0.0,
+      "docs_with_detection": 0.0,
+      "recall_PERSON": 0.0
+     },
+     "precision_ci95": null,
+     "detections": 0,
+     "chars": 343692
+    }
+   }
+  },
+  "mapa_it": {
+   "countries": "IT",
+   "scope": "out_of_scope",
+   "test": {
+    "outcome": {
+     "docs": 7,
+     "chars": 250221,
+     "scored": 5,
+     "no_direct": 2,
+     "passed": 0,
+     "no_leak_rate": 0.0,
+     "no_leak_ci95_wilson": [
+      0.0,
+      0.43448246478317476
+     ],
+     "mentions": 47,
+     "mentions_masked": 0,
+     "mention_recall": 0.0,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 0,
+     "per_label": {
+      "ADDRESS": {
+       "mentions": 1,
+       "masked": 0,
+       "recall": 0.0
+      },
+      "PERSON": {
+       "mentions": 46,
+       "masked": 0,
+       "recall": 0.0
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.0,
+      "mention_recall_at80": 0.0,
+      "char_recall": 0.0,
+      "precision": null,
+      "over_masking": 0.0,
+      "doc_leak_rate": 1.0,
+      "doc_literal_leak_rate": 1.0,
+      "mention_literal_leak_rate": 1.0,
+      "kept_touched_rate": 0.0,
+      "detections_per_10k_chars": 0.0,
+      "docs_with_detection": 0.0,
+      "recall_PERSON": 0.0,
+      "recall_ADDRESS": 0.0
+     },
+     "precision_ci95": null,
+     "detections": 0,
+     "chars": 250221
+    }
+   },
+   "dev": {
+    "outcome": {
+     "docs": 5,
+     "chars": 208601,
+     "scored": 4,
+     "no_direct": 1,
+     "passed": 0,
+     "no_leak_rate": 0.0,
+     "no_leak_ci95_wilson": [
+      0.0,
+      0.4898908364545973
+     ],
+     "mentions": 63,
+     "mentions_masked": 0,
+     "mention_recall": 0.0,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 0,
+     "per_label": {
+      "PERSON": {
+       "mentions": 63,
+       "masked": 0,
+       "recall": 0.0
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.0,
+      "mention_recall_at80": 0.0,
+      "char_recall": 0.0,
+      "precision": null,
+      "over_masking": 0.0,
+      "doc_leak_rate": 1.0,
+      "doc_literal_leak_rate": 1.0,
+      "mention_literal_leak_rate": 1.0,
+      "kept_touched_rate": 0.0,
+      "detections_per_10k_chars": 0.0,
+      "docs_with_detection": 0.0,
+      "recall_PERSON": 0.0
+     },
+     "precision_ci95": null,
+     "detections": 0,
+     "chars": 208601
+    }
+   },
+   "all": {
+    "outcome": {
+     "docs": 12,
+     "chars": 458822,
+     "scored": 9,
+     "no_direct": 3,
+     "passed": 0,
+     "no_leak_rate": 0.0,
+     "no_leak_ci95_wilson": [
+      0.0,
+      0.2991450484195441
+     ],
+     "mentions": 110,
+     "mentions_masked": 0,
+     "mention_recall": 0.0,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 0,
+     "per_label": {
+      "ADDRESS": {
+       "mentions": 1,
+       "masked": 0,
+       "recall": 0.0
+      },
+      "PERSON": {
+       "mentions": 109,
+       "masked": 0,
+       "recall": 0.0
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.0,
+      "mention_recall_at80": 0.0,
+      "char_recall": 0.0,
+      "precision": null,
+      "over_masking": 0.0,
+      "doc_leak_rate": 1.0,
+      "doc_literal_leak_rate": 1.0,
+      "mention_literal_leak_rate": 1.0,
+      "kept_touched_rate": 0.0,
+      "detections_per_10k_chars": 0.0,
+      "docs_with_detection": 0.0,
+      "recall_PERSON": 0.0,
+      "recall_ADDRESS": 0.0
+     },
+     "precision_ci95": null,
+     "detections": 0,
+     "chars": 458822
+    }
+   }
+  },
+  "mapa_nl": {
+   "countries": "NL",
+   "scope": "out_of_scope",
+   "test": {
+    "outcome": {
+     "docs": 5,
+     "chars": 201889,
+     "scored": 3,
+     "no_direct": 2,
+     "passed": 0,
+     "no_leak_rate": 0.0,
+     "no_leak_ci95_wilson": [
+      0.0,
+      0.5614970317550454
+     ],
+     "mentions": 190,
+     "mentions_masked": 0,
+     "mention_recall": 0.0,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 0,
+     "per_label": {
+      "PERSON": {
+       "mentions": 190,
+       "masked": 0,
+       "recall": 0.0
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.0,
+      "mention_recall_at80": 0.0,
+      "char_recall": 0.0,
+      "precision": null,
+      "over_masking": 0.0,
+      "doc_leak_rate": 1.0,
+      "doc_literal_leak_rate": 1.0,
+      "mention_literal_leak_rate": 1.0,
+      "kept_touched_rate": 0.0,
+      "detections_per_10k_chars": 0.0,
+      "docs_with_detection": 0.0,
+      "recall_PERSON": 0.0
+     },
+     "precision_ci95": null,
+     "detections": 0,
+     "chars": 201889
+    }
+   },
+   "dev": {
+    "outcome": {
+     "docs": 7,
+     "chars": 249123,
+     "scored": 6,
+     "no_direct": 1,
+     "passed": 0,
+     "no_leak_rate": 0.0,
+     "no_leak_ci95_wilson": [
+      0.0,
+      0.3903342879021653
+     ],
+     "mentions": 173,
+     "mentions_masked": 0,
+     "mention_recall": 0.0,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 1,
+     "per_label": {
+      "PERSON": {
+       "mentions": 173,
+       "masked": 0,
+       "recall": 0.0
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.0,
+      "mention_recall_at80": 0.0,
+      "char_recall": 0.0,
+      "precision": 0.0,
+      "over_masking": 0.0,
+      "doc_leak_rate": 1.0,
+      "doc_literal_leak_rate": 0.8333333333333334,
+      "mention_literal_leak_rate": 1.0,
+      "kept_touched_rate": 0.0022522522522522522,
+      "detections_per_10k_chars": 0.04014081397542579,
+      "docs_with_detection": 0.14285714285714285,
+      "recall_PERSON": 0.0
+     },
+     "precision_ci95": [
+      0.0,
+      0.0
+     ],
+     "detections": 1,
+     "chars": 249123
+    }
+   },
+   "all": {
+    "outcome": {
+     "docs": 12,
+     "chars": 451012,
+     "scored": 9,
+     "no_direct": 3,
+     "passed": 0,
+     "no_leak_rate": 0.0,
+     "no_leak_ci95_wilson": [
+      0.0,
+      0.2991450484195441
+     ],
+     "mentions": 363,
+     "mentions_masked": 0,
+     "mention_recall": 0.0,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 1,
+     "per_label": {
+      "PERSON": {
+       "mentions": 363,
+       "masked": 0,
+       "recall": 0.0
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.0,
+      "mention_recall_at80": 0.0,
+      "char_recall": 0.0,
+      "precision": 0.0,
+      "over_masking": 0.0,
+      "doc_leak_rate": 1.0,
+      "doc_literal_leak_rate": 0.8888888888888888,
+      "mention_literal_leak_rate": 1.0,
+      "kept_touched_rate": 0.0012422360248447205,
+      "detections_per_10k_chars": 0.022172359050313516,
+      "docs_with_detection": 0.08333333333333333,
+      "recall_PERSON": 0.0
+     },
+     "precision_ci95": [
+      0.0,
+      0.0
+     ],
+     "detections": 1,
+     "chars": 451012
+    }
+   }
+  },
+  "mapa_pt": {
+   "countries": "PT",
+   "scope": "out_of_scope",
+   "test": {
+    "outcome": {
+     "docs": 4,
+     "chars": 80531,
+     "scored": 3,
+     "no_direct": 1,
+     "passed": 0,
+     "no_leak_rate": 0.0,
+     "no_leak_ci95_wilson": [
+      0.0,
+      0.5614970317550454
+     ],
+     "mentions": 38,
+     "mentions_masked": 0,
+     "mention_recall": 0.0,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 0,
+     "per_label": {
+      "PERSON": {
+       "mentions": 38,
+       "masked": 0,
+       "recall": 0.0
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.0,
+      "mention_recall_at80": 0.0,
+      "char_recall": 0.0,
+      "precision": null,
+      "over_masking": 0.0,
+      "doc_leak_rate": 1.0,
+      "doc_literal_leak_rate": 1.0,
+      "mention_literal_leak_rate": 1.0,
+      "kept_touched_rate": 0.0,
+      "detections_per_10k_chars": 0.0,
+      "docs_with_detection": 0.0,
+      "recall_PERSON": 0.0
+     },
+     "precision_ci95": null,
+     "detections": 0,
+     "chars": 80531
+    }
+   },
+   "dev": {
+    "outcome": {
+     "docs": 8,
+     "chars": 360277,
+     "scored": 6,
+     "no_direct": 2,
+     "passed": 0,
+     "no_leak_rate": 0.0,
+     "no_leak_ci95_wilson": [
+      0.0,
+      0.3903342879021653
+     ],
+     "mentions": 340,
+     "mentions_masked": 0,
+     "mention_recall": 0.0,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 0,
+     "per_label": {
+      "ADDRESS": {
+       "mentions": 3,
+       "masked": 0,
+       "recall": 0.0
+      },
+      "PERSON": {
+       "mentions": 337,
+       "masked": 0,
+       "recall": 0.0
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.0,
+      "mention_recall_at80": 0.0,
+      "char_recall": 0.0,
+      "precision": null,
+      "over_masking": 0.0,
+      "doc_leak_rate": 1.0,
+      "doc_literal_leak_rate": 1.0,
+      "mention_literal_leak_rate": 1.0,
+      "kept_touched_rate": 0.0,
+      "detections_per_10k_chars": 0.0,
+      "docs_with_detection": 0.0,
+      "recall_PERSON": 0.0,
+      "recall_ADDRESS": 0.0
+     },
+     "precision_ci95": null,
+     "detections": 0,
+     "chars": 360277
+    }
+   },
+   "all": {
+    "outcome": {
+     "docs": 12,
+     "chars": 440808,
+     "scored": 9,
+     "no_direct": 3,
+     "passed": 0,
+     "no_leak_rate": 0.0,
+     "no_leak_ci95_wilson": [
+      0.0,
+      0.2991450484195441
+     ],
+     "mentions": 378,
+     "mentions_masked": 0,
+     "mention_recall": 0.0,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 0,
+     "per_label": {
+      "ADDRESS": {
+       "mentions": 3,
+       "masked": 0,
+       "recall": 0.0
+      },
+      "PERSON": {
+       "mentions": 375,
+       "masked": 0,
+       "recall": 0.0
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.0,
+      "mention_recall_at80": 0.0,
+      "char_recall": 0.0,
+      "precision": null,
+      "over_masking": 0.0,
+      "doc_leak_rate": 1.0,
+      "doc_literal_leak_rate": 1.0,
+      "mention_literal_leak_rate": 1.0,
+      "kept_touched_rate": 0.0,
+      "detections_per_10k_chars": 0.0,
+      "docs_with_detection": 0.0,
+      "recall_PERSON": 0.0,
+      "recall_ADDRESS": 0.0
+     },
+     "precision_ci95": null,
+     "detections": 0,
+     "chars": 440808
+    }
+   }
+  },
+  "meddocan_es": {
+   "countries": "ES",
+   "scope": "out_of_scope",
+   "test": {
+    "outcome": {
+     "docs": 469,
+     "chars": 1341429,
+     "scored": 469,
+     "no_direct": 0,
+     "passed": 0,
+     "no_leak_rate": 0.0,
+     "no_leak_ci95_wilson": [
+      0.0,
+      0.008124200509564118
+     ],
+     "mentions": 4589,
+     "mentions_masked": 492,
+     "mention_recall": 0.10721290041403356,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 1230,
+     "per_label": {
+      "ADDRESS": {
+       "mentions": 789,
+       "masked": 0,
+       "recall": 0.0
+      },
+      "EMAIL": {
+       "mentions": 457,
+       "masked": 452,
+       "recall": 0.9890590809628009
+      },
+      "ID": {
+       "mentions": 1048,
+       "masked": 0,
+       "recall": 0.0
+      },
+      "NATIONAL_ID": {
+       "mentions": 364,
+       "masked": 0,
+       "recall": 0.0
+      },
+      "PERSON": {
+       "mentions": 1883,
+       "masked": 0,
+       "recall": 0.0
+      },
+      "PHONE": {
+       "mentions": 48,
+       "masked": 40,
+       "recall": 0.8333333333333334
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.10721290041403356,
+      "mention_recall_at80": 0.10743081281324908,
+      "char_recall": 0.1439998759824515,
+      "precision": 0.6111184210526316,
+      "over_masking": 3.5596598999227046e-05,
+      "doc_leak_rate": 1.0,
+      "doc_literal_leak_rate": 1.0,
+      "mention_literal_leak_rate": 0.8919154499891043,
+      "kept_touched_rate": 0.12019623875715454,
+      "detections_per_10k_chars": 9.169326143985257,
+      "docs_with_detection": 1.0,
+      "recall_PERSON": 0.0,
+      "recall_ADDRESS": 0.0,
+      "recall_EMAIL": 0.9890590809628009,
+      "recall_PHONE": 0.8333333333333334,
+      "recall_NATIONAL_ID": 0.0,
+      "recall_ID": 0.0
+     },
+     "precision_ci95": [
+      0.5996289614899636,
+      0.622563691641061
+     ],
+     "detections": 1230,
+     "chars": 1341429
+    }
+   },
+   "dev": {
+    "outcome": {
+     "docs": 531,
+     "chars": 1546540,
+     "scored": 531,
+     "no_direct": 0,
+     "passed": 0,
+     "no_leak_rate": 0.0,
+     "no_leak_ci95_wilson": [
+      0.0,
+      0.007182425291345966
+     ],
+     "mentions": 5233,
+     "mentions_masked": 575,
+     "mention_recall": 0.10987961016625263,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 1424,
+     "per_label": {
+      "ADDRESS": {
+       "mentions": 920,
+       "masked": 2,
+       "recall": 0.002173913043478261
+      },
+      "EMAIL": {
+       "mentions": 502,
+       "masked": 500,
+       "recall": 0.9960159362549801
+      },
+      "ID": {
+       "mentions": 1174,
+       "masked": 0,
+       "recall": 0.0
+      },
+      "NATIONAL_ID": {
+       "mentions": 419,
+       "masked": 0,
+       "recall": 0.0
+      },
+      "PERSON": {
+       "mentions": 2129,
+       "masked": 0,
+       "recall": 0.0
+      },
+      "PHONE": {
+       "mentions": 89,
+       "masked": 73,
+       "recall": 0.8202247191011236
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.10987961016625263,
+      "mention_recall_at80": 0.1100707051404548,
+      "char_recall": 0.1447528939734866,
+      "precision": 0.6114164662773388,
+      "over_masking": 3.869822682965656e-05,
+      "doc_leak_rate": 1.0,
+      "doc_literal_leak_rate": 1.0,
+      "mention_literal_leak_rate": 0.889738199885343,
+      "kept_touched_rate": 0.12292213473315836,
+      "detections_per_10k_chars": 9.207650626559934,
+      "docs_with_detection": 1.0,
+      "recall_PERSON": 0.0,
+      "recall_ADDRESS": 0.002173913043478261,
+      "recall_EMAIL": 0.9960159362549801,
+      "recall_PHONE": 0.8202247191011236,
+      "recall_NATIONAL_ID": 0.0,
+      "recall_ID": 0.0
+     },
+     "precision_ci95": [
+      0.6011981674487655,
+      0.62128527695809
+     ],
+     "detections": 1424,
+     "chars": 1546540
+    }
+   },
+   "all": {
+    "outcome": {
+     "docs": 1000,
+     "chars": 2887969,
+     "scored": 1000,
+     "no_direct": 0,
+     "passed": 0,
+     "no_leak_rate": 0.0,
+     "no_leak_ci95_wilson": [
+      0.0,
+      0.0038267584855551234
+     ],
+     "mentions": 9822,
+     "mentions_masked": 1067,
+     "mention_recall": 0.1086336794950112,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 2654,
+     "per_label": {
+      "ADDRESS": {
+       "mentions": 1709,
+       "masked": 2,
+       "recall": 0.0011702750146284377
+      },
+      "EMAIL": {
+       "mentions": 959,
+       "masked": 952,
+       "recall": 0.9927007299270073
+      },
+      "ID": {
+       "mentions": 2222,
+       "masked": 0,
+       "recall": 0.0
+      },
+      "NATIONAL_ID": {
+       "mentions": 783,
+       "masked": 0,
+       "recall": 0.0
+      },
+      "PERSON": {
+       "mentions": 4012,
+       "masked": 0,
+       "recall": 0.0
+      },
+      "PHONE": {
+       "mentions": 137,
+       "masked": 113,
+       "recall": 0.8248175182481752
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.1086336794950112,
+      "mention_recall_at80": 0.10883730401140297,
+      "char_recall": 0.14440161699727366,
+      "precision": 0.6112777811792077,
+      "over_masking": 3.7259880117514835e-05,
+      "doc_leak_rate": 1.0,
+      "doc_literal_leak_rate": 1.0,
+      "mention_literal_leak_rate": 0.8907554469558134,
+      "kept_touched_rate": 0.1216372465890696,
+      "detections_per_10k_chars": 9.189849337025432,
+      "docs_with_detection": 1.0,
+      "recall_PERSON": 0.0,
+      "recall_ADDRESS": 0.0011702750146284377,
+      "recall_EMAIL": 0.9927007299270073,
+      "recall_PHONE": 0.8248175182481752,
+      "recall_NATIONAL_ID": 0.0,
+      "recall_ID": 0.0
+     },
+     "precision_ci95": [
+      0.603760710772162,
+      0.6189840343852285
+     ],
+     "detections": 2654,
+     "chars": 2887969
+    }
+   }
+  },
+  "german_ler_de": {
+   "countries": "DE",
+   "scope": "out_of_scope",
+   "test": {
+    "outcome": {
+     "docs": 169,
+     "chars": 681705,
+     "scored": 103,
+     "no_direct": 66,
+     "passed": 0,
+     "no_leak_rate": 0.0,
+     "no_leak_ci95_wilson": [
+      0.0,
+      0.03595475822864816
+     ],
+     "mentions": 166,
+     "mentions_masked": 0,
+     "mention_recall": 0.0,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 0,
+     "per_label": {
+      "ADDRESS": {
+       "mentions": 8,
+       "masked": 0,
+       "recall": 0.0
+      },
+      "PERSON": {
+       "mentions": 158,
+       "masked": 0,
+       "recall": 0.0
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.0,
+      "mention_recall_at80": 0.0,
+      "char_recall": 0.0,
+      "precision": null,
+      "over_masking": 0.0,
+      "doc_leak_rate": 1.0,
+      "doc_literal_leak_rate": 0.6893203883495146,
+      "mention_literal_leak_rate": 1.0,
+      "kept_touched_rate": 0.0,
+      "detections_per_10k_chars": 0.0,
+      "docs_with_detection": 0.0,
+      "recall_PERSON": 0.0,
+      "recall_ADDRESS": 0.0
+     },
+     "precision_ci95": null,
+     "detections": 0,
+     "chars": 681705
+    }
+   },
+   "dev": {
+    "outcome": {
+     "docs": 165,
+     "chars": 683854,
+     "scored": 96,
+     "no_direct": 69,
+     "passed": 0,
+     "no_leak_rate": 0.0,
+     "no_leak_ci95_wilson": [
+      0.0,
+      0.038475587857675686
+     ],
+     "mentions": 171,
+     "mentions_masked": 0,
+     "mention_recall": 0.0,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 1,
+     "per_label": {
+      "ADDRESS": {
+       "mentions": 7,
+       "masked": 0,
+       "recall": 0.0
+      },
+      "PERSON": {
+       "mentions": 164,
+       "masked": 0,
+       "recall": 0.0
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.0,
+      "mention_recall_at80": 0.0,
+      "char_recall": 0.0,
+      "precision": 0.0,
+      "over_masking": 0.0,
+      "doc_leak_rate": 1.0,
+      "doc_literal_leak_rate": 0.65625,
+      "mention_literal_leak_rate": 1.0,
+      "kept_touched_rate": 0.00040016006402561027,
+      "detections_per_10k_chars": 0.01462300432548468,
+      "docs_with_detection": 0.006060606060606061,
+      "recall_PERSON": 0.0,
+      "recall_ADDRESS": 0.0
+     },
+     "precision_ci95": [
+      0.0,
+      0.0
+     ],
+     "detections": 1,
+     "chars": 683854
+    }
+   },
+   "all": {
+    "outcome": {
+     "docs": 334,
+     "chars": 1365559,
+     "scored": 199,
+     "no_direct": 135,
+     "passed": 0,
+     "no_leak_rate": 0.0,
+     "no_leak_ci95_wilson": [
+      0.0,
+      0.018938233056634942
+     ],
+     "mentions": 337,
+     "mentions_masked": 0,
+     "mention_recall": 0.0,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 1,
+     "per_label": {
+      "ADDRESS": {
+       "mentions": 15,
+       "masked": 0,
+       "recall": 0.0
+      },
+      "PERSON": {
+       "mentions": 322,
+       "masked": 0,
+       "recall": 0.0
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.0,
+      "mention_recall_at80": 0.0,
+      "char_recall": 0.0,
+      "precision": 0.0,
+      "over_masking": 0.0,
+      "doc_leak_rate": 1.0,
+      "doc_literal_leak_rate": 0.6733668341708543,
+      "mention_literal_leak_rate": 1.0,
+      "kept_touched_rate": 0.0002008435428800964,
+      "detections_per_10k_chars": 0.007323008379718489,
+      "docs_with_detection": 0.0029940119760479044,
+      "recall_PERSON": 0.0,
+      "recall_ADDRESS": 0.0
+     },
+     "precision_ci95": [
+      0.0,
+      0.0
+     ],
+     "detections": 1,
+     "chars": 1365559
+    }
+   }
+  },
+  "tab_en": {
+   "countries": "FR",
+   "scope": "out_of_scope",
+   "test": {
+    "outcome": {
+     "docs": 55,
+     "chars": 269497,
+     "scored": 55,
+     "no_direct": 0,
+     "passed": 37,
+     "no_leak_rate": 0.6727272727272727,
+     "no_leak_ci95_wilson": [
+      0.5410322355657868,
+      0.7818693440483107
+     ],
+     "mentions": 390,
+     "mentions_masked": 323,
+     "mention_recall": 0.8282051282051283,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 423,
+     "per_label": {
+      "PERSON": {
+       "mentions": 390,
+       "masked": 323,
+       "recall": 0.8282051282051283
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.8282051282051283,
+      "mention_recall_at80": 0.841025641025641,
+      "char_recall": 0.8951525054466231,
+      "precision": 0.7794640739862462,
+      "over_masking": 0.0020424689116632197,
+      "doc_leak_rate": 0.32727272727272727,
+      "doc_literal_leak_rate": 0.21818181818181817,
+      "mention_literal_leak_rate": 0.10582010582010581,
+      "kept_touched_rate": 0.028412600370599134,
+      "detections_per_10k_chars": 15.69590756112313,
+      "docs_with_detection": 1.0,
+      "recall_PERSON": 0.8282051282051283
+     },
+     "precision_ci95": [
+      0.7142847205660228,
+      0.8306209757216985
+     ],
+     "detections": 423,
+     "chars": 269497
+    }
+   },
+   "dev": {
+    "outcome": {
+     "docs": 72,
+     "chars": 378141,
+     "scored": 72,
+     "no_direct": 0,
+     "passed": 42,
+     "no_leak_rate": 0.5833333333333334,
+     "no_leak_ci95_wilson": [
+      0.46807697931465553,
+      0.6901478252526017
+     ],
+     "mentions": 568,
+     "mentions_masked": 475,
+     "mention_recall": 0.8362676056338029,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 639,
+     "per_label": {
+      "PERSON": {
+       "mentions": 568,
+       "masked": 475,
+       "recall": 0.8362676056338029
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.8362676056338029,
+      "mention_recall_at80": 0.8450704225352113,
+      "char_recall": 0.9120440729483282,
+      "precision": 0.7723616473616474,
+      "over_masking": 0.0027479862934448847,
+      "doc_leak_rate": 0.4166666666666667,
+      "doc_literal_leak_rate": 0.19444444444444445,
+      "mention_literal_leak_rate": 0.07606679035250463,
+      "kept_touched_rate": 0.02452316076294278,
+      "detections_per_10k_chars": 16.898458511507613,
+      "docs_with_detection": 1.0,
+      "recall_PERSON": 0.8362676056338029
+     },
+     "precision_ci95": [
+      0.6949844272464474,
+      0.8336837081919364
+     ],
+     "detections": 639,
+     "chars": 378141
+    }
+   },
+   "all": {
+    "outcome": {
+     "docs": 127,
+     "chars": 647638,
+     "scored": 127,
+     "no_direct": 0,
+     "passed": 79,
+     "no_leak_rate": 0.6220472440944882,
+     "no_leak_ci95_wilson": [
+      0.5353049541396186,
+      0.7016230064579667
+     ],
+     "mentions": 958,
+     "mentions_masked": 798,
+     "mention_recall": 0.8329853862212944,
+     "errors": {},
+     "ambiguous_docs": 0,
+     "ambiguous_segments": 0,
+     "placeholders": 1062,
+     "per_label": {
+      "PERSON": {
+       "mentions": 958,
+       "masked": 798,
+       "recall": 0.8329853862212944
+      }
+     }
+    },
+    "measures": {
+     "metrics": {
+      "mention_recall": 0.8329853862212944,
+      "mention_recall_at80": 0.8434237995824635,
+      "char_recall": 0.9051029543419875,
+      "precision": 0.7752324355410716,
+      "over_masking": 0.0024528892100920104,
+      "doc_leak_rate": 0.3779527559055118,
+      "doc_literal_leak_rate": 0.2047244094488189,
+      "mention_literal_leak_rate": 0.08833151581243184,
+      "kept_touched_rate": 0.026026743075453676,
+      "detections_per_10k_chars": 16.398049527668235,
+      "docs_with_detection": 1.0,
+      "recall_PERSON": 0.8329853862212944
+     },
+     "precision_ci95": [
+      0.7272620279873401,
+      0.8153020933453949
+     ],
+     "detections": 1062,
+     "chars": 647638
+    }
+   }
+  }
+ },
+ "negative_control": {
+  "judilibre_fr": {
+   "docs": 300,
+   "chars": 3296812,
+   "errors": {},
+   "masked_spans": 3797,
+   "masked_spans_per_10k_chars": 11.517186906623733,
+   "docs_with_masked_span": 1.0,
+   "note": "pas de gold : précision seulement par relecture manuelle / no gold: precision only through a manual review (docs/CORPUS_REELS.md, section 7)"
+  }
+ },
+ "redteam_operators": {
+  "arabic_indic": {
+   "group": "obfuscation",
+   "docs": 12000,
+   "no_leak_rate": 0.9709166666666667,
+   "mention_recall": 0.9954848165891184,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "arobase": {
+   "group": "obfuscation",
+   "docs": 6113,
+   "no_leak_rate": 0.9283494192704074,
+   "mention_recall": 0.9908798972382787,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "at_brackets": {
+   "group": "obfuscation",
+   "docs": 6113,
+   "no_leak_rate": 0.9283494192704074,
+   "mention_recall": 0.9908798972382787,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "at_entity": {
+   "group": "obfuscation",
+   "docs": 6113,
+   "no_leak_rate": 0.9283494192704074,
+   "mention_recall": 0.9908798972382787,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "at_fullwidth": {
+   "group": "obfuscation",
+   "docs": 6113,
+   "no_leak_rate": 0.9492884017667267,
+   "mention_recall": 0.9932562620423893,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "at_parens": {
+   "group": "obfuscation",
+   "docs": 6113,
+   "no_leak_rate": 0.9283494192704074,
+   "mention_recall": 0.9908798972382787,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "at_percent": {
+   "group": "obfuscation",
+   "docs": 6113,
+   "no_leak_rate": 0.9283494192704074,
+   "mention_recall": 0.9908798972382787,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "bidi_isolate": {
+   "group": "obfuscation",
+   "docs": 12000,
+   "no_leak_rate": 0.9790833333333333,
+   "mention_recall": 0.997412868764571,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "bidi_mark": {
+   "group": "obfuscation",
+   "docs": 12000,
+   "no_leak_rate": 0.9788333333333333,
+   "mention_recall": 0.9973538467592,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "bom": {
+   "group": "obfuscation",
+   "docs": 12000,
+   "no_leak_rate": 0.9788333333333333,
+   "mention_recall": 0.9973538467592,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "compact": {
+   "group": "everyday",
+   "docs": 11122,
+   "no_leak_rate": 0.9359827369178205,
+   "mention_recall": 0.9892746377337746,
+   "survival": 0.9789599790348545,
+   "errors": {}
+  },
+  "crlf": {
+   "group": "everyday",
+   "docs": 12000,
+   "no_leak_rate": 0.10783333333333334,
+   "mention_recall": 0.7545963386682668,
+   "survival": 0.6968805729064546,
+   "errors": {}
+  },
+  "cyrillic": {
+   "group": "obfuscation",
+   "docs": 12000,
+   "no_leak_rate": 0.765,
+   "mention_recall": 0.9655803338678104,
+   "survival": 0.9522176667909057,
+   "errors": {}
+  },
+  "devanagari": {
+   "group": "obfuscation",
+   "docs": 12000,
+   "no_leak_rate": 0.9709166666666667,
+   "mention_recall": 0.9954848165891184,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "dot_brackets": {
+   "group": "obfuscation",
+   "docs": 6113,
+   "no_leak_rate": 0.9492884017667267,
+   "mention_recall": 0.9932562620423893,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "dot_point": {
+   "group": "obfuscation",
+   "docs": 6113,
+   "no_leak_rate": 0.9492884017667267,
+   "mention_recall": 0.9932562620423893,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "dots": {
+   "group": "everyday",
+   "docs": 11937,
+   "no_leak_rate": 0.9519142163022535,
+   "mention_recall": 0.9941566880623816,
+   "survival": 0.9863735070575461,
+   "errors": {}
+  },
+  "double_space": {
+   "group": "everyday",
+   "docs": 12000,
+   "no_leak_rate": 0.9135833333333333,
+   "mention_recall": 0.9892186470188968,
+   "survival": 0.9180748103583574,
+   "errors": {}
+  },
+  "en_dash_groups": {
+   "group": "everyday",
+   "docs": 12000,
+   "no_leak_rate": 0.95425,
+   "mention_recall": 0.9944519314951258,
+   "survival": 0.992548435171386,
+   "errors": {}
+  },
+  "figure_space": {
+   "group": "everyday",
+   "docs": 12000,
+   "no_leak_rate": 0.9709166666666667,
+   "mention_recall": 0.9954848165891184,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "fullwidth": {
+   "group": "obfuscation",
+   "docs": 12000,
+   "no_leak_rate": 0.9709166666666667,
+   "mention_recall": 0.9954848165891184,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "grapheme_joiner": {
+   "group": "obfuscation",
+   "docs": 12000,
+   "no_leak_rate": 0.9788333333333333,
+   "mention_recall": 0.9973538467592,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "greek": {
+   "group": "obfuscation",
+   "docs": 11991,
+   "no_leak_rate": 0.9709782336752565,
+   "mention_recall": 0.9954924365447263,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "hangul_filler": {
+   "group": "obfuscation",
+   "docs": 12000,
+   "no_leak_rate": 0.9768333333333333,
+   "mention_recall": 0.997117758737716,
+   "survival": 0.9997848517718353,
+   "errors": {}
+  },
+  "hyphens": {
+   "group": "everyday",
+   "docs": 11681,
+   "no_leak_rate": 0.9532574265901892,
+   "mention_recall": 0.9944017563117453,
+   "survival": 0.9921599694047587,
+   "errors": {}
+  },
+  "ideographic_space": {
+   "group": "everyday",
+   "docs": 12000,
+   "no_leak_rate": 0.9709166666666667,
+   "mention_recall": 0.9954848165891184,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "letter_spacing": {
+   "group": "everyday",
+   "docs": 12000,
+   "no_leak_rate": 0.8831666666666667,
+   "mention_recall": 0.9856281416921608,
+   "survival": 0.9885757003613223,
+   "errors": {}
+  },
+  "line_break": {
+   "group": "everyday",
+   "docs": 12000,
+   "no_leak_rate": 0.15916666666666668,
+   "mention_recall": 0.769381351013703,
+   "survival": 0.7113246127559452,
+   "errors": {}
+  },
+  "lower": {
+   "group": "everyday",
+   "docs": 12000,
+   "no_leak_rate": 0.30175,
+   "mention_recall": 0.7904718809329412,
+   "survival": 0.6067440174039159,
+   "errors": {}
+  },
+  "markdown_bold": {
+   "group": "everyday",
+   "docs": 12000,
+   "no_leak_rate": 0.96075,
+   "mention_recall": 0.9950421515488358,
+   "survival": 0.9963873026687344,
+   "errors": {}
+  },
+  "math_bold": {
+   "group": "obfuscation",
+   "docs": 12000,
+   "no_leak_rate": 0.0,
+   "mention_recall": 0.3578012335599123,
+   "survival": 0.36282358329437137,
+   "errors": {}
+  },
+  "narrow_nbsp": {
+   "group": "everyday",
+   "docs": 12000,
+   "no_leak_rate": 0.9709166666666667,
+   "mention_recall": 0.9954848165891184,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "nb_hyphen": {
+   "group": "everyday",
+   "docs": 6047,
+   "no_leak_rate": 0.9708946585083512,
+   "mention_recall": 0.9959341081213137,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "nbsp": {
+   "group": "everyday",
+   "docs": 12000,
+   "no_leak_rate": 0.9709166666666667,
+   "mention_recall": 0.9954848165891184,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "nfd": {
+   "group": "everyday",
+   "docs": 8859,
+   "no_leak_rate": 0.9703126763743086,
+   "mention_recall": 0.9956077977321638,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "ocr": {
+   "group": "ocr",
+   "docs": 11931,
+   "no_leak_rate": 0.09177772190093035,
+   "mention_recall": 0.728357178095708,
+   "survival": 0.28589138290296207,
+   "errors": {}
+  },
+  "pdf_hyphenation": {
+   "group": "everyday",
+   "docs": 12000,
+   "no_leak_rate": 0.9286666666666666,
+   "mention_recall": 0.990222021110204,
+   "survival": 0.9902502141308112,
+   "errors": {}
+  },
+  "regroup": {
+   "group": "everyday",
+   "docs": 11997,
+   "no_leak_rate": 0.8985579728265399,
+   "mention_recall": 0.9863246854185729,
+   "survival": 0.9159679278901582,
+   "errors": {}
+  },
+  "slashes": {
+   "group": "everyday",
+   "docs": 12000,
+   "no_leak_rate": 0.8611666666666666,
+   "mention_recall": 0.9821458433752718,
+   "survival": 0.9439941431783716,
+   "errors": {}
+  },
+  "soft_hyphen": {
+   "group": "everyday",
+   "docs": 12000,
+   "no_leak_rate": 0.9788333333333333,
+   "mention_recall": 0.9973538467592,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "strip_accents": {
+   "group": "everyday",
+   "docs": 8859,
+   "no_leak_rate": 0.9703126763743086,
+   "mention_recall": 0.9956077977321638,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "superscript": {
+   "group": "obfuscation",
+   "docs": 12000,
+   "no_leak_rate": 0.0,
+   "mention_recall": 0.55548560354919,
+   "survival": 0.06779461180215764,
+   "errors": {}
+  },
+  "surname_first": {
+   "group": "everyday",
+   "docs": 9579,
+   "no_leak_rate": 0.9550057417266938,
+   "mention_recall": 0.9929398657926782,
+   "survival": 0.9954699388661653,
+   "errors": {}
+  },
+  "tab": {
+   "group": "everyday",
+   "docs": 12000,
+   "no_leak_rate": 0.9085,
+   "mention_recall": 0.9877037488810412,
+   "survival": 0.987754849296407,
+   "errors": {}
+  },
+  "tag_chars": {
+   "group": "obfuscation",
+   "docs": 12000,
+   "no_leak_rate": 0.9788333333333333,
+   "mention_recall": 0.9973538467592,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "thin_space": {
+   "group": "everyday",
+   "docs": 12000,
+   "no_leak_rate": 0.9709166666666667,
+   "mention_recall": 0.9954848165891184,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "upper": {
+   "group": "everyday",
+   "docs": 12000,
+   "no_leak_rate": 0.9526666666666667,
+   "mention_recall": 0.993055077368012,
+   "survival": 0.9946973970505278,
+   "errors": {}
+  },
+  "variation_selector": {
+   "group": "obfuscation",
+   "docs": 12000,
+   "no_leak_rate": 0.9788333333333333,
+   "mention_recall": 0.9973538467592,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "word_joiner": {
+   "group": "obfuscation",
+   "docs": 12000,
+   "no_leak_rate": 0.9788333333333333,
+   "mention_recall": 0.9973538467592,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "zero_width_joiner": {
+   "group": "obfuscation",
+   "docs": 12000,
+   "no_leak_rate": 0.9788333333333333,
+   "mention_recall": 0.9973538467592,
+   "survival": 1.0,
+   "errors": {}
+  },
+  "zero_width_space": {
+   "group": "obfuscation",
+   "docs": 12000,
+   "no_leak_rate": 0.9788333333333333,
+   "mention_recall": 0.9973538467592,
+   "survival": 1.0,
+   "errors": {}
+  }
+ },
+ "seeds": {
+  "redteam_bases/seed=2026102521": {
+   "docs": 1200,
+   "no_leak_rate": 0.9691666666666666,
+   "mention_recall": 0.9951124144672532
+  },
+  "redteam_bases/seed=2026102522": {
+   "docs": 1200,
+   "no_leak_rate": 0.9725,
+   "mention_recall": 0.9958637937668334
+  },
+  "redteam_bases/seed=2026102523": {
+   "docs": 1200,
+   "no_leak_rate": 0.9675,
+   "mention_recall": 0.9947701900834758
+  },
+  "redteam_bases/seed=2026102524": {
+   "docs": 1200,
+   "no_leak_rate": 0.9675,
+   "mention_recall": 0.9950680607614915
+  },
+  "redteam_bases/seed=2026102525": {
+   "docs": 1200,
+   "no_leak_rate": 0.9708333333333333,
+   "mention_recall": 0.9954513991891625
+  },
+  "redteam_bases/seed=2026102526": {
+   "docs": 1200,
+   "no_leak_rate": 0.9766666666666667,
+   "mention_recall": 0.9964570416297609
+  },
+  "redteam_bases/seed=2026102527": {
+   "docs": 1200,
+   "no_leak_rate": 0.9716666666666667,
+   "mention_recall": 0.9954910801803568
+  },
+  "redteam_bases/seed=2026102528": {
+   "docs": 1200,
+   "no_leak_rate": 0.9725,
+   "mention_recall": 0.9960687960687961
+  },
+  "redteam_bases/seed=2026102529": {
+   "docs": 1200,
+   "no_leak_rate": 0.9691666666666666,
+   "mention_recall": 0.9952071892161758
+  },
+  "redteam_bases/seed=2026102530": {
+   "docs": 1200,
+   "no_leak_rate": 0.9716666666666667,
+   "mention_recall": 0.9953325554259043
+  },
+  "synthetic_fr/seed=2026102501": {
+   "docs": 45000,
+   "no_leak_rate": 0.9719555555555556,
+   "mention_recall": 0.9955706248055557
+  },
+  "synthetic_fr/seed=2026102502": {
+   "docs": 45000,
+   "no_leak_rate": 0.9725333333333334,
+   "mention_recall": 0.9956833963606657
+  },
+  "synthetic_fr/seed=2026102503": {
+   "docs": 45000,
+   "no_leak_rate": 0.9716222222222223,
+   "mention_recall": 0.9955587555021059
+  },
+  "synthetic_fr/seed=2026102504": {
+   "docs": 45000,
+   "no_leak_rate": 0.9706888888888889,
+   "mention_recall": 0.9953160480738039
+  },
+  "synthetic_fr/seed=2026102505": {
+   "docs": 45000,
+   "no_leak_rate": 0.9709555555555556,
+   "mention_recall": 0.9953691056568883
+  },
+  "synthetic_fr/seed=2026102506": {
+   "docs": 45000,
+   "no_leak_rate": 0.9726444444444444,
+   "mention_recall": 0.9956604499844451
+  },
+  "synthetic_fr/seed=2026102507": {
+   "docs": 45000,
+   "no_leak_rate": 0.9712,
+   "mention_recall": 0.9954604273405363
+  },
+  "synthetic_fr/seed=2026102508": {
+   "docs": 45000,
+   "no_leak_rate": 0.9726666666666667,
+   "mention_recall": 0.9956498225897933
+  },
+  "synthetic_fr/seed=2026102509": {
+   "docs": 45000,
+   "no_leak_rate": 0.9723555555555555,
+   "mention_recall": 0.9956553107901015
+  },
+  "synthetic_fr/seed=2026102510": {
+   "docs": 45000,
+   "no_leak_rate": 0.9728444444444444,
+   "mention_recall": 0.995678164314136
+  }
+ },
+ "guards": {
+  "checks": {
+   "overmask_synthetic": {
+    "value": 0.0006883598686244038,
+    "max": 0.02,
+    "passed": true
+   },
+   "decoys_masked_synthetic": {
+    "value": 0.037069586491449674,
+    "max": 0.1,
+    "passed": true
+   },
+   "precision_bodacc_fr": {
+    "value": 0.9916301269754271,
+    "min": 0.7,
+    "passed": true
+   },
+   "precision_boamp_fr": {
+    "value": 0.8768600227909563,
+    "min": 0.7,
+    "passed": true
+   }
+  },
+  "passed": true
+ },
+ "fingerprints": {
+  "plan_id": "d5676bcfe40afa96",
+  "synthetic_sha256": "0b91be78435e5434ee5a3b136ab8f08dd10a2c3673dad56fc6dca469c87a955b",
+  "redteam_sha256": "d984ee1bf9dba70bf2ccf32957cab9da9bbf1fdf02adf5b7444956fa0137760b",
+  "real_sha256": {
+   "bodacc_fr": "0bf1f852624abc46a555186695546fbc23cbc7af795965b901ab87f378606912",
+   "boamp_fr": "6364631f75d62fbed0ef023156ad8ec4fd4708b8463a287cb2d38971a1355f5f",
+   "parlamint_fr": "b40fbb6fb1e462741ad4b81f46f1f8aef37f38bfaaa3399c4a2fdec2602b9896",
+   "europeana_fr": "3b84162f52e0a6fbffa38ce1fd431b655b120ba5da4a7f1084409c0fcc977d67",
+   "hipe_newseye_fr": "b9d1590e61a864e63ca703421d59e789e26b3d50904e4ee46aa4864992046071",
+   "mapa_fr": "976ab0c25d29d4e466f1cef6c1811d37bda1ac116afd06a5fad112932e54dc82",
+   "mapa_de": "d55a3efed237a7646e52389e2e8c0db12420ce55fbb8947649767b2d6eafb475",
+   "mapa_es": "167d6715823292acf4a57f607030dbdf519fbd62a6141b74f625da2d1f11988b",
+   "mapa_it": "3cd8ef5cbdc9e9e085e8a41e85f44319da3f403d4fab981bc47cb9f039aac036",
+   "mapa_nl": "9e6e0c589dd7f7f7af7a6e4633bb924eb2db5f93cc372474f3af2fc422149272",
+   "mapa_pt": "67458aec331e2c81bacd959a4bbe75eeb41986baed23965b680e3d5f428df53e",
+   "meddocan_es": "bedf1518b82c240293ac3db9d55a4f81fc41c4136119b6feae75e0881e5283d8",
+   "german_ler_de": "c8079d236facb747f7753f086a521d0db044dd36f70723c7b13a926a830bfa04",
+   "tab_en": "e942482c69fb9f49782e4fdb7c252a27358677fac0a83461209942ced85993f6",
+   "judilibre_fr": "2bf23920ad79a1fe5c480eb9b0d635aba5cf3540741ca6c3a74c5c8c2525100f"
+  }
+ },
+ "quality_keys": {
+  "confidence_index": 96.9,
+  "confidence_ci_low": 96.2,
+  "confidence_ci_high": 97.6,
+  "mention_recall_pct": 99.3,
+  "protocol_docs": 1019385,
+  "protocol_families": 4,
+  "real_corpora": 14,
+  "real_docs": 8178,
+  "protocol_date": "2026-10-26",
+  "protocol_engine": "1.0.1+4bb5c465425e",
+  "hard_index": 84.0,
+  "hard_ci_low": 83.9,
+  "hard_ci_high": 84.1,
+  "hard_docs": 548907,
+  "hard_mention_recall_pct": 95.0
+ }
+}

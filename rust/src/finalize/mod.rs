@@ -19,7 +19,9 @@ mod python;
 mod render;
 mod resolve;
 mod scope;
+mod selfcheck;
 mod span;
+mod values;
 
 pub use python::register;
 

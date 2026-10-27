@@ -126,7 +126,7 @@
     "protocol_done_nodate": "Run of {docs} documents, protocol published beforehand.",
     "limits_title": "Known limits",
     "limits": [
-      "Published apart: deliberate obfuscations, low-quality OCR, MAPA FR.",
+      "Published apart: old newspapers (low-quality OCR), MAPA FR, other languages.",
       "Real corpora already seen while tuning: optimistic figures.",
       "German, Spanish, Italian, Dutch, Portuguese names: not detected.",
       "A first barrier, not a GDPR certification."
@@ -219,7 +219,7 @@
     {"figure": "Confidence index (value, 95% CI, mentions masked, documents, date), protocol 1.1", "source": "site/data/quality.json, read at every render (confidence_index, confidence_ci_low, confidence_ci_high, mention_recall_pct, protocol_docs, protocol_date); “Being measured” while any of the first four is missing. Social cut: the definition and the run’s date on the index card"},
     {"figure": "Precision BODACC and BOAMP; neutral text masked by mistake", "source": "Guards of the protocol 1.1 run (the result’s “guards”): site/data/quality.json (f_bod_pr, f_boa_pr, g_overmask), read at every render; without these keys, only the share of mentions masked shows; docs/PROTOCOLE.md § 7 (precision and over-masking are always published next to the index)"},
     {"figure": "Protocol written before measuring: 1,019,385 documents, 8,478 of them real, through the real service", "source": "docs/PROTOCOLE.md, summary (“1,019,385 documents, of which 1,010,907 synthetic and 8,478 real”); version 1.1, same campaign plan (section “Version 1.1”, point 5), registered before the run (PROTOCOL-REGISTRATION-1.1.json)"},
-    {"figure": "Limits: published apart, deliberate obfuscations, low-quality OCR, MAPA FR; real corpora already seen, optimistic figures; DE, ES, IT, NL, PT names not detected; first barrier, not a certification", "source": "docs/PROTOCOLE.md, “Version 1.1” (families published apart; test halves not blind: real-corpus figures optimistic); tools/protocol/spec.py (APART_FAMILIES); out of scope, MAPA DE, ES, IT, NL, PT and German LER: 0% of mentions masked in the 1.0 run (benchmarks/results/); README.md, “Disclaimer”"},
+    {"figure": "Limits: published apart, old newspapers (low-quality OCR), MAPA FR, other languages; real corpora already seen, optimistic figures; DE, ES, IT, NL, PT names not detected; first barrier, not a certification", "source": "docs/PROTOCOLE.md, “Version 1.1” (families published apart; test halves not blind: real-corpus figures optimistic); tools/protocol/spec.py (APART_FAMILIES); out of scope, MAPA DE, ES, IT, NL, PT and German LER: 0% of mentions masked in the 1.0 run (benchmarks/results/); README.md, “Disclaimer”"},
     {"figure": "The protocol: gdprguardian.com/#protocol", "source": "site/templates/index.en.html, section id=\"protocol\""},
     {"figure": "Offered by Flow Line Intégration; Guillaume CLEMENT, CTO Data & AI; Design: Claude Design; MIT licence, version 1.0.1","source": "site/templates/index.en.html, footer (“CTO Data & AI”) and “Thanks” panel"}
   ]

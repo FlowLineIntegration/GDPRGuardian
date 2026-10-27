@@ -378,7 +378,10 @@ client ─► en-têtes de sécurité ─► journal (erreurs 5xx seulement) ─
   au-delà de 3 durées depuis la publication du résultat (`store.MAX_LIFE_TTLS`, 30 minutes par défaut) ; une fois
   tout lu (ou l'échec signalé), le résultat reste relisible 120 s (`store.READ_GRACE_S`, réponse perdue), puis il
   est effacé. Erreurs distinctes, toujours 404 : `already_read`, `expired`, `deleted` (empreinte et motif fermé
-  gardés une heure, au plus 50 000 ; seul le détenteur de la capacité de 256 bits les apprend), `not_found` sinon.
+  gardés une heure, au plus 50 000 ; seul le détenteur de la capacité de 256 bits les apprend), `not_found` sinon ;
+  une URL d'envoi rejouée répond `upload_used` à son détenteur (demander une nouvelle URL), une fausse ou celle d'une
+  autre clé `not_found`. Sur `/mcp`, un refus de la porte (429, 503, 408, 413) part en erreur JSON-RPC sous HTTP 200
+  (`data.code`, `data.retry_after_s`, `Retry-After` gardé) : un client MCP ne lit pas le corps d'un 4xx/5xx.
 - **Gros documents sans blocage** (motif des tâches MCP, SEP-1686, fait avec de simples outils pour tous les
   clients) : le `PUT` répond `202 Accepted` dès le corps reçu (`UploadAcceptedOut` : étape `queued`,
   `retry_after_s`) ; le traitement continue **dans la même requête ASGI**, après la réponse (tâche de fond
@@ -489,7 +492,10 @@ while waiting for its worker, its processing delay starts when the worker is gra
 `GDPRGUARDIAN_RESULT_TTL_S`, never beyond 3 lifetimes from the result's publication (`store.MAX_LIFE_TTLS`, 30 minutes
 by default); once fully read (or its failure told) the result stays readable for a 120 s grace period
 (a lost answer), then it is wiped; distinct 404 codes `already_read`, `expired`, `deleted` (digest and closed reason
-kept one hour, 50,000 at most, learnt only by the capability holder), else `not_found`. Big documents never block
+kept one hour, 50,000 at most, learnt only by the capability holder), else `not_found`; a replayed upload URL
+answers `upload_used` to its holder (request a new URL), a wrong one or another key's `not_found`. On `/mcp`, a gate
+refusal (429, 503, 408, 413) goes out as a JSON-RPC error over HTTP 200 (`data.code`, `data.retry_after_s`,
+`Retry-After` kept): an MCP client does not read the body of a 4xx/5xx. Big documents never block
 (the MCP Tasks pattern, SEP-1686, done with plain tools): the `PUT` answers `202 Accepted` once the body is in, and
 processing continues within the same ASGI request after the answer (same worker isolation, memory budget, limiter
 ticket and deadlines); reading the result returns the stage (`queued`, `converting`, `anonymising`, `done`,

@@ -12,7 +12,8 @@ use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyType};
 
 use crate::detectors::{
-    PyAddressDetector, PyBirthDateDetector, PyEmailDetector, PyIbanDetector, PyOrganizationDetector,
+    CodeData, CodeDetector, PyAddressDetector, PyBirthDateDetector, PyEmailDetector, PyIbanDetector,
+    PyOrganizationDetector,
 };
 use crate::finalize::{read_object, Span};
 use crate::names::py::PyNameDetector;
@@ -123,6 +124,25 @@ pub(crate) struct Phone {
     pub value: Py<PyAny>,
 }
 
+/// `PersonalSiteDetector` (`URL_PERSONAL_NAME`) : jumeau natif, repli des mots non ASCII par `_fold_word`.
+/// Native twin; non-ASCII words folded by `_fold_word`.
+pub(crate) struct PersonalSite {
+    pub template: Template,
+    pub prefilters: Vec<String>,
+    pub fold: Py<PyAny>,
+    /// Détecteur Python, pour un texte hors du domaine du jumeau / the Python detector, outside the twin's domain.
+    pub fallback: usize,
+}
+
+/// `IdentifierCodeDetector` (`ID_CODE`, `ID_LONG_NUMBER`, `SECRET_COOKIE`) : jumeau natif et modèles des trois
+/// règles / native twin and the three rules' templates.
+pub(crate) struct Codes {
+    pub detector: CodeDetector,
+    pub code: Template,
+    pub long_number: Template,
+    pub cookie: Template,
+}
+
 /// Détecteur d'un pack : jumeau natif, ou appel Python (indice dans les appels de l'hôte).
 /// A pack's detector: native twin, or a Python call (index into the host's calls).
 pub(crate) enum Slot {
@@ -135,6 +155,8 @@ pub(crate) enum Slot {
     Iban(Iban),
     Mrz(Mrz),
     Phone(Phone),
+    PersonalSite(PersonalSite),
+    Codes(Box<Codes>),
 }
 
 impl Slot {
@@ -307,6 +329,25 @@ impl<'py> Reader<'_, 'py> {
                 prefilters: words("prefilters")?,
                 value: field(spec, "value")?.unbind(),
             }),
+            "personal_site" => Slot::PersonalSite(PersonalSite {
+                template: self.template(spec, "prototype")?,
+                prefilters: words("prefilters")?,
+                fold: field(spec, "fold")?.unbind(),
+                fallback: field(spec, "fallback")?.extract()?,
+            }),
+            "codes" => Slot::Codes(Box::new(Codes {
+                detector: CodeDetector::new(CodeData {
+                    exclusions: words("exclusions")?,
+                    short_list: words("short_list")?,
+                    months: words("months")?,
+                    bic_countries: words("bic_countries")?,
+                    attributes: words("attributes")?,
+                })
+                .map_err(PyValueError::new_err)?,
+                code: self.template(spec, "code")?,
+                long_number: self.template(spec, "long_number")?,
+                cookie: self.template(spec, "cookie")?,
+            })),
             other => return Err(PyValueError::new_err(format!("détecteur inconnu / unknown detector: {other}"))),
         })
     }

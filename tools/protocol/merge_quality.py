@@ -3,7 +3,9 @@
     python tools/protocol/merge_quality.py benchmarks/results/protocol-<version>-<date>.json site/data/quality.json
 
 Clés : indice « documents normalisés » (confidence_*, mention_recall_pct, protocol_*, real_*) et, depuis la 1.1,
-indice « documents difficiles » (hard_*). Keys: normalised index, and from 1.1 the difficult index (hard_*).
+indice « documents difficiles » (hard_*) ; depuis la 1.2, les deux chiffres de chaque mode (fort_*, ess_*, modes_*,
+source « protocole 1.2 »). Keys: normalised index, from 1.1 the difficult index (hard_*), from 1.2 each mode's two
+numbers (fort_*, ess_*, modes_*).
 Ne touche qu'aux clés du protocole ; les autres clés et leur ordre restent. Refuse une campagne incomplète, un plan
 réduit (essai), un plan dont les empreintes diffèrent de celles enregistrées, une campagne passée sans le jeton
 local, une surcharge du service comptée en échecs (429/503), une campagne répétée qui ne liste pas celle déjà
@@ -39,6 +41,39 @@ _PERCENT = ("confidence_index", "confidence_ci_low", "confidence_ci_high", "ment
 _INTEGER = ("protocol_docs", "protocol_families", "real_corpora", "real_docs", "hard_docs")
 # Versions du protocole qui publient l'indice « documents difficiles » / protocol versions with the difficult index.
 _HARD_FROM = (1, 1)
+# Protocole 1.2 : deux chiffres par mode (anonymisation, codes utiles perdus), d'où ces clés partagées avec le site ;
+# `modes_source` dit d'où elles viennent : « protocole 1.2 » (campagne) ou « mesure interne, moitié dev » (modes-dev,
+# jamais présentée comme le protocole). Protocol 1.2: two numbers per mode; `modes_source` says where they come from.
+MODE_PERCENT_KEYS = ("fort_index", "fort_ci_low", "fort_ci_high", "fort_hard_index", "fort_code_loss",
+                     "ess_index", "ess_ci_low", "ess_ci_high", "ess_hard_index", "ess_code_loss")
+MODE_KEYS = (*MODE_PERCENT_KEYS, "modes_source", "modes_date", "modes_engine")
+MODE_SOURCES = ("protocole 1.2", "mesure interne, moitié dev")
+_MODES_FROM = (1, 2)
+
+
+def mode_values(keys: dict[str, Any], source: str) -> dict[str, Any]:
+    """Clés par mode vérifiées (« — » permis pour un mode non mesuré) ; ValueError sinon / per-mode keys, checked."""
+    if source not in MODE_SOURCES or keys.get("modes_source") != source:
+        raise ValueError(f"modes_source attendu / expected: {source!r}")
+    out: dict[str, Any] = {}
+    for key in MODE_PERCENT_KEYS:
+        value = keys.get(key)
+        if value == PENDING:
+            out[key] = value
+            continue
+        if not isinstance(value, (int, float)) or isinstance(value, bool) or not 0 <= value <= 100:
+            raise ValueError(f"pourcentage invalide / invalid percent: {key}")
+        out[key] = round(float(value), 1)
+    for prefix in ("fort", "ess"):
+        trio = [out[f"{prefix}_{k}"] for k in ("ci_low", "index", "ci_high")]
+        if PENDING not in trio and not trio[0] <= trio[1] <= trio[2]:
+            raise ValueError(f"indice du mode hors de son intervalle / mode index outside its interval: {prefix}")
+    if not isinstance(keys.get("modes_date"), str) or not _DATE_RE.match(keys["modes_date"]):
+        raise ValueError("modes_date : date ISO attendue / ISO date expected")
+    if not isinstance(keys.get("modes_engine"), str) or not _VERSION_RE.match(keys["modes_engine"]):
+        raise ValueError("modes_engine : version attendue / version expected")
+    out.update({"modes_source": source, "modes_date": keys["modes_date"], "modes_engine": keys["modes_engine"]})
+    return out
 _DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _VERSION_RE = re.compile(r"^\d+\.\d+\.\d+([.+-][0-9A-Za-z.+-]+)?$")
 
@@ -102,6 +137,11 @@ def quality_values(results: dict[str, Any], *, force_guards: bool = False,
     families = results.get("confidence_index", {}).get("families")
     if families is not None and out["protocol_families"] != len(families):
         raise ValueError("nombre de familles différent de celles de l'indice / family count differs from the index's")
+    # Protocole 1.2 : les deux chiffres de chaque mode, exigés, source « protocole 1.2 » / per-mode keys required.
+    if match is not None and (int(match[1]), int(match[2])) >= _MODES_FROM:
+        if any(keys.get(k) in (None, PENDING) for k in MODE_KEYS):
+            raise ValueError("résultat 1.2 sans les chiffres de chaque mode / 1.2 result without the per-mode figures")
+        out.update(mode_values(keys, f"protocole {match[1]}.{match[2]}"))
     return out
 
 

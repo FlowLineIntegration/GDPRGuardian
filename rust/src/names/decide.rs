@@ -307,8 +307,10 @@ impl Doc<'_> {
         if self.after_locative(e.start, false) && (e.amb() != AMB_NONE || commune) {
             return 0.0; // « à Albert », « en Lorraine »
         }
-        if commune && e.given() == 0 && e.surname() < COMMUNE_SURNAME_MIN {
-            return 0.0; // nom rare homonyme d'une commune : un indice est exigé / needs a cue
+        // Nom rare homonyme d'une commune, ou prénom trop rare pour valoir seul (« chantier de Briec », 1.0.2) :
+        // un indice est exigé. A rare commune homonym, or a given name too rare to stand alone, needs a cue.
+        if commune && e.given() < GIVEN_ALONE_MIN && e.surname() < COMMUNE_SURNAME_MIN {
+            return 0.0;
         }
         if e.amb() == AMB_NONE {
             return 0.8;

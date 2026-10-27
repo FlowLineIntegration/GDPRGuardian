@@ -91,6 +91,8 @@ def test_isolated_results_are_identical_to_the_in_process_engine(isolated: TestC
         report = {key: value for key, value in expected.report.items() if key != "timings_ms"}
         # Le service donne toujours une liste d'avertissements (vide ici) / the service always gives a warnings list.
         report["warnings"] = list(report.get("warnings", []))
+        # Mode par défaut (fort) et catégories coupées toujours rapportés / default mode always reported.
+        report = AnonymizeOptions().annotate(report)
         assert body["text"] == expected.text and body["report"] == json.loads(json.dumps(report))
 
 
@@ -177,8 +179,12 @@ def test_options_round_trip_through_json_with_untrusted_rules() -> None:
     options = AnonymizeOptions.build(["BE", "fr"], "strict", "en", RULES, True) if _native.available() else (
         AnonymizeOptions.build(["BE", "fr"], "strict", "en", None, True))
     restored = AnonymizeOptions.from_json(json.loads(json.dumps(options.to_json())))
-    assert (restored.countries, restored.profile, restored.label_language, restored.explain) == (
-        ("BE", "FR"), "strict", "en", True)
+    # « strict » (profil déprécié) devient le mode fort / deprecated profile "strict" becomes mode fort.
+    assert (restored.countries, restored.mode, restored.disable, restored.label_language, restored.explain) == (
+        ("BE", "FR"), "fort", (), "en", True)
+    custom = AnonymizeOptions.build("FR", None, "fr", None, False, disable=["codes", "functional_mailboxes"])
+    assert AnonymizeOptions.from_json(json.loads(json.dumps(custom.to_json()))).disable == (
+        "boites_fonctionnelles", "codes")
     if options.rules is not None:
         assert restored.rules is not None and restored.rules.trusted is False
         assert (restored.rules.rules, restored.rules.deny, restored.rules.allow) == (

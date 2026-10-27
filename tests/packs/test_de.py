@@ -271,12 +271,17 @@ def test_shared_german_reference_document(anonymizer):
 
 
 def test_weak_and_context_only_tiers(anonymizer_de):
-    assert "A123456780" in anonymizer_de.anonymize("Artikel A123456780 geliefert.").text
+    # Sans mot-clé, pas une KVNR ; depuis 1.0.2, un code masqué en identifiant (filtre fort, `ID_CODE`).
+    # No keyword, no KVNR; since 1.0.2 a code masked as a plain identifier (strong filter).
+    assert anonymizer_de.anonymize("Artikel A123456780 geliefert.").text == "Artikel [IDENTIFIANT_1] geliefert."
     assert "[KVNR_1]" in anonymizer_de.anonymize("Krankenkasse: AOK, Versichertennummer A123456780").text
     strict = Anonymizer(countries=("DE",), profile="strict")
     assert "A123456780" not in strict.anonymize("Artikel A123456780 geliefert.").text
     assert "181/815/08155" in anonymizer_de.anonymize("Aktenzeichen 181/815/08155").text
-    assert "1234567890" in anonymizer_de.anonymize("Bestellung 030 1234567890 vom Lager").text
+    # Pas un téléphone berlinois ; depuis 1.0.2, la suite nue de 10 chiffres est un identifiant (`ID_LONG_NUMBER`).
+    # Not a Berlin phone; since 1.0.2 the bare run of 10 digits is an identifier.
+    out = anonymizer_de.anonymize("Bestellung 030 1234567890 vom Lager").text
+    assert out == "Bestellung 030 [IDENTIFIANT_1] vom Lager"
 
 
 def test_vat_follows_company_policy(anonymizer_de):
@@ -324,8 +329,12 @@ def test_identifier_layouts(anonymizer_de, text, expected):
 
 def test_identifiers_inside_longer_numbers_are_left_alone(anonymizer_de):
     # Bornes dans la regex : aucune fenêtre prise dans un nombre plus long / no window inside a longer number.
+    # Filtre fort 1.0.2 : chaque nombre entier est masqué en code ou longue suite (`ID_CODE`, `ID_LONG_NUMBER`),
+    # jamais une fenêtre d'identifiant allemand prise dedans. Strong filter 1.0.2: each whole number is masked as a
+    # code or a long run, never a German identifier window taken inside it.
     text = "Steuer-ID Referenz 1365742618090, Sozialversicherungsnummer 915070649C1031."
-    assert anonymizer_de.anonymize(text).text == text
+    expected = "Steuer-ID Referenz [IDENTIFIANT_1], Sozialversicherungsnummer [IDENTIFIANT_2]."
+    assert anonymizer_de.anonymize(text).text == expected
 
 
 @pytest.fixture(scope="module")

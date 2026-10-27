@@ -123,6 +123,11 @@ def _compress_ipv6(packed: bytes) -> str:
 def ipv6(candidate: str) -> str | None:
     if candidate.count(":") < 2 or sum(c.isalnum() for c in candidate) < 3:
         return None
+    # 1.0.2 : trois groupes, ou un groupe de trois caractères au moins (« a::b », « x::y » du C++ restent).
+    # 1.0.2: three groups, or one group of three characters at least ("a::b", C++ "x::y" stay).
+    groups = [g for g in candidate.split("%", 1)[0].split(":") if g]
+    if len(groups) < 3 and not any(len(g) >= 3 for g in groups):
+        return None
     try:
         address = ipaddress.IPv6Address(candidate)
     except ValueError:
@@ -137,7 +142,15 @@ def ipv6(candidate: str) -> str | None:
 
 
 def mac(candidate: str) -> str | None:
-    value = candidate.replace("-", ":").upper()
+    if "." in candidate:
+        # Forme pointée « 001a.2b3c.4d5e » (1.0.2) : rendue en paires, jamais tout en chiffres (un nombre).
+        # Dotted form, rendered as pairs; never all digits (a number).
+        packed = candidate.replace(".", "")
+        if packed.isdigit():
+            return None
+        value = ":".join(packed[i:i + 2] for i in range(0, len(packed), 2)).upper()
+    else:
+        value = candidate.replace("-", ":").upper()
     return None if value in ("00:00:00:00:00:00", "FF:FF:FF:FF:FF:FF") else value
 
 
@@ -166,13 +179,59 @@ def digits_e164(candidate: str) -> str | None:
     return "+" + digits if 8 <= len(digits) <= 15 and is_digits(digits) else None
 
 
+_MONTH_WORDS = {"janvier": "1", "février": "2", "fevrier": "2", "mars": "3", "avril": "4", "mai": "5",
+                "juin": "6", "juillet": "7", "août": "8", "aout": "8", "septembre": "9",
+                "octobre": "10", "novembre": "11", "décembre": "12", "decembre": "12",
+                # Abréviations (1.0.2, troisième tour, dates) / abbreviations (third round, dates).
+                "janv": "1", "févr": "2", "fevr": "2", "fév": "2", "fev": "2", "avr": "4", "juil": "7",
+                "sept": "9", "oct": "10", "nov": "11", "déc": "12", "dec": "12"}
+# « jui. » : juin ou juillet, on ne sait pas ; la date est masquée, sans valeur ISO / June or July: masked, no ISO.
+_AMBIGUOUS_MONTH = "jui"
+# Année sur deux chiffres d'une date de naissance : 00 à 26 -> 2000 à 2026, sinon 19xx (constante fixe, sortie
+# déterministe). Two-digit birth year: 00-26 -> 20xx, else 19xx (fixed constant, deterministic output).
+BIRTH_YEAR_PIVOT = 26
+
+
+def _full_year(part: str) -> str:
+    """Année sur deux chiffres -> quatre chiffres (pivot fixe) / two-digit year -> four digits (fixed pivot)."""
+    if len(part) == 2 and part.isascii() and part.isdigit():
+        return str((2000 if int(part) <= BIRTH_YEAR_PIVOT else 1900) + int(part))
+    return part
+
+
 def calendar_date(candidate: str) -> str | None:
-    """Date jj/mm/aaaa, jj.mm.aaaa ou aaaa-mm-jj valide / valid calendar date."""
+    """Date jj/mm/aaaa, jj.mm.aaaa, aaaa-mm-jj ou « 12 mars 1985 » valide, rendue en ISO / valid date, ISO value.
+
+    1.0.2 : la forme en mots (« 1er août 1990 ») rend la même valeur ISO que sa forme chiffrée, pour une même
+    balise. The word form returns the same ISO value as the numeric form, for one shared tag. Troisième tour
+    (dates de naissance) : année sur deux chiffres (« 06/04/69 », « 3 mars 85 », pivot `BIRTH_YEAR_PIVOT`), mois
+    abrégés (« 1er janv. 1990 »), forme compacte « 19751021 » ; « 12 jui. 1979 » (juin ou juillet) rend la date
+    écrite, repliée, sans valeur ISO. Third round: two-digit years, abbreviated months, compact form; "jui." (June
+    or July) returns the folded written date, no ISO value.
+    """
     import datetime as _dt
 
-    parts = [p for p in candidate.replace(".", "/").replace("-", "/").split("/") if p]
+    if len(candidate) == 8 and candidate.isdigit() and candidate.isascii():
+        parts = [candidate[:4], candidate[4:6], candidate[6:]]
+    else:
+        parts = [p for p in candidate.replace(".", "/").replace("-", "/").split("/") if p]
     if len(parts) != 3:
-        return None
+        words = candidate.split()
+        if len(words) != 3:
+            return None
+        month_word = words[1].lower().removesuffix(".")
+        if month_word == _AMBIGUOUS_MONTH and words[1].endswith("."):
+            first = words[0].lower()
+            day = 1 if first == "1er" else int(first) if first.isascii() and first.isdigit() else 0
+            year = _full_year(words[2])
+            if not (1 <= day <= 31 and year.isascii() and year.isdigit()):
+                return None
+            return f"{day} jui. {year}"
+        if month_word not in _MONTH_WORDS:
+            return None
+        parts = ["1" if words[0].lower() == "1er" else words[0], _MONTH_WORDS[month_word], _full_year(words[2])]
+    elif len(parts[0]) != 4:
+        parts[2] = _full_year(parts[2])
     try:
         if len(parts[0]) == 4:
             year, month, day = (int(p) for p in parts)
@@ -182,3 +241,42 @@ def calendar_date(candidate: str) -> str | None:
     except (ValueError, OverflowError):
         return None
     return date.isoformat()
+
+
+# Mots courants après « login », « identifiant », « utilisateur »… : jamais un identifiant de connexion (1.0.2, second
+# tour, item J ; jumeau Rust `LOGIN_COMMON_WORDS`, même liste). Common words after a login cue: never a login.
+LOGIN_COMMON_WORDS = frozenset({
+    "about", "accede", "accepte", "active", "actif", "admin", "administrateur", "ainsi", "ajoute", "alors", "ancien",
+    "anonyme", "appelle", "apple", "apres", "associe", "aussi", "autre", "avait", "avant", "avoir", "bancaire",
+    "bloque", "choisit", "client", "clients", "clique", "comme", "compte", "confirme", "connecte", "connexion",
+    "consulte", "contacte", "dans", "demande", "demo", "depuis", "deux", "dispose", "distant", "doit", "doivent",
+    "domaine", "dont", "elle", "elles", "email", "encore", "entre", "envoie", "etait", "etre", "existante", "externe",
+    "fait", "faite", "final", "finale", "fiscal", "fiscale", "fournit", "google", "guest", "identifiant", "inactif",
+    "inactive", "incorrect", "incorrecte", "inconnu", "inconnue", "indique", "interne", "invalide", "invite",
+    "lambda", "lance", "ldap", "leur", "leurs", "local", "login", "mail", "mais", "meme", "merci", "microsoft",
+    "modifie", "moyen", "moyenne", "national", "nationale", "nouveau", "nouvelle", "obligatoire", "obtient", "ouvre",
+    "paie", "password", "paye", "personnel", "personnelle", "perso", "peut", "peuvent", "possede", "pour",
+    "principal", "principale", "provisoire", "puis", "quand", "recoit", "remplit", "renseigne", "requis", "requise",
+    # Voie « codes » (dernier tour) : verbes après « utilisateur » (« chaque utilisateur reste… ») / verbs.
+    "aura", "aurait", "concerne", "conserve", "devra", "devrait", "existe", "garde", "pourra", "pourrait", "reste",
+    "restent", "serait", "seront",
+    "reseau", "root", "saisit", "sans", "selon", "sera", "service", "signale", "signe", "simple", "souhaite",
+    "standard", "suivante", "support", "supprime", "system", "systeme", "tape", "technique", "temporaire", "test",
+    "tests", "toujours", "trouve", "unique", "user", "utilisateur", "utilise", "valide", "voit", "windows",
+    # Fix 1.0.2 : valeurs ordinaires après « Teams : », « Skype : », « Pseudo : » et dossiers communs d'un chemin.
+    # Ordinary values after a chat cue or "Pseudo:", and shared folders of a path.
+    "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche", "demain", "visio", "dispo", "absent",
+    "absente", "canal", "groupe", "serveur", "profil", "general", "prive", "public", "ouvert", "ferme", "occupe",
+    "aucun", "aucune", "voir", "neant", "vide", "indisponible", "disponible", "reunion", "appel", "equipe", "lien",
+    "oui", "non", "default", "administrator", "matin", "soir", "semaine", "message", "video", "rappel",
+})
+
+
+def login_word(candidate: str) -> str | None:
+    """Identifiant de connexion fait de lettres seules (« jdupont ») : jamais un mot courant de la liste, un participe
+    en « -ant(s) » ni un adverbe en « -ment ». Letters-only login: never a listed common word, a participle or an
+    adverb (1.0.2, second round, item J)."""
+    value = candidate.lower()
+    if value in LOGIN_COMMON_WORDS or value.endswith(("ant", "ants", "ment")):
+        return None
+    return candidate

@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Gardien RGPD · anonymiser avant l’IA, sans perdre le sens</title>
-<meta name="description" content="Poste de travail d’anonymisation irréversible : déposez vos documents, reprenez-les anonymisés avant de les confier à une IA, la logique du texte intacte. Gratuit, sans clé, sans cookie ; licence MIT, code ouvert sur GitHub.">
+<meta name="description" content="Filtre de premier niveau, irréversible : déposez vos documents, reprenez-les anonymisés avant de les confier à une IA, la logique du texte intacte. Gratuit, sans clé, sans cookie ; licence MIT, code ouvert sur GitHub.">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Gardien RGPD · retirer les noms, garder le sens">
-<meta property="og:description" content="Anonymisation irréversible des documents avant l’IA, ouverte à tous, sans clé. Licence MIT.">
+<meta property="og:description" content="Filtre de premier niveau : anonymisation irréversible des documents avant l’IA, ouverte à tous, sans clé. Licence MIT.">
 <meta property="og:url" content="https://gardienrgpd.fr/">
 <meta property="og:locale" content="fr_FR">
 <link rel="canonical" href="https://gardienrgpd.fr/">
@@ -27,7 +27,7 @@
 <a class="skip" href="#ck-t">Aller à la saisie</a>
 <div class="app" id="poste">
 <header class="bar">
-<h1 class="brand"><a href="#poste"><svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path class="mk" d="M7 4H4v16h3M17 4h3v16h-3"/><rect class="mb" x="7.5" y="10" width="9" height="4"/></svg>Gardien RGPD</a><span><span class="vh">, </span>anonymisation irréversible avant l’IA</span></h1>
+<h1 class="brand"><a href="#poste"><svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path class="mk" d="M7 4H4v16h3M17 4h3v16h-3"/><rect class="mb" x="7.5" y="10" width="9" height="4"/></svg>Gardien RGPD</a><span><span class="vh">, </span>filtre de premier niveau avant l’IA</span></h1>
 <a class="keep" href="#confidentialite"><i aria-hidden="true"></i><span>Aucun document conservé<span>, ni ici ni sur le serveur</span></span></a>
 <a class="src" target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian" aria-label="Code source sur GitHub">Code<span> source</span></a>
 <nav class="more" aria-label="En savoir plus"><a href="#video">Vidéo</a><a href="#defi">Le défi</a><a href="#histoire">L’histoire</a><a href="#architecture">Architecture</a><a href="#protocole">Protocole et scores</a><a href="#utiliser">Utiliser</a><a href="#appel">L’appel</a><a href="#merci">Merci</a></nav>
@@ -37,15 +37,26 @@
 <div class="col cin">
 <form class="in" id="ck" aria-labelledby="t-in" novalidate>
 <div class="hd"><h2 id="t-in">Entrée</h2><button type="button" class="lk" data-ex="M. Jean Dupont (jean.dupont@exemple.fr, 06 12 34 56 78), NIR 1 85 05 78 006 084 91, IBAN FR76 3000 6000 0112 3456 7890 189. M. Dupont rappellera Mme Claire Martin. DUPONT Jean réglera la facture n° 2026-0042 de 1 234,56 euros.">Exemple</button></div>
+<fieldset class="md"><legend>Façon de travailler</legend>
+<label><input type="radio" name="mode" value="fort" checked><span><b>Fort (recommandé)</b> on masque tout ce qu’on peut, codes compris</span><span class="mn q" data-v="{{q.fort_index}}"><span class="n">anonymisation {{q.fort_index}} % · codes utiles perdus {{q.fort_code_loss}} %</span><span class="pd">anonymisation — · codes utiles perdus —</span></span></label>
+<label><input type="radio" name="mode" value="essentiel"><span><b>Essentiel</b> ce que prouve une clé, un format ou un libellé ; codes produit lisibles</span><span class="mn q" data-v="{{q.ess_index}}"><span class="n">anonymisation {{q.ess_index}} % · codes utiles perdus {{q.ess_code_loss}} %</span><span class="pd">anonymisation — · codes utiles perdus —</span></span></label>
+<label><input type="radio" name="mode" value="personnalise"><span><b>Personnalisé</b> le fort, catégories et codes au choix</span><span class="mn">chiffres selon vos choix</span></label>
+</fieldset>
+<div class="cu" data-r="cu" hidden>
+<fieldset class="cats" data-r="cats"><legend>Masqués (décochez pour laisser en clair ; les secrets le restent toujours)</legend></fieldset>
+<label class="kl" for="ck-k">Codes à conserver</label>
+<input id="ck-k" name="keep" autocomplete="off" spellcheck="false" placeholder="SKU-###### LOT-@@@@-###" aria-describedby="ck-kh ck-ke">
+<p class="kh" id="ck-kh"># = un chiffre, @ = une lettre, le reste tel quel, avec au moins une lettre ou un chiffre fixe ; un espace entre deux codes. Ils restent lisibles.</p>
+<p class="ke" id="ck-ke" data-r="kerr" aria-live="polite"></p>
+</div>
+<p class="hint q msrc" data-v="{{q.modes_source}}">Trois modes, pour que chacun l’utilise comme bon lui semble. Le fort protège le plus ; l’essentiel garde lisibles les codes utiles (commande, facture, produit). <span class="n">Chiffres : {{q.modes_source}}<span class="m-i"> (données de mise au point, pas le protocole public)</span>, {{q.modes_date}}.</span><span class="pd">Chiffres : à venir.</span></p>
 <label class="vh" for="ck-t">Texte à anonymiser</label>
 <textarea id="ck-t" name="text" spellcheck="false" autocomplete="off" placeholder="Collez ou tapez un texte. Des documents ? Déposez-les n’importe où dans la page, plusieurs à la fois."></textarea>
 <fieldset class="opts"><legend class="vh">Réglages</legend>
 <label class="sel"><span>Pays</span><select name="countries"><option value="FR" selected>France</option><option value="FR,BE">France + Belgique</option><option value="FR,CH">France + Suisse</option><option value="FR,DE">France + Allemagne</option><option value="FR,ES">France + Espagne</option><option value="FR,IT">France + Italie</option><option value="FR,LU">France + Luxembourg</option><option value="FR,MC">France + Monaco</option><option value="FR,NL">France + Pays-Bas</option><option value="FR,PT">France + Portugal</option><option value="all">Tous les pays</option></select></label>
-<fieldset class="seg"><legend>Profil</legend><label><input type="radio" name="profile" value="standard" checked><span>standard</span></label><label><input type="radio" name="profile" value="strict"><span>strict</span></label></fieldset>
 <label class="chk"><input type="checkbox" name="explain" checked><span>Explications</span></label>
 </fieldset>
 <p class="hint" data-r="hint" hidden>Hors de France, seuls les identifiants du pays sont vérifiés et les noms passent par les lexiques français : textes juridiques de cinq pays (DE, ES, IT, NL, PT), 23 à 42 % des noms masqués, 78 à 89 % des documents avec fuite (mesure interne hors protocole).</p>
-<p class="hint">Strict : masque davantage, avec plus de faux positifs.</p>
 <div class="go"><button class="btn" type="submit" data-r="go" disabled>Anonymiser</button><input class="vh" type="file" id="ck-f" multiple accept=".pdf,.docx,.docm,.dotx,.dotm,.xlsx,.xlsm,.xlsb,.xls,.pptx,.pptm,.ppsx,.potx,.odt,.ott,.fodt,.ods,.odp,.otp,.fodp,.odg,.rtf,.eml,.mht,.mhtml,.msg,.html,.htm,.xhtml,.csv,.tsv,.txt,.text,.md,.markdown"><label class="btn2" for="ck-f">Ajouter des documents</label></div>
 <p class="keys" data-r="keys">Ctrl + Entrée anonymiser · Ctrl + Maj + C copier · Ctrl + S télécharger · Échap vider la saisie</p>
 <p class="fmts">PDF, Word, Excel, PowerPoint, OpenDocument, RTF, e-mail, HTML, CSV, texte · 50&nbsp;Mo par document · seule l’extension du nom part avec le fichier</p>
@@ -78,22 +89,27 @@
 </section>
 
 <aside class="col rail" aria-label="Instruments">
-<section class="g gc" aria-labelledby="t-ci"><div class="gh"><h2 id="t-ci">Indice de confiance</h2><p class="live-st q" data-v="{{q.protocol_date}}"><span class="n">protocole 1.1 · {{q.protocol_date}}</span><span class="pd">protocole 1.1</span></p></div>
-<p class="lede">Part des documents où aucun nom de personne, adresse, téléphone, courriel ni autre identifiant direct ne reste lisible.</p>
+<section class="g gc" aria-labelledby="t-ci"><div class="gh"><h2 id="t-ci">Notes par mode</h2><p class="live-st">premier niveau</p></div>
+<p class="lede">Gardien RGPD est un filtre de premier niveau : il masque les identifiants directs. Le sens (santé, opinions, recoupements) n’est pas traité ici : avec nos skills, un modèle léger de votre IA relit ensuite le texte anonymisé ; un étage LLM gouverné est à l’étude. <a href="#defi">Les niveaux</a>.</p>
 <div class="sc">
-<div class="t s1 q" data-v="{{q.confidence_index}}"><p class="k">Documents normalisés</p>
-<p class="ci-v"><span class="n">{{q.confidence_index}}<small> %</small></span><span class="pd">mesure à venir</span></p>
-<p class="ci-ic"><span class="n">intervalle à 95 % : <span class="nw">{{q.confidence_ci_low}} – {{q.confidence_ci_high}} %</span></span><span class="pd">publiée à la fin de la campagne 1.1</span></p>
-<p class="ci-d">Textes écrits normalement, sans dégât ni déguisement : courriels et documents internes (synthétiques), annonces légales, avis de marchés publics et débats parlementaires réels.</p></div>
-<div class="t s2 q" data-v="{{q.hard_index}}"><p class="k">Documents difficiles</p>
-<p class="ci-v"><span class="n">{{q.hard_index}}<small> %</small></span><span class="pd">mesure à venir</span></p>
-<p class="ci-ic"><span class="n">intervalle à 95 % : <span class="nw">{{q.hard_ci_low}} – {{q.hard_ci_high}} %</span></span><span class="pd">publiée à la fin de la campagne 1.1</span></p>
-<p class="ci-d">Textes synthétiques abîmés ou piégés : copier-coller abîmés, identifiants coupés par un retour à la ligne, déguisements volontaires, lettres mal lues par l’OCR.</p></div>
+<div class="t s1 q" data-v="{{q.fort_index}}"><p class="k">Fort <span>(recommandé)</span></p>
+<p class="ci-v"><span class="n">{{q.fort_index}}<small> %</small></span><span class="pd">—</span></p>
+<p class="ci-ic">anonymisation<span class="n">, intervalle à 95 % : <span class="nw">{{q.fort_ci_low}} – {{q.fort_ci_high}} %</span></span></p>
+<p class="ci-w"><span class="n">{{q.fort_code_loss}}<small> %</small></span><span class="pd">—</span></p>
+<p class="ci-ic">codes utiles perdus</p>
+<p class="ci-d q" data-v="{{q.fort_hard_index}}">Documents difficiles : <span class="n">{{q.fort_hard_index}} %</span><span class="pd">à venir</span></p></div>
+<div class="t s2 q" data-v="{{q.ess_index}}"><p class="k">Essentiel</p>
+<p class="ci-v"><span class="n">{{q.ess_index}}<small> %</small></span><span class="pd">—</span></p>
+<p class="ci-ic">anonymisation<span class="n">, intervalle à 95 % : <span class="nw">{{q.ess_ci_low}} – {{q.ess_ci_high}} %</span></span></p>
+<p class="ci-w"><span class="n">{{q.ess_code_loss}}<small> %</small></span><span class="pd">—</span></p>
+<p class="ci-ic">codes utiles perdus</p>
+<p class="ci-d q" data-v="{{q.ess_hard_index}}">Documents difficiles : <span class="n">{{q.ess_hard_index}} %</span><span class="pd">à venir</span></p></div>
 </div>
+<p class="note msrc q" data-v="{{q.modes_source}}"><span class="n">Source : {{q.modes_source}}, {{q.modes_date}}, moteur {{q.modes_engine}}<span class="m-i"> ; pas encore le protocole public ; données ayant servi à régler le moteur : chiffres optimistes</span>.</span><span class="pd">Notes par mode : mesure à venir, sur le moteur 1.0.2.</span></p>
+<p class="note">Anonymisation : part des documents où aucun identifiant direct ne reste lisible ; plus haut, mieux. Codes utiles perdus : part des numéros qui ne désignent personne (commande, facture, produit, ticket, lot) que le filtre masque quand même, mesurée sur nos documents synthétiques ; plus bas, mieux.</p>
 <ul class="ok">
-<li class="q" data-v="{{q.confidence_index}}"><span class="n">Mesuré selon un protocole public, enregistré avant la campagne : plus d’un million de documents passés par le vrai service, dont près de 3 000 documents réels annotés.</span><span class="pd">Protocole public, enregistré avant la campagne : plus d’un million de documents passent par le vrai service.</span></li>
-<li>Un moteur de pointe et sobre : {{q.ms_per_doc}} ms en médiane par document de 2 Ko, sur un seul cœur, sans GPU ni LLM. Irréversible : aucune table de correspondance.</li>
-<li>Scans de mauvaise qualité : performance dégradée, mesurée et publiée à part.</li>
+<li class="q" data-v="{{q.confidence_index}}"><span class="n">Résultat public : protocole {{q.protocol_version}} · moteur {{q.protocol_engine}} (réglage unique, d’avant les modes ; pas directement comparable aux notes par mode), {{q.confidence_index}} % des documents normalisés et {{q.hard_index}} % des difficiles sans fuite ; plus d’un million de documents passés par le vrai service.</span><span class="pd">Protocole public, enregistré avant la campagne : plus d’un million de documents passent par le vrai service.</span></li>
+<li>Un moteur sobre : {{q.ms_per_doc}} ms en médiane par document de 2 Ko, sur un seul cœur, sans GPU ni LLM. Irréversible : aucune table de correspondance.</li>
 </ul>
 <a class="ci-a" href="#protocole">Le protocole, en détail</a>
 </section>
@@ -121,16 +137,22 @@
 
 <section class="pn" id="video" aria-labelledby="h-vi"><div class="ph"><p>Vidéo</p><a class="x" href="#poste">Fermer</a></div>
 <h2 id="h-vi" tabindex="-1">La vidéo de lancement</h2>
-<video class="vid" controls preload="none" playsinline poster="/media/gardien-rgpd-lancement-fr-poster.png?v=3c16c019" src="/media/gardien-rgpd-lancement-fr.mp4?v=f6a1f0ae" aria-labelledby="h-vi"></video>
-<p>Vidéo muette : tout son texte est dans la <a href="/media/gardien-rgpd-lancement-fr-transcript.txt?v=7111ad4c" target="_blank" rel="noopener">transcription</a>. Montage court en 4:5, pour les réseaux : <a href="/media/gardien-rgpd-lancement-fr-social.mp4?v=629f0f12" download>MP4, 5,0 Mo</a>.</p>
+<video class="vid" controls preload="none" playsinline poster="/media/gardien-rgpd-lancement-fr-poster.png?v=3c16c019" src="/media/gardien-rgpd-lancement-fr.mp4?v=aaec2e17" aria-labelledby="h-vi"></video>
+<p>Vidéo muette : tout son texte est dans la <a href="/media/gardien-rgpd-lancement-fr-transcript.txt?v=c1ea0ea2" target="_blank" rel="noopener">transcription</a>. Montage court en 4:5, pour les réseaux : <a href="/media/gardien-rgpd-lancement-fr-social.mp4?v=b95af83d" download>MP4, 5,0 Mo</a>.</p>
 <p class="fine">L’indice de la vidéo date de son rendu ; le chiffre à jour : <a href="#protocole">Protocole et scores</a>.</p>
 </section>
 
 <section class="pn" id="defi" aria-labelledby="h-defi"><div class="ph"><p>Le défi</p><a class="x" href="#poste">Fermer</a></div>
 <h2 id="h-defi" tabindex="-1">Chaque jour, de vrais documents partent vers l’IA</h2>
 <p class="lead">Contrats, dossiers RH, comptes rendus médicaux, relevés bancaires : on les colle dans un assistant d’IA pour les résumer, les traduire ou les analyser.</p>
-<p>Le plus souvent de bonne foi, et sans connaître les règles. Les données personnelles partent alors chez un tiers, souvent sans base légale ni contrat de sous-traitance, parfois hors de l’Union européenne : c’est précisément ce que le RGPD encadre. Une fois envoyées, elles ne reviennent pas.</p>
+<p>Le plus souvent de bonne foi, sans connaître les règles. Les données personnelles partent alors chez un tiers, souvent sans base légale ni contrat de sous-traitance, parfois hors de l’Union européenne : précisément ce que le RGPD encadre. Une fois envoyées, elles ne reviennent pas.</p>
 <p>Le défi tient en trois exigences qui tirent en sens contraire : <b>garder la logique</b> du texte, pour que l’IA reste utile ; rendre tout <b>retour en arrière impossible</b> ; rester assez <b>rapide et sobre</b> pour ne jamais être contourné. D’où un poste de travail, pas une page : on dépose, on reprend, on enchaîne, toute la journée.</p>
+<h3>Un filtre de premier niveau</h3>
+<ul class="list">
+<li><b>Ce qu’il fait.</b> Il masque les identifiants directs : noms, coordonnées, numéros, adresses IP, dates de naissance… Il s’appuie sur des formats connus, des clés de contrôle, le contexte et les règles de votre organisation. Même résultat à chaque fois, une raison nommée pour chaque balise, aucun retour possible.</li>
+<li><b>Ce qu’il laisse au niveau suivant.</b> Ce qui dépend du sens : santé, opinions, appartenance syndicale, infractions… (RGPD, art. 9 et 10), et les indices qui, recoupés, désignent quelqu’un (fonction, ville, date). Aujourd’hui, nos skills Claude les confient, au mieux, à un modèle léger de votre IA : <a href="#utiliser">la solution pragmatique</a>.</li>
+<li><b>La suite.</b> Un étage LLM gouverné, pour ce qui dépend du sens, à l’étude. L’intention : un modèle sous contrôle, des règles écrites, des décisions vérifiées et mesurées comme au premier niveau. Pas de date annoncée.</li>
+</ul>
 </section>
 
 <section class="pn" id="histoire" aria-labelledby="h-st"><div class="ph"><p>L’histoire</p><a class="x" href="#poste">Fermer</a></div>
@@ -141,9 +163,9 @@
 <p class="lab">Masquage naïf</p><p class="txt"><mark class="p0">[Personne]</mark> embête <mark class="p0">[Personne]</mark>. <mark class="p0">[Personne]</mark> frappe <mark class="p0">[Personne]</mark>. <span class="why">Qui frappe qui ? Une IA ne peut que deviner.</span></p>
 <p class="lab">Gardien RGPD</p><p class="txt"><mark class="p1">[PERSONNE_1]</mark> embête <mark class="p2">[PERSONNE_2]</mark>. <mark class="p2">[PERSONNE_2]</mark> frappe <mark class="p1">[PERSONNE_1]</mark>. <span class="why">Les rôles survivent, les identités non.</span></p>
 </div>
-<p>Sur l’exemple du poste de travail, la version 1.0.1 rend « Jean Dupont », « M. Dupont » et « DUPONT Jean » par une seule balise, <code>[PERSONNE_1]</code> ; « Mme Claire Martin » devient <code>Mme [PERSONNE_2]</code>. La civilité reste, elle aide à suivre le texte. Le numéro de facture et le montant restent aussi : ce ne sont pas des données personnelles.</p>
+<p>Sur l’exemple du poste de travail, le moteur rend « Jean Dupont », « M. Dupont » et « DUPONT Jean » par une seule balise, <code>[PERSONNE_1]</code> ; « Mme Claire Martin » devient <code>Mme [PERSONNE_2]</code>. La civilité reste, elle aide à suivre le texte. Le montant reste : ce n’est pas une donnée personnelle. Le numéro de facture peut être masqué par prudence.</p>
 <p>Pas toujours, cependant : mesuré le 26 octobre sur 2 463 personnes fictives, le moteur déployé donne une seule balise à 92,2 % d’entre elles ; 192 sont éclatées sur plusieurs, 44 partagent celle d’une autre.</p>
-<p>Chaque document est anonymisé séparément, avec sa propre clé détruite : <code>[PERSONNE_1]</code> d’un document n’est pas forcément celle d’un autre. Plus tard, sur la feuille de route : traiter un ensemble de documents avec un même code, pour garder les mêmes balises d’un document à l’autre, toujours sans retour possible (clé de l’ensemble détruite à la fin).</p>
+<p>Chaque document est anonymisé séparément, avec sa propre clé détruite : <code>[PERSONNE_1]</code> d’un document n’est pas forcément celle d’un autre. Plus tard : un ensemble de documents traité sous un même code, mêmes balises partout, toujours sans retour possible (clé détruite à la fin).</p>
 </section>
 
 <section class="pn" id="architecture" aria-labelledby="h-ar"><div class="ph"><p>Architecture</p><a class="x" href="#poste">Fermer</a></div>
@@ -166,13 +188,13 @@
 <li><b>Document d’origine</b>dans un dossier que vous avez autorisé ; il ne bouge pas.</li>
 <li class="hl"><b>Gardien RGPD, local</b>même moteur Rust, aucune connexion pendant le traitement ; variante 100 % locale : conteneur Docker sans réseau.</li>
 <li><b>Client IA, en MCP stdio</b>Claude Code, Claude Desktop, Cowork, VS Code ou Cursor : il passe le chemin et reçoit le Markdown anonymisé.</li>
-<li><b>Modèle d’IA</b>reçoit le texte anonymisé. Gardien RGPD n’envoie rien et demande à l’assistant de ne jamais ouvrir l’original.</li>
+<li><b>Modèle d’IA</b>reçoit le texte anonymisé ; avec les skills, un modèle léger l’a d’abord relu (<a href="#utiliser">deux étapes</a>). Gardien RGPD n’envoie rien et demande à l’assistant de ne jamais ouvrir l’original.</li>
 </ol>
 <h3>Irréversible par construction</h3>
 <ul class="list">
 <li><b>Une clé par document, puis détruite.</b> 256 bits aléatoires ; les mentions d’une personne sont rapprochées par des empreintes BLAKE2b à clé, jamais par leur valeur. La clé n’est jamais écrite ; en ligne, elle disparaît avec le processus de la requête.</li>
 <li><b>Aucune table de correspondance.</b> Rien n’associe une balise à un nom, ni chez vous ni sur le serveur : rien à voler, rien à restituer, pas même pour nous.</li>
-<li><b>Explicable.</b> Aucun LLM : chaque balise vient d’une règle nommée (clé de contrôle, mot-clé, étiquette de formulaire, règle de votre organisation).</li>
+<li><b>Explicable.</b> Aucun LLM, par choix pour un premier niveau : chaque balise vient d’une règle nommée (clé de contrôle, mot-clé, étiquette de formulaire, règle de votre organisation).</li>
 </ul></div>
 </div>
 <h3>Un cœur de processeur suffit</h3>
@@ -191,10 +213,11 @@
 
 <section class="pn" id="protocole" aria-labelledby="h-pr"><div class="ph"><p>Protocole et scores</p><a class="x" href="#poste">Fermer</a></div>
 <h2 id="h-pr" tabindex="-1">Comment nous nous notons</h2>
-<p class="lead">Un indice ne vaut que si chacun peut le vérifier et le recalculer. D’abord les résultats, puis le protocole 1.1 point par point, assez précis pour le juger et le rejouer ; le texte de référence est <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/docs/PROTOCOLE.md">PROTOCOLE.md</a>.</p>
+<p class="lead">Un indice ne vaut que si chacun peut le vérifier et le recalculer. Ces notes mesurent le seul filtre de premier niveau. D’abord les résultats, puis le protocole 1.1 point par point ; le texte de référence est <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/docs/PROTOCOLE.md">PROTOCOLE.md</a>.</p>
+<p><b>Version 1.2, déclarée avant sa campagne.</b> Deux notes par mode, fort et essentiel : l’anonymisation et les codes utiles perdus (leurres masqués : numéros de commande, de facture, de produit qui ne désignent personne). En mode fort, cette perte est affichée sans faire échouer la mesure, car masquer ces codes y est voulu ; en mode essentiel, le garde-fou des 10 % reste. Les garde-fous de lisibilité (texte neutre sur-masqué au plus 2 %, précision au moins 70 %) valent pour les deux modes. La version 1.2 sera mesurée sur le moteur 1.0.2, après sa sortie ; d’ici là, les notes par mode de l’accueil sont une mesure interne. Le résultat 1.1 reste publié tel quel.</p>
 <div class="rt">
 <table class="sheet rc">
-<caption class="q" data-v="{{q.confidence_index}}"><span class="pd">Campagne 1.1 : résultats publiés à sa fin.</span><span class="n">Protocole {{q.protocol_version}}, campagne du {{q.protocol_date}}, moteur {{q.protocol_engine}}.</span></caption>
+<caption class="q" data-v="{{q.confidence_index}}"><span class="pd">Campagne 1.1 : résultats publiés à sa fin.</span><span class="n">Résultat publié : protocole {{q.protocol_version}} · moteur {{q.protocol_engine}}, campagne du {{q.protocol_date}}.</span></caption>
 <thead><tr><td></td><th scope="col">Normalisés</th><th scope="col">Difficiles</th></tr></thead>
 <tbody>
 <tr><th scope="row">Indice de confiance</th><td class="q" data-v="{{q.confidence_index}}"><span class="n">{{q.confidence_index}} %</span><span class="pd">pas encore mesuré</span></td><td class="q" data-v="{{q.hard_index}}"><span class="n">{{q.hard_index}} %</span><span class="pd">pas encore mesuré</span></td></tr>
@@ -228,11 +251,12 @@
 <div class="two">
 <div class="limits"><h3>Limites connues</h3>
 <ul>
-<li>Une première barrière, qui réduit le risque sans l’annuler ; pas une certification RGPD.</li>
+<li>Un filtre de premier niveau, qui réduit le risque sans l’annuler ; pas une certification RGPD.</li>
 <li>Fuites relevées avec le moteur 1.0 : un retour à la ligne à l’intérieur d’un identifiant, les lettres espacées d’un PDF, barres obliques ou doubles espaces entre chiffres, adresses des avis BOAMP, RIB écrit champ par champ.</li>
 <li>Texte seulement : la conversion des PDF, Word et Excel n’est pas mesurée ; une page numérisée sans texte est écartée.</li>
 <li>Par l’API, un pays choisi sans la France ne masque ni noms ni adresses.</li>
-<li>Le moteur masque aussi à tort (colonne Précision) ; le contexte (fonction, lieu, date) peut permettre une ré-identification indirecte.</li>
+<li>Le moteur masque aussi à tort (colonne Précision).</li>
+<li>Le premier niveau ne lit pas le sens : ni données sensibles (RGPD, art. 9 et 10), ni recoupements (fonction, lieu, date) qui peuvent ré-identifier. Aujourd’hui : la seconde passe des skills Claude, au mieux, non mesurée. Ensuite : l’étage LLM gouverné.</li>
 </ul></div>
 <table class="sheet">
 <caption>Non-régression interne, à chaque version</caption>
@@ -298,6 +322,12 @@ python -m tools.protocol registration --bundle gg-protocol.pyz</code></pre>
 <section class="pn" id="utiliser" aria-labelledby="h-us"><div class="ph"><p>Utiliser</p><a class="x" href="#poste">Fermer</a></div>
 <h2 id="h-us" tabindex="-1">Ailleurs que sur cette page</h2>
 <p class="lead">Le même service, gratuit et sans clé, depuis votre assistant d’IA ou vos programmes ; pour les documents très sensibles, sur votre poste.</p>
+<h3>La solution pragmatique, en deux étapes</h3>
+<ol class="list">
+<li><b>D’abord le Gardien.</b> Il se branche sur les IA du quotidien : Claude par le serveur MCP et les skills, tout client MCP, l’API. Les skills en font la règle : chaque document passe d’abord par le Gardien. Une consigne donnée à l’IA, pas un verrou : un client sans les skills, ou un texte collé dans la conversation, n’est pas couvert.</li>
+<li><b>Puis un modèle léger.</b> Un modèle léger de votre IA lit le seul document anonymisé et, au mieux, signale ou masque ce que le premier niveau ne voit pas : santé, convictions, opinions, appartenance syndicale, vie sexuelle, infractions, indices du même ordre.</li>
+</ol>
+<p>Pas parfait, mais pragmatique : un niveau de protection élevé pour un usage courant. C’est notre appréciation, pas une mesure : seul le premier niveau est mesuré (<a href="#protocole">scores</a>). À l’étude, rien de décidé, sans date : confier cette seconde étape à l’API de Mistral AI, fournisseur européen, dans l’étage LLM gouverné.</p>
 <div class="use">
 <div><h3>Dans Claude, par MCP public, sans clé</h3>
 <p>Adresse : <code>https://api.gdprguardian.com/mcp</code> (ou <code>api.gardienrgpd.fr/mcp</code>). Claude Code :</p>
@@ -309,8 +339,8 @@ python -m tools.protocol registration --bundle gg-protocol.pyz</code></pre>
   -d '{"text": "M. Jean Dupont, 06 12 34 56 78", "explain": true}'
 
 curl https://api.gdprguardian.com/v1/anonymize/file \
-  -F file=@contrat.pdf -F countries=FR -F profile=strict</code></pre>
-<p>Réponse : le texte (ou le Markdown) anonymisé et le rapport. Options : <code>countries</code> (FR par défaut, <code>FR,BE</code>, <code>all</code>), <code>profile</code>, <code>label_language</code>, <code>explain</code>.</p></div>
+  -F file=@contrat.pdf -F countries=FR -F mode=essentiel</code></pre>
+<p>Réponse : le texte (ou le Markdown) anonymisé et le rapport. Options : <code>countries</code> (FR par défaut, <code>FR,BE</code>, <code>all</code>), <code>mode</code> (<code>fort</code> par défaut, <code>essentiel</code>, <code>personnalise</code>), <code>disable</code>, <code>rules</code>, <code>label_language</code>, <code>explain</code> ; les mêmes en MCP.</p></div>
 <div><h3>Sur votre poste</h3>
 <p>Pour les documents très sensibles : le même logiciel, en serveur MCP local ou en conteneur sans réseau ; rien ne part par Gardien RGPD. Installation : <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/docs/LOCAL.md">guide de la version locale</a> ; questions : <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>.</p>
 <h3>Limites du service public</h3>
@@ -322,11 +352,12 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 
 <section class="pn" id="appel" aria-labelledby="h-ap"><div class="ph"><p>L’appel</p><a class="x" href="#poste">Fermer</a></div>
 <h2 id="h-ap" tabindex="-1">Aux établissements publics français</h2>
-<blockquote><p>« Nous, acteurs privés, avons besoin sur ce sujet d’une solution efficace en coût d’usage et digne d’une confiance totale. »</p><p class="by">Guillaume CLEMENT, Flow Line Intégration</p></blockquote>
-<p>L’usage de l’IA ne reculera pas. Un outil qui protège les données avant qu’elles ne partent devrait être un bien commun : audité, hébergé et maintenu dans la durée, au service de tous, administrations comme entreprises. Gardien RGPD est prêt à être repris : licence MIT, code ouvert, architecture documentée, mesures publiées. Un établissement public pourrait :</p>
+<blockquote><p>« Nous, acteurs privés, avons besoin sur ce sujet d’une solution efficace en coût d’usage et digne d’une confiance totale. »</p><p>« Je trouverais formidable qu’une de nos écoles, universités ou institutions publiques reprenne ce sujet, pour le bien de toute la collectivité. »</p><p class="by">Guillaume CLEMENT, Flow Line Intégration</p></blockquote>
+<p>L’usage de l’IA ne reculera pas. Un outil qui protège les données avant qu’elles ne partent devrait être un bien commun : audité, hébergé et maintenu dans la durée, au service de tous, administrations comme entreprises. Gardien RGPD est prêt à être repris : licence MIT, code ouvert, architecture documentée, protocole public, mesures publiées. Une école, une université ou un établissement public pourrait :</p>
 <ul class="list">
 <li>auditer le code et la méthode ;</li>
 <li>reprendre, héberger et exploiter le service sur une infrastructure publique ;</li>
+<li>faire de l’étage LLM gouverné, la seconde étape, un sujet d’étude ou de recherche ;</li>
 <li>constituer le corpus de documents bureautiques annotés (PDF, Word, Excel) qui manque aujourd’hui pour mesurer la conversion.</li>
 </ul>
 <p class="cta">Pour répondre : <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>. Aucun partenariat n’existe à ce jour : cet appel est ouvert.</p>
@@ -334,7 +365,7 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 
 <section class="pn" id="merci" aria-labelledby="h-me"><div class="ph"><p>Merci</p><a class="x" href="#poste">Fermer</a></div>
 <h2 id="h-me" tabindex="-1">Un outil offert, à reprendre librement</h2>
-<p class="lead">Gardien RGPD est offert au monde : chacun peut l’utiliser, s’en inspirer et le reprendre, sans que rien ne lui soit imposé. Nous montrons nos scores tels qu’ils sont, faiblesses comprises.</p>
+<p class="lead">Gardien RGPD est offert au monde : chacun peut l’utiliser, s’en inspirer et le reprendre, sans que rien ne lui soit imposé. Nous montrons nos scores tels qu’ils sont, faiblesses comprises. Écoles, universités, institutions publiques : <a href="#appel">notre appel</a>.</p>
 <p>Merci à <a target="_blank" rel="noopener" href="https://www.flowlineintegration.com/">Flow Line Intégration</a>, qui offre et héberge gratuitement le service en ligne. Conçu par <a target="_blank" rel="noopener" href="https://www.linkedin.com/in/guillaume-clement-erp-cloud/">Guillaume CLEMENT</a>, CTO Data &amp; IA. Conception de l’interface : Claude Design.</p>
 <p class="cta">Une évolution, un problème de performance, un identifiant qui passe : <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/issues/new/choose">ouvrir un ticket</a>. Décrivez la forme avec des données fictives seulement, jamais une donnée réelle : « un IBAN coupé par un retour à la ligne ». Faille de sécurité : <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/security/advisories/new">signalement privé</a>.</p>
 </section>
@@ -343,13 +374,13 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 <h2 id="h-le" tabindex="-1">Mentions légales</h2>
 <p>Éditeur : <a target="_blank" rel="noopener" href="https://www.flowlineintegration.com/">Flow Line Intégration</a>. Directeur de la publication : Guillaume CLEMENT, directeur technique Data &amp; IA. Contact : <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>.</p>
 <p>Hébergeur : OVH SAS, 2 rue Kellermann, 59100 Roubaix, France, tél. 1007.</p>
-<p>Gardien RGPD 1.0.1, licence MIT, code dans le <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian">dépôt public</a>. Logiciel fourni en l’état, sans garantie. C’est une première barrière automatique, explicable et mesurée : ni une certification de conformité au RGPD, ni un conseil juridique ; chaque responsable de traitement reste responsable de sa conformité.</p>
+<p>Gardien RGPD 1.0.2, licence MIT, code dans le <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian">dépôt public</a>. Logiciel fourni en l’état, sans garantie. C’est un filtre de premier niveau, automatique, explicable et mesuré : ni une certification de conformité au RGPD, ni un conseil juridique ; chaque responsable de traitement reste responsable de sa conformité.</p>
 </section>
 
 <section class="pn" id="confidentialite" aria-labelledby="h-co"><div class="ph"><p>Confidentialité</p><a class="x" href="#poste">Fermer</a></div>
 <h2 id="h-co" tabindex="-1">Aucun document conservé, ni ici ni sur le serveur</h2>
 <ul class="list">
-<li><b>Ici.</b> Aucun cookie, aucun stockage du navigateur (ni local, ni de session, ni base IndexedDB), aucun traceur, aucune ressource tierce. Vos textes et résultats ne vivent que dans la mémoire de cet onglet : « Tout effacer » la vide, fermer l’onglet aussi.</li>
+<li><b>Ici.</b> Aucun cookie, aucun traceur, aucune ressource tierce. Le navigateur ne garde que le mode choisi, avec ses catégories et ses codes à conserver (stockage local) : jamais un texte. Vos textes et résultats ne vivent que dans la mémoire de cet onglet : « Tout effacer » la vide, fermer l’onglet aussi.</li>
 <li><b>Sur le serveur.</b> Chaque document est traité en mémoire dans un processus isolé et rien n’en reste une fois la réponse partie ; seul le résultat revient, à vous seul. Le nom du fichier ne part pas : seulement son extension.</li>
 <li><b>Nous restons un tiers.</b> Vous nous confiez le texte, sans contrat de sous-traitance. Pour ne rien envoyer : la <a href="#utiliser">version locale</a>.</li>
 <li><b>Adresse IP</b>, en mémoire seulement, jamais écrite sur disque, aucun journal d’accès. Le serveur web la garde telle quelle (IPv4, ou son /64 en IPv6) dans ses compteurs anti-abus, qu’il recycle au fil du trafic. Le service la remplace aussitôt par un pseudonyme à clé, oublié après 10 minutes d’inactivité (clé renouvelée toutes les 24 h). Pour compter les visiteurs une fois par jour : une empreinte à clé de l’adresse tronquée (/24, ou /48 en IPv6) et de l’agent utilisateur du navigateur, clé et empreintes oubliées chaque jour.</li>
@@ -359,7 +390,7 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 </section>
 </main>
 <footer class="foot">
-<p>Gardien RGPD 1.0.1 · licence MIT<span>, code ouvert sur GitHub</span></p>
+<p>Gardien RGPD 1.0.2 · licence MIT<span>, code ouvert sur GitHub</span></p>
 <p>Offert par <a target="_blank" rel="noopener" href="https://www.flowlineintegration.com/">Flow Line Intégration</a> · <a target="_blank" rel="noopener" href="https://www.linkedin.com/in/guillaume-clement-erp-cloud/">Guillaume CLEMENT</a>, CTO Data &amp; IA · <span class="cd">Conception : Claude Design</span></p>
 <p><a href="#mentions">Mentions légales</a><a href="#confidentialite">Confidentialité</a><a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/issues/new/choose">Signaler un problème</a></p>
 </footer>
@@ -440,6 +471,11 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 <li data-k="invalid_text">Texte invalide : caractère isolé non représentable.</li>
 <li data-k="invalid_request">Requête refusée : vérifiez le texte et les réglages.</li>
 <li data-k="r">validated=clé de contrôle ou règles officielles vérifiées|validated_and_keyword=clé vérifiée, et mot-clé présent|keyword=format reconnu près d’un mot-clé|format=format structurel|keyword_despite_invalid_key=clé fausse, mais mot-clé explicite|printed_layout=clé fausse, mais présentation imprimée caractéristique|iban_layout_despite_invalid_key=IBAN à clé fausse, écrit par blocs ou près d’un mot-clé|phone_numbering_plan=plan de numérotation vérifié|name_lexicon=prénom ou nom des fichiers Insee, avec un indice|postcode_and_town=code postal et commune vérifiés ensemble|legal_form=forme juridique|matches_nir=date de naissance cohérente avec un NIR|propagation=autre occurrence d’une valeur déjà détectée|custom_rule=règle de l’organisation|deny_list=terme imposé par l’organisation|company_policy=organisation ou identifiant d’entreprise, conservés par politique|keep_rule=règle de conservation de l’organisation</li>
+<li data-k="mo">fort=fort|essentiel=essentiel|personnalise=personnalisé</li>
+<li data-k="cats">personnes=Noms de personnes|emails=E-mails personnels|boites_fonctionnelles=Boîtes partagées (support@…)|telephones=Téléphones|fragments=Fins de numéros|adresses=Adresses postales|dates_naissance=Dates de naissance|iban=IBAN et RIB|cartes=Cartes bancaires|numeros_nationaux=Numéros nationaux (NIR…)|ip=Adresses IP et MAC|identifiants_techniques=Identifiants techniques|codes=Codes (produit, commande…)|nombres_longs=Longs numéros|plaques=Plaques et VIN|pseudonymes=Pseudonymes et identifiants</li>
+<li data-k="kbad">Codes à conserver, « {c} » : lettres, chiffres, # @ et - . / _ seulement, de 2 à 40 caractères.</li>
+<li data-k="kfix">Codes à conserver, « {c} » : au moins une lettre ou un chiffre fixe, comme SKU-######.</li>
+<li data-k="kmax">Codes à conserver : 20 au plus.</li>
 <li data-k="d">attachments=pièces jointes|comments=commentaires|metadata=métadonnées|scanned_pages=pages numérisées|links=liens|hidden_text=texte masqué|hidden_content=contenu masqué|hidden_slides=diapositives masquées|speaker_notes=notes de l’orateur|tracked_deletions=suppressions suivies|email_headers=en-têtes d’e-mail|embedded_objects=objets incorporés</li>
 </ul>
 <div class="dz" data-r="dz" aria-hidden="true"><p></p></div>

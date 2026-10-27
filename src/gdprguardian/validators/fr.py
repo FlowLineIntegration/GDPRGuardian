@@ -163,10 +163,45 @@ def alnum_mixed(candidate: str) -> str | None:
     return value if has_digit and has_alpha else None
 
 
+def _date_shaped(value: str) -> bool:
+    """Date ou plage d'années écrite avec « - », « / » ou « . » (« 2024-03-15 », « 12/03/2024 », « 2024-2025 »).
+
+    Date or year range written with "-", "/" or ".": never an identifier after its label (1.0.2, second round).
+    """
+    parts: list[str] = []
+    current: list[str] = []
+    for c in value:
+        if c in "-/.":
+            parts.append("".join(current))
+            current = []
+        else:
+            current.append(c)
+    parts.append("".join(current))
+    if not all(p and p.isascii() and p.isdigit() for p in parts):
+        return False
+    lengths = [len(p) for p in parts]
+    if len(parts) == 2:
+        return lengths == [4, 4] and all(p[:2] in ("19", "20") for p in parts)
+    if len(parts) != 3:
+        return False
+    if lengths[0] == 4 and lengths[1] <= 2 and lengths[2] <= 2:
+        return 1 <= int(parts[1]) <= 12 and 1 <= int(parts[2]) <= 31
+    if lengths[0] <= 2 and lengths[1] <= 2 and lengths[2] in (2, 4):
+        return 1 <= int(parts[0]) <= 31 and 1 <= int(parts[1]) <= 12
+    return False
+
+
 def contextual_id(candidate: str) -> str | None:
-    """Valeur après un libellé (« n° client : … ») : au moins un chiffre / at least one digit."""
+    """Valeur après un libellé (« n° client : … ») : au moins un chiffre, jamais une date ni une plage d'années.
+
+    Value after a label: at least one digit, never a date or a year range.
+    """
     value = candidate.strip(" .-/")
-    return value.upper() if any(c.isdigit() for c in value) and len(value) >= 4 else None
+    if _date_shaped(value):
+        return None
+    # 1.0.2 : squelette en majuscules (« clt-204518 » et « CLT 204518 » : une valeur, une balise).
+    # 1.0.2: uppercase skeleton (one value, one tag for every written variant).
+    return strip_separators(value).upper() if any(c.isdigit() for c in value) and len(value) >= 4 else None
 
 
 def phone_field(candidate: str) -> str | None:
@@ -193,9 +228,13 @@ def phone_field(candidate: str) -> str | None:
 def phone(candidate: str) -> str | None:
     """Téléphone français, forme canonique E.164 / French phone, canonical E.164."""
     digits = "".join(c for c in candidate if c.isdigit())
+    # « (+33) … » (1.0.2) : la parenthèse ouvrante ne cache pas le « + » / an opening bracket does not hide the "+".
+    head = candidate.lstrip()
+    if head.startswith("("):
+        head = head[1:].lstrip()
     if digits.startswith("0033"):
         digits = digits[4:]
-    elif digits.startswith("33") and candidate.lstrip().startswith("+"):
+    elif digits.startswith("33") and head.startswith("+"):
         digits = digits[2:]
     if digits.startswith("0") and len(digits) == 10:
         digits = digits[1:]

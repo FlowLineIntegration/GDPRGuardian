@@ -21,7 +21,7 @@ professionnel), préférez cette version locale.**
 |---|---|---|
 | Claude Code, Cowork | le **plugin Claude** `gdprguardian` (serveur MCP local, skill `gdprguardian-local`, garde-fou) | [`integrations/claude/plugin`](../integrations/claude/plugin/README.md) |
 | Claude Code, un agent, sans uv ni réseau (ou tant que le paquet n'est pas sur PyPI) | la **skill lourde** `gdprguardian-local` : moteur complet embarqué, installé sans réseau au premier usage | [`skills`](../skills/README.md) |
-| Claude Desktop, en un double clic | le paquet **`gdprguardian-1.0.1.mcpb`** | [`packaging/mcpb`](../packaging/mcpb/README.md) |
+| Claude Desktop, en un double clic | le paquet **`gdprguardian-1.0.2.mcpb`** | [`packaging/mcpb`](../packaging/mcpb/README.md) |
 | VS Code, Cursor, tout client MCP | la configuration donnée par `gdprguardian mcp-config` | ci-dessous |
 | Un registre MCP | le paquet **`gdprguardian-mcp`** | [`packaging/gdprguardian-mcp`](../packaging/gdprguardian-mcp/README.md) |
 | Python, la ligne de commande | `pip install "gdprguardian[local]"` | ci-dessous |
@@ -33,7 +33,7 @@ professionnel), préférez cette version locale.**
 2. Installer Gardien RGPD à la version de votre client :
 
    ```bash
-   uv tool install "gdprguardian[local]==1.0.1"
+   uv tool install "gdprguardian[local]==1.0.2"
    ```
 
    Le serveur démarre ensuite **sans aucun réseau** et dans le délai de démarrage des clients. Sans cette
@@ -54,7 +54,7 @@ La commande affiche la configuration exacte, épinglée à la version installée
 d'erreur où la coller. Elle lance toujours la même ligne :
 
 ```bash
-uvx --from "gdprguardian[local]==1.0.1" gdprguardian mcp --stdio --allow-dir ~/GDPRGuardian
+uvx --from "gdprguardian[local]==1.0.2" gdprguardian mcp --stdio --allow-dir ~/GDPRGuardian
 ```
 
 Sous macOS, une application graphique ne voit pas le `PATH` du terminal : remplacez `uvx` par le chemin donné par
@@ -73,9 +73,9 @@ gdprguardian anonymize - < notes.txt                 # texte UTF-8 sur l'entrée
 
 - **Docker** : l'image tourne sans aucune interface réseau autre que `lo`, en lecture seule, sans privilège ;
   recette exacte dans [`deploy/README.md`](../deploy/README.md) (section « Sans réseau »), serveur MCP compris.
-- **Poste isolé** : sur une machine connectée, `pip download "gdprguardian[local]==1.0.1" -d roues` (même système et
+- **Poste isolé** : sur une machine connectée, `pip download "gdprguardian[local]==1.0.2" -d roues` (même système et
   même version de Python que le poste cible) ; copier le dossier `roues`, puis sur le poste isolé
-  `pip install --no-index --find-links roues "gdprguardian[local]==1.0.1"`.
+  `pip install --no-index --find-links roues "gdprguardian[local]==1.0.2"`.
 - **Skill lourde** : les archives de [`skills/`](../skills/README.md) apportent déjà Gardien RGPD, son noyau et ses
   convertisseurs (Linux x86_64 et aarch64 ; Windows x64 et macOS Apple Silicon ; Python 3.11 à 3.14). Le script de la
   skill les installe sans réseau dans un dossier privé ; ou, dans un environnement dédié,
@@ -94,6 +94,12 @@ gdprguardian anonymize - < notes.txt                 # texte UTF-8 sur l'entrée
   fichier que le modèle passe à l'outil (donc son nom : préférez des noms neutres) et, dans les messages
   d'erreur, les dossiers autorisés tels que vous les avez écrits.
 - Un texte **collé dans la conversation** a déjà été lu par le modèle : l'anonymiser ensuite ne le protège pas.
+- **Seconde passe des skills Claude** (données sensibles, RGPD art. 9 et 10) : un modèle léger de votre IA
+  (sous-agent `haiku` dans Claude Code) remplace dans une copie du Markdown anonymisé les faits sensibles restants
+  (`[SANTE_1]`, `[INFRACTION_1]`…). Ce modèle, chez le même fournisseur que le modèle principal, reçoit ce Markdown
+  (sans sous-agent, l'agent fait la passe lui-même et lit donc ces faits) ; rien ne part vers un service Gardien
+  RGPD. Passe faite par votre IA, probabiliste, non mesurée, hors des garanties déterministes : voir
+  [`integrations/claude/README.md`](../integrations/claude/README.md).
 
 ### Vérifier
 
@@ -122,14 +128,14 @@ this local version instead.**
 |---|---|---|
 | Claude Code, Cowork | the **`gdprguardian` Claude plugin** (local MCP server, `gdprguardian-local` skill, guardrail) | [`integrations/claude/plugin`](../integrations/claude/plugin/README.md) |
 | Claude Code, an agent, no uv and no network (or while the package is not on PyPI) | the **heavy skill** `gdprguardian-local`: full engine bundled, installed offline on first use | [`skills`](../skills/README.md) |
-| Claude Desktop, one double-click | the **`gdprguardian-1.0.1.mcpb`** bundle | [`packaging/mcpb`](../packaging/mcpb/README.md) |
+| Claude Desktop, one double-click | the **`gdprguardian-1.0.2.mcpb`** bundle | [`packaging/mcpb`](../packaging/mcpb/README.md) |
 | VS Code, Cursor, any MCP client | the configuration printed by `gdprguardian mcp-config` | below |
 | An MCP registry | the **`gdprguardian-mcp`** package | [`packaging/gdprguardian-mcp`](../packaging/gdprguardian-mcp/README.md) |
 | Python, the command line | `pip install "gdprguardian[local]"` | below |
 | No network at all, even to install | Docker `--network none`, or copied wheels | below |
 
 **Once, with the network.** Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then
-`uv tool install "gdprguardian[local]==1.0.1"`: the server then starts **without any network** and within client
+`uv tool install "gdprguardian[local]==1.0.2"`: the server then starts **without any network** and within client
 start-up timeouts. Without this step, `uvx` downloads GDPR Guardian at first start and then re-checks the package
 index (PyPI) at every start once its copy is a few minutes old, so it fails offline. Run it again with the new
 version after each plugin or bundle update. Create the **allowed folder**, by default `~/GDPRGuardian`: the server
@@ -139,7 +145,7 @@ Never choose your whole home folder.
 **Other MCP clients.** `gdprguardian mcp-config vscode --allow-dir ~/GDPRGuardian` (also `claude-desktop`,
 `claude-code`, `cursor`, `generic`) prints the exact configuration, pinned to the installed version, and says on
 stderr where to paste it. It always runs the same line:
-`uvx --from "gdprguardian[local]==1.0.1" gdprguardian mcp --stdio --allow-dir ~/GDPRGuardian`. On macOS, GUI apps
+`uvx --from "gdprguardian[local]==1.0.2" gdprguardian mcp --stdio --allow-dir ~/GDPRGuardian`. On macOS, GUI apps
 do not get the terminal's `PATH`: use the path given by `which uvx`. Cowork does not load `claude_desktop_config.json`
 servers: use the plugin there.
 
@@ -148,8 +154,8 @@ servers: use the plugin there.
 
 **No network at all.** Docker: the image runs with no interface but `lo`, read-only and unprivileged; exact recipe,
 MCP server included, in [`deploy/README.md`](../deploy/README.md) ("Without network"). Air-gapped computer: on a
-connected machine with the same OS and Python version, `pip download "gdprguardian[local]==1.0.1" -d wheels`; copy
-the folder, then `pip install --no-index --find-links wheels "gdprguardian[local]==1.0.1"`. Heavy skill: the
+connected machine with the same OS and Python version, `pip download "gdprguardian[local]==1.0.2" -d wheels`; copy
+the folder, then `pip install --no-index --find-links wheels "gdprguardian[local]==1.0.2"`. Heavy skill: the
 [`skills/`](../skills/README.md) archives already carry GDPR Guardian, its core and its converters (Linux x86_64 and
 aarch64; Windows x64 and Apple-silicon macOS; Python 3.11 to 3.14); the skill's script installs them offline into a
 private folder, or, in a dedicated environment, `pip install --no-index --find-links wheels -r
@@ -163,7 +169,12 @@ not help there: only its skill loads, with no wheels and no local server.
 no mapping table exists, nothing is kept between calls, and a result is wiped 2 minutes after a full read. Goes to the model:
 the anonymised Markdown, the file path the model passes to the tool (so its name: prefer neutral names) and, in
 error messages, the allowed folders as you wrote them. Text pasted into the chat has already been seen by the
-model.
+model. The Claude skills' second pass (sensitive data, GDPR art. 9 and 10) has a light model of your AI (a `haiku`
+subagent in Claude Code) replace the remaining sensitive facts in a copy of the anonymised Markdown (`[SANTE_1]`,
+`[INFRACTION_1]`...); that model, from the same provider as the main model, receives that Markdown (without
+subagents, the agent does the pass itself and so reads those facts), and nothing goes to a GDPR Guardian service.
+The pass is done by your AI, probabilistic, not measured, outside the deterministic guarantees: see
+[`integrations/claude/README.md`](../integrations/claude/README.md).
 
 **Check.** Drop a PDF in `~/GDPRGuardian` and ask "Summarise ~/GDPRGuardian/contrat.pdf": the client calls
 `anonymize_file`, never a direct read; the summary only holds placeholders; a file outside the allowed folder is

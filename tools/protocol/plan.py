@@ -43,12 +43,26 @@ class Plan:
     redteam_seeds: tuple[int, ...]
     redteam_bases_per_seed: int
     real_counts: Mapping[str, int]
+    # Modes déclarés (1.2) : chaque document est noté une fois par mode ; aucun mode = plan 1.1 (le service choisit,
+    # « profile » envoyé comme en 1.1). Declared modes (1.2): every document scored once per mode; none = a 1.1 plan.
+    modes: tuple[str, ...] = ()
+
+    @property
+    def protocol(self) -> str:
+        """Version du protocole du plan : 1.2 avec des modes, 1.1 sans / the plan's protocol version."""
+        return spec.PROTOCOL_VERSION if self.modes else "1.1"
 
     @property
     def plan_id(self) -> str:
-        """Empreinte du plan (unités et paramètres, jamais de contenu) / plan fingerprint (no content)."""
-        payload = json.dumps({"protocol": spec.PROTOCOL_VERSION, "units": [u.uid + f"+{u.count}" for u in self.units]},
-                             separators=(",", ":"))
+        """Empreinte du plan (unités et paramètres, jamais de contenu) / plan fingerprint (no content).
+
+        Plan 1.1 (sans modes) : même empreinte qu'avant la 1.2 / a 1.1 plan keeps its pre-1.2 fingerprint.
+        """
+        body: dict[str, object] = {"protocol": self.protocol}
+        if self.modes:
+            body["modes"] = list(self.modes)
+        body["units"] = [u.uid + f"+{u.count}" for u in self.units]
+        payload = json.dumps(body, separators=(",", ":"))
         return hashlib.sha256(payload.encode()).hexdigest()[:16]
 
 
@@ -63,14 +77,16 @@ def build_plan(*, synthetic_seeds: Sequence[int] = spec.SYNTHETIC_SEEDS,
                redteam_bases_per_seed: int = spec.REDTEAM_BASES_PER_SEED,
                real_counts: Mapping[str, int] | None = None,
                unit_synthetic: int = spec.UNIT_SYNTHETIC_DOCS, unit_redteam: int = spec.UNIT_REDTEAM_BASES,
-               unit_real: int = spec.UNIT_REAL_DOCS) -> Plan:
+               unit_real: int = spec.UNIT_REAL_DOCS, modes: Sequence[str] = ()) -> Plan:
     """Corpus réels d'abord (effacés de la mémoire au plus tôt), puis synthétique et équipe rouge en alternance.
 
-    Real corpora first (out of RAM as early as possible), then synthetic and red-team units interleaved.
+    Real corpora first (out of RAM as early as possible), then synthetic and red-team units interleaved. `modes` :
+    modes 1.2 déclarés (spec.MODES pour le plan standard) ; vide = plan 1.1 / declared 1.2 modes; empty = a 1.1 plan.
     """
     real_counts = dict(real_counts or {})
     if spec.DEV_SEED in set(synthetic_seeds) | set(redteam_seeds):
         raise ValueError("la graine de développement est exclue / the development seed is excluded")
+    modes = check_modes(modes)
     units: list[Unit] = []
     for corpus in spec.REAL_CORPORA:
         for start, count in _slices(real_counts.get(corpus, 0), unit_real):
@@ -91,7 +107,31 @@ def build_plan(*, synthetic_seeds: Sequence[int] = spec.SYNTHETIC_SEEDS,
             j += 1
     units.extend(merged)
     return Plan(tuple(units), tuple(synthetic_seeds), synthetic_docs_per_seed, tuple(redteam_seeds),
-                redteam_bases_per_seed, real_counts)
+                redteam_bases_per_seed, real_counts, modes)
+
+
+def service_options(countries: str, mode: str | None) -> dict[str, str]:
+    """Options envoyées au service : « mode » (1.2) ou « profile » (plan 1.1, sans mode), jamais les deux (le service
+    refuse un « profile » qui contredit « mode »). Options sent to the service: "mode" (1.2) or "profile" (1.1 plan),
+    never both (the service refuses a profile contradicting the mode)."""
+    if mode is None:
+        return {"countries": countries, "profile": spec.PROFILE, "label_language": spec.LABEL_LANGUAGE}
+    return {"countries": countries, "mode": mode, "label_language": spec.LABEL_LANGUAGE}
+
+
+def mode_key(mode: str | None, key: str) -> str:
+    """Clé de cellule d'un mode (« fort::synthetic_fr/seed=… ») ; sans mode, la clé 1.1 / per-mode cell key."""
+    return key if mode is None else f"{mode}{spec.MODE_SEP}{key}"
+
+
+def check_modes(modes: Sequence[str]) -> tuple[str, ...]:
+    """Modes déclarables (spec.MODES), sans doublon, dans l'ordre donné / declarable modes, no duplicate."""
+    out = tuple(modes)
+    unknown = [m for m in out if m not in spec.MODES]
+    if unknown or len(set(out)) != len(out):
+        raise ValueError(f"modes inconnus ou répétés / unknown or repeated modes: {', '.join(out)} (connus / known: "
+                         f"{', '.join(spec.MODES)})")
+    return out
 
 
 # --- Documents synthétiques d'une unité / synthetic documents of a unit ------------------------------------------

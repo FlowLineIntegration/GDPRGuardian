@@ -323,6 +323,9 @@ def run_job(payload: bytes, spec: str) -> _sandbox.Body | dict[str, str]:
     try:
         job = json.loads(spec)
         options = AnonymizeOptions.from_json(job["options"])
+        if job["kind"] == "text":
+            # label_language=auto : texte court ou ambigu -> langue des pays / short or ambiguous -> countries'.
+            options = options.for_text(payload.decode("utf-8"))
         max_chars = job.get("max_chars")
         try:
             anonymizer = options.anonymizer()
@@ -338,7 +341,9 @@ def run_job(payload: bytes, spec: str) -> _sandbox.Body | dict[str, str]:
             text = payload.decode("utf-8")
             result = anonymizer.anonymize(text)
             _check_output(result.text, max_chars)
-            return _sandbox.Body({"report": result.report, "worker": os.getpid(), "cpu_ms": _cpu_ms(started)},
+            # Mode, catégories coupées et avertissement toujours dans le rapport / mode and warning always reported.
+            return _sandbox.Body({"report": options.annotate(result.report), "worker": os.getpid(),
+                                  "cpu_ms": _cpu_ms(started)},
                                  result.text)
         limits = DocumentOptions(max_bytes=job["max_bytes"], timeout_s=job["timeout_s"], sandbox=job["sandbox"],
                                  max_pages=job.get("max_pages", _DEFAULT_PAGES))
@@ -350,7 +355,7 @@ def run_job(payload: bytes, spec: str) -> _sandbox.Body | dict[str, str]:
             # jamais un refus. Converted text quality, PDF only (the only way an OCR text arrives), never a refusal.
             document.warnings.append(quality.LOW_QUALITY_WARNING)
         meta = {"kind": document.kind, "pages": document.pages, "warnings": document.warnings,
-                "dropped": document.dropped, "report": document.report, "worker": os.getpid(),
+                "dropped": document.dropped, "report": options.annotate(document.report), "worker": os.getpid(),
                 "cpu_ms": _cpu_ms(started)}
         return _sandbox.Body(meta, document.markdown)
     except (DocumentError, MemoryError, RecursionError):

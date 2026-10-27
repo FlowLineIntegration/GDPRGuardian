@@ -3,12 +3,12 @@
 //! Lowercase names: a field value after a strong label, and a name right after a cue (chats, tickets).
 //! Port of `_lowercase_fields` and `_lowercase_after_cues`.
 
-use super::chars::{eq, strip_chars, sub};
+use super::chars::{eq, strip_chars, sub, WORD};
 use super::cues::{Cues, Label, LABEL_VALUE_MAX};
-use super::lexicon::{ambiguity, given_bias, given_rank, surname_rank, AMB_NONE};
+use super::lexicon::{ambiguity, given_bias, given_rank, surname_rank, AMB_ENTITY, AMB_NONE, AMB_WORD};
 use super::patterns;
-use super::vocab::flag;
-use super::{inside, Doc, Found, GIVEN_ALONE_MIN, MEDIUM, STRONG, SURNAME_ALONE_MIN};
+use super::vocab::{flag, Entry};
+use super::{inside, Doc, Found, GIVEN_ALONE_MIN, MEDIUM, PAIR_HOMONYM_MIN, STRONG, SURNAME_ALONE_MIN};
 
 /// Mot d'un champ : (début, fin, clé repliée, code) / field word: (start, end, folded key, code).
 type Word = (usize, usize, Vec<char>, Option<u16>);
@@ -250,7 +250,9 @@ impl Doc<'_> {
                 let Some(code) = det.code(&key) else {
                     break;
                 };
-                if entry.has(flag::FUNCTION) || entry.has(flag::STOP) {
+                // « Le salarié doit être convoqué » : un verbe après un rôle n'est jamais un nom (1.0.2).
+                // A verb after a role word is never a name.
+                if entry.has(flag::FUNCTION) || entry.has(flag::STOP) || entry.has(flag::AUXILIARY) {
                     break;
                 }
                 if !words.is_empty() {
@@ -281,4 +283,245 @@ impl Doc<'_> {
             });
         }
     }
+
+    /// `_lowercase_pairs` : « rdv avec sophie martin » : prénom puis nom en minuscules, sans indice (1.0.2, fort
+    /// et essentiel). Lowercase given name then surname with no cue. `_LOWER_PAIR_RE.finditer` : le premier mot
+    /// seul est consommé, le second est lu en avance / only the first word is consumed, the second is a lookahead.
+    pub(super) fn lowercase_pairs(&self, found: &mut Vec<Found>) {
+        let (det, text) = (self.det, &self.text);
+        let mut covered: Vec<(usize, usize)> = found.iter().map(|f| (f.start, f.end)).collect();
+        covered.sort_unstable();
+        let common = |entry: Entry| {
+            entry.has(flag::FUNCTION)
+                || entry.has(flag::STOP)
+                || entry.has(flag::PARTICLE)
+                || entry.has(flag::AUXILIARY)
+        };
+        let mut added = Vec::new();
+        let mut key: Vec<char> = Vec::with_capacity(32);
+        let mut pos = 0;
+        while pos < text.len() {
+            // `(?<![\w'’.@/-])` puis le premier mot, suivi d'un seul blanc / then the first word and one blank.
+            let free = pos == 0 || !(det.chars.is(text[pos - 1], WORD) || "'’.@/-".contains(text[pos - 1]));
+            let first_end = if free { lower_word(text, pos) } else { None };
+            let Some(first_end) = first_end.filter(|&e| matches!(text.get(e), Some(' ' | '\t'))) else {
+                pos += 1;
+                continue;
+            };
+            let start = pos;
+            pos = first_end;
+            let second_start = first_end + 1;
+            let Some(second_end) = lower_word(text, second_start) else {
+                continue;
+            };
+            // `(?![\w'’@-])` après le second mot / after the second word.
+            if text.get(second_end).is_some_and(|&c| det.chars.is(c, WORD) || "'’@-".contains(c)) {
+                continue;
+            }
+            // Tampon réutilisé : la plupart des mots de la prose passent ici / reused buffer: most prose words get here.
+            key.clear();
+            det.chars.push_fold(&text[start..first_end], &mut key);
+            let first_entry = det.vocab.get(&key);
+            let Some(code1) = det.code(&key) else {
+                continue;
+            };
+            if ambiguity(code1) != AMB_NONE
+                || given_rank(code1) < GIVEN_ALONE_MIN
+                || given_rank(code1) <= surname_rank(code1)
+                || first_entry.has(flag::WORD)
+                || first_entry.has(flag::COMMUNE)
+                || common(first_entry)
+            {
+                continue;
+            }
+            let second_key = self.folded_word(second_start, second_end);
+            let second_entry = det.vocab.get(&second_key);
+            let Some(code2) = det.code(&second_key) else {
+                continue;
+            };
+            if surname_rank(code2) < SURNAME_ALONE_MIN || second_entry.has(flag::WORD) || common(second_entry) {
+                continue;
+            }
+            let amb = ambiguity(code2);
+            let accepted = amb == AMB_NONE || (amb == AMB_WORD && surname_rank(code2) >= PAIR_HOMONYM_MIN);
+            if !accepted {
+                continue;
+            }
+            if inside(&covered, start, second_end) {
+                continue;
+            }
+            added.push(Found {
+                start,
+                end: second_end,
+                value: self.field_value(&[(start, first_end, Some(code1)), (second_start, second_end, Some(code2))]),
+                score: 0.8,
+                propagate: amb == AMB_NONE,
+                form: None,
+            });
+        }
+        found.extend(added);
+    }
+
+    /// `_lowercase_after_prepositions` : « prise en charge par mathéo » : prénom seul en minuscules après « par »,
+    /// « avec », « chez », « pour » ou « à » (1.0.2, troisième tour, fort et essentiel). `_PREPOSITION_NAME_RE.finditer` :
+    /// après une correspondance, la recherche reprend après le mot / after a match, the search resumes after the word.
+    pub(super) fn lowercase_after_prepositions(&self, found: &mut Vec<Found>) {
+        let (det, text) = (self.det, &self.text);
+        let mut covered: Vec<(usize, usize)> = found.iter().map(|f| (f.start, f.end)).collect();
+        covered.sort_unstable();
+        let common = |entry: Entry| {
+            entry.has(flag::FUNCTION)
+                || entry.has(flag::STOP)
+                || entry.has(flag::PARTICLE)
+                || entry.has(flag::AUXILIARY)
+        };
+        let mut added = Vec::new();
+        let mut pos = 0;
+        while pos < text.len() {
+            let free = pos == 0 || !(det.chars.is(text[pos - 1], WORD) || "'’.@/-".contains(text[pos - 1]));
+            let prep_end = if free { preposition_end(text, pos) } else { None };
+            let start = prep_end.filter(|&e| matches!(text.get(e), Some(' ' | '\t'))).map(|e| e + 1);
+            let Some(start) = start else {
+                pos += 1;
+                continue;
+            };
+            let Some(end) = lower_word(text, start)
+                .filter(|&e| !text.get(e).is_some_and(|&c| det.chars.is(c, WORD) || "'’@-".contains(c)))
+            else {
+                pos += 1;
+                continue;
+            };
+            pos = end;
+            let key = self.folded_word(start, end);
+            let entry = det.vocab.get(&key);
+            let Some(code) = det.code(&key) else {
+                continue;
+            };
+            if ambiguity(code) != AMB_NONE
+                || given_rank(code) < GIVEN_ALONE_MIN
+                || given_rank(code) <= surname_rank(code)
+                || entry.has(flag::WORD)
+                || entry.has(flag::COMMUNE)
+                || common(entry)
+                || inside(&covered, start, end)
+            {
+                continue;
+            }
+            added.push(Found {
+                start,
+                end,
+                value: text[start..end].iter().collect(),
+                score: 0.8,
+                propagate: true,
+                form: None,
+            });
+        }
+        found.extend(added);
+    }
+
+    /// `_file_name_people` : « CV_Nadia_Haddad.pdf » : Prénom_Nom dans un nom de fichier (1.0.2, fort et essentiel).
+    /// Given_Surname inside a file name. `_FILE_PAIR_RE.finditer` : les deux segments sont consommés.
+    pub(super) fn file_name_people(&self, found: &mut Vec<Found>) {
+        let (det, text) = (self.det, &self.text);
+        let mut covered: Vec<(usize, usize)> = found.iter().map(|f| (f.start, f.end)).collect();
+        covered.sort_unstable();
+        // `(?<![^\W_])` et `(?![^\W_])` : ni lettre ni chiffre accolé, « _ » admis / no glued letter or digit.
+        let glued = |c: Option<&char>| c.is_some_and(|&c| det.chars.is(c, WORD) && c != '_');
+        let mut added = Vec::new();
+        let mut pos = 0;
+        while pos < text.len() {
+            let free = pos == 0 || !glued(text.get(pos - 1));
+            let first_end = if free { file_segment(text, pos) } else { None };
+            let pair = first_end
+                .filter(|&e| text.get(e) == Some(&'_'))
+                .and_then(|e| file_segment(text, e + 1).map(|second_end| (e, second_end)))
+                .filter(|&(_, second_end)| !glued(text.get(second_end)));
+            let Some((first_end, second_end)) = pair else {
+                pos += 1;
+                continue;
+            };
+            let start = pos;
+            pos = second_end;
+            let second_start = first_end + 1;
+            let first_key = self.folded_word(start, first_end);
+            let second_key = self.folded_word(second_start, second_end);
+            let (first_entry, second_entry) = (det.vocab.get(&first_key), det.vocab.get(&second_key));
+            let Some(code1) = det.code(&first_key) else {
+                continue;
+            };
+            if ambiguity(code1) != AMB_NONE
+                || given_rank(code1) < GIVEN_ALONE_MIN
+                || given_rank(code1) <= surname_rank(code1)
+                || first_entry.has(flag::STOP)
+            {
+                continue;
+            }
+            let code2 = det.code(&second_key);
+            let rejected = match code2 {
+                Some(code) => ambiguity(code) == AMB_ENTITY,
+                None => second_entry.has(flag::WORD),
+            };
+            if second_entry.has(flag::STOP) || second_entry.has(flag::FUNCTION) || rejected {
+                continue;
+            }
+            if inside(&covered, start, second_end) {
+                continue;
+            }
+            added.push(Found {
+                start,
+                end: second_end,
+                value: self.field_value(&[(start, first_end, Some(code1)), (second_start, second_end, code2)]),
+                score: 0.8,
+                propagate: code2.is_some_and(|code| ambiguity(code) == AMB_NONE),
+                form: None,
+            });
+        }
+        found.extend(added);
+    }
+}
+
+/// Segment `[UPPER][L]{1,30}` d'un nom de fichier (majuscule latine puis minuscules latines), fin ou `None`.
+/// A file-name segment: a Latin capital then 1 to 30 Latin lowercase letters (a longer run can never match).
+fn file_segment(text: &[char], pos: usize) -> Option<usize> {
+    let upper = |c: char| matches!(c, 'A'..='Z' | '\u{c0}'..='\u{d6}' | '\u{d8}'..='\u{de}');
+    if !text.get(pos).is_some_and(|&c| upper(c)) {
+        return None;
+    }
+    let lowers = text.get(pos + 1..).map_or(0, |rest| rest.iter().take(31).take_while(|&&c| is_lower_latin(c)).count());
+    (1..=30).contains(&lowers).then_some(pos + 1 + lowers)
+}
+
+/// Minuscule latine de `_LOWER_LETTERS` / Latin lowercase letter.
+fn is_lower_latin(c: char) -> bool {
+    matches!(c, 'a'..='z' | '\u{df}'..='\u{f6}' | '\u{f8}'..='\u{ff}' | '\u{153}')
+}
+
+/// `_LOWER_WORD` en `pos` : `[L]{2,30}(?:-[L]{2,30})?` (lettres minuscules latines), fin du mot ou `None`. Un
+/// mot plus long, ou un trait d'union sans seconde partie, ne peut jamais réussir dans le motif : `None`.
+/// Lowercase Latin word at `pos`; a longer run, or a hyphen without a valid second part, can never match.
+/// `_PREPOSITION_NAME_RE` : « par », « avec », « chez », « pour » ou « à » en `pos` ; fin du mot, sinon None.
+/// A strong preposition at `pos`: its end, else None.
+fn preposition_end(text: &[char], pos: usize) -> Option<usize> {
+    const PREPOSITIONS: [&str; 5] = ["par", "avec", "chez", "pour", "à"];
+    PREPOSITIONS.iter().find_map(|word| {
+        let n = word.chars().count();
+        let slice = text.get(pos..pos + n)?;
+        slice.iter().copied().eq(word.chars()).then_some(pos + n)
+    })
+}
+
+fn lower_word(text: &[char], pos: usize) -> Option<usize> {
+    let run = |from: usize| {
+        text.get(from..).map_or(0, |rest| rest.iter().take(31).take_while(|&&c| is_lower_latin(c)).count())
+    };
+    let first = run(pos);
+    if !(2..=30).contains(&first) {
+        return None;
+    }
+    let end = pos + first;
+    if text.get(end) != Some(&'-') {
+        return Some(end);
+    }
+    let second = run(end + 1);
+    (2..=30).contains(&second).then_some(end + 1 + second)
 }

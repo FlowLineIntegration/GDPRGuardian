@@ -340,5 +340,9 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyIbanDetector>()?;
     m.add_class::<PyBirthDateDetector>()?;
     m.add_function(wrap_pyfunction!(mrz_bands, m)?)?;
+    // Jumeau de `detectors/codes.py` dans le moteur fusionné (`native_plan`) / code twin in the fused engine.
+    m.add("code_twin", true)?;
+    // Jumeau de `PersonalSiteDetector` dans le moteur fusionné (`native_plan`) / personal-site twin, fused engine.
+    m.add("personal_site_twin", true)?;
     Ok(())
 }

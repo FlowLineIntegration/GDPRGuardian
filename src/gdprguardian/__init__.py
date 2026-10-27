@@ -10,6 +10,6 @@ from .types import Analysis, AnonymizedText, Span
 
 # Recopiée depuis pyproject.toml par `tools/release.py set` ; tests/test_release.py vérifie l'égalité.
 # Copied from pyproject.toml by `tools/release.py set`; tests/test_release.py checks they match.
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 __all__ = ["Analysis", "AnonymizedText", "Anonymizer", "DetectionContext", "Scope", "Settings", "Span", "anonymize"]

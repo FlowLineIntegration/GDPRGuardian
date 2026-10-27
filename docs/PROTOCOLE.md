@@ -1,5 +1,154 @@
 # Protocole public d'auto-évaluation de Gardien RGPD
 
+## Version 1.2 (26 octobre 2026)
+
+Écrite le **26 octobre 2026** au soir, après la campagne 1.1 et **avant la campagne 1.2**. Nous savions déjà, par une
+mesure interne sur les moitiés dev, que le mode fort masque environ 15 % des leurres : c'est ce qui motive ce
+changement. Elle sera mesurée sur le moteur **1.0.2**, après sa sortie. Le résultat 1.1 reste publié tel quel : documents normalisés **96,9 %
+[96,2–97,6]**, documents difficiles **84,0 %**, leurres masqués 3,71 %, tous les garde-fous passés, moteur
+`1.0.1+4bb5c465425e` ([`benchmarks/results/protocol-1.1-2026-10-26.md`](../benchmarks/results/protocol-1.1-2026-10-26.md)).
+La section « Version 1.1 » et les sections 1 à 15 restent en vigueur, sauf là où cette section dit autre chose.
+Définitions exécutables : [`tools/protocol/spec.py`](../tools/protocol/spec.py) (`PROTOCOL_VERSION = "1.2"`, `MODES`,
+`DECOY_GUARD_MODES`, `MODE_SITE_PREFIX`).
+
+### Pourquoi une version 1.2
+
+Le moteur 1.0.2 a trois modes, avec les mêmes noms dans l'API, le serveur MCP et le site :
+
+- **fort** (le mode par défaut) : on masque tout ce qu'on peut. Chaque identifiant, chaque code, les nombres longs,
+  les boîtes partagées.
+- **essentiel** : le filtre classique de premier niveau. On masque ce que prouve une clé de contrôle, un format connu
+  ou un libellé personnel. Les codes de produit, de commande, de facture, de lot et les boîtes partagées restent
+  lisibles.
+- **personnalisé** : on part du mode fort et on peut couper des catégories. Les secrets ne se coupent jamais.
+
+Dans tous les modes, les règles « codes à conserver » de l'organisation s'appliquent et l'emportent.
+
+Le protocole 1.1 ne connaissait qu'un réglage. Son garde-fou des leurres (au plus 10 % de numéros qui ne désignent
+personne masqués) a été écrit quand ces codes restaient lisibles. Le mode fort les masque tous, par choix. Mesuré avec
+la règle 1.1, il afficherait un échec qui ne dit rien de sa qualité. Un garde-fou doit repérer une erreur, pas
+sanctionner un choix affiché. Règle retenue : mode fort, masquer le moins de leurres possible et publier leur perte ;
+mode essentiel, en garder le maximum (garde-fou des 10 %). La version 1.2 mesure donc chaque mode pour ce qu'il
+promet, et montre ce qu'il coûte.
+
+### Les changements
+
+1. **Le plan déclare les modes notés : fort et essentiel.** Chaque document est envoyé et noté une fois par mode. Le
+   service reçoit `mode`, et plus `profile` (depuis le moteur 1.0.2, `profile: standard` veut dire « essentiel »). Le
+   mode personnalisé n'est pas noté : son résultat dépend des catégories choisies.
+2. **Deux chiffres par mode.**
+   - **Anonymisation** : l'indice « documents normalisés », avec son intervalle à 95 %, même définition qu'en 1.1.
+     L'indice « documents difficiles » est donné en détail.
+   - **Codes utiles perdus** : la part des leurres du corpus synthétique (numéros de commande, de facture, de
+     produit, de ticket, de lot, qui ne désignent personne) masqués quand même. Plus ce chiffre est bas, mieux c'est.
+     C'est la mesure du garde-fou des leurres de la 1.1, sur la famille synthétique (10 graines).
+3. **Garde-fous.**
+   - Lisibilité, pour les deux modes : texte neutre sur-masqué au plus 2 %, précision BODACC et BOAMP au moins 70 %.
+     Ils repèrent une erreur ; ils ne sanctionnent pas un choix.
+   - Leurres masqués au plus 10 % : **mode essentiel seulement**. En mode fort, la perte est publiée à côté de
+     l'indice, sans garde-fou. La ligne « Tout masquer » de la section 8 a donc, pour le mode fort, cette réponse :
+     les garde-fous de lisibilité, et la perte publiée sur la même carte que l'indice (le site refuse un indice de
+     mode montré sans sa perte).
+4. **Résultat et site.** Le mode par défaut (fort) donne les clés déjà lues par le site (`confidence_*`, `hard_*`).
+   **Rupture de série déclarée** : le résultat 1.1 porte sur le réglage unique du moteur 1.0.1, ni fort ni essentiel.
+   Le titre 1.2 est le mode fort, qui masque davantage. Les deux modes sont publiés côte à côte, et le 1.1 reste
+   affiché.
+   Chaque mode a ses clés : `fort_index`, `fort_ci_low`, `fort_ci_high`, `fort_hard_index`, `fort_code_loss`, et de
+   même `ess_*`. La clé `modes_source` dit d'où viennent ces chiffres : « protocole 1.2 » ou « mesure interne, moitié
+   dev ». Le résultat 1.2 garde, pour chaque mode, le détail par famille, par groupe et par opérateur.
+5. **Moitiés `test` encore moins aveugles.** La campagne 1.1 s'ajoute à `spec.EARLIER_CAMPAIGNS` et à
+   `spec.TEST_HALVES_MEASURED_BEFORE`. Les chiffres des corpus réels restent optimistes, et le résultat le dit.
+
+### Ce qui ne change pas
+
+La définition d'une fuite (une adresse électronique compte toujours, quel qu'en soit le titulaire), celle des deux
+indices, les familles et leurs poids, le bootstrap, la partition `dev`/`test`, les graines, le plan et ses empreintes,
+les seuils des garde-fous (le garde-fou des leurres ne s'applique plus qu'au mode essentiel, voir plus haut). Les mêmes documents sont envoyés une fois par mode : environ deux fois plus de requêtes,
+soit environ 4 h 30 sur le serveur au lieu de 2 h 15.
+
+**Conséquence déclarée.** En mode essentiel, une boîte partagée (contact@…, support@…) reste lisible par choix. Elle
+compte pourtant comme une fuite, comme en 1.1. Le chiffre d'anonymisation du mode essentiel en est plus bas. Nous ne
+changeons pas la définition pour l'éviter.
+
+### D'ici la campagne 1.2 : des mesures internes, signalées comme telles
+
+Jusqu'à la campagne 1.2, les chiffres par mode montrés sur le site sont des **mesures internes**, toujours signalées
+ainsi (« mesure interne, moitié dev ») et jamais présentées comme le protocole. Elles viennent de `python -m
+tools.protocol modes-dev` : moteur installé, en processus ; moitiés `dev` de BODACC, BOAMP et ParlaMint-FR ; graine de
+développement 20261024 (20 000 documents synthétiques avec leurres, 600 documents de base passés par les 51
+opérateurs). Aucune moitié `test` n'est lue. Ces données ont servi à régler le moteur : ces chiffres sont optimistes.
+
+### Règles de la campagne 1.2
+
+- Le moteur 1.0.2 est gelé et déployé. Le contrôle croisé (section 11) est refait sur lui.
+- Puis `bundle`, `registration --bundle` : les champs « TO_FILL_AT_RELEASE » de
+  [`PROTOCOL-REGISTRATION-1.2.json`](../PROTOCOL-REGISTRATION-1.2.json) sont remplis et publiés **avant** la campagne.
+- Les résultats s'écrivent dans `benchmarks/results/protocol-1.2-<date>.{json,md}`. Le report vers le site refuse un
+  résultat 1.2 sans les deux chiffres de chaque mode.
+- Le résultat 1.1 reste publié, et rappelé à côté du résultat 1.2.
+
+### English version
+
+Written on the evening of **26 October 2026**, after the 1.1 campaign and **before the 1.2 campaign**. We already
+knew, from an internal measure on the dev halves, that strong mode masks about 15% of the decoys: that is what
+prompted this change. It will be measured on engine **1.0.2**, after its release. The 1.1 result stays published as it is: normalised documents
+**96.9% [96.2–97.6]**, difficult documents **84.0%**, decoys masked 3.71%, every guard passed, engine
+`1.0.1+4bb5c465425e` (`benchmarks/results/protocol-1.1-2026-10-26.md`). The "Version 1.1" section and sections 1 to 15
+remain in force except where this section says otherwise. Executable definitions: `tools/protocol/spec.py`
+(`PROTOCOL_VERSION = "1.2"`, `MODES`, `DECOY_GUARD_MODES`, `MODE_SITE_PREFIX`).
+
+**Why.** Engine 1.0.2 has three modes, with the same names in the API, the MCP server and the site: **fort**
+("strong", the default: mask everything we can, every identifier, every code, long numbers, shared mailboxes);
+**essentiel** ("essential": the classic first-level filter, what a check digit, a known format or a personal label
+proves; product, order, invoice and lot codes and shared mailboxes stay readable); **personnalisé** ("custom": starts
+from strong, categories can be switched off, secrets never). In every mode the organisation's "codes to keep" rules
+apply and win. Protocol 1.1 knew one setting only. Its decoy guard (at most 10% of numbers that designate nobody
+masked) was written when those codes stayed readable. Strong mode masks them all, by choice: measured under the 1.1
+rule, it would show a failure that says nothing about its quality. A guard should catch an error, not punish a stated
+choice. Rule adopted: strong mode, mask as few decoys as possible and publish the loss; essential mode, keep as many
+as possible (10% guard). Version 1.2 therefore measures each mode for what it promises, and shows what it costs.
+
+**Changes.**
+
+1. **The plan declares the scored modes: strong and essential.** Every document is sent and scored once per mode. The
+   service gets `mode`, no longer `profile` (since engine 1.0.2, `profile: standard` means essential). Custom mode is
+   not scored: its result depends on the categories chosen.
+2. **Two numbers per mode.** **Anonymisation**: the normalised-documents index with its 95% interval, same definition
+   as 1.1; the difficult-documents index as a detail. **Useful codes lost**: the share of the synthetic corpus's
+   decoys (order, invoice, product, ticket, lot numbers that designate nobody) masked anyway; lower is better. It is
+   the 1.1 decoy guard's measure, synthetic family (10 seeds).
+3. **Guards.** Readability, for both modes: neutral text over-masked at most 2%, BODACC and BOAMP precision at least
+   70%; they catch a bug, they do not punish a choice. Decoys masked at most 10%: **essential mode only**; in strong
+   mode the loss is published next to the index, without a guard. For strong mode, the "Mask everything" row of
+   section 8 is therefore answered by the readability guards and by the loss published on the same card as the index
+   (the site refuses a mode index shown without its loss).
+4. **Result and site.** The default mode (strong) gives the keys the site already reads (`confidence_*`, `hard_*`).
+   **Declared series break**: the 1.1 result covers the single setting of engine 1.0.1, neither strong nor essential.
+   The 1.2 headline is strong mode, which masks more. Both modes are published side by side, and 1.1 stays shown.
+   Each mode has its own keys: `fort_index`, `fort_ci_low`, `fort_ci_high`, `fort_hard_index`, `fort_code_loss`, and
+   likewise `ess_*`. `modes_source` says where they come from: "protocole 1.2" or "mesure interne, moitié dev"
+   (internal measure, dev half). The 1.2 result keeps each mode's detail per family, group and operator.
+5. **Test halves even less blind.** The 1.1 campaign is added to `spec.EARLIER_CAMPAIGNS` and
+   `spec.TEST_HALVES_MEASURED_BEFORE`. Real-corpus figures stay optimistic, and the result says so.
+
+**Unchanged**: the leak definition (an e-mail address always counts, whoever it belongs to), the two indexes, the
+families and their weights, the bootstrap, the dev/test split, the seeds, the plan and its fingerprints, the guard
+thresholds (the decoy guard now applies to essential mode only, see above). The same documents are sent once per mode: about twice as many requests, about 4 h 30 on the server
+instead of 2 h 15. **Declared consequence**: in essential mode a shared mailbox (contact@…, support@…) stays readable
+by choice, yet counts as a leak, as in 1.1; essential mode's anonymisation figure is lower for it. We do not change the
+definition to avoid that.
+
+**Until the 1.2 campaign: internal measures, labelled as such.** Per-mode figures shown on the site are **internal
+measures**, always labelled so ("mesure interne, moitié dev") and never presented as the protocol. They come from
+`python -m tools.protocol modes-dev`: installed engine, in process; dev halves of BODACC, BOAMP and ParlaMint-FR;
+development seed 20261024 (20,000 synthetic documents with decoys, 600 base documents through the 51 operators). No
+test half is read. These data were used to tune the engine: the figures are optimistic.
+
+**1.2 campaign rules.** Engine 1.0.2 frozen and deployed; the cross-check (section 11) redone on it; then `bundle`,
+`registration --bundle`: the "TO_FILL_AT_RELEASE" fields of `PROTOCOL-REGISTRATION-1.2.json` filled and published
+**before** the campaign. Results go to `benchmarks/results/protocol-1.2-<date>.{json,md}`; the site merge refuses a
+1.2 result without both numbers of each mode. The 1.1 result stays published and is recalled next to the 1.2 result.
+
 ## Version 1.1 (26 octobre 2026)
 
 Écrite le **26 octobre 2026**, après la première campagne (protocole 1.0) et **avant toute campagne 1.1**. Le
