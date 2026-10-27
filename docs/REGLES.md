@@ -82,7 +82,10 @@ s'appliquent, et une règle « keep » l'emporte sur tout, propagation comprise.
 structure précise en mode fort : `{"label": "SKU", "pattern": "SKU-[0-9]{6}", "action": "keep"}`.
 
 **Rapport et `explain`** : `report.mode`, `report.disable` (noms français), `report.left_in_clear_by_mode` (nombre de
-détections laissées en clair, par catégorie, hors mode fort) et un avertissement dans `report.warnings`. Avec
+détections laissées en clair, par catégorie, hors mode fort ; texte et documents convertis en Markdown, pas encore
+dans le rapport des tableurs) et un avertissement dans `report.warnings`. Dans un tableur, une colonne dont
+l'en-tête et les valeurs annoncent des courriels est masquée en entier, boîtes fonctionnelles comprises, quel que
+soit le mode. Avec
 `explain=true`, une ligne par (catégorie, règle) : `{"left_in_clear": "codes", "rule": "ID_CODE", "reason":
 "mode_essentiel", "count": 2}`, jamais la valeur.
 
@@ -108,7 +111,9 @@ avec toute autre coupure, il est masqué (`[TEL_n]`).
 > codes and long numbers without a personal label, functional mailboxes, "@" handles without a cue and phone fragments
 > stay in clear) and `personnalise` (custom: strong minus the categories in `disable`; `disable` alone selects it, and
 > is refused with fort or essentiel). The organisation's rules apply in every mode and a keep rule wins over
-> everything. The report carries `mode`, `disable`, `left_in_clear_by_mode` and a warning; `explain` adds one line per
+> everything. The report carries `mode`, `disable`, `left_in_clear_by_mode` (text and converted documents; not yet in
+> the spreadsheet report) and a warning; in a spreadsheet, an e-mail column (header and values) is masked whole,
+> functional mailboxes included, in every mode; `explain` adds one line per
 > (category, rule) left in clear, never the value. Deprecated `profile`: strict = fort, standard = fast = essentiel.
 
 ## 2. Ce que Gardien RGPD conserve volontairement
@@ -937,6 +942,12 @@ Avec `explain=true`, le rapport contient une ligne par balise et par raison, **j
   et une ligne de signature égale au prénom ou au nom d'une personne masquée (§ 2) ; un prénom seul en minuscules
   dans la prose, sans mention antérieure, peut encore passer. « M. Le Floch » et « Mme Le Floch » d'un couple
   reçoivent la même balise.
+- Un nom de famille rare qui est aussi un mot courant (« Fontanelle », « Prairie », « Lumière »), juste après un
+  prénom, sans civilité ni étiquette, peut rester lisible : « Albéric Fontanelle » devient « [PERSONNE_1]
+  Fontanelle », et si le prénom est lui aussi un mot courant, rien n'est masqué (« Claire Fontanelle a signé. »).
+  Avec une civilité ou une étiquette (« Mme Claire Fontanelle », « Nom : Fontanelle »), le nom est masqué. Relevé à
+  l'audit du 27 octobre 2026 (12 cas sur 129 noms-mots essayés), correction prévue en 1.0.3 ; d'ici là, une règle
+  `deny` de l'organisation (§ 3) ou la seconde passe des skills.
 - Propagation des valeurs (1.0.2) : une date ordinaire égale à une date de naissance du document est masquée avec
   elle, même quand cette date de naissance a été reconnue par simple proximité d'un indice (rappel d'abord).
 - Un nom de personne écrit sur la même ligne que le code postal, sans séparateur (« Claire Dubois 69003 Lyon »),

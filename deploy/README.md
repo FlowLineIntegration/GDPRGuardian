@@ -387,7 +387,7 @@ Le gain est plus faible sur des textes éloignés du corpus de profil, sans jama
 seul) : l'image garde le jeu d'instructions x86-64 de base et tourne sur toute VM x86-64. Un profil dépend
 légèrement de l'exécution (tables de hachage à graine aléatoire) : la roue PGO n'est pas identique bit à bit d'une
 construction à l'autre, alors qu'avec `PGO=0` la roue ne dépend que de la chaîne épinglée et des sources. Les
-roues `gdprguardian-core` publiées sur PyPI sont construites sans PGO (sept plateformes, dont certaines en compilation
+roues `gdprguardian-core` destinées à PyPI sont construites sans PGO (sept plateformes, dont certaines en compilation
 croisée, où le profil ne peut pas être joué). Image : 103 Mo de contenu (441 Mo sur disque) avec ou sans PGO,
 noyau de 3,6 Mo ; construction complète sans cache en 3 min 49 s avec PGO, 2 min 26 s sans (16 cœurs, octobre
 2026).
@@ -1105,7 +1105,7 @@ smaller on texts far from the profile corpus, and never turns into a loss. `-Cta
 measurable (median −0.3% over 7 rounds; with PGO, worse than PGO alone), so the image keeps the baseline x86-64
 instruction set and runs on any x86-64 VM. A profile depends slightly on the run (randomly seeded hash tables):
 the PGO wheel is not bit-for-bit reproducible across builds, whereas with `PGO=0` the wheel only depends on the
-pinned toolchain and the sources. The `gdprguardian-core` wheels published on PyPI are built without PGO (seven
+pinned toolchain and the sources. The `gdprguardian-core` wheels meant for PyPI are built without PGO (seven
 platforms, some cross-compiled, where the profile cannot be run). Image: 103 MB of content (441 MB on disk) with
 or without PGO, 3.6 MB core; a full uncached build takes 3 min 49 s with PGO, 2 min 26 s without (16 cores,
 October 2026).

@@ -12,7 +12,7 @@ naissance…) avant que le texte n'atteigne une IA : toujours de la même façon
 chaque balise, sans retour possible. Ce qui dépend du sens (santé, opinions, infractions : RGPD, art. 9 et 10 ;
 indices recoupés) revient au niveau suivant : la prochaine étape du projet est un étage LLM gouverné, sans date
 annoncée. Les scores publiés mesurent le premier niveau seul. Trois modes, mêmes noms sur l'API, le MCP et le
-site : fort (par défaut, on masque tout ce qu'on peut), essentiel, personnalisé.
+site : fort (par défaut, on masque tout ce qu'on peut), essentiel, personnalisé (`personnalise` dans l'API).
 En pratique, deux étapes : branché sur les IA du quotidien (MCP, skills Claude, API), le Gardien reçoit chaque
 document d'abord, puis un modèle léger de votre IA lit le seul texte anonymisé pour signaler ou masquer, au
 mieux, ce qui dépend du sens ; pas parfait, mais pragmatique (notre appréciation : cette seconde étape n'est pas
@@ -40,9 +40,9 @@ Un LLM peut alors résumer, analyser ou comparer le contenu **sans jamais savoir
 Offert gratuitement par [Flow Line Intégration](https://www.flowlineintegration.com/) · conçu par
 [Guillaume CLEMENT](https://www.linkedin.com/in/guillaume-clement-erp-cloud/), CTO Data & IA · Licence MIT.
 Offered free of charge by Flow Line Intégration · designed by Guillaume CLEMENT, CTO Data & AI · MIT licence.
-Version 1.0.1, en phase de recherche et développement / in research and development.
+Version 1.0.2, en phase de recherche et développement / in research and development.
 
-**Vidéo / Video** (muette, 2 min 48 / silent, 2 min 50) : [lancement en français](video/out/gardien-rgpd-lancement-fr.mp4) ·
+**Vidéo / Video** (muette, 2 min 52 / silent, 2 min 50) : [lancement en français](video/out/gardien-rgpd-lancement-fr.mp4) ·
 [launch in English](video/out/gdpr-guardian-launch-en.mp4) ; sur le site / on the site :
 <https://gardienrgpd.fr/#video>, <https://gdprguardian.com/#video>.
 
@@ -58,7 +58,7 @@ Version 1.0.1, en phase de recherche et développement / in research and develop
 | 🌍 **Packs pays** | `countries=["FR"]` (défaut), plusieurs pays, ou `"all"` pour un document d'origine inconnue : identifiants à clé forte masqués partout, identifiants faibles seulement avec leurs mots-clés locaux. Le mode `"auto"` (pays deviné) reste expérimental. |
 | ⚡ **Rapide, sur CPU** | Aucun GPU, aucun appel à un LLM. Noyau optionnel en **Rust** (sans GIL) aux résultats identiques au moteur Python : un message de 2 Ko est traité en moins d'une milliseconde. |
 | 📄 **Documents et tableurs** | PDF, Word, PowerPoint, HTML, e-mails, Excel et CSV sont convertis en **Markdown anonymisé**, prêt pour l'IA. Feuilles masquées, commentaires et métadonnées ne fuient pas. |
-| 🤖 **Fait pour Claude et les agents** | Serveur **MCP** en ligne ou **sur votre poste** (plugins Claude pour Claude Code, Claude Desktop et Cowork ; VS Code, Cursor…), même logiciel et même version, et **deux skills Claude**, légère (service public, rien à installer) ou lourde (moteur embarqué, rien ne quitte la machine) : Claude fait anonymiser le document sans le lire et ne lit que le Markdown anonymisé. |
+| 🤖 **Fait pour Claude et les agents** | Serveur **MCP** en ligne ou **sur votre poste** (plugins Claude pour Claude Code, Claude Desktop et Cowork ; VS Code, Cursor… ; sur le poste, les archives des skills tant que le paquet n'est pas sur PyPI), même logiciel et même version, et **deux skills Claude**, légère (service public, rien à installer) ou lourde (moteur embarqué, rien ne quitte la machine) : Claude fait anonymiser le document sans le lire et ne lit que le Markdown anonymisé. |
 | 💻 **Sur votre poste, sans rien envoyer** | Pour les plus prudents : installation locale, aucune connexion réseau pendant le traitement (vérifié à chaque version), ou conteneur Docker sans réseau. Voir [docs/LOCAL.md](docs/LOCAL.md). |
 | 🧩 **Vos règles en plus** | Chaque organisation ajoute ses règles dans l'appel (références internes à masquer, numéros de commande à conserver, projets confidentiels), exécutées par un moteur d'expressions **à temps linéaire**, jamais conservées. |
 | 🔎 **Explicable** | `explain=true` : pour chaque balise, la règle et la raison (clé de contrôle validée, mot-clé, étiquette de formulaire, règle de l'organisation…), jamais la valeur. Voir [docs/REGLES.md](docs/REGLES.md). |
@@ -122,16 +122,16 @@ et la légère n'envoie un document qu'après l'accord de l'utilisateur.
 
 | Skill | Ce qu'elle fait | Archive | Plugin |
 |---|---|---|---|
-| `gdprguardian-online`, légère | envoie le document au service public gratuit (MCP ou API REST), rien à installer | `gdprguardian-online.zip` | `gdprguardian-online` (MCP en ligne + skill) : claude.ai, Claude Desktop, Cowork, Claude Code |
-| `gdprguardian-local`, lourde | anonymise **là où elle tourne**, moteur complet embarqué, sans réseau, Python 3.11 à 3.14 | `gdprguardian-local.zip` (Linux : claude.ai et conversation de Claude Desktop, même sur Windows ou Mac ; Linux, WSL) ; `gdprguardian-local-windows-macos.zip` (Claude Code directement sous Windows ou macOS Apple Silicon) | `gdprguardian` (MCP local + skill + garde-fou) : Claude Code, Cowork |
+| `gdprguardian-online`, légère | envoie le document au service public gratuit (MCP ou API REST), rien à installer | [`gdprguardian-online.zip`](https://github.com/FlowLineIntegration/GDPRGuardian/raw/main/skills/gdprguardian-online.zip) | `gdprguardian-online` (MCP en ligne + skill) : claude.ai, Claude Desktop, Cowork, Claude Code |
+| `gdprguardian-local`, lourde | anonymise **là où elle tourne**, moteur complet embarqué, sans réseau, Python 3.11 à 3.14 | [`gdprguardian-local.zip`](https://github.com/FlowLineIntegration/GDPRGuardian/raw/main/skills/gdprguardian-local.zip) (Linux : claude.ai et conversation de Claude Desktop, même sur Windows ou Mac ; Linux, WSL) ; [`gdprguardian-local-windows-macos.zip`](https://github.com/FlowLineIntegration/GDPRGuardian/raw/main/skills/gdprguardian-local-windows-macos.zip) (Claude Code directement sous Windows ou macOS Apple Silicon) | `gdprguardian` (MCP local + skill + garde-fou) : Claude Code, Cowork |
 
 - **claude.ai et Claude Desktop** : Personnaliser > Plugins > Ajouter > Ajouter une marketplace
   `FlowLineIntegration/GDPRGuardian` > `gdprguardian-online`, puis onglet Connecteurs du plugin ; ou Personnaliser >
   Skills > « + » > Créer une skill > Téléverser une skill (exécution de code activée).
 - **Claude Code** : `claude plugin marketplace add FlowLineIntegration/GDPRGuardian`, puis
   `claude plugin install gdprguardian-online@gdprguardian` ou `claude plugin install gdprguardian@gdprguardian` ; ou
-  dézipper une archive dans `~/.claude/skills/`. Le plugin local exige le paquet `gdprguardian` sur PyPI ; sans lui,
-  les archives.
+  dézipper une archive dans `~/.claude/skills/`. Le plugin local lance `uvx` sur le paquet `gdprguardian`, **pas encore publié sur
+  PyPI** : d'ici là, il ne démarre pas ; utilisez les archives.
 - Explications sur demande (règle et raison de chaque balise, jamais la valeur), limites et mode d'emploi :
   [`integrations/claude/README.md`](integrations/claude/README.md). Dans claude.ai, un fichier joint à la
   conversation est déjà parti chez Anthropic : pour qu'il ne quitte pas le poste, Claude Code ou Cowork.
@@ -147,7 +147,7 @@ Cowork and Claude Code). The heavy `gdprguardian-local` bundles the full engine 
 to 3.14: `gdprguardian-local.zip` (Linux) for claude.ai and the Claude Desktop chat, even on Windows or a Mac, and for
 Linux and WSL; `gdprguardian-local-windows-macos.zip` only for Claude Code running directly on Windows or
 Apple-silicon macOS; plugin `gdprguardian` (local MCP server and guardrail) for Claude Code and Cowork, which needs the
-`gdprguardian` package on PyPI. claude.ai and Claude Desktop: Customize > Plugins > Add > Add marketplace, then the
+`gdprguardian` package on PyPI, **not published yet**: until then, use the archives. claude.ai and Claude Desktop: Customize > Plugins > Add > Add marketplace, then the
 plugin's Connectors tab, or Customize > Skills > "+" > Create skill > Upload a skill (code execution on); Claude
 Code: `claude plugin marketplace add FlowLineIntegration/GDPRGuardian`, then install either plugin, or unzip an
 archive into `~/.claude/skills/`. Then, unless the task needs them, a light model of the user's own AI masks the
@@ -162,7 +162,7 @@ Protocole 1.1 ([docs/PROTOCOLE.md](docs/PROTOCOLE.md)), deux notes. **Documents 
 documents. **Documents difficiles**, toute l'équipe rouge (51 façons de piéger un texte) :
 **<!--q:hard_index:fr-->84,0<!--/q--> %** [<!--q:hard_ci_low:fr-->83,9<!--/q-->–<!--q:hard_ci_high:fr-->84,1<!--/q-->],
 <!--q:hard_docs:fr-->548 907<!--/q--> documents. Campagne du <!--q:protocol_date:fr-->26 octobre 2026<!--/q-->, par le **vrai service**,
-moteur <!--q:protocol_engine:fr-->1.0.1+4bb5c465425e<!--/q--> (« — » : pas encore mesuré, ou sans objet). L'usage mesuré : les textes
+moteur <!--q:protocol_engine:fr-->1.0.1+4bb5c465425e<!--/q--> (réglage unique, d'avant les modes ; « — » : pas encore mesuré, ou sans objet). L'usage mesuré : les textes
 qu'une organisation envoie à une IA, de bonne foi (courriels, demandes collées, comptes rendus, courriers RH, contrats,
 factures). Une **fuite**, c'est un seul caractère lisible d'une adresse postale, d'un téléphone, d'un courriel ou d'un
 autre identifiant direct, quel qu'en soit le titulaire, ou du nom d'une personne ; un nom de société (RGPD,
@@ -175,6 +175,7 @@ graine fixe) ; mentions directes entièrement masquées : <!--q:mention_recall_p
 sont plus aveugles (déjà notées par la campagne 1.0 et pendant la mise au point du moteur), donc les chiffres réels
 sont optimistes.
 Protocole 1.0, 7 familles dont les plus faibles (sorties de l'indice en 1.1) : 61,8 % [58,6–66,9], résultat gardé publié ([protocol-2026-10-26.md](benchmarks/results/protocol-2026-10-26.md)).
+**Notes par mode, moteur 1.0.2** (<!--q:modes_source:fr-->mesure interne, moitié dev<!--/q-->, <!--q:modes_date:fr-->27 octobre 2026<!--/q-->, moteur <!--q:modes_engine:fr-->1.0.2+src.65f7bd2b7075<!--/q--> : données de mise au point, pas encore le protocole public, chiffres optimistes) : **fort** (par défaut) <!--q:fort_index:fr-->96,3<!--/q--> % [<!--q:fort_ci_low:fr-->95,4<!--/q-->–<!--q:fort_ci_high:fr-->97,1<!--/q-->], difficiles <!--q:fort_hard_index:fr-->85,4<!--/q--> %, codes utiles perdus <!--q:fort_code_loss:fr-->14,5<!--/q--> % ; **essentiel** <!--q:ess_index:fr-->92,7<!--/q--> % [<!--q:ess_ci_low:fr-->91,6<!--/q-->–<!--q:ess_ci_high:fr-->93,7<!--/q-->], difficiles <!--q:ess_hard_index:fr-->85,1<!--/q--> %, codes utiles perdus <!--q:ess_code_loss:fr-->4,0<!--/q--> %. Le protocole 1.2 les mesurera sur le vrai service ; il est déclaré avant sa campagne ([PROTOCOL-REGISTRATION-1.2.json](PROTOCOL-REGISTRATION-1.2.json)), et le résultat 1.1 reste affiché.
 
 | Famille (corpus réels : moitié test) / family (real corpora: test half) | Documents | Sans fuite / no leak (%) | Mentions masquées / masked (%) | Précision / precision (%) |
 |---|---:|---:|---:|---:|
@@ -207,7 +208,7 @@ campagnes, versions précédentes comprises : [benchmarks/results/](benchmarks/r
 (95% CI), <!--q:protocol_docs:en-->1,019,385<!--/q--> documents. **Difficult documents**, the whole red team (51 ways to trap
 a text): **<!--q:hard_index:en-->84.0<!--/q-->%** [<!--q:hard_ci_low:en-->83.9<!--/q-->–<!--q:hard_ci_high:en-->84.1<!--/q-->],
 <!--q:hard_docs:en-->548,907<!--/q--> documents. Run of <!--q:protocol_date:en-->26 October 2026<!--/q-->, through the **real service**,
-engine <!--q:protocol_engine:en-->1.0.1+4bb5c465425e<!--/q--> ("—": not measured yet, or not applicable). The use case measured: the
+engine <!--q:protocol_engine:en-->1.0.1+4bb5c465425e<!--/q--> (single setting, before modes; "—": not measured yet, or not applicable). The use case measured: the
 texts an organisation sends to an AI, in good faith (e-mails, pasted requests, minutes, HR letters, contracts,
 invoices). A **leak** is a single readable character of a postal address, a phone number, an e-mail address or another
 direct identifier, whoever it belongs to, or of a person's name; a company name (GDPR, recital 14) or a town named as
@@ -219,6 +220,7 @@ Definition and digests published before the run (PROTOCOL-REGISTRATION-1.1.json)
 corpora are no longer blind (scored by the 1.0 run and while the engine was tuned), so the real-corpus figures are
 optimistic.
 Protocol 1.0, 7 families including the weakest (moved out of the index in 1.1): 61.8% [58.6–66.9], result kept published ([protocol-2026-10-26.md](benchmarks/results/protocol-2026-10-26.md)).
+**Scores per mode, engine 1.0.2** (internal measurement, dev half, <!--q:modes_date:en-->27 October 2026<!--/q-->, engine <!--q:modes_engine:en-->1.0.2+src.65f7bd2b7075<!--/q-->: tuning data, not yet the public protocol, so optimistic figures): **strong** (default) <!--q:fort_index:en-->96.3<!--/q-->% [<!--q:fort_ci_low:en-->95.4<!--/q-->–<!--q:fort_ci_high:en-->97.1<!--/q-->], difficult <!--q:fort_hard_index:en-->85.4<!--/q-->%, useful codes lost <!--q:fort_code_loss:en-->14.5<!--/q-->%; **essential** <!--q:ess_index:en-->92.7<!--/q-->% [<!--q:ess_ci_low:en-->91.6<!--/q-->–<!--q:ess_ci_high:en-->93.7<!--/q-->], difficult <!--q:ess_hard_index:en-->85.1<!--/q-->%, useful codes lost <!--q:ess_code_loss:en-->4.0<!--/q-->%. Protocol 1.2 will measure them through the real service; it is registered before its run (PROTOCOL-REGISTRATION-1.2.json), and the 1.1 result stays shown.
 Published apart, outside both scores, with their figures in the table above: old newspapers (low-quality OCR), MAPA FR,
 other languages, and the Judilibre control. Known limits: a first barrier, not a certification; the leaks that remain
 are mostly in the difficult documents (a line break inside an identifier, the spaced-out letters of a PDF, slashes or
@@ -227,6 +229,9 @@ is not measured; through the API, a country chosen without France masks neither 
 and the history of runs, earlier versions included: [benchmarks/results/](benchmarks/results/).
 
 ## Démarrage rapide
+
+> **Pas encore sur PyPI.** Les paquets `gdprguardian`, `gdprguardian-core` et `gdprguardian-mcp` 1.0.2 ne sont pas encore publiés : les commandes `pip install`, `uv tool install` et `uvx` ci-dessous échouent d'ici là, comme le plugin local `gdprguardian`, `gdprguardian mcp-config` et le paquet `.mcpb`. Sans rien installer : le site, l'API et le MCP en ligne. Sur le poste : les archives de [`skills/`](skills/README.md) (moteur, noyau et convertisseurs embarqués, sans réseau), ou depuis le code : `git clone` du dépôt puis `uv sync --extra local` (Python 3.11+ et Rust : le noyau se construit depuis `rust/`).
+> *Not on PyPI yet: until then the commands below fail; use the online service, the `skills/` archives (engine bundled) or a clone of the repository with `uv sync --extra local` (Python 3.11+ and Rust).*
 
 ```bash
 pip install "gdprguardian[all]"      # bibliothèque, convertisseurs, API et MCP en ligne

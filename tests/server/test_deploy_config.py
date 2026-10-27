@@ -221,8 +221,12 @@ def cited_media() -> dict[str, dict[str, str]]:
     cited: dict[str, dict[str, str]] = {}
     for lang in ("fr", "en"):
         page = (SITE_SRC / "templates" / f"index.{lang}.html").read_text(encoding="utf-8")
-        cited[lang] = dict(MEDIA_REF.findall(page))
-        assert len(cited[lang]) == page.count("/media/"), f"index.{lang}.html : /media/ sans ?v= / without ?v="
+        refs = MEDIA_REF.findall(page)
+        cited[lang] = dict(refs)
+        assert len(refs) == page.count("/media/"), f"index.{lang}.html : /media/ sans ?v= / without ?v="
+        # Un fichier cité plusieurs fois (affiche : vidéo et aperçu de partage) l'est avec la même version.
+        # A file cited more than once (poster: video and share preview) carries the same version each time.
+        assert len(set(refs)) == len(cited[lang]), f"index.{lang}.html : versions ?v= différentes / differing ?v="
     return cited
 
 

@@ -12,6 +12,13 @@
 <meta property="og:description" content="Filtre de premier niveau : anonymisation irréversible des documents avant l’IA, ouverte à tous, sans clé. Licence MIT.">
 <meta property="og:url" content="https://gardienrgpd.fr/">
 <meta property="og:locale" content="fr_FR">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gardien RGPD">
+<meta property="og:image" content="https://gardienrgpd.fr/media/gardien-rgpd-lancement-fr-poster.png?v=3c16c019">
+<meta property="og:image:width" content="1920">
+<meta property="og:image:height" content="1080">
+<meta property="og:image:alt" content="Gardien RGPD : anonymisez vos documents, irréversiblement, avant l’IA">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://gardienrgpd.fr/">
 <link rel="alternate" hreflang="fr" href="https://gardienrgpd.fr/">
 <link rel="alternate" hreflang="en" href="https://gdprguardian.com/">
@@ -124,7 +131,7 @@
 <div class="t"><dt>Votre requête</dt><dd class="v"><span data-r="lat">—</span><small data-r="latu"></small></dd><dd class="u" data-r="lats">aucune encore, mesurée ici</dd></div>
 </dl>
 <p class="vh" aria-live="polite" data-live-say data-tpl="{u} documents traités dans la dernière heure, {v} visiteurs au total."></p>
-<p class="note">Chiffres réels du serveur. Rien n’est conservé ni journalisé : ni document, ni adresse IP ; seuls ces totaux sont tenus.</p>
+<p class="note">Chiffres réels du serveur. Rien n’est écrit sur disque ni journalisé : ni document, ni adresse IP (gardée en mémoire quelques minutes contre les abus, voir <a href="#confidentialite">Confidentialité</a>) ; seuls ces totaux sont tenus.</p>
 </section>
 <section class="g gs" aria-labelledby="t-ses"><h2 id="t-ses">Votre session</h2>
 <dl class="tl">
@@ -139,7 +146,7 @@
 <h2 id="h-vi" tabindex="-1">La vidéo de lancement</h2>
 <video class="vid" controls preload="none" playsinline poster="/media/gardien-rgpd-lancement-fr-poster.png?v=3c16c019" src="/media/gardien-rgpd-lancement-fr.mp4?v=aaec2e17" aria-labelledby="h-vi"></video>
 <p>Vidéo muette : tout son texte est dans la <a href="/media/gardien-rgpd-lancement-fr-transcript.txt?v=c1ea0ea2" target="_blank" rel="noopener">transcription</a>. Montage court en 4:5, pour les réseaux : <a href="/media/gardien-rgpd-lancement-fr-social.mp4?v=b95af83d" download>MP4, 5,0 Mo</a>.</p>
-<p class="fine">L’indice de la vidéo date de son rendu ; le chiffre à jour : <a href="#protocole">Protocole et scores</a>.</p>
+<p class="fine">L’indice de la vidéo date de son rendu ; le chiffre à jour : <a href="#protocole">Protocole et scores</a>. « Noms non détectés » (DE, ES, IT, NL, PT) : cas d’un pays choisi sans la France ; avec la France, comme ici, les lexiques français en masquent 23 à 42 %.</p>
 </section>
 
 <section class="pn" id="defi" aria-labelledby="h-defi"><div class="ph"><p>Le défi</p><a class="x" href="#poste">Fermer</a></div>
@@ -214,7 +221,7 @@
 <section class="pn" id="protocole" aria-labelledby="h-pr"><div class="ph"><p>Protocole et scores</p><a class="x" href="#poste">Fermer</a></div>
 <h2 id="h-pr" tabindex="-1">Comment nous nous notons</h2>
 <p class="lead">Un indice ne vaut que si chacun peut le vérifier et le recalculer. Ces notes mesurent le seul filtre de premier niveau. D’abord les résultats, puis le protocole 1.1 point par point ; le texte de référence est <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/docs/PROTOCOLE.md">PROTOCOLE.md</a>.</p>
-<p><b>Version 1.2, déclarée avant sa campagne.</b> Deux notes par mode, fort et essentiel : l’anonymisation et les codes utiles perdus (leurres masqués : numéros de commande, de facture, de produit qui ne désignent personne). En mode fort, cette perte est affichée sans faire échouer la mesure, car masquer ces codes y est voulu ; en mode essentiel, le garde-fou des 10 % reste. Les garde-fous de lisibilité (texte neutre sur-masqué au plus 2 %, précision au moins 70 %) valent pour les deux modes. La version 1.2 sera mesurée sur le moteur 1.0.2, après sa sortie ; d’ici là, les notes par mode de l’accueil sont une mesure interne. Le résultat 1.1 reste publié tel quel.</p>
+<p><b>Version 1.2, déclarée avant sa campagne.</b> Deux notes par mode, fort et essentiel : l’anonymisation et les codes utiles perdus (leurres masqués : numéros de commande, de facture, de produit qui ne désignent personne). En mode fort, cette perte est affichée sans faire échouer la mesure, car masquer ces codes y est voulu ; en mode essentiel, le garde-fou des 10 % reste. Les garde-fous de lisibilité (texte neutre sur-masqué au plus 2 %, précision au moins 70 %) valent pour les deux modes. La version 1.2 sera mesurée sur le moteur 1.0.2, publié le 27 octobre 2026 ; d’ici sa campagne, les notes par mode de l’accueil sont une mesure interne. Le résultat 1.1 reste publié tel quel.</p>
 <div class="rt">
 <table class="sheet rc">
 <caption class="q" data-v="{{q.confidence_index}}"><span class="pd">Campagne 1.1 : résultats publiés à sa fin.</span><span class="n">Résultat publié : protocole {{q.protocol_version}} · moteur {{q.protocol_engine}}, campagne du {{q.protocol_date}}.</span></caption>
@@ -254,6 +261,7 @@
 <li>Un filtre de premier niveau, qui réduit le risque sans l’annuler ; pas une certification RGPD.</li>
 <li>Fuites relevées avec le moteur 1.0 : un retour à la ligne à l’intérieur d’un identifiant, les lettres espacées d’un PDF, barres obliques ou doubles espaces entre chiffres, adresses des avis BOAMP, RIB écrit champ par champ.</li>
 <li>Texte seulement : la conversion des PDF, Word et Excel n’est pas mesurée ; une page numérisée sans texte est écartée.</li>
+<li>Noms encore manqués par le moteur 1.0.2 : écrits en minuscules (« rdv avec julien dupont »), nom de famille rare qui est aussi un mot courant (« Albéric Fontanelle » sans « M. »), « né Martin le 12/03/1985 », certains pseudonymes.</li>
 <li>Par l’API, un pays choisi sans la France ne masque ni noms ni adresses.</li>
 <li>Le moteur masque aussi à tort (colonne Précision).</li>
 <li>Le premier niveau ne lit pas le sens : ni données sensibles (RGPD, art. 9 et 10), ni recoupements (fonction, lieu, date) qui peuvent ré-identifier. Aujourd’hui : la seconde passe des skills Claude, au mieux, non mesurée. Ensuite : l’étage LLM gouverné.</li>
@@ -316,7 +324,7 @@
 <pre tabindex="0"><code>python -m tools.protocol plan --count
 python -m tools.protocol bundle --out gg-protocol.pyz
 python -m tools.protocol registration --bundle gg-protocol.pyz</code></pre>
-<p>Le premier redonne les nombres et les empreintes du plan ; les deux autres, le paquet (reproductible au bit près) et les empreintes enregistrées. Corpus réels, campagne et report vers le site : section 10 de <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/docs/PROTOCOLE.md">PROTOCOLE.md</a> ; empreintes publiées avant la campagne : <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/PROTOCOL-REGISTRATION-1.1.json">enregistrement 1.1</a> ; résultats bruts et historique : <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/tree/main/benchmarks/results">benchmarks/results</a>.</p>
+<p>Le premier redonne les nombres et les empreintes du plan ; les deux autres, le paquet (reproductible au bit près) et les empreintes enregistrées. Corpus réels, campagne et report vers le site : section 10 de <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/docs/PROTOCOLE.md">PROTOCOLE.md</a> ; empreintes publiées avant la campagne : <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/PROTOCOL-REGISTRATION-1.1.json">enregistrement 1.1</a>, <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/PROTOCOL-REGISTRATION-1.2.json">enregistrement 1.2</a> ; résultats bruts et historique : <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/tree/main/benchmarks/results">benchmarks/results</a>.</p>
 </section>
 
 <section class="pn" id="utiliser" aria-labelledby="h-us"><div class="ph"><p>Utiliser</p><a class="x" href="#poste">Fermer</a></div>
@@ -372,7 +380,7 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 
 <section class="pn" id="mentions" aria-labelledby="h-le"><div class="ph"><p>Mentions légales</p><a class="x" href="#poste">Fermer</a></div>
 <h2 id="h-le" tabindex="-1">Mentions légales</h2>
-<p>Éditeur : <a target="_blank" rel="noopener" href="https://www.flowlineintegration.com/">Flow Line Intégration</a>. Directeur de la publication : Guillaume CLEMENT, directeur technique Data &amp; IA. Contact : <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>.</p>
+<p>Éditeur : <a target="_blank" rel="noopener" href="https://www.flowlineintegration.com/">Flow Line Intégration</a>, SASU au capital de 720 679,80 €, 4 rue Maryse Bastié, 69500 Bron, France, RCS Lyon 801 330 606, tél. 04 72 14 92 50. Directeur de la publication : Guillaume CLEMENT, directeur technique Data &amp; IA. Contact : <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>.</p>
 <p>Hébergeur : OVH SAS, 2 rue Kellermann, 59100 Roubaix, France, tél. 1007.</p>
 <p>Gardien RGPD 1.0.2, licence MIT, code dans le <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian">dépôt public</a>. Logiciel fourni en l’état, sans garantie. C’est un filtre de premier niveau, automatique, explicable et mesuré : ni une certification de conformité au RGPD, ni un conseil juridique ; chaque responsable de traitement reste responsable de sa conformité.</p>
 </section>
@@ -385,7 +393,7 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 <li><b>Nous restons un tiers.</b> Vous nous confiez le texte, sans contrat de sous-traitance. Pour ne rien envoyer : la <a href="#utiliser">version locale</a>.</li>
 <li><b>Adresse IP</b>, en mémoire seulement, jamais écrite sur disque, aucun journal d’accès. Le serveur web la garde telle quelle (IPv4, ou son /64 en IPv6) dans ses compteurs anti-abus, qu’il recycle au fil du trafic. Le service la remplace aussitôt par un pseudonyme à clé, oublié après 10 minutes d’inactivité (clé renouvelée toutes les 24 h). Pour compter les visiteurs une fois par jour : une empreinte à clé de l’adresse tronquée (/24, ou /48 en IPv6) et de l’agent utilisateur du navigateur, clé et empreintes oubliées chaque jour.</li>
 <li><b>Statistiques d’usage</b> : type d’opération, format, taille, durée, succès, origine ; jamais le contenu, le nom du fichier ni l’adresse IP.</li>
-<li><b>Base légale</b> : intérêt légitime à fournir, protéger et sécuriser le service (RGPD, art. 6.1.f et 32). Questions : <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a> ; réclamation : CNIL.</li>
+<li><b>Responsable du traitement</b> : Flow Line Intégration (<a href="#mentions">mentions légales</a>). <b>Base légale</b> : intérêt légitime à fournir, protéger et sécuriser le service (RGPD, art. 6.1.f, considérant 49) ; les mesures de sécurité répondent à l’art. 32. Vos droits (accès, effacement, opposition) et questions : <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a> ; réclamation : CNIL.</li>
 </ul>
 </section>
 </main>

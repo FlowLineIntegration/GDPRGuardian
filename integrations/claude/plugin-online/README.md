@@ -25,7 +25,7 @@ document **sans le lire**, puis ne travaille que sur le Markdown anonymisé (`[P
 - **Claude Code** : `claude plugin marketplace add FlowLineIntegration/GDPRGuardian`, puis
   `claude plugin install gdprguardian-online@gdprguardian`.
 - **Sans marketplace** : téléverser l'archive
-  [`skills/gdprguardian-online.zip`](../../../skills/README.md) (Personnaliser > Skills > « + » > Créer une skill >
+  [`skills/gdprguardian-online.zip`](https://github.com/FlowLineIntegration/GDPRGuardian/raw/main/skills/gdprguardian-online.zip) (Personnaliser > Skills > « + » > Créer une skill >
   Téléverser une skill) et ajouter le connecteur personnalisé `https://api.gardienrgpd.fr/mcp` (Team et Enterprise :
   un Owner).
 
@@ -66,7 +66,7 @@ reading it**, then works only from the anonymised Markdown, whose placeholders a
 - **Install in Claude Code.** `claude plugin marketplace add FlowLineIntegration/GDPRGuardian`, then
   `claude plugin install gdprguardian-online@gdprguardian`.
 - **Without the marketplace**: upload
-  `skills/gdprguardian-online.zip` (Customize > Skills > "+" > Create skill > Upload a skill) and add the custom
+  [`skills/gdprguardian-online.zip`](https://github.com/FlowLineIntegration/GDPRGuardian/raw/main/skills/gdprguardian-online.zip) (Customize > Skills > "+" > Create skill > Upload a skill) and add the custom
   connector `https://api.gardienrgpd.fr/mcp` (an Owner on Team and Enterprise).
 - **Where the document goes.** To the GDPR Guardian service (EU-hosted, in-memory, nothing kept), never to Claude;
   only the anonymised Markdown comes back. We are a third party there, with no processing agreement: the skill tells

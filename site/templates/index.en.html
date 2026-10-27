@@ -12,6 +12,13 @@
 <meta property="og:description" content="A first-level filter: irreversible anonymisation of documents before they reach an AI, open to everyone, no key. MIT licence.">
 <meta property="og:url" content="https://gdprguardian.com/">
 <meta property="og:locale" content="en_GB">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GDPR Guardian">
+<meta property="og:image" content="https://gdprguardian.com/media/gdpr-guardian-launch-en-poster.png?v=b19695e7">
+<meta property="og:image:width" content="1920">
+<meta property="og:image:height" content="1080">
+<meta property="og:image:alt" content="GDPR Guardian: anonymise your documents, irreversibly, before the AI">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://gdprguardian.com/">
 <link rel="alternate" hreflang="en" href="https://gdprguardian.com/">
 <link rel="alternate" hreflang="fr" href="https://gardienrgpd.fr/">
@@ -124,7 +131,7 @@
 <div class="t"><dt>Your request</dt><dd class="v"><span data-r="lat">—</span><small data-r="latu"></small></dd><dd class="u" data-r="lats">none yet, measured here</dd></div>
 </dl>
 <p class="vh" aria-live="polite" data-live-say data-tpl="{u} documents processed in the last hour, {v} visitors in total."></p>
-<p class="note">Real figures from the server. Nothing is kept or logged: no document, no IP address; only these totals are counted.</p>
+<p class="note">Real figures from the server. Nothing is written to disk or logged: no document, no IP address (held in memory for a few minutes against abuse, see <a href="#privacy">Privacy</a>); only these totals are counted.</p>
 </section>
 <section class="g gs" aria-labelledby="t-ses"><h2 id="t-ses">Your session</h2>
 <dl class="tl">
@@ -139,7 +146,7 @@
 <h2 id="h-vi" tabindex="-1">The launch video</h2>
 <video class="vid" controls preload="none" playsinline poster="/media/gdpr-guardian-launch-en-poster.png?v=b19695e7" src="/media/gdpr-guardian-launch-en.mp4?v=2d7d8aa9" aria-labelledby="h-vi"></video>
 <p>Silent video: all its text is in the <a href="/media/gdpr-guardian-launch-en-transcript.txt?v=34391f99" target="_blank" rel="noopener">transcript</a>. Short 4:5 cut for social feeds: <a href="/media/gdpr-guardian-launch-en-social.mp4?v=1c60c1b3" download>MP4, 5.0 MB</a>.</p>
-<p class="fine">The video’s index dates from its rendering; the current figure: <a href="#protocol">Protocol and scores</a>.</p>
+<p class="fine">The video’s index dates from its rendering; the current figure: <a href="#protocol">Protocol and scores</a>. “Names not detected” (DE, ES, IT, NL, PT) is the case of a country chosen without France; with France, as here, the French lexicons mask 23–42% of them.</p>
 </section>
 
 <section class="pn" id="challenge" aria-labelledby="h-defi"><div class="ph"><p>The challenge</p><a class="x" href="#workspace">Close</a></div>
@@ -214,7 +221,7 @@
 <section class="pn" id="protocol" aria-labelledby="h-pr"><div class="ph"><p>Protocol and scores</p><a class="x" href="#workspace">Close</a></div>
 <h2 id="h-pr" tabindex="-1">How we grade ourselves</h2>
 <p class="lead">An index is only worth something if anyone can check and recompute it. These scores measure the first-level filter only. The results first, then protocol 1.1 point by point; the reference text is <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/docs/PROTOCOLE.md">PROTOCOLE.md</a>.</p>
-<p><b>Version 1.2, declared before its campaign.</b> Two scores per mode, strong and essential: anonymisation and useful codes lost (decoys masked: order, invoice, product numbers that designate nobody). In strong mode this loss is shown without failing the measurement, since masking these codes is intended there; in essential mode, the 10% guard stays. The readability guards (neutral text over-masked at most 2%, precision at least 70%) apply to both modes. Version 1.2 will be measured on engine 1.0.2, after its release; until then, the per-mode scores on the home page are an internal measurement. The 1.1 result stays published as it is.</p>
+<p><b>Version 1.2, declared before its campaign.</b> Two scores per mode, strong and essential: anonymisation and useful codes lost (decoys masked: order, invoice, product numbers that designate nobody). In strong mode this loss is shown without failing the measurement, since masking these codes is intended there; in essential mode, the 10% guard stays. The readability guards (neutral text over-masked at most 2%, precision at least 70%) apply to both modes. Version 1.2 will be measured on engine 1.0.2, released on 27 October 2026; until its campaign, the per-mode scores on the home page are an internal measurement. The 1.1 result stays published as it is.</p>
 <div class="rt">
 <table class="sheet rc">
 <caption class="q" data-v="{{q.confidence_index}}"><span class="pd">Run 1.1: results published when it ends.</span><span class="n">Published result: protocol {{q.protocol_version}} · engine {{q.protocol_engine}}, run of {{q.protocol_date}}.</span></caption>
@@ -254,6 +261,7 @@
 <li>A first-level filter, which lowers the risk without removing it; not a GDPR certification.</li>
 <li>Leaks found with engine 1.0: a line break inside an identifier, the spaced-out letters of a PDF, slashes or double spaces between digits, the addresses of BOAMP notices, French bank details (RIB) written field by field.</li>
 <li>Text only: the conversion of PDF, Word and Excel files is not measured; a scanned page with no text is dropped.</li>
+<li>Names still missed by engine 1.0.2: written in lower case (“rdv avec julien dupont”), a rare surname that is also a common French word (“Albéric Fontanelle” without “M.”), “né Martin le 12/03/1985”, some pseudonyms.</li>
 <li>Through the API, a country chosen without France masks neither names nor addresses.</li>
 <li>The engine also masks by mistake (Precision column).</li>
 <li>The first level does not read meaning: neither sensitive data (GDPR, Art. 9 and 10) nor cross-checks (job title, place, date) that can re-identify someone. Today: the Claude skills’ second pass, best effort, not measured. Next: the governed LLM stage.</li>
@@ -316,7 +324,7 @@
 <pre tabindex="0"><code>python -m tools.protocol plan --count
 python -m tools.protocol bundle --out gg-protocol.pyz
 python -m tools.protocol registration --bundle gg-protocol.pyz</code></pre>
-<p>The first gives back the plan’s numbers and digests; the other two, the bundle (byte-for-byte reproducible) and the registered digests. Real corpora, the run and the merge into the site: section 10 of <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/docs/PROTOCOLE.md">PROTOCOLE.md</a>; digests published before the run: <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/PROTOCOL-REGISTRATION-1.1.json">1.1 registration</a>; raw results and history: <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/tree/main/benchmarks/results">benchmarks/results</a>.</p>
+<p>The first gives back the plan’s numbers and digests; the other two, the bundle (byte-for-byte reproducible) and the registered digests. Real corpora, the run and the merge into the site: section 10 of <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/docs/PROTOCOLE.md">PROTOCOLE.md</a>; digests published before the run: <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/PROTOCOL-REGISTRATION-1.1.json">1.1 registration</a>, <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/PROTOCOL-REGISTRATION-1.2.json">1.2 registration</a>; raw results and history: <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/tree/main/benchmarks/results">benchmarks/results</a>.</p>
 </section>
 
 <section class="pn" id="use" aria-labelledby="h-us"><div class="ph"><p>Use it</p><a class="x" href="#workspace">Close</a></div>
@@ -373,7 +381,7 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 
 <section class="pn" id="legal" aria-labelledby="h-le"><div class="ph"><p>Legal notice</p><a class="x" href="#workspace">Close</a></div>
 <h2 id="h-le" tabindex="-1">Legal notice</h2>
-<p>Under French law (LCEN). Publisher: <a target="_blank" rel="noopener" href="https://www.flowlineintegration.com/">Flow Line Intégration</a>. Publication director: Guillaume CLEMENT, CTO Data &amp; AI. Contact: <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>.</p>
+<p>Under French law (LCEN). Publisher: <a target="_blank" rel="noopener" href="https://www.flowlineintegration.com/">Flow Line Intégration</a>, SASU (French simplified joint-stock company) with share capital of €720,679.80, 4 rue Maryse Bastié, 69500 Bron, France, RCS Lyon 801 330 606, phone +33 4 72 14 92 50. Publication director: Guillaume CLEMENT, CTO Data &amp; AI. Contact: <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>.</p>
 <p>Host: OVH SAS, 2 rue Kellermann, 59100 Roubaix, France, phone 1007 (from France).</p>
 <p>GDPR Guardian 1.0.2, MIT licence, code in the <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian">public repository</a>. Software provided as is, without warranty. It is a first-level filter, automated, explainable and measured: neither a GDPR compliance certification nor legal advice; each controller remains responsible for its own compliance.</p>
 </section>
@@ -386,7 +394,7 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 <li><b>We are still a third party.</b> You hand us the text, with no processing agreement. To send nothing: the <a href="#use">local version</a>.</li>
 <li><b>IP address</b>, in memory only, never written to disk, no access log. The web server keeps it as is (IPv4, or its /64 in IPv6) in its anti-abuse counters, which it recycles as traffic flows. The service replaces it at once with a keyed pseudonym, forgotten after 10 idle minutes (key renewed every 24 hours). To count visitors once a day: a keyed digest of the truncated address (/24, or /48 in IPv6) and of the browser’s user agent, key and digests forgotten every day.</li>
 <li><b>Usage statistics</b>: kind of operation, format, size, duration, success, origin; never the content, the file name or the IP address.</li>
-<li><b>Legal basis</b>: legitimate interest in providing, protecting and securing the service (GDPR, Art. 6(1)(f) and 32). Questions: <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>; complaints: the CNIL, France’s data protection authority.</li>
+<li><b>Controller</b>: Flow Line Intégration (<a href="#legal">legal notice</a>). <b>Legal basis</b>: legitimate interest in providing, protecting and securing the service (GDPR, Art. 6(1)(f), recital 49); the security measures meet Art. 32. Your rights (access, erasure, objection) and questions: <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>; complaints: the CNIL, France’s data protection authority.</li>
 </ul>
 </section>
 </main>

@@ -4,6 +4,8 @@
 
 ## Français
 
+> **Pas encore distribué.** Aucun `.mcpb` n'est joint à une version GitHub, et le paquet lance `uvx`, qui exige `gdprguardian` sur PyPI, pas encore publié ([`docs/PUBLISHING.md`](../../docs/PUBLISHING.md)). D'ici là : la skill lourde ([`skills/`](../../skills/README.md)).
+
 `gdprguardian-1.0.2.mcpb` s'installe dans Claude Desktop (macOS, Windows) par double-clic ou Paramètres >
 Extensions. Il ne contient que `manifest.json`, `icon.png` et `LICENSE` : au premier lancement, `uvx` installe
 Gardien RGPD à la version épinglée, **la même que celle du plugin Claude et du service en ligne**, puis lance le
@@ -59,6 +61,8 @@ coupé). Non vérifié, faute de machine vierge avec Claude Desktop :
 7. Paquet signé : avertissement de Claude Desktop absent après `mcpb sign` avec le certificat de l'éditeur.
 
 ## English
+
+> **Not distributed yet.** No `.mcpb` is attached to a GitHub release, and the bundle runs `uvx`, which needs `gdprguardian` on PyPI, not published yet. Until then: the heavy skill ([`skills/`](../../skills/README.md)).
 
 `gdprguardian-1.0.2.mcpb` installs in Claude Desktop (macOS, Windows) by double-click or Settings > Extensions. It
 only holds `manifest.json`, `icon.png` and `LICENSE`: at first start, `uvx` installs GDPR Guardian at the pinned

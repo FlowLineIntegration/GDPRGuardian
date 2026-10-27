@@ -95,6 +95,6 @@
   "ess_hard_index": 85.1,
   "ess_code_loss": 4.0,
   "modes_source": "mesure interne, moitié dev",
-  "modes_date": "2026-10-26",
-  "modes_engine": "1.0.2+src.51e2454170dc"
+  "modes_date": "2026-10-27",
+  "modes_engine": "1.0.2+src.65f7bd2b7075"
 }

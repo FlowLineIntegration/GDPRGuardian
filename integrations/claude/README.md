@@ -20,13 +20,13 @@ travaille que sur le **Markdown anonymisé** (`[PERSONNE_1]`, `[EMAIL_1]`, `[NIR
 | À installer | rien (Python 3.9+ pour son script, sinon le connecteur MCP) | l'archive avec le moteur (22 Mo), Python 3.11 à 3.14 ; ou le plugin local |
 | Où va le document | vers le service Gardien RGPD (UE, en mémoire, rien conservé), un tiers ; jamais vers Claude | nulle part ailleurs : sur le poste (Claude Code, Cowork) ; dans claude.ai et la conversation de Claude Desktop, le bac à sable d'Anthropic, où un fichier joint est déjà parti |
 | Quand | aucune voie locale possible, avec l'accord de l'utilisateur | **toujours, dès qu'elle peut tourner** ; santé, RH, juridique, secret professionnel ; hors ligne |
-| Archive à téléverser ([`skills/`](../../skills/README.md)) | `gdprguardian-online.zip` (53 Ko) | `gdprguardian-local.zip` (Linux x86_64 et aarch64) : claude.ai et conversation de Claude Desktop (bac à sable Linux d'Anthropic, **même sur un poste Windows ou Mac**), Claude Code sous Linux ou WSL ; `gdprguardian-local-windows-macos.zip` (Windows x64, macOS Apple Silicon) : **seulement** Claude Code ou un agent lancé directement sous Windows ou macOS |
+| Archive à téléverser ([`skills/`](../../skills/README.md)) | [`gdprguardian-online.zip`](https://github.com/FlowLineIntegration/GDPRGuardian/raw/main/skills/gdprguardian-online.zip) (53 Ko) | `gdprguardian-local.zip` (Linux x86_64 et aarch64) : claude.ai et conversation de Claude Desktop (bac à sable Linux d'Anthropic, **même sur un poste Windows ou Mac**), Claude Code sous Linux ou WSL ; `gdprguardian-local-windows-macos.zip` (Windows x64, macOS Apple Silicon) : **seulement** Claude Code ou un agent lancé directement sous Windows ou macOS |
 | Plugin | `gdprguardian-online` : MCP en ligne (HTTP) + skill | `gdprguardian` : MCP local + skill + garde-fou (Claude Code, Cowork) |
 
 Installées ensemble, la skill locale passe **toujours** en premier ; la skill légère n'envoie un document qu'après
 avoir prévenu l'utilisateur (service tiers, sans contrat de traitement) et obtenu son accord, sauf s'il l'a
-demandée lui-même. Les deux skills ont les mêmes options (`countries`, `profile`, `label_language`, `rules`,
-`explain`), les mêmes balises, les mêmes explications (règle et raison de chaque balise, jamais la valeur) et la
+demandée lui-même. Les deux skills ont les mêmes options (`countries`, `mode` : `fort` par défaut, `essentiel`, ou
+`personnalise` avec `disable` ; `label_language`, `rules`, `explain` ; `profile` reste un alias déprécié), les mêmes balises, les mêmes explications (règle et raison de chaque balise, jamais la valeur) et la
 même règle : ne jamais lire l'original.
 
 **Seconde passe : données sensibles (RGPD, art. 9 et 10).** Gardien RGPD masque les identifiants, pas les faits
@@ -244,7 +244,7 @@ differs (`anonymize_file` reads a local file, `create_upload` receives an upload
 | Install | nothing (Python 3.9+ for its script, else the MCP connector) | the archive with the engine (22 MB), Python 3.11 to 3.14; or the local plugin |
 | The document goes to | the GDPR Guardian service (EU, in memory, nothing kept), a third party; never to Claude | nowhere else: the computer (Claude Code, Cowork); in claude.ai and the Claude Desktop chat, Anthropic's sandbox, where an attached file already is |
 | When | no local route is possible, with the user's agreement | **always, whenever it can run**; health, HR, legal, professional secrecy; offline |
-| Archive ([`skills/`](../../skills/README.md)) | `gdprguardian-online.zip` (53 KB) | `gdprguardian-local.zip` (Linux x86_64 and aarch64): claude.ai and the Claude Desktop chat (Anthropic's Linux sandbox, **even on a Windows or Mac computer**), Claude Code on Linux or WSL; `gdprguardian-local-windows-macos.zip` (Windows x64, Apple-silicon macOS): **only** Claude Code or an agent running directly on Windows or macOS |
+| Archive ([`skills/`](../../skills/README.md)) | [`gdprguardian-online.zip`](https://github.com/FlowLineIntegration/GDPRGuardian/raw/main/skills/gdprguardian-online.zip) (53 KB) | `gdprguardian-local.zip` (Linux x86_64 and aarch64): claude.ai and the Claude Desktop chat (Anthropic's Linux sandbox, **even on a Windows or Mac computer**), Claude Code on Linux or WSL; `gdprguardian-local-windows-macos.zip` (Windows x64, Apple-silicon macOS): **only** Claude Code or an agent running directly on Windows or macOS |
 | Plugin | `gdprguardian-online`: online MCP (HTTP) + skill | `gdprguardian`: local MCP + skill + guardrail (Claude Code, Cowork) |
 
 Installed together, the local skill **always** comes first; the light skill sends a document only after telling

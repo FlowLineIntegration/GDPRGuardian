@@ -1,7 +1,7 @@
 # Vidéo de lancement · Launch video
 
 Gardien RGPD / GDPR Guardian 1.0.1. Une vidéo muette sur fond blanc, en français et en anglais, en deux montages :
-le **complet** (1920 × 1080, environ 2 min 48 s) et le **court** pour les fils de réseaux sociaux sur téléphone
+le **complet** (1920 × 1080, environ 2 min 52 s) et le **court** pour les fils de réseaux sociaux sur téléphone
 (1080 × 1350, environ 1 min 23 s, texte plus gros, moins de mots). Tout sort d’une seule source, par une seule
 commande. A silent video on a white background, in French and English, in two cuts: the **full** one (1920 × 1080,
 about 2 min 50 s) and the **short** one for phone feeds (1080 × 1350, about 1 min 24 s, larger type, fewer words).

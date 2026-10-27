@@ -17,11 +17,13 @@ professionnel), préférez cette version locale.**
 
 ### Choisir sa voie
 
+> **Pas encore sur PyPI.** `gdprguardian`, `gdprguardian-core` et `gdprguardian-mcp` 1.0.2 ne sont pas encore publiés : le plugin `gdprguardian`, le paquet `.mcpb` (pas encore distribué), `gdprguardian mcp-config`, `uv tool install`, `uvx`, `pip install` et `pip download` de cette page échouent d'ici là. Aujourd'hui, sur le poste : la **skill lourde** (moteur, noyau et convertisseurs embarqués), ou un clone du dépôt avec `uv sync --extra local` (Python 3.11+ et Rust).
+
 | Vous utilisez | Installez | Guide |
 |---|---|---|
 | Claude Code, Cowork | le **plugin Claude** `gdprguardian` (serveur MCP local, skill `gdprguardian-local`, garde-fou) | [`integrations/claude/plugin`](../integrations/claude/plugin/README.md) |
 | Claude Code, un agent, sans uv ni réseau (ou tant que le paquet n'est pas sur PyPI) | la **skill lourde** `gdprguardian-local` : moteur complet embarqué, installé sans réseau au premier usage | [`skills`](../skills/README.md) |
-| Claude Desktop, en un double clic | le paquet **`gdprguardian-1.0.2.mcpb`** | [`packaging/mcpb`](../packaging/mcpb/README.md) |
+| Claude Desktop, en un double clic (après la publication sur PyPI) | le paquet **`gdprguardian-1.0.2.mcpb`**, pas encore distribué | [`packaging/mcpb`](../packaging/mcpb/README.md) |
 | VS Code, Cursor, tout client MCP | la configuration donnée par `gdprguardian mcp-config` | ci-dessous |
 | Un registre MCP | le paquet **`gdprguardian-mcp`** | [`packaging/gdprguardian-mcp`](../packaging/gdprguardian-mcp/README.md) |
 | Python, la ligne de commande | `pip install "gdprguardian[local]"` | ci-dessous |
@@ -128,7 +130,7 @@ this local version instead.**
 |---|---|---|
 | Claude Code, Cowork | the **`gdprguardian` Claude plugin** (local MCP server, `gdprguardian-local` skill, guardrail) | [`integrations/claude/plugin`](../integrations/claude/plugin/README.md) |
 | Claude Code, an agent, no uv and no network (or while the package is not on PyPI) | the **heavy skill** `gdprguardian-local`: full engine bundled, installed offline on first use | [`skills`](../skills/README.md) |
-| Claude Desktop, one double-click | the **`gdprguardian-1.0.2.mcpb`** bundle | [`packaging/mcpb`](../packaging/mcpb/README.md) |
+| Claude Desktop, one double-click (once on PyPI) | the **`gdprguardian-1.0.2.mcpb`** bundle, not distributed yet | [`packaging/mcpb`](../packaging/mcpb/README.md) |
 | VS Code, Cursor, any MCP client | the configuration printed by `gdprguardian mcp-config` | below |
 | An MCP registry | the **`gdprguardian-mcp`** package | [`packaging/gdprguardian-mcp`](../packaging/gdprguardian-mcp/README.md) |
 | Python, the command line | `pip install "gdprguardian[local]"` | below |
