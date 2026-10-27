@@ -353,7 +353,9 @@ blockquote p+p{margin-top:8px}
    line (the privacy pill's second half stays in its panel title). */
 @media (max-width:1699px){.t,.t.w,.gs .t{aspect-ratio:auto;min-height:96px}}
 @media (min-width:761px) and (max-width:1439px){.keep span span,.src span,.foot p:first-child span{display:none}}
-@media (min-width:1440px) and (max-width:1599px){:lang(en) .keep span span,:lang(en) .src span{display:none}}
+@media (min-width:1440px) and (max-width:1599px){.keep span span,.src span{display:none}}
+/* Sous-titre FR plus long depuis « expérimental » : la barre garde une ligne / longer FR subtitle: the bar keeps one line */
+@media (min-width:761px) and (max-width:1365px){.brand .t2{display:none}}
 @media (min-width:761px) and (max-width:1499px){.more a{padding:0 7px}}
 @media (min-width:1200px) and (max-width:1279px){.bar{column-gap:8px}.more a{padding:0 3px}}
 /* Two columns, instruments below */
