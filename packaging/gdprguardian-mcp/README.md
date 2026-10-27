@@ -7,10 +7,12 @@
 
 Ce paquet ne contient aucun code : il installe `gdprguardian[local]` de la même version (moteur, noyau Rust,
 convertisseurs PDF, Word, Excel, e-mails) et fournit la commande `gdprguardian-mcp`, identique à
-`gdprguardian mcp --stdio`. C'est la même version que le service en ligne ; seule change la porte d'entrée.
+`gdprguardian mcp --stdio`. C'est la même version que le service en ligne (réservé aux détenteurs d'une clé
+d'API) ; seule change la porte d'entrée, ici sans clé ni compte.
 
 This package holds no code: it installs `gdprguardian[local]` of the same version and provides the `gdprguardian-mcp`
-command, identical to `gdprguardian mcp --stdio`. Same release as the hosted service; only the entry point differs.
+command, identical to `gdprguardian mcp --stdio`. Same release as the hosted service (API key holders only); only the
+entry point differs, here with no key and no account.
 
 ## Ce que garantit la variante locale / what the local variant guarantees
 

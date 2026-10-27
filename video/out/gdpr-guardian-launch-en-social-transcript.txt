@@ -1,6 +1,6 @@
 GDPR Guardian · launch video · all on-screen text, in order
 Silent video (no voice, no music): this file lists every on-screen text at the moment it appears.
-86.8 s · 1080 x 1350 · 30 fps
+87.2 s · 1080 x 1350 · 30 fps
 
 [00:00] GDPR Guardian
 [00:00] Mr Jean Dupont, 06 12 34 56 78
@@ -19,7 +19,7 @@ Silent video (no voice, no music): this file lists every on-screen text at the m
 [00:19] Who hit whom?
 [00:22] GDPR Guardian — [PERSON_1] annoys [PERSON_2]. [PERSON_2] hits [PERSON_1].
 [00:22] The roles survive, the identities do not.
-[00:27] Three ways in, one engine
+[00:27] Three ways in with a key, one engine
 [00:28] Website
 [00:28] MCP
 [00:28] REST API
@@ -29,26 +29,26 @@ Silent video (no voice, no music): this file lists every on-screen text at the m
 [00:32] Over MCP, send the file, not pasted text.
 [00:35] 100% local: Claude plugin, Python, Docker without network.
 [00:39] Copy the repository, make your own version.
-[00:39] $ git clone https://github.com/FlowLineIntegration/GDPRGuardian
-[00:41] Code published on GitHub.
+[00:40] $ git clone https://github.com/FlowLineIntegration/GDPRGuardian
+[00:42] Code published on GitHub.
 [00:42] MIT licence — use it, change it, share it
-[00:45] Your server — docker compose
+[00:46] Your server — docker compose
 [00:49] Measured, published
 [00:49] 97.2% — of synthetic documents with no leak
 [00:52] 17.3% — of old newspapers with no leak: low-quality OCR, published apart
 [00:56] Confidence index
 [00:56] 96.9%
 [00:56] 95% CI: 96.2–97.6%
-[00:56] Mentions masked 99.3% · precision 99.2% BODACC, 87.7% BOAMP · neutral text masked by mistake 0.07%
+[00:57] Mentions masked 99.3% · precision 99.2% BODACC, 87.7% BOAMP · neutral text masked by mistake 0.07%
 [00:57] Normalised documents: share with no readable direct identifier · protocol 1.1, run of 26 October 2026.
 [01:08] German, Spanish, Italian, Dutch, Portuguese names: mostly missed (none without France).
 [01:12] A first barrier, not a GDPR certification.
-[01:15] GDPR Guardian
-[01:15] An experimental, open-source tool to help respect the GDPR.
+[01:16] GDPR Guardian
+[01:16] An experimental, open-source tool to help respect the GDPR.
 [01:19] Try it, improve it.
 [01:21] gdprguardian.com · gardienrgpd.fr
 [01:21] github.com/FlowLineIntegration/GDPRGuardian
 [01:22] Offered by Flow Line Intégration
 [01:22] Guillaume CLEMENT, CTO Data & AI
-[01:22] Design: Claude Design
+[01:23] Design: Claude Design
 [01:23] MIT licence, no warranty · version 1.0.1

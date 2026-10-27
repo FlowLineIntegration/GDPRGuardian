@@ -31,14 +31,13 @@ services:
     env_file:
       - /etc/gdprguardian/gdprguardian.env
       - /etc/gdprguardian/local.env
-    # Réglages du service public, prioritaires sur le fichier ci-dessus / public service settings, which win.
+    # Réglages du service en ligne, prioritaires sur le fichier ci-dessus / online service settings, which win.
     environment:
       TMPDIR: /tmp
-      # Aucune clé : REST et MCP ouverts à tous, limites par client (pseudonyme en mémoire de l'adresse que Nginx
-      # pose dans X-GG-Client ; sans cet en-tête, la requête vient du serveur lui-même).
-      # No key: REST and MCP open to all, per-client limits (in-memory pseudonym of the address Nginx puts in
-      # X-GG-Client; without that header, the request comes from the server itself).
-      GDPRGUARDIAN_PUBLIC: "1"
+      # Service à clés (27/10/2026) : REST, MCP et cockpit du site exigent `Authorization: Bearer <clé>` ; seules les
+      # empreintes SHA-256 des clés sont sur le serveur (GDPRGUARDIAN_API_KEY_SHA256 dans gdprguardian.env), une clé
+      # par organisation, remise avec un accord de sous-traitance. Keyed service: REST, MCP and the site's cockpit need
+      # a Bearer key; only the keys' SHA-256 digests are on the server, one key per organisation.
       GDPRGUARDIAN_CLIENT_IP_HEADER: X-GG-Client
       GDPRGUARDIAN_PUBLIC_URL: https://api.gdprguardian.com
       GDPRGUARDIAN_ALLOWED_HOSTS: api.gdprguardian.com,api.gardienrgpd.fr

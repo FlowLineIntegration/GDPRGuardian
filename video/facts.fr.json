@@ -78,17 +78,17 @@
     ]
   },
   "use": {
-    "headline": "Trois accès, un moteur",
+    "headline": "Trois accès sur clé, un moteur",
     "entries": [
-      ["Site web", "Déposez ou collez, puis téléchargez."],
-      ["MCP", "Claude et les agents, sans clé."],
+      ["Site web", "Avec votre clé API, déposez puis téléchargez."],
+      ["MCP", "Claude et les agents, avec votre clé."],
       ["API REST", "<m>/v1/anonymize/text</m>\n<m>/v1/anonymize/file</m>"]
     ],
     "engine": ["Gardien RGPD", "Un processus neuf par requête, rien de gardé."],
     "output": "Markdown anonymisé",
     "ai": "Votre IA",
     "note": "Par MCP, envoyez le fichier\u202f: il ne passe pas par le modèle. Un texte collé est déjà parti.",
-    "local": "<b>100\u202f% local</b>\u202f: plugin Claude, paquet Python, Docker sans réseau."
+    "local": "<b>100\u202f% local, sans clé</b>\u202f: skills Claude (moteur embarqué), Docker sans réseau."
   },
   "fork": {
     "headline": "Copiez le dépôt, faites votre version.",
@@ -203,8 +203,8 @@
     {"figure": "NIR, SIRET, TVA, IBAN de 89 pays validés par leurs clés de contrôle officielles", "source": "README.md, « Expert des identifiants européens »"},
     {"figure": "Chaque balise a sa règle et sa raison (explain=true)", "source": "README.md, « Explicable » ; docs/REGLES.md"},
     {"figure": "Moins d’une milliseconde pour un document de 2 Ko, sur un cœur, sans GPU ni LLM", "source": "README.md, « Performances » : 0,45 ms sous Windows, 0,48 ms sous Linux (noyau Rust) ; site/data/quality.json, ms_per_doc = 0,56 ms (25 octobre 2026, portable partagé) ; moteur déployé, 26 octobre 2026 : 0,30 ms pour 1 000 caractères, 2,2 ms pour 10 000 (benchmarks/results/bench-2026-10-26-standard-rules3.md)"},
-    {"figure": "Un processus neuf par requête, en mémoire, rien de conservé ; ni journal de contenu, ni cookie, ni compte, ni clé", "source": "README.md, « Service en ligne, gratuit et sans clé » ; deploy/README.md, « Construire et lancer »"},
-    {"figure": "Site web, MCP public sans clé (/mcp), API REST /v1/anonymize/text et /v1/anonymize/file", "source": "README.md, « Service en ligne » ; site/templates/index.fr.html, panneau « Utiliser »"},
+    {"figure": "Un processus neuf par requête, en mémoire, rien de conservé ; ni journal de contenu, ni cookie ; accès sur clé API", "source": "README.md, « Service en ligne, gratuit et sans clé » ; deploy/README.md, « Construire et lancer »"},
+    {"figure": "Site web, MCP (/mcp) et API REST sur clé API : /v1/anonymize/text et /v1/anonymize/file", "source": "README.md, « Service en ligne » ; site/templates/index.fr.html, panneau « Utiliser »"},
     {"figure": "Par MCP, le fichier ne passe pas par le modèle ; un texte collé dans la conversation est déjà parti", "source": "site/templates/index.fr.html, panneau « Utiliser » (« create_upload … le fichier part droit vers le service, sans passer par le modèle … Un texte collé dans la conversation est déjà parti : anonymize_text ne le rattrape pas »)"},
     {"figure": "100 % local : plugin Claude (MCP local), paquet Python, conteneur Docker sans réseau", "source": "README.md, « Sur votre poste, sans rien envoyer » ; docs/LOCAL.md ; deploy/README.md (docker run --network none)"},
     {"figure": "Licence MIT ; git clone ; code publié sur GitHub", "source": "README.md (licence MIT) ; site/templates/index.fr.html, mentions (« code dans le dépôt public »)"},

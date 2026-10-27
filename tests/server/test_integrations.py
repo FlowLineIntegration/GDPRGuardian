@@ -129,11 +129,15 @@ def test_marketplace_lists_both_plugins(plugin: dict[str, Any], online_plugin: d
         assert not entry["name"].startswith(("claude-", "anthropic-"))
 
 
-def test_light_plugin_uses_the_public_mcp_over_http(online_plugin: dict[str, Any]) -> None:
+def test_light_plugin_sends_the_api_key_to_the_online_mcp(online_plugin: dict[str, Any]) -> None:
     servers = load(ONLINE_PLUGIN / ".mcp.json")["mcpServers"]
     script = load_script(ONLINE_SCRIPT, "gdprguardian_online_for_plugin")
-    # Aucune clé, aucun en-tête, aucune option : rien à installer / no key, no header, no option: nothing to install.
-    assert servers == {"gdprguardian": {"type": "http", "url": f"{script.PUBLIC_URL}/mcp"}}
+    # Service en ligne réservé aux clés : Claude Code développe ${GDPRGUARDIAN_API_KEY}, variable de l'utilisateur,
+    # dans l'en-tête ; jamais de clé en clair dans le dépôt, aucune option : rien à installer. Keyed online service:
+    # Claude Code expands the user's ${GDPRGUARDIAN_API_KEY} in the header; never a plaintext key in the repository.
+    assert servers == {"gdprguardian": {"type": "http", "url": f"{script.PUBLIC_URL}/mcp",
+                                        "headers": {"Authorization": "Bearer ${GDPRGUARDIAN_API_KEY}"}}}
+    assert "GDPRGUARDIAN_API_KEY" in online_plugin["description"]
     assert "userConfig" not in online_plugin and not (ONLINE_PLUGIN / "hooks").exists()
     assert sorted(path.name for path in (ONLINE_PLUGIN / "skills").iterdir()) == ["gdprguardian-online"]
     assert (ONLINE_PLUGIN / "README.md").is_file()

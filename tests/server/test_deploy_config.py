@@ -418,7 +418,7 @@ def test_every_shipped_file_is_installed() -> None:
 # --- compose / compose -----------------------------------------------------------------------------------------
 
 
-def test_compose_runs_the_public_service_with_the_reviewed_settings() -> None:
+def test_compose_runs_the_keyed_service_with_the_reviewed_settings() -> None:
     yaml = pytest.importorskip("yaml")
     service = yaml.safe_load(read("compose.yaml"))["services"]["gdprguardian"]
     assert "init" not in service and service["pull_policy"] == "never"
@@ -428,12 +428,15 @@ def test_compose_runs_the_public_service_with_the_reviewed_settings() -> None:
     assert service["command"][-2:] == ["--log-level", "warning"]
     assert service["env_file"] == ["/etc/gdprguardian/gdprguardian.env", "/etc/gdprguardian/local.env"]
     env = service["environment"]
-    assert env["GDPRGUARDIAN_PUBLIC"] == "1" and env["GDPRGUARDIAN_CLIENT_IP_HEADER"] == "X-GG-Client"
+    # Service à clés : ni mode public dans le compose (il l'emporterait), ni clé ; les empreintes viennent du fichier
+    # d'environnement du serveur. Keyed service: no public mode in the compose file (it would win), no key in it.
+    assert "GDPRGUARDIAN_PUBLIC" not in env and env["GDPRGUARDIAN_CLIENT_IP_HEADER"] == "X-GG-Client"
     assert (env["GDPRGUARDIAN_MAX_CONCURRENCY"], env["GDPRGUARDIAN_WORKER_MEMORY_MB"], env["GDPRGUARDIAN_QUEUE_MB"],
             env["GDPRGUARDIAN_MAX_STORE_CHARS"]) == ("3", "1280", "1024", "100000000")
     assert not any("API_KEY" in name for name in env)
-    config = ServerConfig.from_env({name: str(value) for name, value in env.items()})
-    assert config.public and not config.keyed and config.max_concurrency == 3
+    served = {name: str(value) for name, value in env.items()} | {"GDPRGUARDIAN_API_KEY_SHA256": "0" * 64}
+    config = ServerConfig.from_env(served)
+    assert config.keyed and not config.public and config.max_concurrency == 3
     # Mémoire : travailleurs + file + résultats (4 octets par caractère au pire : chaînes UCS-4) sous la limite du
     # conteneur, marge d'accueil comprise. Memory: workers + queue + results (4 bytes per character at worst: UCS-4
     # strings) under the container limit, front margin included.

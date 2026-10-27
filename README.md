@@ -44,7 +44,7 @@ Offert gratuitement par [Flow Line Intégration](https://www.flowlineintegration
 Offered free of charge by Flow Line Intégration · designed by Guillaume CLEMENT, CTO Data & AI · MIT licence.
 Version 1.0.2, en phase de recherche et développement / in research and development.
 
-**Vidéo / Video** (muette, 2 min 55 / silent, 2 min 54) : [lancement en français](video/out/gardien-rgpd-lancement-fr.mp4) ·
+**Vidéo / Video** (muette, 2 min 57 / silent, 2 min 56) : [lancement en français](video/out/gardien-rgpd-lancement-fr.mp4) ·
 [launch in English](video/out/gdpr-guardian-launch-en.mp4) ; sur le site / on the site :
 <https://gardienrgpd.fr/#video>, <https://gdprguardian.com/#video>.
 
@@ -60,8 +60,8 @@ Version 1.0.2, en phase de recherche et développement / in research and develop
 | 🌍 **Packs pays** | `countries=["FR"]` (défaut), plusieurs pays, ou `"all"` pour un document d'origine inconnue : identifiants à clé forte masqués partout, identifiants faibles seulement avec leurs mots-clés locaux. Le mode `"auto"` (pays deviné) reste expérimental. |
 | ⚡ **Rapide, sur CPU** | Aucun GPU, aucun appel à un LLM. Noyau optionnel en **Rust** (sans GIL) aux résultats identiques au moteur Python : un message de 2 Ko est traité en moins d'une milliseconde. |
 | 📄 **Documents et tableurs** | PDF, Word, PowerPoint, HTML, e-mails, Excel et CSV sont convertis en **Markdown anonymisé**, prêt pour l'IA. Feuilles masquées, commentaires et métadonnées ne fuient pas. |
-| 🤖 **Fait pour Claude et les agents** | Serveur **MCP** en ligne ou **sur votre poste** (plugins Claude pour Claude Code, Claude Desktop et Cowork ; VS Code, Cursor… ; sur le poste, les archives des skills tant que le paquet n'est pas sur PyPI), même logiciel et même version, et **deux skills Claude**, légère (service public, rien à installer) ou lourde (moteur embarqué, rien ne quitte la machine) : Claude fait anonymiser le document sans le lire et ne lit que le Markdown anonymisé. |
-| 💻 **Sur votre poste, sans rien envoyer** | Pour les plus prudents : installation locale, aucune connexion réseau pendant le traitement (vérifié à chaque version), ou conteneur Docker sans réseau. Voir [docs/LOCAL.md](docs/LOCAL.md). |
+| 🤖 **Fait pour Claude et les agents** | Serveur **MCP** en ligne ou **sur votre poste** (plugins Claude pour Claude Code, Claude Desktop et Cowork ; VS Code, Cursor… ; sur le poste, les archives des skills tant que le paquet n'est pas sur PyPI), même logiciel et même version, et **deux skills Claude**, légère (service en ligne, clé API, rien à installer) ou lourde (moteur embarqué, sans clé, rien ne quitte la machine) : Claude fait anonymiser le document sans le lire et ne lit que le Markdown anonymisé. |
+| 💻 **Sur votre poste, sans rien envoyer** | Pour les plus prudents, et sans clé : installation locale, aucune connexion réseau pendant le traitement (vérifié à chaque version), ou conteneur Docker sans réseau. Voir [docs/LOCAL.md](docs/LOCAL.md). |
 | 🧩 **Vos règles en plus** | Chaque organisation ajoute ses règles dans l'appel (références internes à masquer, numéros de commande à conserver, projets confidentiels), exécutées par un moteur d'expressions **à temps linéaire**, jamais conservées. |
 | 🔎 **Explicable** | `explain=true` : pour chaque balise, la règle et la raison (clé de contrôle validée, mot-clé, étiquette de formulaire, règle de l'organisation…), jamais la valeur. Voir [docs/REGLES.md](docs/REGLES.md). |
 | 🛡️ **Privacy by design** | Traitement en mémoire uniquement, un processus neuf par document converti, aucun contenu journalisé, hébergement européen, sortie nettoyée des vecteurs d'injection (caractères invisibles, images distantes). |
@@ -76,22 +76,23 @@ Sortie :  M. [PERSONNE_1] ([EMAIL_1], [TEL_1]), NIR [NIR_1],
           IBAN [IBAN_1]. M. [PERSONNE_1] rappellera Mme [PERSONNE_2].
 ```
 
-## Service en ligne, gratuit et sans clé / free online service, no key
+## Service en ligne, avec clé API / online service, with an API key
 
 | | |
 |---|---|
 | API REST | `https://api.gardienrgpd.fr` · `https://api.gdprguardian.com` (`POST /v1/anonymize/text`, `POST /v1/anonymize/file`, envoi hors bande `/v1/uploads`) |
-| MCP en ligne | `https://api.gardienrgpd.fr/mcp` · `https://api.gdprguardian.com/mcp`, **sans clé** : `claude mcp add --transport http gdprguardian https://api.gardienrgpd.fr/mcp`, ou connecteur personnalisé dans claude.ai |
-| Page et essai | [gardienrgpd.fr](https://gardienrgpd.fr) · [gdprguardian.com](https://gdprguardian.com) |
+| MCP en ligne | `https://api.gardienrgpd.fr/mcp` · `https://api.gdprguardian.com/mcp`, **avec la clé** : `claude mcp add --transport http gdprguardian https://api.gdprguardian.com/mcp --header "Authorization: Bearer $GDPRGUARDIAN_API_KEY"` ; claude.ai, Claude Desktop, Cowork : connecteur personnalisé avec un en-tête de requête `Authorization` (`Bearer` suivi de la clé) ; Cursor, VS Code : champ `headers` de la configuration MCP |
+| Page et essai | [gardienrgpd.fr](https://gardienrgpd.fr) · [gdprguardian.com](https://gdprguardian.com) (pages publiques ; l'essai demande la clé) |
 
 ```bash
-curl -s https://api.gardienrgpd.fr/v1/anonymize/text -H 'Content-Type: application/json' \
-  -d '{"text": "Contactez Jean Dupont au 06 12 34 56 78."}'
+curl -s https://api.gardienrgpd.fr/v1/anonymize/text -H "Authorization: Bearer $GDPRGUARDIAN_API_KEY" \
+  -H 'Content-Type: application/json' -d '{"text": "Contactez Jean Dupont au 06 12 34 56 78."}'
 ```
 
-- **Aucune clé, aucun compte, aucun cookie.** Traitement en mémoire, un processus neuf par requête, rien
-  n'est conservé ni journalisé ; un résultat différé est effacé 2 minutes après sa lecture complète, ou 10 minutes
-  après la dernière lecture.
+- **Une clé API, aucun cookie.** La clé est remise sur demande (contact@gardienrgpd.fr) avec un accord de
+  sous-traitance (RGPD, art. 28) ; elle passe dans l'en-tête `Authorization: Bearer <clé>`, le seul accepté (sans
+  clé : `401`). Traitement en mémoire, un processus neuf par requête, rien n'est conservé ni journalisé ; un
+  résultat différé est effacé 2 minutes après sa lecture complète, ou 10 minutes après la dernière lecture.
 - **Gros documents** : l'envoi (`PUT`) répond `202` dès le fichier reçu ; le traitement continue et la lecture du
   résultat (`get_anonymized` ou `GET /v1/results/…`) donne l'étape, l'avancement et `retry_after_s` jusqu'au
   résultat.
@@ -105,16 +106,21 @@ curl -s https://api.gardienrgpd.fr/v1/anonymize/text -H 'Content-Type: applicati
   mauvaise qualité (OCR probable) : détection dégradée, relisez le résultat » : un nom déformé peut échapper à la
   détection. Ce contrôle ne porte que sur les PDF (le produit ne fait pas d'OCR) ; jamais sur un texte collé.
 - **Documents très sensibles** (santé, RH, dossier judiciaire, secret professionnel) : sur le service en ligne,
-  nous sommes un tiers, sans contrat de traitement ; préférez la **version locale**, où rien ne quitte le poste
-  ([docs/LOCAL.md](docs/LOCAL.md)).
+  nous les traitons pour votre compte, sous accord de sous-traitance ; préférez la **version locale**, libre et sans
+  clé, où rien ne quitte le poste ([docs/LOCAL.md](docs/LOCAL.md)).
 
-**EN.** REST and MCP at `https://api.gdprguardian.com` and `https://api.gardienrgpd.fr` (MCP on `/mcp`), **no key, no
-account, no cookie**; in-memory processing, nothing kept or logged; per-client limits (a few 10 MB documents in a
-row, then one every 8 seconds; hundreds of small texts per minute; 50 MB per file; 429 or 503 with `Retry-After`
-beyond). Big documents: the upload answers `202` once received, then reading the result reports the stage, progress
+**EN.** REST and MCP at `https://api.gdprguardian.com` and `https://api.gardienrgpd.fr` (MCP on `/mcp`), **for API key
+holders only**: the key is given on request (contact@gardienrgpd.fr) with a data processing agreement (GDPR Art. 28)
+and goes in the `Authorization: Bearer <key>` header, the only one accepted (`401` without it): curl
+`-H "Authorization: Bearer $GDPRGUARDIAN_API_KEY"`; Claude Code
+`claude mcp add --transport http gdprguardian https://api.gdprguardian.com/mcp --header "Authorization: Bearer $GDPRGUARDIAN_API_KEY"`;
+claude.ai, Claude Desktop, Cowork: a custom connector with an `Authorization` request header (`Bearer` then the key);
+Cursor, VS Code: the `headers` field of the MCP configuration. No cookie; in-memory processing, nothing kept or
+logged; per-client limits (a few 10 MB documents in a row, then one every 8 seconds; hundreds of small texts per
+minute; 50 MB per file; 429 or 503 with `Retry-After` beyond). Big documents: the upload answers `202` once received, then reading the result reports the stage, progress
 and `retry_after_s`. Minimum text quality: readable text (scanned pages without a text layer are not read, with a
 warning); a PDF whose text layer comes from low-quality OCR is processed with the warning "Low-quality text (likely
-OCR): degraded detection, check the result" (PDFs only: the product does no OCR; never on pasted text). For very sensitive documents, use the local version: nothing leaves your computer.
+OCR): degraded detection, check the result" (PDFs only: the product does no OCR; never on pasted text). Online, we process your documents on your behalf, under a data processing agreement; for very sensitive documents, use the local version, free and with no key: nothing leaves your computer.
 
 ## Skills Claude : légère ou locale / Claude skills: light or local
 
@@ -124,7 +130,7 @@ et la légère n'envoie un document qu'après l'accord de l'utilisateur.
 
 | Skill | Ce qu'elle fait | Archive | Plugin |
 |---|---|---|---|
-| `gdprguardian-online`, légère | envoie le document au service public gratuit (MCP ou API REST), rien à installer | [`gdprguardian-online.zip`](https://github.com/FlowLineIntegration/GDPRGuardian/raw/main/skills/gdprguardian-online.zip) | `gdprguardian-online` (MCP en ligne + skill) : claude.ai, Claude Desktop, Cowork, Claude Code |
+| `gdprguardian-online`, légère | envoie le document au service en ligne (MCP ou API REST), avec une clé API (`GDPRGUARDIAN_API_KEY`), rien à installer | [`gdprguardian-online.zip`](https://github.com/FlowLineIntegration/GDPRGuardian/raw/main/skills/gdprguardian-online.zip) | `gdprguardian-online` (MCP en ligne + skill) : claude.ai, Claude Desktop, Cowork, Claude Code |
 | `gdprguardian-local`, lourde | anonymise **là où elle tourne**, moteur complet embarqué, sans réseau, Python 3.11 à 3.14 | [`gdprguardian-local.zip`](https://github.com/FlowLineIntegration/GDPRGuardian/raw/main/skills/gdprguardian-local.zip) (Linux : claude.ai et conversation de Claude Desktop, même sur Windows ou Mac ; Linux, WSL) ; [`gdprguardian-local-windows-macos.zip`](https://github.com/FlowLineIntegration/GDPRGuardian/raw/main/skills/gdprguardian-local-windows-macos.zip) (Claude Code directement sous Windows ou macOS Apple Silicon) | `gdprguardian` (MCP local + skill + garde-fou) : Claude Code, Cowork |
 
 - **claude.ai et Claude Desktop** : Personnaliser > Plugins > Ajouter > Ajouter une marketplace
@@ -143,8 +149,8 @@ et la légère n'envoie un document qu'après l'accord de l'utilisateur.
 
 **EN.** Claude **never opens the document**: it has it anonymised, then reads only the anonymised Markdown. Two
 skills, as ready-to-upload archives in [`skills/`](skills/README.md); installed together, **the local one comes
-first**, and the light one sends a document only once the user agrees. The light `gdprguardian-online` uses the free
-public service through MCP or REST, nothing to install (plugin `gdprguardian-online`, for claude.ai, Claude Desktop,
+first**, and the light one sends a document only once the user agrees. The light `gdprguardian-online` uses the online
+service through MCP or REST, with an API key (`GDPRGUARDIAN_API_KEY`), nothing to install (plugin `gdprguardian-online`, for claude.ai, Claude Desktop,
 Cowork and Claude Code). The heavy `gdprguardian-local` bundles the full engine and runs with no network, Python 3.11
 to 3.14: `gdprguardian-local.zip` (Linux) for claude.ai and the Claude Desktop chat, even on Windows or a Mac, and for
 Linux and WSL; `gdprguardian-local-windows-macos.zip` only for Claude Code running directly on Windows or
@@ -232,8 +238,8 @@ and the history of runs, earlier versions included: [benchmarks/results/](benchm
 
 ## Démarrage rapide
 
-> **Pas encore sur PyPI.** Les paquets `gdprguardian`, `gdprguardian-core` et `gdprguardian-mcp` 1.0.2 ne sont pas encore publiés : les commandes `pip install`, `uv tool install` et `uvx` ci-dessous échouent d'ici là, comme le plugin local `gdprguardian`, `gdprguardian mcp-config` et le paquet `.mcpb`. Sans rien installer : le site, l'API et le MCP en ligne. Sur le poste : les archives de [`skills/`](skills/README.md) (moteur, noyau et convertisseurs embarqués, sans réseau), ou depuis le code : `git clone` du dépôt puis `uv sync --extra local` (Python 3.11+ et Rust : le noyau se construit depuis `rust/`).
-> *Not on PyPI yet: until then the commands below fail; use the online service, the `skills/` archives (engine bundled) or a clone of the repository with `uv sync --extra local` (Python 3.11+ and Rust).*
+> **Pas encore sur PyPI.** Les paquets `gdprguardian`, `gdprguardian-core` et `gdprguardian-mcp` 1.0.2 ne sont pas encore publiés : les commandes `pip install`, `uv tool install` et `uvx` ci-dessous échouent d'ici là, comme le plugin local `gdprguardian`, `gdprguardian mcp-config` et le paquet `.mcpb`. Sans rien installer, avec une clé API : le site, l'API et le MCP en ligne. Sur le poste, sans clé : les archives de [`skills/`](skills/README.md) (moteur, noyau et convertisseurs embarqués, sans réseau), ou depuis le code : `git clone` du dépôt puis `uv sync --extra local` (Python 3.11+ et Rust : le noyau se construit depuis `rust/`).
+> *Not on PyPI yet: until then the commands below fail; use the online service (API key), the `skills/` archives (engine bundled, no key) or a clone of the repository with `uv sync --extra local` (Python 3.11+ and Rust).*
 
 ```bash
 pip install "gdprguardian[all]"      # bibliothèque, convertisseurs, API et MCP en ligne
@@ -325,9 +331,9 @@ Third-party data, fonts and components, with their licences and attributions: [T
 
 ## Avertissement / Disclaimer
 
-**FR.** Gardien RGPD est un outil expérimental et open source, pour contribuer au respect du RGPD : il aide à limiter les données personnelles confiées à une IA, sans suffire à assurer la conformité. Le logiciel (licence MIT) et le service en ligne sont fournis en l'état, sans garantie. L'outil masque des identifiants directs, pas tous, et ne lit pas le sens (santé, opinions, recoupements) : le texte produit peut encore permettre d'identifier quelqu'un. Traitez-le comme des données personnelles et vérifiez les résultats avant de vous y fier. Passer un document dans l'outil est déjà un traitement de données personnelles : vous en restez responsable. En ligne, vos documents passent par notre serveur, sans contrat de sous-traitance : à vous de juger si cet envoi est permis ; sinon, utilisez la [version locale](docs/LOCAL.md). Dans toute la mesure permise par la loi, et sans préjudice des droits qu'elle ne permet pas d'écarter, Flow Line Intégration et les auteurs du projet déclinent toute responsabilité quant à l'usage que vous faites de l'outil et de ses résultats. Ni certification ni conseil juridique.
+**FR.** Gardien RGPD est un outil expérimental et open source, pour contribuer au respect du RGPD : il aide à limiter les données personnelles confiées à une IA, sans suffire à assurer la conformité. Le logiciel (licence MIT) et le service en ligne sont fournis en l'état, sans garantie. L'outil masque des identifiants directs, pas tous, et ne lit pas le sens (santé, opinions, recoupements) : le texte produit peut encore permettre d'identifier quelqu'un. Traitez-le comme des données personnelles et vérifiez les résultats avant de vous y fier. Passer un document dans l'outil est déjà un traitement de données personnelles : vous en restez responsable. En ligne, vos documents passent par notre serveur, qui les traite pour votre compte sous accord de sous-traitance (RGPD, art. 28) : à vous de juger si cet envoi est permis ; sinon, utilisez la [version locale](docs/LOCAL.md). Dans toute la mesure permise par la loi, et sans préjudice des droits qu'elle ne permet pas d'écarter, Flow Line Intégration et les auteurs du projet déclinent toute responsabilité quant à l'usage que vous faites de l'outil et de ses résultats. Ni certification ni conseil juridique.
 
-**EN.** GDPR Guardian is an experimental, open-source tool to help with GDPR compliance: it reduces the personal data you hand to an AI, but is not enough on its own to ensure compliance. The software (MIT licence) and the online service are provided as is, without warranty. The tool masks direct identifiers, not all of them, and does not read meaning (health, opinions, combined clues): its output may still identify someone. Treat it as personal data and check the results before relying on them. Running a document through the tool is itself processing of personal data: you remain responsible for it. Online, your documents go through our server, with no processing agreement: it is for you to decide whether you may send them; if not, use the [local version](docs/LOCAL.md). To the fullest extent permitted by law, and without prejudice to rights it does not allow to be excluded, Flow Line Intégration and the project's authors accept no liability for the use you make of the tool or of its results. Neither a certification nor legal advice.
+**EN.** GDPR Guardian is an experimental, open-source tool to help with GDPR compliance: it reduces the personal data you hand to an AI, but is not enough on its own to ensure compliance. The software (MIT licence) and the online service are provided as is, without warranty. The tool masks direct identifiers, not all of them, and does not read meaning (health, opinions, combined clues): its output may still identify someone. Treat it as personal data and check the results before relying on them. Running a document through the tool is itself processing of personal data: you remain responsible for it. Online, your documents go through our server, which processes them on your behalf under a data processing agreement (GDPR Art. 28): it is for you to decide whether you may send them; if not, use the [local version](docs/LOCAL.md). To the fullest extent permitted by law, and without prejudice to rights it does not allow to be excluded, Flow Line Intégration and the project's authors accept no liability for the use you make of the tool or of its results. Neither a certification nor legal advice.
 
 ---
 

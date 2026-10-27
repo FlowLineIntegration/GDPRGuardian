@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>GDPR Guardian · anonymise before the AI, keep the meaning</title>
-<meta name="description" content="An experimental, open-source tool to help with GDPR compliance: a first-level filter to plug into the AI tools on the market (MCP, API, Claude skills), which masks the direct identifiers it recognises, with no way back. Free, no key, no cookie; MIT licence.">
+<meta name="description" content="An experimental, open-source tool to help with GDPR compliance: a first-level filter to plug into the AI tools on the market (MCP, API, Claude skills), which masks the direct identifiers it recognises, with no way back. Open code under the MIT licence; online service with an API key.">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="GDPR Guardian · remove the names, keep the meaning">
-<meta property="og:description" content="An experimental, open-source tool to help with GDPR compliance: a first-level filter to plug into the AI tools on the market. Free, MIT licence.">
+<meta property="og:description" content="An experimental, open-source tool to help with GDPR compliance: a first-level filter to plug into the AI tools on the market. Open code under the MIT licence.">
 <meta property="og:url" content="https://gdprguardian.com/">
 <meta property="og:locale" content="en_GB">
 <meta property="og:type" content="website">
@@ -62,12 +62,13 @@
 <fieldset class="opts"><legend class="vh">Settings</legend>
 <label class="sel"><span>Country</span><select name="countries"><option value="FR" selected>France</option><option value="FR,BE">France + Belgium</option><option value="FR,CH">France + Switzerland</option><option value="FR,DE">France + Germany</option><option value="FR,ES">France + Spain</option><option value="FR,IT">France + Italy</option><option value="FR,LU">France + Luxembourg</option><option value="FR,MC">France + Monaco</option><option value="FR,NL">France + Netherlands</option><option value="FR,PT">France + Portugal</option><option value="all">All countries</option></select></label>
 <label class="chk"><input type="checkbox" name="explain" checked><span>Explanations</span></label>
+<label class="sel ky"><span>API key</span><input id="ck-key" type="password" autocomplete="off" spellcheck="false" placeholder="on request"></label>
 </fieldset>
 <p class="hint" data-r="hint" hidden>Outside France, only the country’s identifiers are verified and names go through the French lexicons: on legal texts from five countries (DE, ES, IT, NL, PT), 23–42% of names masked, 78–89% of documents with a leak (internal measurement, outside the protocol).</p>
 <div class="go"><button class="btn" type="submit" data-r="go" disabled>Anonymise</button><input class="vh" type="file" id="ck-f" multiple accept=".pdf,.docx,.docm,.dotx,.dotm,.xlsx,.xlsm,.xlsb,.xls,.pptx,.pptm,.ppsx,.potx,.odt,.ott,.fodt,.ods,.odp,.otp,.fodp,.odg,.rtf,.eml,.mht,.mhtml,.msg,.html,.htm,.xhtml,.csv,.tsv,.txt,.text,.md,.markdown"><label class="btn2" for="ck-f">Add documents</label></div>
 <p class="alert"><b>Experimental tool, no warranty</b>: the output may still identify someone. Check it; you remain responsible for how you use it. <a href="#legal">Disclaimer</a></p>
 <p class="keys vh" data-r="keys">Ctrl + Enter anonymise · Ctrl + Shift + C copy · Ctrl + S download · Esc clear the input</p>
-<p class="fmts">Sent to our server in France (we are a third party), processed in memory, nothing of it is kept. To send nothing: the <a href="#use">local version</a>.</p>
+<p class="fmts">Online service with an API key (on request: <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>), processed in memory in France, nothing of it is kept. Without a key: the <a href="#use">local version</a>.</p>
 <p class="st" data-r="st" role="status"></p>
 <noscript><p class="nojs">The workspace needs JavaScript. Without it: the API or the MCP server, see <a href="#use">Use it</a>.</p></noscript>
 </form>
@@ -138,8 +139,8 @@
 
 <section class="pn" id="video" aria-labelledby="h-vi"><div class="ph"><p>Video</p><a class="x" href="#workspace">Close</a></div>
 <h2 id="h-vi" tabindex="-1">The launch video</h2>
-<video class="vid" controls preload="none" playsinline poster="/media/gdpr-guardian-launch-en-poster.png?v=0dc955f2" src="/media/gdpr-guardian-launch-en.mp4?v=fbbb0fe3" aria-labelledby="h-vi"></video>
-<p>Silent video: all its text is in the <a href="/media/gdpr-guardian-launch-en-transcript.txt?v=7fb30d1a" target="_blank" rel="noopener">transcript</a>. Short 4:5 cut for social feeds: <a href="/media/gdpr-guardian-launch-en-social.mp4?v=e1291e1a" download>MP4, 5.1 MB</a>.</p>
+<video class="vid" controls preload="none" playsinline poster="/media/gdpr-guardian-launch-en-poster.png?v=0dc955f2" src="/media/gdpr-guardian-launch-en.mp4?v=70309474" aria-labelledby="h-vi"></video>
+<p>Silent video: all its text is in the <a href="/media/gdpr-guardian-launch-en-transcript.txt?v=42148aea" target="_blank" rel="noopener">transcript</a>. Short 4:5 cut for social feeds: <a href="/media/gdpr-guardian-launch-en-social.mp4?v=c8dc52bb" download>MP4, 5.1 MB</a>.</p>
 <p class="fine">The video’s index dates from its rendering; the current figure: <a href="#protocol">Protocol and scores</a>.</p>
 </section>
 
@@ -171,11 +172,11 @@
 
 <section class="pn" id="architecture" aria-labelledby="h-ar"><div class="ph"><p>Architecture</p><a class="x" href="#workspace">Close</a></div>
 <h2 id="h-ar" tabindex="-1">Online or on your machine: same software</h2>
-<p class="lead">Same package, same version: online to start without installing anything, on your own computer so that GDPR Guardian sends nothing. Open to everyone without a key, the service guards against abuse with a rate limiter that lives in memory only.</p>
+<p class="lead">Same package, same version: online with an API key, or on your own computer so that GDPR Guardian sends nothing. The online service guards against abuse with a rate limiter that lives in memory only.</p>
 <div class="two">
 <div><h3>Online</h3>
 <ol class="flow">
-<li><b>Browser, AI agent, script</b>REST or MCP over HTTPS, no key; this workspace calls the same API.</li>
+<li><b>Browser, AI agent, script</b>REST or MCP over HTTPS, with an API key; this workspace calls the same API.</li>
 <li><b>TLS 1.2/1.3 · nginx</b>OVH, in France: firewall, automatic updates, no core dumps, no access log.</li>
 <li><b>Unix socket</b>in a memory-backed folder: no port open between nginx and the service.</li>
 <li class="in"><b>Container with no network at all</b>read-only, no privileges.</li>
@@ -324,7 +325,7 @@ python -m tools.protocol registration --bundle gg-protocol.pyz</code></pre>
 
 <section class="pn" id="use" aria-labelledby="h-us"><div class="ph"><p>Use it</p><a class="x" href="#workspace">Close</a></div>
 <h2 id="h-us" tabindex="-1">Beyond this page</h2>
-<p class="lead">The same service, free and without a key, from your AI assistant or your own programs; for very sensitive documents, on your own computer.</p>
+<p class="lead">The same service from your AI assistant or your own programs, with an API key given on request (<a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>) with a data processing agreement; without a key, on your own computer, with the local version.</p>
 <h3>The pragmatic solution, in two steps</h3>
 <ol class="list">
 <li><b>The Guardian first.</b> It plugs into the AIs people already use: Claude through the MCP server and the skills, any MCP client, the API. The skills make it the rule: every document goes through the Guardian first. An instruction given to the AI, not a lock: a client without the skills, or text pasted into the chat, is not covered.</li>
@@ -332,23 +333,26 @@ python -m tools.protocol registration --bundle gg-protocol.pyz</code></pre>
 </ol>
 <p>Not perfect, but pragmatic: a high level of protection for everyday use. That is our assessment, not a measurement: only the first level is measured (<a href="#protocol">scores</a>). Under study, nothing decided, no date: running this second step through the API of Mistral AI, a European provider, within the governed LLM stage.</p>
 <div class="use">
-<div><h3>In Claude, over public MCP, no key</h3>
+<div><h3>In Claude, over MCP, with your key</h3>
 <p>Address: <code>https://api.gdprguardian.com/mcp</code> (or <code>api.gardienrgpd.fr/mcp</code>). Claude Code:</p>
-<pre tabindex="0"><code>claude mcp add --transport http gdprguardian https://api.gdprguardian.com/mcp</code></pre>
-<p>claude.ai: add this address as a custom connector. For a file, <code>create_upload</code> gives a command that you run yourself on your computer: the file goes straight to the service, without passing through the model; <code>get_anonymized</code> then reads the result, deleted 2 min after reading, 30 min at most. A text already pasted into the chat has already left: <code>anonymize_text</code> cannot bring it back.</p></div>
+<pre tabindex="0"><code>claude mcp add --transport http gdprguardian https://api.gdprguardian.com/mcp \
+  --header "Authorization: Bearer $GDPRGUARDIAN_API_KEY"</code></pre>
+<p>claude.ai, Claude Desktop, Cowork: add this address as a custom connector, with the header <code>Authorization</code> and the value <code>Bearer</code> followed by your key. For a file, <code>create_upload</code> gives a command that you run yourself on your computer: the file goes straight to the service, without passing through the model; <code>get_anonymized</code> then reads the result, deleted 2 min after reading, 30 min at most. A text already pasted into the chat has already left: <code>anonymize_text</code> cannot bring it back.</p></div>
 <div><h3>Through the REST API</h3>
 <pre tabindex="0"><code>curl https://api.gdprguardian.com/v1/anonymize/text \
+  -H "Authorization: Bearer $GDPRGUARDIAN_API_KEY" \
   -H 'Content-Type: application/json' \
   -d '{"text": "Mr Jean Dupont, 06 12 34 56 78",
        "label_language": "en", "explain": true}'
 
 curl https://api.gdprguardian.com/v1/anonymize/file \
+  -H "Authorization: Bearer $GDPRGUARDIAN_API_KEY" \
   -F file=@contract.pdf -F label_language=en -F mode=essentiel</code></pre>
 <p>Response: the anonymised text (or Markdown) and the report. Options: <code>countries</code> (FR by default, <code>FR,BE</code>, <code>all</code>), <code>mode</code> (<code>fort</code> by default, <code>essentiel</code>, <code>personnalise</code>; or <code>strong</code>, <code>essential</code>, <code>custom</code>), <code>disable</code>, <code>rules</code>, <code>label_language</code>, <code>explain</code>; the same over MCP.</p></div>
 <div><h3>On your computer</h3>
-<p>For very sensitive documents: the same software, as a local MCP server or in a container with no network; nothing leaves through GDPR Guardian. Installation: <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/docs/LOCAL.md">local version guide</a>; questions: <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>.</p>
-<h3>Limits of the public service</h3>
-<p>Per client: one request processed at a time and two waiting, about 20 seconds of compute in advance, refilled at 0.5 s per second. Your network (/24 in IPv4, /48 in IPv6) shares a budget twice as large and 12 requests in flight. Beyond that: a 429 and a delay to honour (<code>Retry-After</code>), which this workspace applies by itself while sending one document at a time; a saturated server (estimated wait over 10 s): 503; an upload too slow (15 s, plus 128 KiB per second of body): 408.</p>
+<p>For very sensitive documents: the same software, free and without a key: the Claude skills archives (engine bundled, no network) or a container with no network; nothing leaves through GDPR Guardian. Installation: <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/docs/LOCAL.md">local version guide</a>; questions: <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>.</p>
+<h3>Limits of the online service</h3>
+<p>Per key: one request processed at a time and two waiting, about 20 seconds of compute in advance, refilled at 0.5 s per second. Beyond that: a 429 and a delay to honour (<code>Retry-After</code>), which this workspace applies by itself while sending one document at a time; a saturated server (estimated wait over 10 s): 503; an upload too slow (15 s, plus 128 KiB per second of body): 408.</p>
 <p>Size: 50 MB per file, one million characters per text; per document, 12.5 million characters of result, 10,000 pages or slides, one million HTML tags (opening and closing), 100,000 Word paragraphs (table cells included). Very dense plain text, CSV or spreadsheets reach that ceiling before 50 MB (around 13 MB of text, 16 MB of CSV, 4 MB of spreadsheet): 413, naming the limit. An illustrated 50 MB document takes a few seconds; each may take 60 s plus 1 s per 250 KB (4 min 30 s at 50 MB).</p>
 <p>Minimum quality: readable text. Images and scanned pages without a text layer: not read (warning). PDF from low-quality OCR: processed, with the warning “Low-quality text (likely OCR)”.</p></div>
 </div>
@@ -379,7 +383,7 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 <p>Under French law (LCEN). Publisher: <a target="_blank" rel="noopener" href="https://www.flowlineintegration.com/">Flow Line Intégration</a>, SASU (French simplified joint-stock company) with share capital of €720,679.80, 4 rue Maryse Bastié, 69500 Bron, France, RCS Lyon 801 330 606, phone +33 4 72 14 92 50. Publication director: Guillaume CLEMENT, CTO Data &amp; AI. Contact: <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>.</p>
 <p>Host: OVH SAS, 2 rue Kellermann, 59100 Roubaix, France, phone 1007 (from France).</p>
 <p>GDPR Guardian 1.0.2, MIT licence, code in the <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian">public repository</a>.</p>
-<p><b>Disclaimer.</b> GDPR Guardian is an experimental, open-source tool to help with GDPR compliance: it reduces the personal data you hand to an AI, but is not enough on its own to ensure compliance. The software (MIT licence) and the online service are provided as is, without warranty. The tool masks direct identifiers, not all of them, and does not read meaning (health, opinions, combined clues): its output may still identify someone. Treat it as personal data and check the results before relying on them. Running a document through the tool is itself processing of personal data: you remain responsible for it. Online, your documents go through our server, with no processing agreement: it is for you to decide whether you may send them; if not, use the <a href="#use">local version</a>. To the fullest extent permitted by law, and without prejudice to rights it does not allow to be excluded, Flow Line Intégration and the project’s authors accept no liability for the use you make of the tool or of its results. Neither a certification nor legal advice.</p>
+<p><b>Disclaimer.</b> GDPR Guardian is an experimental, open-source tool to help with GDPR compliance: it reduces the personal data you hand to an AI, but is not enough on its own to ensure compliance. The software (MIT licence) and the online service are provided as is, without warranty. The tool masks direct identifiers, not all of them, and does not read meaning (health, opinions, combined clues): its output may still identify someone. Treat it as personal data and check the results before relying on them. Running a document through the tool is itself processing of personal data: you remain responsible for it. Online, your documents go through our server: the service is for key holders, with a data processing agreement; without a key, use the <a href="#use">local version</a>. To the fullest extent permitted by law, and without prejudice to rights it does not allow to be excluded, Flow Line Intégration and the project’s authors accept no liability for the use you make of the tool or of its results. Neither a certification nor legal advice.</p>
 </section>
 
 <section class="pn" id="privacy" aria-labelledby="h-co"><div class="ph"><p>Privacy</p><a class="x" href="#workspace">Close</a></div>
@@ -387,7 +391,7 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 <ul class="list">
 <li><b>Here.</b> No cookie, no tracker, no third-party resource. The browser keeps only the mode you chose, with its categories and codes to keep (local storage): never a text. Your texts and results live only in this tab’s memory: “Clear everything” empties it, and so does closing the tab.</li>
 <li><b>On the server.</b> Each document is processed in memory in an isolated process, and nothing of it remains once the response has left; only the result comes back, to you alone. The file name does not travel: only its extension.</li>
-<li><b>We are still a third party.</b> You hand us the text, with no processing agreement. To send nothing: the <a href="#use">local version</a>.</li>
+<li><b>With a key and a data processing agreement.</b> The online service processes your documents on your behalf: it is for holders of an API key, given on request with a data processing agreement. To send nothing: the <a href="#use">local version</a>.</li>
 <li><b>IP address</b>, in memory only, never written to disk, no access log. The web server keeps it as is (IPv4, or its /64 in IPv6) in its anti-abuse counters, which it recycles as traffic flows. The service replaces it at once with a keyed pseudonym, forgotten after 10 idle minutes (key renewed every 24 hours). To count visitors once a day: a keyed digest of the truncated address (/24, or /48 in IPv6) and of the browser’s user agent, key and digests forgotten every day.</li>
 <li><b>Usage statistics</b>: kind of operation, format, size, duration, success, origin; never the content, the file name or the IP address.</li>
 <li><b>Controller</b>: Flow Line Intégration (<a href="#legal">legal notice</a>). <b>Legal basis</b>: legitimate interest in providing, protecting and securing the service (GDPR, Art. 6(1)(f), recital 49); the security measures meet Art. 32. Your rights (access, erasure, objection) and questions: <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>; complaints: the CNIL, France’s data protection authority.</li>
@@ -455,6 +459,7 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 <li data-k="insp">Hover over or tap a placeholder: all its mentions light up.</li>
 <li data-k="dropped">Not carried over: {l}</li>
 <li data-k="kept">kept as is: {l}</li>
+<li data-k="e401">API key required|The online service is for key holders: enter yours next to “Country”, or ask for one (contact@gardienrgpd.fr). The local version is free to use.</li>
 <li data-k="e403">Request refused|The service only accepts uploads from this page: reload it from gdprguardian.com.</li>
 <li data-k="e408">Upload too slow|The document did not arrive in time (15 s, plus 128 KiB per second): try again on a better connection, or split the document.</li>
 <li data-k="e413">Too large|50 MB per document, one million characters per text, 12.5 million characters of result: split it.</li>

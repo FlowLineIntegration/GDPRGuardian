@@ -55,7 +55,10 @@ WORST_WORD_AT_LIMIT = (390_000, 28.0)
 def compose_config() -> ServerConfig:
     yaml = pytest.importorskip("yaml")
     service = yaml.safe_load((DEPLOY / "compose.yaml").read_text(encoding="utf-8"))["services"]["gdprguardian"]
-    return ServerConfig.from_env({name: str(value) for name, value in service["environment"].items()})
+    # Service à clés : les empreintes viennent du fichier de réglages du serveur ; une empreinte factice ici.
+    # Keyed service: the digests come from the server's settings file; a dummy digest here.
+    env = {name: str(value) for name, value in service["environment"].items()}
+    return ServerConfig.from_env(env | {"GDPRGUARDIAN_API_KEY_SHA256": "0" * 64})
 
 
 def nginx_size(value: str) -> int:

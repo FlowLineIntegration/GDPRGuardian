@@ -38,7 +38,7 @@ function half(s) { s = String(s || ""); var i = s.indexOf(" / "); return i < 0 ?
 var R = {}, S = {}, S0 = {};
 each(d.querySelectorAll("[data-r]"), function (e) { R[e.dataset.r] = e; });
 var ta = q("#ck-t"), fin = q("#ck-f"), sel = form.elements.countries, res = R.res, empty = res.firstElementChild;
-var ban = R.ban, lat0 = R.lats.textContent;
+var ban = R.ban, lat0 = R.lats.textContent, apiKey = d.getElementById("ck-key");
 each(d.querySelectorAll("[data-s]"), function (e) { S[e.dataset.s] = e; S0[e.dataset.s] = e.textContent; });
 var exts = fin.getAttribute("accept").split(","), TAG = /\[[A-ZÀ-Þ][A-Z0-9_À-Þ]*_\d+\]|<!-- page \d+ -->/g;
 // Q: the session, in order; item.st: wait | run | retry | done | err | stop; item.name is shown here only.
@@ -161,6 +161,8 @@ function send(it) {
   Object.assign(it, { st: "run", t0: Date.now(), t1: it.file ? 0 : Date.now(), why: "", up: it.file ? 0 : 1 });
   x.open("POST", "/v1/anonymize/" + (it.file ? "file" : "text"));
   if (!it.file) x.setRequestHeader("Content-Type", "application/json");
+  // Clé API, en mémoire seulement / API key, kept in memory only.
+  if (apiKey.value.trim()) x.setRequestHeader("Authorization", "Bearer " + apiKey.value.trim());
   // The service's bounds: the body within 15 s + size at 131072 B/s, then two deadlines of 60 s + size / 25e4 B/s
   // (one maximal job ahead, then this one), 30 s margin. tests/server/test_big_documents.py checks these numbers.
   x.timeout = (165 + it.size * (1 / 131072 + 2 / 25e4)) * 1e3;
@@ -227,7 +229,7 @@ function fail(it, s, j, ra, local) {
   if (s === 422) { k = "e422"; b = T[e.code] || half(e.message) || t("invalid_request"); }
   // A short item that gets no answer in time: the service is busy, splitting it would not help.
   else if (s === "time") k = it.size > 1048576 ? "eTime" : "eTimeS";
-  else if ([403, 408, 413, 415, 501].indexOf(s) >= 0) {
+  else if ([401, 403, 408, 413, 415, 501].indexOf(s) >= 0) {
     k = "e" + s;
     // The service names the limit reached (file, text, converted document, pages...).
     if (s === 413) b = half(e.message);

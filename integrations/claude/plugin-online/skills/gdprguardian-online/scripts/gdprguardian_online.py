@@ -7,9 +7,10 @@ GDPR Guardian online: anonymises a document or a text without the AI reading it,
     python gdprguardian_online.py --text notes.txt                    un texte UTF-8 (fichier ou « - ») / a UTF-8 text
     python gdprguardian_online.py --limits                            service et limites / service and limits
 
-Service : GDPRGUARDIAN_URL, sinon le service public gratuit, sans clé ni compte (https://api.gardienrgpd.fr).
-Service: GDPRGUARDIAN_URL, else the free public service, no key, no account. GDPRGUARDIAN_API_KEY seulement pour un
-serveur à clés : envoyée à ce seul serveur, jamais affichée, aucune redirection suivie / only for a keyed server.
+Service : GDPRGUARDIAN_URL, sinon le service en ligne (https://api.gardienrgpd.fr), réservé aux détenteurs d'une clé.
+Service: GDPRGUARDIAN_URL, else the online service, for API key holders only. GDPRGUARDIAN_API_KEY : la clé, envoyée
+en « Authorization: Bearer » à ce seul serveur, jamais affichée, aucune redirection suivie / the key, sent as a Bearer
+header to that server only, never printed, no redirect followed.
 
 Bibliothèque standard seule, Python 3.9+ / standard library only. Le fichier part du disque vers le service en flux,
 seule son extension est transmise ; 429 et 503 sont retentés en respectant Retry-After. The file is streamed from disk,
@@ -33,7 +34,7 @@ from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Any, BinaryIO
 
-# --- Limites publiées du service public : le seul endroit à mettre à jour / published limits: the one place to edit.
+# --- Limites publiées du service en ligne : le seul endroit à mettre à jour / published limits: the one place to edit.
 PUBLIC_URL = "https://api.gardienrgpd.fr"
 # Modes du service (alias anglais acceptés aussi) / service modes (English aliases accepted too).
 MODES = ("fort", "essentiel", "personnalise", "strong", "essential", "custom")
@@ -79,7 +80,7 @@ _OPENER = urllib.request.build_opener(_NoRedirect)
 
 
 def base_url(env: Mapping[str, str]) -> str:
-    """GDPRGUARDIAN_URL, sinon le service public ; https seulement (http sur la boucle locale) / https only."""
+    """GDPRGUARDIAN_URL, sinon le service en ligne ; https seulement (http sur la boucle locale) / https only."""
     url = (env.get("GDPRGUARDIAN_URL", "").strip() or PUBLIC_URL).rstrip("/")
     parts = urllib.parse.urlsplit(url)
     if parts.scheme == "https" or (parts.scheme == "http" and parts.hostname in _LOOPBACK):
@@ -172,8 +173,9 @@ def _check(status: int, body: bytes, expected: tuple[int, ...], headers: Mapping
     if status in _RETRY_STATUSES:
         raise Failure(f"HTTP {status} {text}{_retry_after_text(headers or {})}: {_BUSY_HINT}", EXIT_BUSY)
     if status == 401:
-        raise Failure("HTTP 401 unauthorized : ce serveur exige une clé (GDPRGUARDIAN_API_KEY) ou refuse celle "
-                      "configurée / this server requires a key or refuses the configured one")
+        raise Failure("HTTP 401 unauthorized : clé API absente ou refusée ; définissez GDPRGUARDIAN_API_KEY (clé sur "
+                      "demande : contact@gardienrgpd.fr) ou utilisez la skill locale / API key missing or refused; set "
+                      "GDPRGUARDIAN_API_KEY (key on request) or use the local skill (gdprguardian-local)")
     raise Failure(f"HTTP {status} {text}")
 
 
@@ -274,7 +276,7 @@ def anonymize(path: Path, env: Mapping[str, str], *, countries: str = "FR", prof
     Avec `sink`, chaque page lui est passée et le Markdown rendu est vide / with `sink`, pages go to it.
     """
     base = base_url(env)
-    # Service public : aucune clé. Serveur à clés : GDPRGUARDIAN_API_KEY. Public service: no key at all.
+    # Clé API : GDPRGUARDIAN_API_KEY, exigée par le service en ligne / API key, required by the online service.
     key = env.get("GDPRGUARDIAN_API_KEY", "").strip() or None
     if not path.is_file():
         raise Failure("fichier introuvable / file not found", EXIT_USAGE)

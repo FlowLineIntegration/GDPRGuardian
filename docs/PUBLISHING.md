@@ -47,10 +47,10 @@ la commande installée ci-dessus.
 
 ### Service en ligne
 
-Le service **public et gratuit** répond sur `https://api.gdprguardian.com` et `https://api.gardienrgpd.fr` (API REST
-et MCP sur `/mcp`), **sans clé ni compte**, avec des limites par client tenues en mémoire ; il tourne sur le serveur
-OVH du projet, durci au préalable (pare-feu, fail2ban, mises à jour automatiques, journaux bornés, aucun vidage
-mémoire). Installation : `deploy/server/` (voir [`deploy/README.md`](../deploy/README.md)). Le conteneur n'a aucun
+Le service, **réservé aux détenteurs d'une clé d'API** (remise sur demande à contact@gardienrgpd.fr, avec un accord
+de sous-traitance, art. 28 RGPD), répond sur `https://api.gdprguardian.com` et `https://api.gardienrgpd.fr` (API REST
+et MCP sur `/mcp`), avec des limites par client tenues en mémoire ; il tourne sur le serveur OVH du projet, durci
+au préalable (pare-feu, fail2ban, mises à jour automatiques, journaux bornés, aucun vidage mémoire). Installation : `deploy/server/` (voir [`deploy/README.md`](../deploy/README.md)). Le conteneur n'a aucun
 réseau ; Nginx le joint par un socket Unix, en mémoire, et rien du document ne touche le disque.
 
 Mettre à jour le service après une nouvelle version (le démon du site d'abord) :
@@ -66,11 +66,12 @@ ssh <serveur> bash gdprguardian-deploy/install.sh start
 ssh <serveur> bash gdprguardian-deploy/install.sh verify
 ```
 
-Aucune clé d'API à créer ni à distribuer : le service officiel est public. `install.sh base` crée seulement le
-**jeton local** des requêtes du serveur lui-même (sonde de santé, `verify`, protocole de mesure), dans
-`/etc/gdprguardian/local-header` (root 0600, jamais affiché ni passé en argument). Un déploiement tiers peut garder
-des clés : il n'en donne au service que les empreintes SHA-256 (`GDPRGUARDIAN_API_KEY_SHA256`) ; une clé en clair
-(`GDPRGUARDIAN_API_KEYS`) est refusée au démarrage.
+Une clé d'API par organisation : le service n'en reçoit que l'empreinte SHA-256, ajoutée à
+`GDPRGUARDIAN_API_KEY_SHA256` dans `/etc/gdprguardian/gdprguardian.env`, puis `install.sh start` (qui recrée le
+conteneur) ; révocation : retirer l'empreinte, puis `install.sh start`. Une clé en clair (`GDPRGUARDIAN_API_KEYS`) est
+refusée au démarrage. `install.sh base` crée aussi le **jeton local** des requêtes du serveur lui-même (sonde de santé,
+`verify`, protocole de mesure), dans `/etc/gdprguardian/local-header` (root 0600, jamais affiché ni passé en
+argument). `install.sh verify` attend encore le mode public (contrôles sans clé) et reste à adapter.
 
 Après toute version qui change le moteur, relancer la **campagne du protocole public** sur le serveur, puis
 reporter ses clés dans `site/data/quality.json` : [`docs/PROTOCOLE.md`](PROTOCOLE.md), sections 9, 10 et 15. Jusqu'à
@@ -127,8 +128,8 @@ repository).
    GitHub, le registre MCP `io.github.<compte>/gdprguardian` et l'image `ghcr.io/<compte>/gdprguardian`.
 6. **Ensuite** : rendre l'image GHCR publique ; joindre le paquet MCPB à la version (le signer avec un certificat
    de signature de code si possible) ; essayer le plugin (`claude plugin marketplace add <compte>/GDPRGuardian`)
-   dans Claude Code, Claude Desktop et Cowork. `server.json` déclare déjà les deux points MCP publics
-   (`remotes`, `streamable-http`, sans en-tête de clé).
+   dans Claude Code, Claude Desktop et Cowork. `server.json` déclare déjà les deux points MCP en ligne
+   (`remotes`, `streamable-http`), sans y annoncer encore l'en-tête `Authorization` que le service exige désormais.
 
 ## English
 
@@ -149,15 +150,17 @@ workflows (`ci.yml`, `release.yml`) that stay out of the public repository while
 - **Try it:** `pip install --find-links dist/<version> "gdprguardian[local]==<version>"`. Until the packages are on
   PyPI, the plugin, the MCPB bundle and `mcp-config` (all `uvx --from …`) cannot find them: point the client at
   the installed `gdprguardian mcp --stdio --allow-dir <folder>` instead.
-- **Online service:** the **free public** service at `https://api.gdprguardian.com` and
-  `https://api.gardienrgpd.fr` (REST API, MCP on `/mcp`), **no key, no account**, per-client limits kept in
-  memory; installed with `deploy/server/` (see [`deploy/README.md`](../deploy/README.md)); the container has no
+- **Online service:** the service at `https://api.gdprguardian.com` and `https://api.gardienrgpd.fr` (REST API,
+  MCP on `/mcp`), **reserved for API key holders** (given on request at contact@gardienrgpd.fr, with a data
+  processing agreement, GDPR art. 28), per-client limits kept in memory; installed with `deploy/server/` (see [`deploy/README.md`](../deploy/README.md)); the container has no
   network and Nginx reaches it through an in-memory Unix socket. Update (site daemon first): `install.sh site
-  <site binary> <copy of video/out>`, `install.sh base`, `install.sh image <archive>`, `install.sh start`, `install.sh verify`. There is
-  no API key to create or hand out. `install.sh base` only creates the **local token** of the server's own requests
-  (health probe, `verify`, measurement protocol) in `/etc/gdprguardian/local-header` (root 0600, never printed nor
-  passed as an argument). A third-party deployment may keep keys, given to the service as SHA-256 digests only
-  (`GDPRGUARDIAN_API_KEY_SHA256`); a plaintext `GDPRGUARDIAN_API_KEYS` is refused at start-up. After any release
+  <site binary> <copy of video/out>`, `install.sh base`, `install.sh image <archive>`, `install.sh start`, `install.sh verify`. One API
+  key per organisation: the service only gets its SHA-256 digest, added to `GDPRGUARDIAN_API_KEY_SHA256` in
+  `/etc/gdprguardian/gdprguardian.env`, then `install.sh start` (which recreates the container); revocation: remove the
+  digest, then `install.sh start`. A plaintext `GDPRGUARDIAN_API_KEYS` is refused at start-up. `install.sh base` also
+  creates the **local token** of the server's own requests (health probe, `verify`, measurement protocol) in
+  `/etc/gdprguardian/local-header` (root 0600, never printed nor passed as an argument). `install.sh verify` still
+  expects public mode (checks without a key) and is yet to be adapted. After any release
   that changes the engine, run the **public protocol campaign** again on the server and merge its keys into
   `site/data/quality.json`: [`docs/PROTOCOLE.md`](PROTOCOLE.md), sections 9, 10 and 15. Until the campaign, every
   real-corpus measurement uses the `dev` half only (`evaluate_real.py --split dev`, `pack-real --split dev`); a
@@ -191,5 +194,5 @@ workflows (`ci.yml`, `release.yml`) that stay out of the public repository while
   3. Create a `pypi` environment.
   4. Do a dry run of the release workflow.
   5. Tag `v<version>`: the workflow publishes PyPI, the GitHub release, the MCP Registry entry and GHCR.
-  6. Attach the MCPB bundle and try the plugin; `server.json` already declares the two public MCP endpoints
-     (`remotes`, `streamable-http`, no key header).
+  6. Attach the MCPB bundle and try the plugin; `server.json` already declares the two online MCP endpoints
+     (`remotes`, `streamable-http`), without announcing yet the `Authorization` header the service now requires.

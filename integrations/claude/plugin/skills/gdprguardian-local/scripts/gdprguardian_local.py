@@ -87,13 +87,19 @@ class NotCovered(Failure):
         pythons = ", ".join(manifest.get("pythons", [])) or "?"
         major, minor, _ = _interpreter()
         here = f"Python {major}.{minor}, {_machine()}, {sysconfig.get_platform()}"
+        # Rien n'est encore sur PyPI : le plugin et pip viennent après la publication, les voies du jour d'abord.
+        # Nothing is on PyPI yet: the plugin and pip come after publication, today's routes first.
         super().__init__(
             f"plateforme non couverte par cette archive / platform not covered by this archive ({here}) ; "
-            f"couvertes / covered: {covered}, Python {pythons}. Utilisez l'outil local anonymize_file (plugin "
-            f"gdprguardian), l'autre archive gdprguardian-local (Windows x64 et macOS Apple Silicon : "
-            f"gdprguardian-local-windows-macos.zip ; Linux : gdprguardian-local.zip), ou pip install "
-            f"\"gdprguardian[local]\" dans ce Python / use the local anonymize_file tool (gdprguardian plugin), the "
-            f"other gdprguardian-local archive, or pip install \"gdprguardian[local]\" into this Python")
+            f"couvertes / covered: {covered}, Python {pythons}. Utilisez l'outil local anonymize_file s'il est "
+            f"connecté, l'autre archive gdprguardian-local (Windows x64 et macOS Apple Silicon : "
+            f"gdprguardian-local-windows-macos.zip ; Linux : gdprguardian-local.zip) ou un clone du dépôt avec uv sync "
+            f"--extra local (Python 3.11+ et Rust), puis ce script lancé par le Python de cet environnement ; après "
+            f"publication sur PyPI, le plugin gdprguardian ou pip install \"gdprguardian[local]\" dans ce Python / use "
+            f"the local anonymize_file tool if connected, the other gdprguardian-local archive, or a clone of the "
+            f"repository with uv sync --extra local (Python 3.11+ and Rust), then this script run by that "
+            f"environment's Python; once published on PyPI, the gdprguardian plugin or pip install "
+            f"\"gdprguardian[local]\" into this Python")
 
 
 # --- Choix des roues pour cet interpréteur / picking the wheels for this interpreter ---------------------------
@@ -272,9 +278,9 @@ def cache_root(env: Mapping[str, str]) -> Path:
         base = Path(env.get("XDG_CACHE_HOME") or Path.home() / ".cache") / "gdprguardian" / "skill"
     if _usable(base):
         return base
-    # Dossier personnel non accessible en écriture (bac à sable) : un dossier temporaire à soi, le même à chaque
-    # appel (sinon 26 Mo de plus par appel). Home not writable (sandbox): one private temporary folder per user,
-    # reused by every run (otherwise 26 MB more per run).
+    # Dossier personnel non accessible en écriture ou monté noexec (bac à sable) : un dossier temporaire à soi, le
+    # même à chaque appel (sinon 26 Mo de plus par appel). Home not writable or noexec (sandbox): one private
+    # temporary folder per user, reused by every run (otherwise 26 MB more per run).
     owner = os.getuid() if hasattr(os, "getuid") else re.sub(r"\W+", "_", env.get("USERNAME", "") or "user")
     shared = Path(tempfile.gettempdir()) / f"gdprguardian-skill-{owner}"
     if _usable(shared):
@@ -293,12 +299,26 @@ def _usable(base: Path) -> bool:
     """
     try:
         base.mkdir(parents=True, exist_ok=True, mode=0o700)
-        if base.is_symlink() or not base.is_dir() or not _private_dir(base):
+        if base.is_symlink() or not base.is_dir() or not _private_dir(base) or _noexec(base):
             return False
         probe = base / f".probe-{os.getpid()}"
         probe.write_bytes(b"")
         probe.unlink()
         return True
+    except OSError:
+        return False
+
+
+def _noexec(path: Path) -> bool:
+    """Montage noexec : les bibliothèques natives du moteur (.so) n'y chargent pas ; Linux seulement.
+
+    noexec mount: the engine's native libraries (.so) cannot load there; Linux only.
+    """
+    statvfs, flag = getattr(os, "statvfs", None), getattr(os, "ST_NOEXEC", 0)
+    if statvfs is None or not flag:
+        return False
+    try:
+        return bool(statvfs(path).f_flag & flag)
     except OSError:
         return False
 
@@ -400,11 +420,27 @@ def activate(env: Mapping[str, str]) -> dict[str, Any]:
         return {"source": "bundled", "path": str(path), "wheels": sorted(selected.values())}
     if installed is None:
         raise Failure("moteur absent : cette copie de la skill n'a pas de roues. Prenez l'archive gdprguardian-local "
-                      "(skills/ du dépôt), installez \"gdprguardian[local]\", ou utilisez l'outil MCP local "
-                      "anonymize_file / engine missing: this copy of the skill has no wheels. Use the "
-                      "gdprguardian-local archive, install \"gdprguardian[local]\", or the local MCP tool "
-                      "anonymize_file")
+                      "(skills/ du dépôt : gdprguardian-local.zip pour Linux, gdprguardian-local-windows-macos.zip "
+                      "pour Windows x64 et macOS Apple Silicon), l'outil MCP local anonymize_file s'il est connecté, "
+                      "ou un clone du dépôt avec uv sync --extra local (Python 3.11+ et Rust) ; après publication sur "
+                      "PyPI, pip install \"gdprguardian[local]\" / engine missing: this copy of the skill has no "
+                      "wheels. Use the gdprguardian-local archive (skills/ in the repository: gdprguardian-local.zip "
+                      "for Linux, gdprguardian-local-windows-macos.zip for Windows x64 and Apple-silicon macOS), the "
+                      "local MCP tool anonymize_file if connected, or a clone of the repository with uv sync --extra "
+                      "local (Python 3.11+ and Rust); once published on PyPI, pip install \"gdprguardian[local]\"")
     return {"source": "environment", "version": installed}
+
+
+def _pip_refused() -> bool:
+    """pip absent, ou Python système géré par la distribution (PEP 668, hors environnement virtuel).
+
+    pip missing, or a system Python managed by the distribution (PEP 668, outside a virtual environment).
+    """
+    if importlib.util.find_spec("pip") is None:
+        return True
+    if sys.prefix != sys.base_prefix:
+        return False  # environnement virtuel : PEP 668 ne s'applique pas / virtual environment: PEP 668 does not apply
+    return (Path(sysconfig.get_path("stdlib")) / "EXTERNALLY-MANAGED").is_file()
 
 
 def _pip_install(manifest: dict[str, Any]) -> int:
@@ -412,6 +448,12 @@ def _pip_install(manifest: dict[str, Any]) -> int:
     selected = select_wheels(manifest["wheels"])
     if "gdprguardian" not in selected or "ahocorasick-rs" not in selected:
         raise NotCovered(manifest)
+    if _pip_refused():
+        # Sinon « No module named pip » ou le refus de pip, sans conseil / otherwise a bare pip error, no advice.
+        raise Failure("pip absent ou Python système géré (PEP 668) : lancez sans --setup --pip (dossier privé, ni pip "
+                      "ni environnement virtuel) ou dans un environnement virtuel / pip missing or externally-managed "
+                      "system Python (PEP 668): run without --setup --pip (private folder, needs neither pip nor a "
+                      "virtual environment) or inside a virtual environment")
     for name in selected.values():
         if _sha256(WHEELS / name) != manifest["wheels"][name]:
             raise Failure(f"roue altérée / altered wheel: {name}")
@@ -567,7 +609,7 @@ class Output:
         if automatic:
             print(notice + " ; lisez-le par parties / read it in parts")
         else:
-            print(f"gdprguardian: {notice}", file=sys.stderr)
+            print(notice, file=sys.stderr)  # déjà préfixé « [gdprguardian] » / already prefixed
 
 
 def _read_text(source: str) -> str:
@@ -679,6 +721,14 @@ def main(argv: list[str] | None = None) -> int:
         return failure.code
     except KeyboardInterrupt:
         return 130
+    except ImportError as exc:
+        # Bibliothèque native refusée (dossier de cache sur un montage noexec…) : le nom de la classe, jamais le
+        # message tiers. Native library refused (cache folder on a noexec mount...): the class name, never its text.
+        print(f"gdprguardian: moteur non chargeable ici / engine cannot load here ({type(exc).__name__}) ; dossier "
+              f"de cache sur un montage noexec ? Relancez avec GDPRGUARDIAN_SKILL_CACHE=<dossier où l'exécution est "
+              f"permise> / cache folder on a noexec mount? Rerun with GDPRGUARDIAN_SKILL_CACHE=<a folder that allows "
+              f"execution>", file=sys.stderr)
+        return EXIT_ERROR
     except Exception as exc:
         # Jamais de trace ni de message tiers : il pourrait citer le document / never a traceback or third-party text.
         print(f"gdprguardian: échec / failed ({type(exc).__name__})", file=sys.stderr)

@@ -79,10 +79,10 @@ REASON = (
     "Anonymise the document first with gdprguardian-local whenever it is available (the local MCP tool "
     "anonymize_file, or the skill's bundled engine: nothing leaves the computer); older installs call the skill "
     "gdprguardian-anonymize. Only if no local route works, and only after the user agrees to send the document to "
-    "the public service, use gdprguardian-online (its script, or create_upload then get_anonymized). Work only "
-    "from the anonymised Markdown. / Lecture directe des documents bruts bloquée : anonymisez d'abord avec la "
-    "skill gdprguardian-local ; gdprguardian-online (service public) seulement à défaut, avec l'accord de "
-    "l'utilisateur."
+    "the online service (API key), use gdprguardian-online (its script, or create_upload then get_anonymized). Work "
+    "only from the anonymised Markdown. / Lecture directe des documents bruts bloquée : anonymisez d'abord avec la "
+    "skill gdprguardian-local ; gdprguardian-online (service en ligne, clé API) seulement à défaut, avec l'accord "
+    "de l'utilisateur."
 )
 # Jetons du shell : chaînes entre guillemets intactes, opérateurs à part / quoted strings kept, operators apart.
 _TOKEN = re.compile(r'"[^"]*"|\'[^\']*\'|\|\||&&|\$\(|[;&|\n`()<]|[^\s"\'|&;`()<]+')

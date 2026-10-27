@@ -16,7 +16,7 @@ modèle (détails plus bas).
 | `skills/gdprguardian-local` | Dit à Claude d'utiliser `anonymize_file`, sans jamais ouvrir l'original ; à défaut, le script de la skill, qui anonymise sur le poste avec le moteur embarqué (roues fournies dans les archives de [`skills/`](../../../skills/README.md), absentes du plugin) ou un Gardien RGPD déjà installé. Jamais de service en ligne sans l'accord de l'utilisateur. |
 | `hooks/hooks.json` | Hook `PreToolUse` : refuse `Read`, `Grep`, `cat`, `Get-Content`, `Import-Csv`… et les outils MCP tiers sur un document brut. |
 
-Version légère, sans rien installer (service public, MCP en HTTP) : le plugin `gdprguardian-online`,
+Version légère, sans rien installer (service en ligne avec clé API, MCP en HTTP) : le plugin `gdprguardian-online`,
 [`../plugin-online`](../plugin-online/README.md).
 
 ### Prérequis
@@ -106,7 +106,7 @@ the anonymised Markdown (`[PERSONNE_1]`, `[EMAIL_1]`…). Placeholders are irrev
   or an installed GDPR Guardian, never an online service without the user's agreement; the `PreToolUse` hook
   denies `Read`, `Grep`, shell
   readers and third-party MCP tools on raw documents. The light plugin `gdprguardian-online` (online MCP over HTTP,
-  nothing to install) lives in [`../plugin-online`](../plugin-online/README.md).
+  nothing to install, API key required) lives in [`../plugin-online`](../plugin-online/README.md).
 - **Prerequisite.** [uv](https://docs.astral.sh/uv/getting-started/installation/). Once, with the network, run
   `uv tool install "gdprguardian[local]==1.0.2"` in a terminal: the server then starts **without any network** and
   within the client's start-up timeout. Without this step the plugin still works, but `uvx` downloads GDPR Guardian

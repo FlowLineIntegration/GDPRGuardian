@@ -78,17 +78,17 @@
     ]
   },
   "use": {
-    "headline": "Three ways in, one engine",
+    "headline": "Three ways in with a key, one engine",
     "entries": [
-      ["Website", "Drop or paste, then download."],
-      ["MCP", "Claude and other agents, no key."],
+      ["Website", "With your API key, drop, then download."],
+      ["MCP", "Claude and other agents, with your key."],
       ["REST API", "<m>/v1/anonymize/text</m>\n<m>/v1/anonymize/file</m>"]
     ],
     "engine": ["GDPR Guardian", "One fresh process per request, nothing kept."],
     "output": "Anonymised Markdown",
     "ai": "Your AI",
     "note": "Over MCP, send the file: it never goes through the model. Pasted text has already left.",
-    "local": "<b>100% local</b>: Claude plugin, Python package, Docker without network."
+    "local": "<b>100% local, no key</b>: Claude skills (engine bundled), Docker without network."
   },
   "fork": {
     "headline": "Copy the repository, make your own version.",
@@ -203,8 +203,8 @@
     {"figure": "NIR, SIRET, VAT, IBAN of 89 countries validated by official check digits", "source": "README.md, “Expert des identifiants européens”; site/templates/index.en.html (“check digits”)"},
     {"figure": "Every tag has its rule and its reason (explain=true)", "source": "README.md, “Explicable”; docs/REGLES.md"},
     {"figure": "Under a millisecond for a 2 KB document, one core, no GPU, no LLM", "source": "README.md, “Performances”: 0.45 ms on Windows, 0.48 ms on Linux (Rust core); site/data/quality.json, ms_per_doc = 0.56 ms (25 October 2026, shared laptop); deployed engine, 26 October 2026: 0.30 ms for 1,000 characters, 2.2 ms for 10,000 (benchmarks/results/bench-2026-10-26-standard-rules3.md)"},
-    {"figure": "One fresh process per request, in memory, nothing kept; no content logged, no cookie, no account, no key", "source": "README.md, “Service en ligne, gratuit et sans clé / free online service, no key”; deploy/README.md"},
-    {"figure": "Website, public MCP without a key (/mcp), REST API /v1/anonymize/text and /v1/anonymize/file", "source": "README.md; site/templates/index.en.html, “Use it” panel"},
+    {"figure": "One fresh process per request, in memory, nothing kept; no content logged, no cookie; access with an API key", "source": "README.md, “Service en ligne, gratuit et sans clé / free online service, no key”; deploy/README.md"},
+    {"figure": "Website, MCP (/mcp) and REST API with an API key: /v1/anonymize/text and /v1/anonymize/file", "source": "README.md; site/templates/index.en.html, “Use it” panel"},
     {"figure": "Over MCP the file never goes through the model; text pasted into the chat has already left", "source": "site/templates/index.en.html, “Use it” panel (“create_upload … the file goes straight to the service, without passing through the model … A text already pasted into the chat has already left: anonymize_text cannot bring it back”)"},
     {"figure": "100% local: Claude plugin (local MCP), Python package, Docker container without network", "source": "README.md; docs/LOCAL.md; deploy/README.md (docker run --network none)"},
     {"figure": "MIT licence; git clone; code published on GitHub", "source": "README.md (MIT); site/templates/index.en.html, legal notice (“code in the public repository”)"},

@@ -49,7 +49,7 @@ Un test d'un pack pays doit donc préciser `countries=[...]` ou `countries="all"
 | `convert/` | documents → Markdown (PDF, DOCX, PPTX, ODT, HTML, EML, MSG, RTF, TXT) | extensible |
 | `tabular/` | Excel, ODS, CSV → Markdown anonymisé | extensible |
 | `ner/` | NER ONNX optionnel | extensible |
-| `server/` | API REST, serveur MCP en ligne, envois hors bande ; service public : identité pseudonyme (`clients.py`), limiteur d'abus (`limiter.py`) | extensible |
+| `server/` | API REST, serveur MCP en ligne, envois hors bande ; clés d'API (`security.py`), identité pseudonyme (`clients.py`), limiteur d'abus (`limiter.py`) | extensible |
 
 ## 3. Contrat d'un détecteur
 
@@ -253,9 +253,9 @@ client ─► en-têtes de sécurité ─► journal (erreurs 5xx seulement) ─
        ─► réponse (temps mesuré rendu au limiteur, réservation ramenée au résultat jusqu'à la fin de la réponse)
 ```
 
-- **Service public** (`GDPRGUARDIAN_PUBLIC=1`, le service officiel) : aucune clé. Les clés restent possibles pour un
-  déploiement tiers, données par leurs seules empreintes SHA-256 (`GDPRGUARDIAN_API_KEY_SHA256`) ; une clé en clair
-  dans l'environnement est refusée au démarrage.
+- **Service à clés** (`GDPRGUARDIAN_API_KEY_SHA256`, le service officiel) : `Authorization: Bearer <clé>` exigé, une
+  clé par organisation, donnée par sa seule empreinte SHA-256 ; une clé en clair dans l'environnement est
+  refusée au démarrage. Le mode public (`GDPRGUARDIAN_PUBLIC=1`, aucune clé) reste possible pour un autre déploiement.
 - **Identité** (`server/clients.py`) : adresse lue dans l'en-tête de confiance posé par Nginx (`X-GG-Client`), retiré
   de la requête aussitôt ; pseudonyme immédiat, 8 octets de HMAC-SHA256 sous un secret de 32 octets en mémoire,
   renouvelé toutes les 24 h (le précédent reconnu 10 min) ; niveaux IPv4 /32 + /24, IPv6 /64 + /48. L'adresse
@@ -369,7 +369,7 @@ client ─► en-têtes de sécurité ─► journal (erreurs 5xx seulement) ─
   part quitte la file, ou son travailleur est tué.
 - **Envois hors bande** (`server/store.py`) : jeton et identifiant de résultat de 256 bits (le second dérivé du
   premier par HMAC sous une clé en mémoire), gardés en empreintes, jeton à usage unique ; liés en plus à la clé si
-  l'envoi en vient (service public : la capacité seule). Quotas : en attente, 40 par préfixe du créateur et 10 000 en
+  l'envoi en vient (mode public : la capacité seule). Quotas : en attente, 40 par préfixe du créateur et 10 000 en
   tout ; reçus non lus, 10 par client du PUT et 40 par son préfixe ; caractères, 1/8 du dépôt par client du PUT et
   1/4 par préfixe (le PUT part de la machine de l'utilisateur, pas d'un connecteur partagé). Une URL d'envoi vaut
   `GDPRGUARDIAN_UPLOAD_TTL_S` ; un envoi reçu n'expire
@@ -484,7 +484,7 @@ to the waiting key holding the fewest slots, then to the one waiting the longest
 of its last job); FIFO within a key; a new key waits at most one release behind a flooding key (behind only the
 keys that arrived before it), and keys that keep resending requests starve no other key. Out-of-band uploads:
 single-use 256-bit token and 256-bit result id (derived from the token by HMAC under an in-memory key), both stored
-as digests, also bound to the key when the upload came with one (public service: the capability alone); quotas:
+as digests, also bound to the key when the upload came with one (public mode: the capability alone); quotas:
 pending, 40 per creator prefix and 10,000 in all; received and unread, 10 per PUT client and 40 per its prefix;
 characters, 1/8 of the store per PUT client and 1/4 per prefix (the PUT comes from the user's machine, not a shared
 connector); a received upload never expires
@@ -506,8 +506,9 @@ ticket and deadlines); reading the result returns the stage (`queued`, `converti
 product does no OCR, so OCR text only arrives as a PDF text layer), never pasted text or office documents, and clean
 IT writing (upper-case codes with digits, camel-case product names, two-capital acronyms) is not counted as garbled. Workers are the OOM
 killer's preferred victims (`oom_score_adj`
-1000). **Public service** (`GDPRGUARDIAN_PUBLIC=1`): no key (keys, for third-party deployments, only as SHA-256
-digests in `GDPRGUARDIAN_API_KEY_SHA256`; plaintext keys in the environment are refused). An entry gate decides
+1000). **Keyed service** (`GDPRGUARDIAN_API_KEY_SHA256`, the official service): `Authorization: Bearer <key>`
+required, one key per organisation, given as SHA-256 digests only; plaintext keys in the environment are refused;
+public mode (`GDPRGUARDIAN_PUBLIC=1`, no key) remains for another deployment. An entry gate decides
 before any body is read: the client address comes from the trusted header Nginx sets (`X-GG-Client`), removed from
 the request at once and turned into an in-memory pseudonym (8 bytes of HMAC-SHA256 under a 32-byte secret renewed
 every 24 h, previous one honoured 10 min; IPv4 /32 + /24, IPv6 /64 + /48), never stored, logged, sent or echoed;

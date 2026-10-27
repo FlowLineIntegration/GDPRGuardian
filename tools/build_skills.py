@@ -8,7 +8,7 @@
 Trois archives, chacune avec le dossier de la skill à sa racine (ce qu'attend claude.ai) / three archives, each with
 the skill folder at its root (what claude.ai expects):
 
-- `gdprguardian-online.zip` : la skill légère (service public, MCP ou API REST) / the light skill;
+- `gdprguardian-online.zip` : la skill légère (service en ligne avec clé API, MCP ou API REST) / the light skill;
 - `gdprguardian-local.zip` : la skill lourde, moteur complet pour Linux x86_64 et aarch64 (bac à sable de claude.ai
   et de la conversation de Claude Desktop, Linux, WSL) / the heavy skill, full engine for Linux;
 - `gdprguardian-local-windows-macos.zip` : la même skill lourde, roues Windows x64 et macOS Apple Silicon (Claude Code

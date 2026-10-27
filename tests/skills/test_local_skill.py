@@ -15,7 +15,7 @@ import subprocess
 import sys
 import zipfile
 from pathlib import Path
-from types import ModuleType
+from types import ModuleType, SimpleNamespace
 
 import pytest
 
@@ -166,6 +166,64 @@ def test_an_unwritable_home_reuses_one_private_temporary_folder(local: ModuleTyp
     first, second = local.cache_root(env), local.cache_root(env)
     assert first == second and first.parent == tmp_path / "tmp" and first.name.startswith("gdprguardian-skill-")
     assert [path.name for path in (tmp_path / "tmp").iterdir()] == [first.name]
+
+
+def test_a_cache_on_a_mount_without_execution_is_skipped(local: ModuleType, tmp_path: Path,
+                                                         monkeypatch: pytest.MonkeyPatch) -> None:
+    # Montage noexec (bac à sable durci) : les .so du moteur n'y chargeraient pas, le candidat suivant sert.
+    # noexec mount (hardened sandbox): the engine's .so files would not load there, the next candidate is used.
+    blocked, flag = tmp_path / "mount", 8  # ST_NOEXEC sous Linux / on Linux
+    monkeypatch.setattr(local.os, "ST_NOEXEC", flag, raising=False)
+    monkeypatch.setattr(local.os, "statvfs", lambda path: SimpleNamespace(
+        f_flag=flag if Path(path).is_relative_to(blocked) else 0), raising=False)
+    monkeypatch.setattr(local.tempfile, "tempdir", str(tmp_path / "tmp"))
+    (tmp_path / "tmp").mkdir()
+    assert not local._usable(blocked / "cache") and local._usable(tmp_path / "other")
+    root = local.cache_root({"GDPRGUARDIAN_SKILL_CACHE": str(blocked / "cache")})
+    assert root.parent == tmp_path / "tmp" and root.name.startswith("gdprguardian-skill-")
+
+
+def test_setup_pip_without_pip_or_on_a_managed_python_is_explained(local: ModuleType, locked: list[str],
+                                                                   tmp_path: Path,
+                                                                   monkeypatch: pytest.MonkeyPatch) -> None:
+    # Au lieu de « No module named pip » ou du refus PEP 668 : un message qui dit quoi faire, pip jamais lancé.
+    # Instead of "No module named pip" or the PEP 668 refusal: a message saying what to do, pip never started.
+    _as(monkeypatch, local, "linux", "x86_64", (3, 12))
+    manifest = {"gdprguardian": "1.0.0", "wheels": {name: "0" * 64 for name in locked}}
+    monkeypatch.setattr(local.subprocess, "run", lambda *_a, **_k: pytest.fail("pip lancé / pip started"))
+    real = local.importlib.util.find_spec
+    monkeypatch.setattr(local.importlib.util, "find_spec", lambda name, *a: None if name == "pip" else real(name, *a))
+    with pytest.raises(local.Failure, match=r"pip missing or externally-managed.*run without --setup --pip"):
+        local._pip_install(manifest)
+    # pip présent, Python système (hors environnement virtuel) marqué EXTERNALLY-MANAGED / managed system Python.
+    monkeypatch.setattr(local.importlib.util, "find_spec", lambda name, *a: object() if name == "pip" else None)
+    monkeypatch.setattr(local.sys, "base_prefix", local.sys.prefix)
+    monkeypatch.setattr(local.sysconfig, "get_path", lambda *_a, **_k: str(tmp_path))
+    assert not local._pip_refused()
+    (tmp_path / "EXTERNALLY-MANAGED").write_text("[externally-managed]\n", encoding="utf-8")
+    with pytest.raises(local.Failure, match="PEP 668"):
+        local._pip_install(manifest)
+    # Dans un environnement virtuel, le marqueur ne compte pas / inside a virtual environment, it does not count.
+    monkeypatch.setattr(local.sys, "prefix", str(tmp_path / "venv"))
+    assert not local._pip_refused()
+
+
+def test_an_engine_that_cannot_load_and_the_output_notice(local: ModuleType, tmp_path: Path,
+                                                          monkeypatch: pytest.MonkeyPatch,
+                                                          capsys: pytest.CaptureFixture[str]) -> None:
+    # ImportError (bibliothèque native refusée) : une ligne claire, jamais le message tiers.
+    # ImportError (native library refused): one clear line, never the third-party message.
+    def refused(_env: object) -> None:
+        raise ImportError("failed to map segment from shared object")
+
+    monkeypatch.setattr(local, "activate", refused)
+    assert local.main(["--text", "-"]) == 1
+    err = capsys.readouterr().err
+    assert err.startswith("gdprguardian: ") and "GDPRGUARDIAN_SKILL_CACHE" in err and "map segment" not in err
+    # Avec -o, un seul préfixe sur stderr / with -o, one prefix on stderr.
+    local.Output(tmp_path / "x.anon.md", None).emit("[PERSONNE_1]")
+    err = capsys.readouterr().err
+    assert err.startswith("[gdprguardian] ") and "gdprguardian: [" not in err
 
 
 def test_powerpoint_without_python_pptx_is_explained(local: ModuleType, tmp_path: Path,

@@ -10,9 +10,10 @@ mêmes outils MCP) ; seule change la porte d'entrée du document. Chaque version
 interdit toute connexion réseau, toute résolution de nom et tout lancement de programme imprévu pendant
 l'anonymisation de PDF, Word, Excel, CSV, e-mails et HTML, et pendant une session MCP complète.
 
-Le service en ligne, public et gratuit (`https://api.gardienrgpd.fr`, `https://api.gdprguardian.com`, MCP sur `/mcp`,
-sans clé ni compte), traite en mémoire et ne garde rien ; mais le document y transite, et nous y sommes un tiers,
-sans contrat de traitement. **Pour un document très sensible (santé, RH, dossier judiciaire, secret
+Le service en ligne (`https://api.gardienrgpd.fr`, `https://api.gdprguardian.com`, MCP sur `/mcp`), réservé aux
+détenteurs d'une clé API remise sur demande (contact@gardienrgpd.fr) avec un accord de sous-traitance (RGPD, art. 28),
+traite en mémoire et ne garde rien ; mais le document y transite, et nous l'y traitons pour votre compte. Cette
+version locale, elle, est libre et sans clé. **Pour un document très sensible (santé, RH, dossier judiciaire, secret
 professionnel), préférez cette version locale.**
 
 ### Choisir sa voie
@@ -21,8 +22,8 @@ professionnel), préférez cette version locale.**
 
 | Vous utilisez | Installez | Guide |
 |---|---|---|
+| Claude Code ou un agent sur le poste : **la voie publique**, libre, sans clé, sans uv ni réseau, disponible dès aujourd'hui | la **skill lourde** `gdprguardian-local` : moteur complet embarqué, installé sans réseau au premier usage (`gdprguardian-local-windows-macos.zip` pour Windows x64 et macOS Apple Silicon, `gdprguardian-local.zip` pour Linux et WSL) | [`skills`](../skills/README.md) |
 | Claude Code, Cowork | le **plugin Claude** `gdprguardian` (serveur MCP local, skill `gdprguardian-local`, garde-fou) | [`integrations/claude/plugin`](../integrations/claude/plugin/README.md) |
-| Claude Code, un agent, sans uv ni réseau (ou tant que le paquet n'est pas sur PyPI) | la **skill lourde** `gdprguardian-local` : moteur complet embarqué, installé sans réseau au premier usage | [`skills`](../skills/README.md) |
 | Claude Desktop, en un double clic (après la publication sur PyPI) | le paquet **`gdprguardian-1.0.2.mcpb`**, pas encore distribué | [`packaging/mcpb`](../packaging/mcpb/README.md) |
 | VS Code, Cursor, tout client MCP | la configuration donnée par `gdprguardian mcp-config` | ci-dessous |
 | Un registre MCP | le paquet **`gdprguardian-mcp`** | [`packaging/gdprguardian-mcp`](../packaging/gdprguardian-mcp/README.md) |
@@ -80,13 +81,20 @@ gdprguardian anonymize - < notes.txt                 # texte UTF-8 sur l'entrée
   `pip install --no-index --find-links roues "gdprguardian[local]==1.0.2"`.
 - **Skill lourde** : les archives de [`skills/`](../skills/README.md) apportent déjà Gardien RGPD, son noyau et ses
   convertisseurs (Linux x86_64 et aarch64 ; Windows x64 et macOS Apple Silicon ; Python 3.11 à 3.14). Le script de la
-  skill les installe sans réseau dans un dossier privé ; ou, dans un environnement dédié,
-  `pip install --no-index --find-links wheels -r wheels/requirements.txt` (Linux x86_64, Windows x64). Sans le serveur
-  MCP : ni `fastmcp`, ni lecture de PowerPoint (`python-pptx`, trop lourd pour l'archive).
+  skill les installe sans réseau dans un dossier privé, sans pip ni venv (emplacement, taille et désinstallation :
+  [`skills/README.md`](../skills/README.md)). Variante, dans un environnement dédié :
+  `pip install --no-index --find-links wheels -r wheels/requirements.txt`. Elle exige un Python avec `venv` et `pip`
+  (Debian, Ubuntu : `sudo apt install python3-venv` avant de couper le réseau ; sinon, le script de la skill suffit)
+  et n'existe que pour Linux x86_64 et Windows x64 : sous Linux aarch64 et macOS, Gardien RGPD exige son noyau
+  `gdprguardian-core`, que l'archive n'apporte pas. Sans le serveur MCP : ni `fastmcp`, ni lecture de PowerPoint
+  (`python-pptx`, trop lourd pour l'archive).
 - **Dans claude.ai** et la conversation de Claude Desktop, cette même skill (archive Linux `gdprguardian-local.zip`,
   même sur un poste Windows ou Mac) tourne dans le bac à sable d'exécution de code d'Anthropic : rien ne part
   ailleurs, mais ce n'est pas votre poste, et un fichier joint à la conversation y est déjà parti. Le plugin
   `gdprguardian` n'y sert pas : seule sa skill s'y charge, sans roues ni serveur local.
+- Le test « aucun programme imprévu » (en tête de page) porte sur l'anonymisation, pas sur une installation par
+  `pip` (poste isolé, environnement dédié) : pip lance par exemple `rustc --version` quand Rust est installé, sans
+  ouvrir le réseau. Le script de la skill, lui, installe le moteur sans lancer aucun programme.
 
 ### Ce qui reste sur le poste, ce qui part vers le modèle
 
@@ -105,6 +113,15 @@ gdprguardian anonymize - < notes.txt                 # texte UTF-8 sur l'entrée
 
 ### Vérifier
 
+**Skill lourde**
+
+1. `python <dossier de la skill>/scripts/gdprguardian_local.py --check` (`python3` sous Linux et macOS) affiche
+   `"source": "bundled"` et `"engine": "rust"` (Linux x86_64, Windows x64 ; ailleurs `"engine": "python"`).
+2. Demandez « Résume entretien.txt » : la skill `gdprguardian-local` passe avant toute lecture du fichier ; seuls
+   `entretien.anon.md` et `entretien.anon2.md` (seconde passe) sont lus, jamais `entretien.txt`.
+
+**Plugin ou serveur MCP local**
+
 1. Déposez un PDF dans `~/GDPRGuardian` et demandez « Résume ~/GDPRGuardian/contrat.pdf » : le client appelle
    `anonymize_file`, jamais la lecture directe du fichier.
 2. Le résumé ne contient que des balises (`[PERSONNE_1]`…).
@@ -121,15 +138,16 @@ document intake differs. Every release is checked by a test that forbids any net
 unexpected program launch while anonymising PDF, Word, Excel, CSV, e-mail and HTML files, and during a full MCP
 session.
 
-The free public online service (`https://api.gdprguardian.com`, `https://api.gardienrgpd.fr`, MCP on `/mcp`, no key,
-no account) processes in memory and keeps nothing, but the document travels to it and we are a third party there,
-with no processing agreement. **For a very sensitive document (health, HR, court file, professional secrecy), use
-this local version instead.**
+The online service (`https://api.gdprguardian.com`, `https://api.gardienrgpd.fr`, MCP on `/mcp`), reserved to holders
+of an API key given on request (contact@gardienrgpd.fr) with a data processing agreement (GDPR Art. 28), processes in
+memory and keeps nothing, but the document travels to it and we process it there on your behalf. This local version,
+for its part, is free to use and needs no key. **For a very sensitive document (health, HR, court file, professional
+secrecy), use this local version instead.**
 
 | You use | Install | Guide |
 |---|---|---|
+| Claude Code or an agent on your computer: **the public route**, free to use, no key, no uv and no network, available today | the **heavy skill** `gdprguardian-local`: full engine bundled, installed offline on first use (`gdprguardian-local-windows-macos.zip` for Windows x64 and Apple-silicon macOS, `gdprguardian-local.zip` for Linux and WSL) | [`skills`](../skills/README.md) |
 | Claude Code, Cowork | the **`gdprguardian` Claude plugin** (local MCP server, `gdprguardian-local` skill, guardrail) | [`integrations/claude/plugin`](../integrations/claude/plugin/README.md) |
-| Claude Code, an agent, no uv and no network (or while the package is not on PyPI) | the **heavy skill** `gdprguardian-local`: full engine bundled, installed offline on first use | [`skills`](../skills/README.md) |
 | Claude Desktop, one double-click (once on PyPI) | the **`gdprguardian-1.0.2.mcpb`** bundle, not distributed yet | [`packaging/mcpb`](../packaging/mcpb/README.md) |
 | VS Code, Cursor, any MCP client | the configuration printed by `gdprguardian mcp-config` | below |
 | An MCP registry | the **`gdprguardian-mcp`** package | [`packaging/gdprguardian-mcp`](../packaging/gdprguardian-mcp/README.md) |
@@ -160,12 +178,18 @@ connected machine with the same OS and Python version, `pip download "gdprguardi
 the folder, then `pip install --no-index --find-links wheels "gdprguardian[local]==1.0.2"`. Heavy skill: the
 [`skills/`](../skills/README.md) archives already carry GDPR Guardian, its core and its converters (Linux x86_64 and
 aarch64; Windows x64 and Apple-silicon macOS; Python 3.11 to 3.14); the skill's script installs them offline into a
-private folder, or, in a dedicated environment, `pip install --no-index --find-links wheels -r
-wheels/requirements.txt` (Linux x86_64, Windows x64); no MCP server (`fastmcp`) and no PowerPoint (`python-pptx`,
-too heavy for the archive). In claude.ai and the Claude Desktop chat the same skill (the Linux archive
-`gdprguardian-local.zip`, even on a Windows or Mac computer) runs in Anthropic's code sandbox: nothing goes anywhere
-else, but it is not your computer, and a file attached to the chat is already there. The `gdprguardian` plugin does
-not help there: only its skill loads, with no wheels and no local server.
+private folder, with neither pip nor venv (location, size and uninstall: [`skills/README.md`](../skills/README.md)).
+Variant, in a dedicated environment: `pip install --no-index --find-links wheels -r wheels/requirements.txt`. It
+needs a Python with `venv` and `pip` (Debian, Ubuntu: `sudo apt install python3-venv` before cutting the network;
+otherwise the skill's script is enough) and only exists for Linux x86_64 and Windows x64: on Linux aarch64 and macOS,
+GDPR Guardian requires its `gdprguardian-core` core, which the archive does not carry. No MCP server (`fastmcp`) and
+no PowerPoint (`python-pptx`, too heavy for the archive). In claude.ai and the Claude Desktop chat the same skill (the
+Linux archive `gdprguardian-local.zip`, even on a Windows or Mac computer) runs in Anthropic's code sandbox: nothing
+goes anywhere else, but it is not your computer, and a file attached to the chat is already there. The
+`gdprguardian` plugin does not help there: only its skill loads, with no wheels and no local server. The "no
+unexpected program" test (top of this page) covers the anonymisation, not an installation by `pip` (air-gapped
+computer, dedicated environment): pip runs for instance `rustc --version` when Rust is installed, without opening the
+network. The skill's script, for its part, installs the engine without launching any program.
 
 **What stays, what goes to the model.** Stays: the file, its conversion, the original text, the anonymisation;
 no mapping table exists, nothing is kept between calls, and a result is wiped 2 minutes after a full read. Goes to the model:
@@ -178,7 +202,11 @@ subagents, the agent does the pass itself and so reads those facts), and nothing
 The pass is done by your AI, probabilistic, not measured, outside the deterministic guarantees: see
 [`integrations/claude/README.md`](../integrations/claude/README.md).
 
-**Check.** Drop a PDF in `~/GDPRGuardian` and ask "Summarise ~/GDPRGuardian/contrat.pdf": the client calls
+**Check.** Heavy skill: `python <skill folder>/scripts/gdprguardian_local.py --check` (`python3` on Linux and macOS)
+prints `"source": "bundled"` and `"engine": "rust"` (Linux x86_64, Windows x64; elsewhere `"engine": "python"`); then
+ask "Summarise entretien.txt": the `gdprguardian-local` skill runs before any read of the file, and only
+`entretien.anon.md` and `entretien.anon2.md` (second pass) are read, never `entretien.txt`. Local plugin or MCP
+server: drop a PDF in `~/GDPRGuardian` and ask "Summarise ~/GDPRGuardian/contrat.pdf": the client calls
 `anonymize_file`, never a direct read; the summary only holds placeholders; a file outside the allowed folder is
 refused (`not_found`). GDPR Guardian is a first barrier, automatic and explainable, not a "zero leak" promise: see the
 [README](../README.md) disclaimer.

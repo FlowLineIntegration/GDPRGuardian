@@ -2,7 +2,10 @@
   "mcpServers": {
     "gdprguardian": {
       "type": "http",
-      "url": "https://api.gardienrgpd.fr/mcp"
+      "url": "https://api.gardienrgpd.fr/mcp",
+      "headers": {
+        "Authorization": "Bearer ${GDPRGUARDIAN_API_KEY}"
+      }
     }
   }
 }

@@ -1,8 +1,8 @@
 ---
 name: gdprguardian-online
-description: Irreversibly anonymise a document or a text with the free GDPR Guardian online service (Gardien RGPD, no key, nothing to install) BEFORE reading it. Use when the user wants to read, summarise, analyse, translate, compare or extract data from a PDF, Word, Excel, PowerPoint, CSV, e-mail or text file that may contain personal data (names, contact details, national ID numbers, IBAN, HR, health or customer records), or asks to anonymise, pseudonymise or redact a document, or to make it GDPR-safe for an AI. Never open the original file. If the gdprguardian-local skill or a local anonymize_file tool is available, use that instead, since nothing then leaves the machine. This skill sends the document to the online service, so unless the user asked for it, say so and wait for their agreement before the first upload. Then work only on the anonymised Markdown. FR - anonymiser un document, données personnelles, RGPD, caviarder avant l'IA.
+description: Irreversibly anonymise a document or a text with the GDPR Guardian online service (Gardien RGPD; API key required, nothing to install) BEFORE reading it. Use when the user wants to read, summarise, analyse, translate, compare or extract data from a PDF, Word, Excel, PowerPoint, CSV, e-mail or text file that may contain personal data (names, contact details, national ID numbers, IBAN, HR, health or customer records), or asks to anonymise, pseudonymise or redact a document, or to make it GDPR-safe for an AI. Never open the original file. If the gdprguardian-local skill or a local anonymize_file tool is available, use that instead, since nothing then leaves the machine. This skill sends the document to the online service, so unless the user asked for it, say so and wait for their agreement before the first upload. Then work only on the anonymised Markdown. FR - anonymiser un document, données personnelles, RGPD, caviarder avant l'IA.
 license: MIT
-compatibility: Needs network access to api.gardienrgpd.fr (or the server set in GDPRGUARDIAN_URL) and Python 3.9+ for the script, or the GDPR Guardian MCP connector https://api.gardienrgpd.fr/mcp. Claude Code, Claude Desktop, Cowork, claude.ai and other agents.
+compatibility: Needs an API key (GDPRGUARDIAN_API_KEY, sent in the Authorization header as Bearer), network access to api.gardienrgpd.fr (or the server set in GDPRGUARDIAN_URL) and Python 3.9+ for the script, or the GDPR Guardian MCP connector https://api.gardienrgpd.fr/mcp with that header. Claude Code, Claude Desktop, Cowork, claude.ai and other agents.
 allowed-tools:
   - mcp__gdprguardian__create_upload
   - mcp__gdprguardian__get_anonymized
@@ -22,8 +22,10 @@ allowed-tools:
 GDPR Guardian (Gardien RGPD in French) replaces personal data **irreversibly**: each person becomes
 `[PERSONNE_1]`, `[PERSONNE_2]`... consistently within one document, and identifiers become `[EMAIL_1]`,
 `[TEL_1]`, `[NIR_1]`, `[IBAN_1]`... No mapping table exists anywhere: nobody (not you, not the user, not the
-service operator) can recover the original values. This skill uses the **free public service** (EU-hosted,
-no key, no account): it processes in memory and keeps nothing.
+service operator) can recover the original values. This skill uses the **online service** (EU-hosted), reserved
+for API key holders: the key, given on request (contact@gardienrgpd.fr) with a processing agreement (GDPR art. 28),
+is read from `GDPRGUARDIAN_API_KEY`; the service processes in memory and keeps nothing. Without a key, use
+`gdprguardian-local`.
 
 ## The rule (non-negotiable)
 
@@ -34,9 +36,10 @@ no key, no account): it processes in memory and keeps nothing.
    stop here: nothing leaves the machine.
 3. **Ask before the first upload.** Unless the user explicitly asked for GDPR Guardian online (or for this skill),
    tell them once, before sending anything: "To anonymise it, I will send the document to the GDPR Guardian
-   public service (EU-hosted, processed in memory, nothing kept). It is a third party with no processing
-   agreement with you. For a sensitive document, the gdprguardian-local skill keeps it on your computer. Shall I
-   send it?" Wait for a yes. One yes covers the documents of this conversation, unless the user says otherwise.
+   online service (EU-hosted, processed in memory, nothing kept), which processes it on your behalf under the
+   processing agreement that comes with the API key. For a sensitive document, the gdprguardian-local skill keeps
+   it on your computer. Shall I send it?" Wait for a yes. One yes covers the documents of this conversation,
+   unless the user says otherwise.
 4. **Anonymise it first**, with one of the routes below. If none works, stop and tell the user why. **Never
    fall back to reading the original file.**
 5. **Work only from the anonymised Markdown**, and once the second pass for sensitive data has run (see "Second
@@ -50,9 +53,9 @@ no key, no account): it processes in memory and keeps nothing.
 
 | | **gdprguardian-online** (this skill) | **gdprguardian-local** |
 |---|---|---|
-| Install | nothing | the skill archive with its engine, or the local Claude plugin |
-| The document goes to | the GDPR Guardian public service (a third party), then only the Markdown reaches you | nowhere: anonymised on this machine |
-| Use | when no local route exists, with the user's agreement | **always, whenever it is available** |
+| Install | nothing; an API key | the skill archive with its engine, or the local Claude plugin; no key |
+| The document goes to | the GDPR Guardian online service (a processor, under a processing agreement), then only the Markdown reaches you | nowhere: anonymised on this machine |
+| Use | when no local route exists, with an API key and the user's agreement | **always, whenever it is available** |
 
 Both give the same placeholders and options.
 
@@ -79,7 +82,8 @@ python3 "${CLAUDE_SKILL_DIR}/scripts/gdprguardian_online.py" "<path/to/document.
 ## Route B: the GDPR Guardian MCP tools
 
 Use them when the GDPR Guardian connector is available (tools `create_upload`, `get_anonymized`,
-`anonymize_text`, `list_packs`; public server `https://api.gardienrgpd.fr/mcp`, no key) and the script cannot run
+`anonymize_text`, `list_packs`; server `https://api.gardienrgpd.fr/mcp`, with the API key in the `Authorization`
+request header) and the script cannot run
 or cannot reach the service.
 
 1. `create_upload(filename=".pdf")` (the extension only is enough), with the options below if needed.
@@ -215,7 +219,7 @@ The script prints one line on stderr starting with `gdprguardian:` and exits wit
 | `HTTP 422 conversion_timeout` | Document too long to convert in time: split it, or use `gdprguardian-local`. |
 | `HTTP 408 upload_timeout` | The connection is too slow: retry once, then tell the user. |
 | `HTTP 404 already_read`, `expired`, `not_found` | Fully read 2 minutes ago, expired (10 minutes after the last read), or unknown: run the script again. |
-| `HTTP 401 unauthorized` | `GDPRGUARDIAN_URL` points to a keyed server: the user must set `GDPRGUARDIAN_API_KEY` (never ask them to paste it). |
+| `HTTP 401 unauthorized` | The API key is missing or refused: the user must set `GDPRGUARDIAN_API_KEY` (key given on request at contact@gardienrgpd.fr; never ask them to paste it), or use `gdprguardian-local`, which needs no key. |
 | `GDPRGUARDIAN_URL must use https` | Plain http is only allowed on localhost. |
 
 ## Limits (say them honestly)
@@ -228,8 +232,9 @@ The script prints one line on stderr starting with `gdprguardian:` and exits wit
   are not read (a warning says so). A PDF whose text layer comes from low-quality OCR is still processed, with the
   warning "Low-quality text (likely OCR): degraded detection, check the result": garbled names can escape detection,
   so tell the user. Only PDFs are checked (pasted text never is).
-- **A third party.** The document travels to the GDPR Guardian service, which keeps nothing, but has no
-  processing agreement with the user: hence rule 3, and `gdprguardian-local` for sensitive documents.
+- **A processor.** The document travels to the GDPR Guardian service, which keeps nothing and processes it on the
+  customer's behalf under a processing agreement (GDPR art. 28), but it leaves the computer: hence rule 3, and
+  `gdprguardian-local` for sensitive documents.
 - **French first.** Names and addresses are found through French lexicons and need `FR` in `countries`; names
   from other languages (in an English or German text, for example) are often missed. Checksummed identifiers
   (IBAN, cards, national IDs of the selected packs), e-mails and phone numbers work across countries.
@@ -241,9 +246,10 @@ The script prints one line on stderr starting with `gdprguardian:` and exits wit
 
 **FR.** Ne jamais lire le document d'origine. Si la skill `gdprguardian-local` (ou l'outil local `anonymize_file`)
 est disponible, l'utiliser : rien ne quitte la machine. Sinon, sauf demande expresse, prévenir l'utilisateur avant le
-premier envoi que le document part vers le service public gratuit Gardien RGPD (hébergé dans l'UE, en mémoire, rien
-n'est conservé, sans contrat de traitement) et attendre son accord ; puis l'envoyer avec le script
-(`gdprguardian_online.py <fichier> -o <fichier>.anon.md`) ou les outils MCP (`create_upload`, puis
+premier envoi que le document part vers le service en ligne Gardien RGPD (hébergé dans l'UE, en mémoire, rien
+n'est conservé, sous accord de sous-traitance) et attendre son accord ; puis l'envoyer avec le script
+(`gdprguardian_online.py <fichier> -o <fichier>.anon.md`, clé API dans `GDPRGUARDIAN_API_KEY`, remise sur demande à
+contact@gardienrgpd.fr ; sans clé, la skill locale) ou les outils MCP (`create_upload`, puis
 `get_anonymized`), et ne travailler que sur le Markdown anonymisé, dont les balises (`[PERSONNE_1]`…) sont
 irréversibles. `--explain` donne la règle et la raison de chaque balise ; `--rules` seulement avec l'accord de
 l'utilisateur. Limites : 50 Mo par fichier, 1 million de caractères par texte, 429 ou 503 avec `Retry-After`

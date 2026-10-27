@@ -6,8 +6,9 @@
 
 Le service expose dans **un seul processus d'accueil** l'API REST (`/v1/...`) et le serveur MCP en ligne (`/mcp`).
 Tout est traité **en mémoire** : aucun fichier temporaire, aucune base, aucun journal de contenu. Le service officiel
-est **public** : ni clé ni compte, REST et MCP ouverts à tous ; un limiteur en mémoire, par client, contient les abus
-(voir « Service public » ci-dessous).
+est **réservé aux détenteurs d'une clé d'API** (une par organisation, remise sur demande avec un accord de
+sous-traitance, art. 28 RGPD) ; un limiteur en mémoire, par client, contient les abus (voir « Accès par clé »
+ci-dessous).
 
 ### Une requête, un processus
 
@@ -51,14 +52,15 @@ ne contrôle que la structure (nombre, longueurs, libellés). Son empreinte ne d
 - **Envoi hors bande** : un fichier reçu n'expire pas tant qu'il attend son travailleur, même derrière une
   longue file ; son délai de traitement part de l'attribution du travailleur.
 
-### Service public : sans clé, limites par client, résultats isolés
+### Accès par clé, limites par client, résultats isolés
 
-`GDPRGUARDIAN_PUBLIC=1` : **aucune authentification**, ni sur REST, ni sur MCP, ni pour les envois hors bande. C'est
-le mode du service officiel. Un déploiement tiers peut garder des clés, données **seulement par leurs empreintes
-SHA-256** (`GDPRGUARDIAN_API_KEY_SHA256`, calculées par `printf '%s' "$cle" | sha256sum`) : une clé en clair dans
-l'environnement se lirait par `/proc/<pid>/environ`, et `GDPRGUARDIAN_API_KEYS` est donc refusé au démarrage. En mode
-public, une clé valide donne son propre principal (ses envois restent liés à elle) ; une clé absente, fausse ou
-ancienne est ignorée.
+**Mode à clés**, celui du service officiel : REST, MCP, envois hors bande et cockpit du site exigent l'en-tête
+`Authorization: Bearer <clé>` (seul accepté) ; sans clé valide, 401 avant toute lecture du corps. Les clés sont
+données **seulement par leurs empreintes SHA-256** (`GDPRGUARDIAN_API_KEY_SHA256`, calculées par
+`printf '%s' "$cle" | sha256sum`) : une clé en clair dans l'environnement se lirait par `/proc/<pid>/environ`, et
+`GDPRGUARDIAN_API_KEYS` est donc refusé au démarrage. Chaque clé est un principal isolé (ses envois lui restent liés).
+`GDPRGUARDIAN_PUBLIC=1` (autre déploiement) : **aucune authentification** ; une clé valide y donne son propre
+principal, une clé absente, fausse ou ancienne est ignorée.
 
 **Identité d'un client, sans rien garder.** Nginx pose `X-GG-Client = $remote_addr` en écrasant toute valeur envoyée
 par le client ; le service ne lit cet en-tête que s'il est nommé par `GDPRGUARDIAN_CLIENT_IP_HEADER` (sinon, il prend
@@ -173,8 +175,8 @@ base de fail2ban (clients SSH seulement) et les anciennes entrées du journal du
   détenteur (404 `upload_used` : demander une nouvelle URL) ; un résultat disparu donne un motif
   distinct (`already_read`, `expired`, `deleted`, toujours 404) au seul détenteur de son identifiant ; aucune route ne
   liste quoi que ce soit ; MCP est sans état (aucun identifiant de session, qui ne donnerait de toute façon aucun
-  droit). Dans le service public, la capacité suffit (l'adresse d'un agent change entre ses appels) ; avec une clé,
-  il faut en plus la clé ;
+  droit). En mode public, la capacité suffit (l'adresse d'un agent change entre ses appels) ; avec une clé (le
+  service officiel), il faut en plus la clé ;
 - `Cache-Control: no-store` imposé sur toute réponse (le service, puis Nginx), aucun `proxy_cache`, aucune réponse
   partagée.
 
@@ -286,19 +288,21 @@ autant (avant : le PDF admis sur une attente estimée de 6,7 s, puis 84 s d'atte
 ```bash
 docker build -f deploy/Dockerfile -t gdprguardian .        # depuis la racine du dépôt
 
-# Service public (sans clé), derrière un proxy qui pose X-GG-Client = adresse du client :
+# Une clé par client (organisation) : seule son empreinte va dans l'environnement.
+cle=$(python -c "import secrets; print(secrets.token_urlsafe(32))")      # à remettre au client
+printf '%s' "$cle" | sha256sum | cut -d' ' -f1                            # -> GDPRGUARDIAN_API_KEY_SHA256
+
+# Service à clés (mode du service officiel), derrière un proxy qui pose X-GG-Client = adresse du client :
 docker run -d --name gdprguardian \
   --read-only --cap-drop ALL --security-opt no-new-privileges \
   --memory 2g --memory-swap 2g --ulimit core=0 --pids-limit 256 \
   --log-driver local --log-opt max-size=10m --log-opt max-file=2 \
-  -e GDPRGUARDIAN_PUBLIC=1 -e GDPRGUARDIAN_CLIENT_IP_HEADER=X-GG-Client \
+  -e GDPRGUARDIAN_API_KEY_SHA256="<empreinte1>,<empreinte2>" -e GDPRGUARDIAN_CLIENT_IP_HEADER=X-GG-Client \
   -e GDPRGUARDIAN_PUBLIC_URL="https://rgpd.example.eu" \
   -e GDPRGUARDIAN_ALLOWED_HOSTS="rgpd.example.eu" \
   -p 127.0.0.1:8000:8000 gdprguardian
 
-# Ou réservé à vos clients : une clé par client, seule son empreinte va dans l'environnement.
-cle=$(python -c "import secrets; print(secrets.token_urlsafe(32))")      # à remettre au client
-printf '%s' "$cle" | sha256sum | cut -d' ' -f1                            # -> GDPRGUARDIAN_API_KEY_SHA256
+# Ou service public, sans clé : -e GDPRGUARDIAN_PUBLIC=1 à la place de GDPRGUARDIAN_API_KEY_SHA256.
 ```
 
 - `--log-driver local` : journal tourné et borné (le pilote `json-file` par défaut ne tourne jamais).
@@ -397,10 +401,10 @@ noyau de 3,6 Mo ; construction complète sans cache en 3 min 49 s avec PGO, 2 mi
 | Variable | Défaut | Rôle |
 |---|---|---|
 | `GDPRGUARDIAN_PUBLIC` | 0 | `1` : service public, **aucune authentification** (REST, MCP, envois), limiteur par client. |
-| `GDPRGUARDIAN_API_KEY_SHA256` | — | Empreintes SHA-256 (hexadécimal) des clés acceptées, séparées par des virgules ; jamais la clé elle-même. Chaque clé est un principal isolé. `GDPRGUARDIAN_API_KEYS` (clés en clair) est refusé. |
+| `GDPRGUARDIAN_API_KEY_SHA256` | — | Empreintes SHA-256 (hexadécimal) des clés acceptées, séparées par des virgules ; jamais la clé elle-même. Chaque clé est un principal isolé. Mode du service officiel. `GDPRGUARDIAN_API_KEYS` (clés en clair) est refusé. |
 | `GDPRGUARDIAN_CLIENT_IP_HEADER` | — (pair TCP) | En-tête de confiance portant l'adresse du client, posé par le proxy en écrasant toute valeur reçue (production : `X-GG-Client`). Sans lui, une requête vient du serveur lui-même (LOCAL). |
 | `GDPRGUARDIAN_LOCAL_TOKEN_SHA256` | — (aucun) | Empreinte SHA-256 du jeton exigé, dans `X-GG-Local`, d'une requête sans en-tête d'adresse pour qu'elle soit LOCAL ; sinon seau commun. Production : créée par `install.sh base` (`/etc/gdprguardian/local.env`, jeton dans `/etc/gdprguardian/local-header`, root 0600). |
-| `GDPRGUARDIAN_LIMITS` | `enforce` | Limiteur : `enforce`, `dry-run` (les seaux comptent sans refuser ; requêtes en vol et délestage restent appliqués), `off`. Réglages : `GDPRGUARDIAN_LIMIT_<NOM>` (tableau « Service public »). |
+| `GDPRGUARDIAN_LIMITS` | `enforce` | Limiteur : `enforce`, `dry-run` (les seaux comptent sans refuser ; requêtes en vol et délestage restent appliqués), `off`. Réglages : `GDPRGUARDIAN_LIMIT_<NOM>` (tableau « Accès par clé »). |
 | `GDPRGUARDIAN_PUBLIC_URL` | — | URL publique (`https://…`) utilisée pour les URL d'envoi. **À définir en production.** Active HSTS si https. |
 | `GDPRGUARDIAN_ALLOWED_HOSTS` | — | Noms d'hôte acceptés (en-tête `Host`, motifs `*.exemple.eu`) sur **toutes** les routes, contre le DNS rebinding. `localhost`/`127.0.0.1` restent acceptés (sonde). Sans réglage, le contrôle ne s'applique que si le service écoute sur `127.0.0.1`. |
 | `GDPRGUARDIAN_MAX_UPLOAD_MB` | 50 | Taille maximale d'un document, en Mio (Nginx : cette taille plus une marge d'au moins 64 Kio pour l'enveloppe multipart, `client_max_body_size 51m`). |
@@ -428,8 +432,8 @@ Lues au démarrage, ces variables sont retirées de l'environnement avant le lan
 ne les voit, clés comprises. Seul `GDPRGUARDIAN_PURE_PYTHON=1` (moteur Python seul, la référence) reste transmis
 aux travailleurs, qui le lisent à leur démarrage.
 
-Rotation des clés (mode à clés) : ajouter l'empreinte de la nouvelle clé, redémarrer, migrer les clients, retirer
-l'ancienne empreinte.
+Rotation des clés (mode à clés) : ajouter l'empreinte de la nouvelle clé, redémarrer (en conteneur : le recréer),
+migrer les clients, retirer l'ancienne empreinte. Révocation : retirer l'empreinte, puis recréer le conteneur.
 
 ### Compteur d'usage (page publique)
 
@@ -518,7 +522,7 @@ jamais un CDN qui déchiffre le trafic hors UE. Points de configuration indispen
 - `GDPRGUARDIAN_PUBLIC_URL` défini : les URL renvoyées ne dépendent pas des en-têtes `X-Forwarded-*`.
 - Si le proxy transmet l'hôte d'origine (`proxy_set_header Host $host;`) à un service qui écoute sur
   `127.0.0.1`, déclarer ce nom dans `GDPRGUARDIAN_ALLOWED_HOSTS`, sinon la réponse est 421.
-- Service public : le proxy pose l'adresse du client dans l'en-tête nommé par `GDPRGUARDIAN_CLIENT_IP_HEADER`
+- Limites par client : le proxy pose l'adresse du client dans l'en-tête nommé par `GDPRGUARDIAN_CLIENT_IP_HEADER`
   (`proxy_set_header X-GG-Client $remote_addr;`, qui écrase toute valeur envoyée par le client), et
   `proxy_redirect http:// https://;` (aucune redirection vers http://).
 
@@ -541,7 +545,7 @@ server {
     location / {
         proxy_pass http://127.0.0.1:8000;
         proxy_http_version 1.1;                        # sans lui, un envoi « chunked » passe par le disque
-        proxy_set_header X-GG-Client $remote_addr;     # service public : adresse du client, écrasée ici
+        proxy_set_header X-GG-Client $remote_addr;     # limites par client : adresse du client, écrasée ici
         proxy_redirect http:// https://;
         proxy_request_buffering off;
         proxy_buffering off;
@@ -563,10 +567,11 @@ automatiques, aucun vidage mémoire), en sept phases idempotentes : `base`, `ima
 pointe vers lui). `<vidéos>` : un dossier qui contient les fichiers de `video/out` du dépôt (par défaut
 `../../video/out` depuis `install.sh`, quand il est lancé d'une copie du dépôt).
 
-- **Service public** (`compose.yaml`) : `GDPRGUARDIAN_PUBLIC=1`, `GDPRGUARDIAN_CLIENT_IP_HEADER=X-GG-Client`,
-  aucune clé dans l'environnement du conteneur ; `base` retire la ligne `GDPRGUARDIAN_API_KEYS` d'un ancien fichier
-  de réglages. Mémoire : 3 travailleurs de 1 280 Mio, file de 1 024 Mio (corps et sorties des travailleurs),
-  100 millions de caractères de résultats, 12,5 millions par résultat au plus (environ 5,5 Gio sous les 6 Gio du
+- **Service à clés** (`compose.yaml`, depuis le 27 octobre 2026) : plus de `GDPRGUARDIAN_PUBLIC`,
+  `GDPRGUARDIAN_CLIENT_IP_HEADER=X-GG-Client` ; les empreintes `GDPRGUARDIAN_API_KEY_SHA256`, une clé par organisation,
+  sont dans `/etc/gdprguardian/gdprguardian.env`, jamais une clé en clair ; `base` retire la ligne
+  `GDPRGUARDIAN_API_KEYS` d'un ancien fichier de réglages. Mémoire : 3 travailleurs de 1 280 Mio, file de 1 024 Mio
+  (corps et sorties des travailleurs), 100 millions de caractères de résultats, 12,5 millions par résultat au plus (environ 5,5 Gio sous les 6 Gio du
   conteneur) ; chaque travailleur est la victime préférée du tueur OOM (`oom_score_adj` 1000) : une saturation coûte
   une requête, jamais le service. Journal au niveau `warning` : aucun événement par requête ni par document.
 - **Jeton local** : `base` crée `/etc/gdprguardian/local-header` (l'en-tête `X-GG-Local` prêt pour `curl -H @…`) et
@@ -617,9 +622,11 @@ pointe vers lui). `<vidéos>` : un dossier qui contient les fichiers de `video/o
   désigne un fichier fourni de même empreinte (SHA-256), puis copie les fichiers changés dans
   `/var/www/gdprguardian-media` (nom temporaire puis renommage ; tout autre fichier retiré). Un binaire d'avant la
   vidéo (retour en arrière) laisse `/media/` tel quel.
-- **Réglages** : `/etc/gdprguardian/gdprguardian.env` (root, 0600), facultatif (mode du limiteur,
-  `GDPRGUARDIAN_LIMIT_*`), jamais de clé.
-- `verify` échoue au premier défaut : écoutes, version, jeton local configuré, Nginx hors swap et pare-feu sans
+- **Réglages** : `/etc/gdprguardian/gdprguardian.env` (root, 0600) : empreintes `GDPRGUARDIAN_API_KEY_SHA256`
+  (séparées par des virgules), mode du limiteur et `GDPRGUARDIAN_LIMIT_*` au besoin, jamais de clé en clair. Nouvelle
+  clé ou révocation : ajouter ou retirer l'empreinte, puis `install.sh start` (qui recrée le conteneur).
+- `verify`, qui attend encore le mode public (ses contrôles passent sans clé) et reste **à adapter** au service à
+  clés, échoue au premier défaut : écoutes, version, jeton local configuré, Nginx hors swap et pare-feu sans
   journal, passage par Nginx jusqu'au service sans clé (corps de 10 octets et de 2 Mo refusés par le service après
   lecture : rien d'anonymisé, donc rien de compté comme trafic public ; MCP `initialize`), en-têtes, aucune
   redirection, refus inter-sites, puis par le socket avec le jeton local (comptés « protocol ») : anonymisation, envoi
@@ -636,9 +643,9 @@ pointe vers lui). `<vidéos>` : un dossier qui contient les fichiers de `video/o
 - Les adresses IP sont des données personnelles : **ni Gardien RGPD ni la configuration ci-dessus n'en
   journalisent**. La lutte contre les abus ne les voit qu'en mémoire : zones de limite de Nginx et pseudonyme du
   service (secret renouvelé toutes les 24 h, rien sur disque), sur la base de l'intérêt légitime (art. 6.1.f,
-  considérant 49) et de l'art. 32 ; voir « Service public » ci-dessus.
-- Le service hébergé agit comme **sous-traitant (art. 28 RGPD)** pour les contenus : publier un DPA et la
-  liste des sous-traitants ultérieurs (voir `docs/PLAN.md`, §13).
+  considérant 49) et de l'art. 32 ; voir « Accès par clé » ci-dessus.
+- Le service hébergé agit comme **sous-traitant (art. 28 RGPD)** pour les contenus : chaque clé est remise avec un
+  accord de sous-traitance ; publier la liste des sous-traitants ultérieurs (voir `docs/PLAN.md`, §13).
 - Données de santé : préférer l'édition auto-hébergée tant que la question HDS n'est pas tranchée.
 
 ### Effacement et isolation : ce que garantit le code, ce que doit garantir l'hôte
@@ -685,8 +692,8 @@ donc fournir :
   client).
 - Journaux : une ligne par événement, métadonnées seulement (`event=request route=/v1/uploads/{token}
   status=503 ms=12.3`). Aucune valeur, aucun nom de fichier, aucun jeton, aucune clé, aucune adresse.
-- MCP : `https://rgpd.example.eu/mcp`, HTTP « streamable » sans état ; service public : sans en-tête ; mode à
-  clés : `Authorization: Bearer <clé>`.
+- MCP : `https://rgpd.example.eu/mcp`, HTTP « streamable » sans état ; mode à clés (le service officiel) :
+  `Authorization: Bearer <clé>` ; service public : sans en-tête.
 - Builds reproductibles : `uv export --frozen --no-dev --extra office --extra phone --extra api --extra mcp
   --no-emit-project > requirements.lock`, puis `pip install --require-hashes -r requirements.lock` et
   `pip install --no-deps .` dans l'étape de construction.
@@ -695,8 +702,8 @@ donc fournir :
 
 The service runs the REST API (`/v1/...`) and the online MCP server (`/mcp`) in **one front process**.
 Everything is processed **in memory**: no temporary file, no database, no content in logs. The official service is
-**public**: no key, no account, REST and MCP open to everyone; an in-memory per-client limiter contains abuse (see
-"Public service" below).
+**reserved for API key holders** (one per organisation, given on request with a data processing agreement, GDPR
+art. 28); an in-memory per-client limiter contains abuse (see "Key access" below).
 
 ### One request, one process
 
@@ -753,13 +760,15 @@ so its footprint does not depend on the rules it receives.
   request: that delay plus one second per 250 KB received. Plan `--pids-limit` ≥ `3 × concurrency + 32` (busy
   workers, reserve, zygote, front-process threads).
 
-### Public service: no key, per-client limits, isolated results
+### Key access, per-client limits, isolated results
 
-`GDPRGUARDIAN_PUBLIC=1`: **no authentication** at all, on REST, MCP and out-of-band uploads; this is the official
-service's mode. A third-party deployment may keep keys, given **only as SHA-256 digests**
-(`GDPRGUARDIAN_API_KEY_SHA256`, computed with `printf '%s' "$key" | sha256sum`): a plaintext key in the environment
-would be readable through `/proc/<pid>/environ`, so `GDPRGUARDIAN_API_KEYS` is refused at start-up. In public mode a
-valid key gets its own principal (its uploads stay bound to it); a missing, wrong or old key is ignored.
+**Keyed mode**, the official service's: REST, MCP, out-of-band uploads and the site's cockpit require the
+`Authorization: Bearer <key>` header (the only one accepted); without a valid key, 401 before any body is read. Keys
+are given **only as SHA-256 digests** (`GDPRGUARDIAN_API_KEY_SHA256`, computed with `printf '%s' "$key" | sha256sum`):
+a plaintext key in the environment would be readable through `/proc/<pid>/environ`, so `GDPRGUARDIAN_API_KEYS` is
+refused at start-up. Every key is an isolated principal (its uploads stay bound to it). `GDPRGUARDIAN_PUBLIC=1`
+(another deployment): **no authentication**; a valid key gets its own principal there, a missing, wrong or old key
+is ignored.
 
 **Client identity, keeping nothing.** Nginx sets `X-GG-Client = $remote_addr`, overwriting any value the client sent;
 the service only reads that header when `GDPRGUARDIAN_CLIENT_IP_HEADER` names it (otherwise it takes the TCP peer
@@ -869,8 +878,8 @@ service remain fail2ban's database (SSH clients only) and older kernel journal e
   answer** (404 `not_found`); a used token tells its holder alone (404 `upload_used`: request a new URL); a vanished
   result gets a distinct reason (`already_read`, `expired`, `deleted`, always
   404), told only to the holder of its id; no route lists anything; MCP is stateless (no session
-  id, which would grant nothing anyway). In the public service the capability is enough (an agent's address changes
-  between calls); with a key, the key is required too;
+  id, which would grant nothing anyway). In public mode the capability is enough (an agent's address changes
+  between calls); with a key (the official service), the key is required too;
 - `Cache-Control: no-store` forced on every response (by the service, then Nginx), no `proxy_cache`, no shared
   response.
 
@@ -978,14 +987,15 @@ since a job past its estimate is assumed to last as long again (before: the PDF 
 
 ```bash
 docker build -f deploy/Dockerfile -t gdprguardian .        # from the repository root
-# Public service (no key), behind a proxy that sets X-GG-Client = the client address:
-docker run -d --read-only --cap-drop ALL --security-opt no-new-privileges \
-  --memory 2g --memory-swap 2g --ulimit core=0 \
-  -e GDPRGUARDIAN_PUBLIC=1 -e GDPRGUARDIAN_CLIENT_IP_HEADER=X-GG-Client \
-  -e GDPRGUARDIAN_PUBLIC_URL="https://rgpd.example.eu" -p 127.0.0.1:8000:8000 gdprguardian
-# Or for your own clients only: one key per client, only its digest goes into the environment.
+# One key per client (organisation): only its digest goes into the environment.
 key=$(python -c "import secrets; print(secrets.token_urlsafe(32))")   # give it to the client
 printf '%s' "$key" | sha256sum | cut -d' ' -f1                        # -> GDPRGUARDIAN_API_KEY_SHA256
+# Keyed service (the official service's mode), behind a proxy that sets X-GG-Client = the client address:
+docker run -d --read-only --cap-drop ALL --security-opt no-new-privileges \
+  --memory 2g --memory-swap 2g --ulimit core=0 \
+  -e GDPRGUARDIAN_API_KEY_SHA256="<digest1>,<digest2>" -e GDPRGUARDIAN_CLIENT_IP_HEADER=X-GG-Client \
+  -e GDPRGUARDIAN_PUBLIC_URL="https://rgpd.example.eu" -p 127.0.0.1:8000:8000 gdprguardian
+# Or a public service, no key: -e GDPRGUARDIAN_PUBLIC=1 instead of GDPRGUARDIAN_API_KEY_SHA256.
 ```
 
 - No swap (`--memory-swap` = `--memory`) and no core dumps: documents never leave RAM.
@@ -1118,7 +1128,7 @@ path, so drop `$request`/`$request_uri` from proxy log formats. Align the body-s
 `GDPRGUARDIAN_MAX_UPLOAD_MB` plus a margin of at least 64 KiB for the multipart envelope (`51m` for 50 MiB), wait for
 the answer at least two deadlines of the largest
 document (2 × 270 s for 50 MiB: `proxy_read_timeout 600s`) and, with nginx, set `proxy_request_buffering off;` so
-large bodies are not spooled to disk. For the public service, set `proxy_set_header X-GG-Client $remote_addr;` (it overwrites any
+large bodies are not spooled to disk. For per-client limits, set `proxy_set_header X-GG-Client $remote_addr;` (it overwrites any
 client value) with `GDPRGUARDIAN_CLIENT_IP_HEADER=X-GG-Client`, and `proxy_redirect http:// https://;`.
 
 **Dedicated server: the official service's install (`deploy/server/`).** `api.gdprguardian.com`,
@@ -1128,8 +1138,10 @@ client value) with `GDPRGUARDIAN_CLIENT_IP_HEADER=X-GG-Client`, and `proxy_redir
 <binary> <videos>`, `base`, `image <archive>`, `start`, `verify` (the site daemon first: the nginx configuration
 installed by `base` points at it). `<videos>`: a folder holding the files of the repository's `video/out` (by default
 `../../video/out` from `install.sh`, when it runs from a repository checkout).
-- Public service (`compose.yaml`): `GDPRGUARDIAN_PUBLIC=1`, `GDPRGUARDIAN_CLIENT_IP_HEADER=X-GG-Client`, no key in
-  the container environment (`base` removes the `GDPRGUARDIAN_API_KEYS` line from an old settings file). Memory:
+- Keyed service (`compose.yaml`, since 27 October 2026): no more `GDPRGUARDIAN_PUBLIC`,
+  `GDPRGUARDIAN_CLIENT_IP_HEADER=X-GG-Client`; the `GDPRGUARDIAN_API_KEY_SHA256` digests, one key per organisation, are
+  in `/etc/gdprguardian/gdprguardian.env`, never a plaintext key (`base` removes the `GDPRGUARDIAN_API_KEYS` line from
+  an old settings file). Memory:
   3 workers of 1,280 MiB, 1,024 MiB queue (bodies and worker outputs), 100 million result characters, 12.5 million
   per result at most (about 5.5 GiB under the container's 6 GiB); every worker is the OOM killer's preferred victim
   (`oom_score_adj` 1000), so a saturation costs one request, never the service. Log level `warning`: no per-request
@@ -1178,9 +1190,11 @@ installed by `base` points at it). `<videos>`: a folder holding the files of the
   binary's pages names a provided file with that digest (SHA-256), then copies the changed files into
   `/var/www/gdprguardian-media` (temporary name, then rename; any other file removed). A binary from before the video
   (rollback) leaves `/media/` as it is.
-- Settings: `/etc/gdprguardian/gdprguardian.env` (root, 0600), optional (limiter mode, `GDPRGUARDIAN_LIMIT_*`), never
-  a key.
-- `verify` fails at the first defect: listeners, version, local token configured, nginx out of swap and firewall
+- Settings: `/etc/gdprguardian/gdprguardian.env` (root, 0600): `GDPRGUARDIAN_API_KEY_SHA256` digests (comma-separated),
+  limiter mode and `GDPRGUARDIAN_LIMIT_*` if needed, never a plaintext key. New key or revocation: add or remove the
+  digest, then `install.sh start` (which recreates the container).
+- `verify`, which still expects public mode (its checks run without a key) and is **yet to be adapted** to the keyed
+  service, fails at the first defect: listeners, version, local token configured, nginx out of swap and firewall
   without a log, the path through Nginx to the service without a key (10-byte and 2 MB bodies refused by the service
   after reading: nothing anonymised, hence nothing counted as public traffic; MCP `initialize`), headers, no redirect,
   cross-site refusal, then through the socket with the local token (counted as "protocol"): anonymisation, 2 MB upload
@@ -1192,10 +1206,10 @@ installed by `base` points at it). `<videos>`: a folder holding the files of the
 ### EU hosting and operations
 
 Choose an EU provider with no US parent or presence (CLOUD Act). The hosted service is a GDPR art. 28
-processor for content: publish a DPA and the list of sub-processors. Neither GDPR Guardian nor the example proxy
-configuration logs IP addresses; abuse handling only sees them in memory (Nginx limit zones and the service's
-pseudonym, secret renewed every 24 h, nothing on disk), under legitimate interest (art. 6(1)(f), recital 49) and
-art. 32; see "Public service" above.
+processor for content: every key comes with a data processing agreement; publish the list of sub-processors. Neither
+GDPR Guardian nor the example proxy configuration logs IP addresses; abuse handling only sees them in memory (Nginx
+limit zones and the service's pseudonym, secret renewed every 24 h, nothing on disk), under legitimate interest
+(art. 6(1)(f), recital 49) and art. 32; see "Key access" above.
 
 Erasure and isolation. The code guarantees: a fresh process per request (organisation rules, conversion and
 anonymisation), never reused, killed after its reply, dying with the service, while the front process never
@@ -1215,8 +1229,8 @@ dumps (`fs.suid_dumpable=0`, no `systemd-coredump`), no kdump, no hibernation, n
 (results and the limiter's state live in that process's memory; workers are its children); with several instances,
 route consistently (by client address, or by upload id for `/v1/uploads/…` and `/v1/results/…`). Health probe:
 `GET /health`; `GET /health/deep` for the server itself (a real worker); aggregate state: `GET /status` (slots,
-queue, estimated wait, limiter counters; nothing about any client). MCP: stateless streamable HTTP at `/mcp`, no
-header in the public service, `Authorization: Bearer <key>` in keyed mode. Logs hold metadata only: no values, file
+queue, estimated wait, limiter counters; nothing about any client). MCP: stateless streamable HTTP at `/mcp`,
+`Authorization: Bearer <key>` in keyed mode (the official service), no header in public mode. Logs hold metadata only: no values, file
 names, tokens, keys or addresses; **no access or activity log at the production level** (`--log-level warning`):
 only warnings and errors (a 5xx answer, an internal limiter error, a failed deep probe). In development
 (`--log-level debug`), each processing line carries its worker's PID (`worker=`) and queue wait (`wait_ms=`),

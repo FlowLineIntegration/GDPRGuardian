@@ -19,7 +19,7 @@ Vidéo muette (aucune voix, aucune musique) : ce fichier reprend chaque texte 
 [00:19] Qui frappe qui ?
 [00:22] Gardien RGPD — [PERSONNE_1] embête [PERSONNE_2]. [PERSONNE_2] frappe [PERSONNE_1].
 [00:22] Les rôles survivent, les identités non.
-[00:27] Trois accès, un moteur
+[00:27] Trois accès sur clé, un moteur
 [00:27] Site web
 [00:28] MCP
 [00:28] API REST

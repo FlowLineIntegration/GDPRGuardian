@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Gardien RGPD · anonymiser avant l’IA, sans perdre le sens</title>
-<meta name="description" content="Outil expérimental et open source, pour contribuer au respect du RGPD : un filtre de premier niveau à intégrer aux outils d’IA du marché (MCP, API, skills Claude), qui masque sans retour possible les identifiants directs qu’il reconnaît. Gratuit, sans clé, sans cookie ; licence MIT.">
+<meta name="description" content="Outil expérimental et open source, pour contribuer au respect du RGPD : un filtre de premier niveau à intégrer aux outils d’IA du marché (MCP, API, skills Claude), qui masque sans retour possible les identifiants directs qu’il reconnaît. Code ouvert sous licence MIT ; service en ligne sur clé API.">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Gardien RGPD · retirer les noms, garder le sens">
-<meta property="og:description" content="Outil expérimental et open source, pour contribuer au respect du RGPD : un filtre de premier niveau à intégrer aux outils d’IA du marché. Gratuit, licence MIT.">
+<meta property="og:description" content="Outil expérimental et open source, pour contribuer au respect du RGPD : un filtre de premier niveau à intégrer aux outils d’IA du marché. Code ouvert sous licence MIT.">
 <meta property="og:url" content="https://gardienrgpd.fr/">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:type" content="website">
@@ -62,12 +62,13 @@
 <fieldset class="opts"><legend class="vh">Réglages</legend>
 <label class="sel"><span>Pays</span><select name="countries"><option value="FR" selected>France</option><option value="FR,BE">France + Belgique</option><option value="FR,CH">France + Suisse</option><option value="FR,DE">France + Allemagne</option><option value="FR,ES">France + Espagne</option><option value="FR,IT">France + Italie</option><option value="FR,LU">France + Luxembourg</option><option value="FR,MC">France + Monaco</option><option value="FR,NL">France + Pays-Bas</option><option value="FR,PT">France + Portugal</option><option value="all">Tous les pays</option></select></label>
 <label class="chk"><input type="checkbox" name="explain" checked><span>Explications</span></label>
+<label class="sel ky"><span>Clé API</span><input id="ck-key" type="password" autocomplete="off" spellcheck="false" placeholder="sur demande"></label>
 </fieldset>
 <p class="hint" data-r="hint" hidden>Hors de France, seuls les identifiants du pays sont vérifiés et les noms passent par les lexiques français : textes juridiques de cinq pays (DE, ES, IT, NL, PT), 23 à 42 % des noms masqués, 78 à 89 % des documents avec fuite (mesure interne hors protocole).</p>
 <div class="go"><button class="btn" type="submit" data-r="go" disabled>Anonymiser</button><input class="vh" type="file" id="ck-f" multiple accept=".pdf,.docx,.docm,.dotx,.dotm,.xlsx,.xlsm,.xlsb,.xls,.pptx,.pptm,.ppsx,.potx,.odt,.ott,.fodt,.ods,.odp,.otp,.fodp,.odg,.rtf,.eml,.mht,.mhtml,.msg,.html,.htm,.xhtml,.csv,.tsv,.txt,.text,.md,.markdown"><label class="btn2" for="ck-f">Ajouter des documents</label></div>
 <p class="alert"><b>Outil expérimental, sans garantie</b> : le résultat peut encore identifier quelqu’un. Relisez-le ; vous restez responsable de son usage. <a href="#mentions">Avertissement</a></p>
 <p class="keys vh" data-r="keys">Ctrl + Entrée anonymiser · Ctrl + Maj + C copier · Ctrl + S télécharger · Échap vider la saisie</p>
-<p class="fmts">Envoyé à notre serveur en France (nous sommes un tiers), traité en mémoire, rien n’en est gardé. Pour ne rien envoyer : la <a href="#utiliser">version locale</a>.</p>
+<p class="fmts">Service en ligne sur clé API (sur demande : <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>), traité en mémoire en France, rien n’en est gardé. Sans clé : la <a href="#utiliser">version locale</a>.</p>
 <p class="st" data-r="st" role="status"></p>
 <noscript><p class="nojs">Le poste de travail a besoin de JavaScript. Sans lui : l’API ou le serveur MCP, voir <a href="#utiliser">Utiliser</a>.</p></noscript>
 </form>
@@ -138,8 +139,8 @@
 
 <section class="pn" id="video" aria-labelledby="h-vi"><div class="ph"><p>Vidéo</p><a class="x" href="#poste">Fermer</a></div>
 <h2 id="h-vi" tabindex="-1">La vidéo de lancement</h2>
-<video class="vid" controls preload="none" playsinline poster="/media/gardien-rgpd-lancement-fr-poster.png?v=e107865c" src="/media/gardien-rgpd-lancement-fr.mp4?v=a6e7dbfb" aria-labelledby="h-vi"></video>
-<p>Vidéo muette : tout son texte est dans la <a href="/media/gardien-rgpd-lancement-fr-transcript.txt?v=dd94a233" target="_blank" rel="noopener">transcription</a>. Montage court en 4:5, pour les réseaux : <a href="/media/gardien-rgpd-lancement-fr-social.mp4?v=110335c5" download>MP4, 5,2 Mo</a>.</p>
+<video class="vid" controls preload="none" playsinline poster="/media/gardien-rgpd-lancement-fr-poster.png?v=e107865c" src="/media/gardien-rgpd-lancement-fr.mp4?v=36e50556" aria-labelledby="h-vi"></video>
+<p>Vidéo muette : tout son texte est dans la <a href="/media/gardien-rgpd-lancement-fr-transcript.txt?v=8ea982f9" target="_blank" rel="noopener">transcription</a>. Montage court en 4:5, pour les réseaux : <a href="/media/gardien-rgpd-lancement-fr-social.mp4?v=dc0e84d0" download>MP4, 5,2 Mo</a>.</p>
 <p class="fine">L’indice de la vidéo date de son rendu ; le chiffre à jour : <a href="#protocole">Protocole et scores</a>.</p>
 </section>
 
@@ -171,11 +172,11 @@
 
 <section class="pn" id="architecture" aria-labelledby="h-ar"><div class="ph"><p>Architecture</p><a class="x" href="#poste">Fermer</a></div>
 <h2 id="h-ar" tabindex="-1">En ligne ou sur votre poste : le même logiciel</h2>
-<p class="lead">Même paquet, même version : en ligne pour démarrer sans rien installer, sur votre poste pour que Gardien RGPD n’envoie rien. Ouvert à tous et sans clé, le service se protège des abus par un limiteur qui ne vit qu’en mémoire.</p>
+<p class="lead">Même paquet, même version : en ligne avec une clé API, ou sur votre poste pour que Gardien RGPD n’envoie rien. Le service en ligne se protège des abus par un limiteur qui ne vit qu’en mémoire.</p>
 <div class="two">
 <div><h3>En ligne</h3>
 <ol class="flow">
-<li><b>Navigateur, agent IA, script</b>REST ou MCP sur HTTPS, sans clé ; ce poste de travail appelle la même API.</li>
+<li><b>Navigateur, agent IA, script</b>REST ou MCP sur HTTPS, avec une clé API ; ce poste de travail appelle la même API.</li>
 <li><b>TLS 1.2/1.3 · nginx</b>OVH, en France : pare-feu, mises à jour automatiques, aucun core dump, aucun journal d’accès.</li>
 <li><b>Socket Unix</b>dans un dossier en mémoire : aucun port ouvert entre nginx et le service.</li>
 <li class="in"><b>Conteneur sans aucun réseau</b>lecture seule, aucun privilège.</li>
@@ -324,7 +325,7 @@ python -m tools.protocol registration --bundle gg-protocol.pyz</code></pre>
 
 <section class="pn" id="utiliser" aria-labelledby="h-us"><div class="ph"><p>Utiliser</p><a class="x" href="#poste">Fermer</a></div>
 <h2 id="h-us" tabindex="-1">Ailleurs que sur cette page</h2>
-<p class="lead">Le même service, gratuit et sans clé, depuis votre assistant d’IA ou vos programmes ; pour les documents très sensibles, sur votre poste.</p>
+<p class="lead">Le même service depuis votre assistant d’IA ou vos programmes, avec une clé API remise sur demande (<a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>) avec un accord de sous-traitance ; sans clé, sur votre poste, avec la version locale.</p>
 <h3>La solution pragmatique, en deux étapes</h3>
 <ol class="list">
 <li><b>D’abord le Gardien.</b> Il se branche sur les IA du quotidien : Claude par le serveur MCP et les skills, tout client MCP, l’API. Les skills en font la règle : chaque document passe d’abord par le Gardien. Une consigne donnée à l’IA, pas un verrou : un client sans les skills, ou un texte collé dans la conversation, n’est pas couvert.</li>
@@ -332,22 +333,25 @@ python -m tools.protocol registration --bundle gg-protocol.pyz</code></pre>
 </ol>
 <p>Pas parfait, mais pragmatique : un niveau de protection élevé pour un usage courant. C’est notre appréciation, pas une mesure : seul le premier niveau est mesuré (<a href="#protocole">scores</a>). À l’étude, rien de décidé, sans date : confier cette seconde étape à l’API de Mistral AI, fournisseur européen, dans l’étage LLM gouverné.</p>
 <div class="use">
-<div><h3>Dans Claude, par MCP public, sans clé</h3>
+<div><h3>Dans Claude, par MCP, avec votre clé</h3>
 <p>Adresse : <code>https://api.gdprguardian.com/mcp</code> (ou <code>api.gardienrgpd.fr/mcp</code>). Claude Code :</p>
-<pre tabindex="0"><code>claude mcp add --transport http gdprguardian https://api.gdprguardian.com/mcp</code></pre>
-<p>claude.ai : ajoutez cette adresse en connecteur personnalisé. Pour un fichier, <code>create_upload</code> donne une commande à lancer vous-même sur votre poste : le fichier part droit vers le service, sans passer par le modèle ; <code>get_anonymized</code> lit le résultat, effacé 2 min après lecture, 30 min au plus tard. Un texte collé dans la conversation est déjà parti : <code>anonymize_text</code> ne le rattrape pas.</p></div>
+<pre tabindex="0"><code>claude mcp add --transport http gdprguardian https://api.gdprguardian.com/mcp \
+  --header "Authorization: Bearer $GDPRGUARDIAN_API_KEY"</code></pre>
+<p>claude.ai, Claude Desktop, Cowork : ajoutez cette adresse en connecteur personnalisé, avec l’en-tête <code>Authorization</code> et la valeur <code>Bearer</code> suivie de votre clé. Pour un fichier, <code>create_upload</code> donne une commande à lancer vous-même sur votre poste : le fichier part droit vers le service, sans passer par le modèle ; <code>get_anonymized</code> lit le résultat, effacé 2 min après lecture, 30 min au plus tard. Un texte collé dans la conversation est déjà parti : <code>anonymize_text</code> ne le rattrape pas.</p></div>
 <div><h3>Par l’API REST</h3>
 <pre tabindex="0"><code>curl https://api.gdprguardian.com/v1/anonymize/text \
+  -H "Authorization: Bearer $GDPRGUARDIAN_API_KEY" \
   -H 'Content-Type: application/json' \
   -d '{"text": "M. Jean Dupont, 06 12 34 56 78", "explain": true}'
 
 curl https://api.gdprguardian.com/v1/anonymize/file \
+  -H "Authorization: Bearer $GDPRGUARDIAN_API_KEY" \
   -F file=@contrat.pdf -F countries=FR -F mode=essentiel</code></pre>
 <p>Réponse : le texte (ou le Markdown) anonymisé et le rapport. Options : <code>countries</code> (FR par défaut, <code>FR,BE</code>, <code>all</code>), <code>mode</code> (<code>fort</code> par défaut, <code>essentiel</code>, <code>personnalise</code>), <code>disable</code>, <code>rules</code>, <code>label_language</code>, <code>explain</code> ; les mêmes en MCP.</p></div>
 <div><h3>Sur votre poste</h3>
-<p>Pour les documents très sensibles : le même logiciel, en serveur MCP local ou en conteneur sans réseau ; rien ne part par Gardien RGPD. Installation : <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/docs/LOCAL.md">guide de la version locale</a> ; questions : <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>.</p>
-<h3>Limites du service public</h3>
-<p>Par client : une requête traitée à la fois et deux en attente, environ 20 secondes de calcul d’avance, rechargées à 0,5 s par seconde. Votre réseau (/24 en IPv4, /48 en IPv6) partage un budget deux fois plus large et 12 requêtes en vol. Au-delà : 429 et un délai à respecter (<code>Retry-After</code>), que ce poste applique seul ; serveur saturé (attente estimée au-delà de 10 s) : 503 ; envoi trop lent (15 s, plus 128 Kio par seconde de corps) : 408.</p>
+<p>Pour les documents très sensibles : le même logiciel, libre et sans clé : les archives des skills Claude (moteur embarqué, sans réseau) ou un conteneur sans réseau ; rien ne part par Gardien RGPD. Installation : <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian/blob/main/docs/LOCAL.md">guide de la version locale</a> ; questions : <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>.</p>
+<h3>Limites du service en ligne</h3>
+<p>Par clé : une requête traitée à la fois et deux en attente, environ 20 secondes de calcul d’avance, rechargées à 0,5 s par seconde. Au-delà : 429 et un délai à respecter (<code>Retry-After</code>), que ce poste applique seul ; serveur saturé (attente estimée au-delà de 10 s) : 503 ; envoi trop lent (15 s, plus 128 Kio par seconde de corps) : 408.</p>
 <p>Taille : 50 Mo par fichier, un million de caractères par texte ; par document, 12,5 millions de caractères de résultat, 10 000 pages ou diapositives, un million de balises HTML (ouvrantes et fermantes), 100 000 paragraphes Word (cellules de tableau comprises). Un texte brut, un CSV ou un tableur très denses atteignent ce plafond avant 50 Mo (vers 13 Mo de texte, 16 Mo de CSV, 4 Mo de tableur) : 413, limite nommée. Un document de 50 Mo illustré se traite en quelques secondes ; chacun a droit à 60 s plus 1 s par 250 Ko (4 min 30 à 50 Mo).</p>
 <p>Qualité minimale : un texte lisible. Images et pages scannées sans couche texte : non lues (avertissement). PDF d’OCR de mauvaise qualité : traité, avec l’avertissement « Texte de mauvaise qualité (OCR probable) ».</p></div>
 </div>
@@ -378,7 +382,7 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 <p>Éditeur : <a target="_blank" rel="noopener" href="https://www.flowlineintegration.com/">Flow Line Intégration</a>, SASU au capital de 720 679,80 €, 4 rue Maryse Bastié, 69500 Bron, France, RCS Lyon 801 330 606, tél. 04 72 14 92 50. Directeur de la publication : Guillaume CLEMENT, directeur technique Data &amp; IA. Contact : <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>.</p>
 <p>Hébergeur : OVH SAS, 2 rue Kellermann, 59100 Roubaix, France, tél. 1007.</p>
 <p>Gardien RGPD 1.0.2, licence MIT, code dans le <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian">dépôt public</a>.</p>
-<p><b>Avertissement.</b> Gardien RGPD est un outil expérimental et open source, pour contribuer au respect du RGPD : il aide à limiter les données personnelles confiées à une IA, sans suffire à assurer la conformité. Le logiciel (licence MIT) et le service en ligne sont fournis en l’état, sans garantie. L’outil masque des identifiants directs, pas tous, et ne lit pas le sens (santé, opinions, recoupements) : le texte produit peut encore permettre d’identifier quelqu’un. Traitez-le comme des données personnelles et vérifiez les résultats avant de vous y fier. Passer un document dans l’outil est déjà un traitement de données personnelles : vous en restez responsable. En ligne, vos documents passent par notre serveur, sans contrat de sous-traitance : à vous de juger si cet envoi est permis ; sinon, utilisez la <a href="#utiliser">version locale</a>. Dans toute la mesure permise par la loi, et sans préjudice des droits qu’elle ne permet pas d’écarter, Flow Line Intégration et les auteurs du projet déclinent toute responsabilité quant à l’usage que vous faites de l’outil et de ses résultats. Ni certification ni conseil juridique.</p>
+<p><b>Avertissement.</b> Gardien RGPD est un outil expérimental et open source, pour contribuer au respect du RGPD : il aide à limiter les données personnelles confiées à une IA, sans suffire à assurer la conformité. Le logiciel (licence MIT) et le service en ligne sont fournis en l’état, sans garantie. L’outil masque des identifiants directs, pas tous, et ne lit pas le sens (santé, opinions, recoupements) : le texte produit peut encore permettre d’identifier quelqu’un. Traitez-le comme des données personnelles et vérifiez les résultats avant de vous y fier. Passer un document dans l’outil est déjà un traitement de données personnelles : vous en restez responsable. En ligne, vos documents passent par notre serveur : le service est réservé aux détenteurs d’une clé, remise avec un accord de sous-traitance ; sans clé, utilisez la <a href="#utiliser">version locale</a>. Dans toute la mesure permise par la loi, et sans préjudice des droits qu’elle ne permet pas d’écarter, Flow Line Intégration et les auteurs du projet déclinent toute responsabilité quant à l’usage que vous faites de l’outil et de ses résultats. Ni certification ni conseil juridique.</p>
 </section>
 
 <section class="pn" id="confidentialite" aria-labelledby="h-co"><div class="ph"><p>Confidentialité</p><a class="x" href="#poste">Fermer</a></div>
@@ -386,7 +390,7 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 <ul class="list">
 <li><b>Ici.</b> Aucun cookie, aucun traceur, aucune ressource tierce. Le navigateur ne garde que le mode choisi, avec ses catégories et ses codes à conserver (stockage local) : jamais un texte. Vos textes et résultats ne vivent que dans la mémoire de cet onglet : « Tout effacer » la vide, fermer l’onglet aussi.</li>
 <li><b>Sur le serveur.</b> Chaque document est traité en mémoire dans un processus isolé et rien n’en reste une fois la réponse partie ; seul le résultat revient, à vous seul. Le nom du fichier ne part pas : seulement son extension.</li>
-<li><b>Nous restons un tiers.</b> Vous nous confiez le texte, sans contrat de sous-traitance. Pour ne rien envoyer : la <a href="#utiliser">version locale</a>.</li>
+<li><b>Sur clé, avec un accord de sous-traitance.</b> Le service en ligne traite vos documents pour votre compte : il est réservé aux détenteurs d’une clé API, remise sur demande avec un accord de sous-traitance. Pour ne rien envoyer : la <a href="#utiliser">version locale</a>.</li>
 <li><b>Adresse IP</b>, en mémoire seulement, jamais écrite sur disque, aucun journal d’accès. Le serveur web la garde telle quelle (IPv4, ou son /64 en IPv6) dans ses compteurs anti-abus, qu’il recycle au fil du trafic. Le service la remplace aussitôt par un pseudonyme à clé, oublié après 10 minutes d’inactivité (clé renouvelée toutes les 24 h). Pour compter les visiteurs une fois par jour : une empreinte à clé de l’adresse tronquée (/24, ou /48 en IPv6) et de l’agent utilisateur du navigateur, clé et empreintes oubliées chaque jour.</li>
 <li><b>Statistiques d’usage</b> : type d’opération, format, taille, durée, succès, origine ; jamais le contenu, le nom du fichier ni l’adresse IP.</li>
 <li><b>Responsable du traitement</b> : Flow Line Intégration (<a href="#mentions">mentions légales</a>). <b>Base légale</b> : intérêt légitime à fournir, protéger et sécuriser le service (RGPD, art. 6.1.f, considérant 49) ; les mesures de sécurité répondent à l’art. 32. Vos droits (accès, effacement, opposition) et questions : <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a> ; réclamation : CNIL.</li>
@@ -454,6 +458,7 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 <li data-k="insp">Survolez ou touchez une balise : toutes ses mentions s’allument.</li>
 <li data-k="dropped">Non repris : {l}</li>
 <li data-k="kept">gardé en clair : {l}</li>
+<li data-k="e401">Clé API requise|Le service en ligne est réservé aux détenteurs d’une clé : saisissez-la à côté de « Pays », ou demandez-en une (contact@gardienrgpd.fr). La version locale, elle, est libre.</li>
 <li data-k="e403">Requête refusée|Le service n’accepte que les envois de cette page : rechargez-la depuis gardienrgpd.fr.</li>
 <li data-k="e408">Envoi trop lent|Le document n’est pas arrivé à temps (15 s, plus 128 Kio par seconde) : réessayez avec une meilleure connexion, ou découpez le document.</li>
 <li data-k="e413">Trop volumineux|50 Mo par document, un million de caractères par texte, 12,5 millions de caractères de résultat : découpez-le.</li>

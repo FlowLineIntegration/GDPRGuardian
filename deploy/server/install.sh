@@ -20,7 +20,8 @@
 #   bash install.sh updates           mises à jour automatiques (heure de Paris) : sécurité chaque nuit à 2 h, le
 #                                     reste le samedi à 2 h, redémarrage aussitôt s'il le faut, et chaque lundi à 2 h
 #
-# Service public : aucune clé d'API. Mise à jour d'un serveur en place / upgrade in place: site <binaire> <vidéos>,
+# Service à clés d'API (empreintes SHA-256 dans gdprguardian.env, depuis le 27/10/2026 ; « verify » attend encore le
+# mode public, à adapter). Mise à jour d'un serveur en place / upgrade in place: site <binaire> <vidéos>,
 # base, image <archive>, start, verify (le démon du site d'abord : Nginx ne pointe vers lui qu'ensuite).
 # Chaque fichier de Nginx est sauvegardé, testé (nginx -t) et rétabli si le test échoue : la configuration en
 # service n'est jamais remplacée par une configuration cassée. Every Nginx file is backed up, tested and restored on
@@ -146,12 +147,12 @@ EOF
   findmnt -no FSTYPE,OPTIONS /run/gdprguardian
   stat -c '%A %U:%G %n' /run/gdprguardian /run/nginx
 
-  step "Réglages (aucune clé : service public) / settings (no key: public service)"
+  step "Réglages (empreintes des clés d'API, jamais de clé en clair) / settings (API key digests, never a key)"
   sudo install -d -m 700 "$ENV_DIR"
   if ! sudo test -f "$ENV_FILE"; then
     printf '%s\n' \
-      "# Gardien RGPD · GDPR Guardian : réglages facultatifs de l'exploitant (deploy/README.md). Jamais de clé :" \
-      "# le service est public ; compose.yaml fixe déjà le mode public, l'en-tête client et la mémoire." \
+      "# Gardien RGPD · GDPR Guardian : réglages de l'exploitant (deploy/README.md). Service à clés : une ligne" \
+      "# GDPRGUARDIAN_API_KEY_SHA256=empreinte1,empreinte2 (SHA-256 des clés, jamais une clé en clair)." \
       "# Exemple : GDPRGUARDIAN_LIMITS=dry-run (compte sans refuser), GDPRGUARDIAN_LIMIT_COST_RATE=0.5" \
       | put "$ENV_FILE" 600
     echo "réglages créés / settings created: $ENV_FILE"
@@ -642,9 +643,9 @@ verify() {
     | grep -v -E ':(22|80|443)$' || true)
   [ -z "$extra" ] || fail "écoute inattendue / unexpected listener: $extra"
   echo "ok"
-  step "Conteneur : ni init, ni clé dans l'environnement / container: no init, no key in the environment"
+  step "Conteneur : ni init, ni clé en clair dans l'environnement / container: no init, no plaintext key"
   [ "$(sudo docker inspect -f '{{.HostConfig.Init}}' "$CONTAINER")" != true ] || fail "init: true"
-  if sudo docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' "$CONTAINER" | grep -q '^GDPRGUARDIAN_API_KEY'; then
+  if sudo docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' "$CONTAINER" | grep -qE '^GDPRGUARDIAN_API_KEYS?='; then
     fail "clé dans l'environnement du conteneur / key in the container environment"
   fi
   sudo docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' "$CONTAINER" \
