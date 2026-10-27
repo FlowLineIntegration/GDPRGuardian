@@ -4,20 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>GDPR Guardian · anonymise before the AI, keep the meaning</title>
-<meta name="description" content="An irreversible first-level filter: drop your documents, take them back anonymised before you hand them to an AI, with the logic of the text intact. Free, no key, no cookie; MIT licence, open code on GitHub.">
+<meta name="description" content="An experimental, open-source tool to help with GDPR compliance: a first-level filter to plug into the AI tools on the market (MCP, API, Claude skills), which masks the direct identifiers it recognises, with no way back. Free, no key, no cookie; MIT licence.">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="GDPR Guardian · remove the names, keep the meaning">
-<meta property="og:description" content="A first-level filter: irreversible anonymisation of documents before they reach an AI, open to everyone, no key. MIT licence.">
+<meta property="og:description" content="An experimental, open-source tool to help with GDPR compliance: a first-level filter to plug into the AI tools on the market. Free, MIT licence.">
 <meta property="og:url" content="https://gdprguardian.com/">
 <meta property="og:locale" content="en_GB">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="GDPR Guardian">
-<meta property="og:image" content="https://gdprguardian.com/media/gdpr-guardian-launch-en-poster.png?v=b19695e7">
+<meta property="og:image" content="https://gdprguardian.com/media/gdpr-guardian-launch-en-poster.png?v=0dc955f2">
 <meta property="og:image:width" content="1920">
 <meta property="og:image:height" content="1080">
-<meta property="og:image:alt" content="GDPR Guardian: anonymise your documents, irreversibly, before the AI">
+<meta property="og:image:alt" content="GDPR Guardian: an experimental, open-source tool to help respect the GDPR">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://gdprguardian.com/">
 <link rel="alternate" hreflang="en" href="https://gdprguardian.com/">
@@ -34,7 +34,7 @@
 <a class="skip" href="#ck-t">Skip to the input</a>
 <div class="app" id="workspace">
 <header class="bar">
-<h1 class="brand"><a href="#workspace"><svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path class="mk" d="M7 4H4v16h3M17 4h3v16h-3"/><rect class="mb" x="7.5" y="10" width="9" height="4"/></svg>GDPR Guardian</a><span><span class="vh">, </span>first-level filter before the AI</span></h1>
+<h1 class="brand"><a href="#workspace"><svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path class="mk" d="M7 4H4v16h3M17 4h3v16h-3"/><rect class="mb" x="7.5" y="10" width="9" height="4"/></svg>GDPR Guardian</a><span><span class="vh">, </span>experimental first-level filter before the AI</span></h1>
 <a class="keep" href="#privacy"><i aria-hidden="true"></i><span>No document kept<span>, neither here nor on the server</span></span></a>
 <a class="src" target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian" aria-label="Source code on GitHub">Source<span> code</span></a>
 <nav class="more" aria-label="Learn more"><a href="#video">Video</a><a href="#challenge">Challenge</a><a href="#story">Story</a><a href="#architecture">Architecture</a><a href="#protocol">Protocol &amp; scores</a><a href="#use">Use it</a><a href="#call">Open call</a><a href="#thanks">Thanks</a></nav>
@@ -65,6 +65,7 @@
 </fieldset>
 <p class="hint" data-r="hint" hidden>Outside France, only the country’s identifiers are verified and names go through the French lexicons: on legal texts from five countries (DE, ES, IT, NL, PT), 23–42% of names masked, 78–89% of documents with a leak (internal measurement, outside the protocol).</p>
 <div class="go"><button class="btn" type="submit" data-r="go" disabled>Anonymise</button><input class="vh" type="file" id="ck-f" multiple accept=".pdf,.docx,.docm,.dotx,.dotm,.xlsx,.xlsm,.xlsb,.xls,.pptx,.pptm,.ppsx,.potx,.odt,.ott,.fodt,.ods,.odp,.otp,.fodp,.odg,.rtf,.eml,.mht,.mhtml,.msg,.html,.htm,.xhtml,.csv,.tsv,.txt,.text,.md,.markdown"><label class="btn2" for="ck-f">Add documents</label></div>
+<p class="alert"><b>Experimental tool, no warranty</b>: the output may still identify someone. Check it; you remain responsible for how you use it. <a href="#legal">Disclaimer</a></p>
 <p class="keys vh" data-r="keys">Ctrl + Enter anonymise · Ctrl + Shift + C copy · Ctrl + S download · Esc clear the input</p>
 <p class="fmts">Sent to our server in France (we are a third party), processed in memory, nothing of it is kept. To send nothing: the <a href="#use">local version</a>.</p>
 <p class="st" data-r="st" role="status"></p>
@@ -137,9 +138,9 @@
 
 <section class="pn" id="video" aria-labelledby="h-vi"><div class="ph"><p>Video</p><a class="x" href="#workspace">Close</a></div>
 <h2 id="h-vi" tabindex="-1">The launch video</h2>
-<video class="vid" controls preload="none" playsinline poster="/media/gdpr-guardian-launch-en-poster.png?v=b19695e7" src="/media/gdpr-guardian-launch-en.mp4?v=2d7d8aa9" aria-labelledby="h-vi"></video>
-<p>Silent video: all its text is in the <a href="/media/gdpr-guardian-launch-en-transcript.txt?v=34391f99" target="_blank" rel="noopener">transcript</a>. Short 4:5 cut for social feeds: <a href="/media/gdpr-guardian-launch-en-social.mp4?v=1c60c1b3" download>MP4, 5.0 MB</a>.</p>
-<p class="fine">The video’s index dates from its rendering; the current figure: <a href="#protocol">Protocol and scores</a>. “Names not detected” (DE, ES, IT, NL, PT) is the case of a country chosen without France; with France, as here, the French lexicons mask 23–42% of them.</p>
+<video class="vid" controls preload="none" playsinline poster="/media/gdpr-guardian-launch-en-poster.png?v=0dc955f2" src="/media/gdpr-guardian-launch-en.mp4?v=fbbb0fe3" aria-labelledby="h-vi"></video>
+<p>Silent video: all its text is in the <a href="/media/gdpr-guardian-launch-en-transcript.txt?v=7fb30d1a" target="_blank" rel="noopener">transcript</a>. Short 4:5 cut for social feeds: <a href="/media/gdpr-guardian-launch-en-social.mp4?v=e1291e1a" download>MP4, 5.1 MB</a>.</p>
+<p class="fine">The video’s index dates from its rendering; the current figure: <a href="#protocol">Protocol and scores</a>.</p>
 </section>
 
 <section class="pn" id="challenge" aria-labelledby="h-defi"><div class="ph"><p>The challenge</p><a class="x" href="#workspace">Close</a></div>
@@ -376,7 +377,8 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 <h2 id="h-le" tabindex="-1">Legal notice</h2>
 <p>Under French law (LCEN). Publisher: <a target="_blank" rel="noopener" href="https://www.flowlineintegration.com/">Flow Line Intégration</a>, SASU (French simplified joint-stock company) with share capital of €720,679.80, 4 rue Maryse Bastié, 69500 Bron, France, RCS Lyon 801 330 606, phone +33 4 72 14 92 50. Publication director: Guillaume CLEMENT, CTO Data &amp; AI. Contact: <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>.</p>
 <p>Host: OVH SAS, 2 rue Kellermann, 59100 Roubaix, France, phone 1007 (from France).</p>
-<p>GDPR Guardian 1.0.2, MIT licence, code in the <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian">public repository</a>. Software provided as is, without warranty. It is a first-level filter, automated, explainable and measured: neither a GDPR compliance certification nor legal advice; each controller remains responsible for its own compliance.</p>
+<p>GDPR Guardian 1.0.2, MIT licence, code in the <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian">public repository</a>.</p>
+<p><b>Disclaimer.</b> GDPR Guardian is an experimental, open-source tool to help with GDPR compliance: it reduces the personal data you hand to an AI, but is not enough on its own to ensure compliance. The software (MIT licence) and the online service are provided as is, without warranty. The tool masks direct identifiers, not all of them, and does not read meaning (health, opinions, combined clues): its output may still identify someone. Treat it as personal data and check the results before relying on them. Running a document through the tool is itself processing of personal data: you remain responsible for it. Online, your documents go through our server, with no processing agreement: it is for you to decide whether you may send them; if not, use the <a href="#use">local version</a>. To the fullest extent permitted by law, and without prejudice to rights it does not allow to be excluded, Flow Line Intégration and the project’s authors accept no liability for the use you make of the tool or of its results. Neither a certification nor legal advice.</p>
 </section>
 
 <section class="pn" id="privacy" aria-labelledby="h-co"><div class="ph"><p>Privacy</p><a class="x" href="#workspace">Close</a></div>

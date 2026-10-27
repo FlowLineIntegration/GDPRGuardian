@@ -1,7 +1,9 @@
 # Gardien RGPD · GDPR Guardian
 
-**L'anonymisation intelligente des documents avant leur passage dans une IA.**
-**Smart anonymisation of documents before they reach an AI.**
+**Outil expérimental et open source, pour contribuer au respect du RGPD : un filtre de premier niveau à intégrer
+aux outils d'IA du marché (MCP, API, skills Claude).**
+**An experimental, open-source tool to help with GDPR compliance: a first-level filter to plug into the AI tools
+on the market (MCP, API, Claude skills).**
 
 Un seul logiciel, deux noms : **Gardien RGPD** en français, **GDPR Guardian** en anglais.
 One piece of software, two names: **Gardien RGPD** in French, **GDPR Guardian** in English.
@@ -35,14 +37,14 @@ community, would be most welcome: the code is open (MIT), the protocol public.
 Gardien RGPD retire les données personnelles d'un document (noms, identifiants nationaux, coordonnées
 bancaires, téléphones, adresses, secrets…) **de façon irréversible**, tout en conservant le sens :
 chaque personne devient `[PERSONNE_1]`, `[PERSONNE_2]`… de manière cohérente dans tout le document.
-Un LLM peut alors résumer, analyser ou comparer le contenu **sans jamais savoir de qui il s'agit**.
+Un LLM peut alors résumer, analyser ou comparer le contenu **sans voir les identifiants masqués**.
 
 Offert gratuitement par [Flow Line Intégration](https://www.flowlineintegration.com/) · conçu par
 [Guillaume CLEMENT](https://www.linkedin.com/in/guillaume-clement-erp-cloud/), CTO Data & IA · Licence MIT.
 Offered free of charge by Flow Line Intégration · designed by Guillaume CLEMENT, CTO Data & AI · MIT licence.
 Version 1.0.2, en phase de recherche et développement / in research and development.
 
-**Vidéo / Video** (muette, 2 min 52 / silent, 2 min 50) : [lancement en français](video/out/gardien-rgpd-lancement-fr.mp4) ·
+**Vidéo / Video** (muette, 2 min 55 / silent, 2 min 54) : [lancement en français](video/out/gardien-rgpd-lancement-fr.mp4) ·
 [launch in English](video/out/gdpr-guardian-launch-en.mp4) ; sur le site / on the site :
 <https://gardienrgpd.fr/#video>, <https://gdprguardian.com/#video>.
 
@@ -52,9 +54,9 @@ Version 1.0.2, en phase de recherche et développement / in research and develop
 
 | | |
 |---|---|
-| 🔒 **Irréversible, par conception** | Une clé aléatoire est créée pour chaque document puis détruite. Aucune table de correspondance n'existe : ni vous, ni nous, ni l'IA ne pouvons retrouver les noms d'origine. |
+| 🔒 **Irréversible, par conception** | Une clé aléatoire est créée pour chaque document puis détruite. Aucune table de correspondance n'existe : ni vous ni nous ne pouvons retrouver, depuis le résultat, une valeur remplacée. |
 | 🧠 **Cohérent pour l'IA** | « M. Dupont », « Jean Dupont », « J. Dupont » et « DUPONT Jean » deviennent la même `[PERSONNE_1]` ; sur 2 463 personnes fictives, 92,2 % gardent une seule balise (26 octobre 2026). Les rôles, les relations et le fil du document sont préservés. |
-| 🇫🇷 **Expert des identifiants européens** | NIR (y compris Corse, DOM, NIA), SIREN/SIRET (exception La Poste), TVA, RIB, IBAN de 89 pays, CNI, passeport, permis, RPPS, FINESS… validés par leurs **clés de contrôle officielles**, et pas seulement par des expressions régulières. |
+| 🇫🇷 **Identifiants européens vérifiés** | NIR (y compris Corse, DOM, NIA), SIREN/SIRET (exception La Poste), TVA, RIB, IBAN de 89 pays, CNI, passeport, permis, RPPS, FINESS… validés par leurs **clés de contrôle officielles**, et pas seulement par des expressions régulières. |
 | 🌍 **Packs pays** | `countries=["FR"]` (défaut), plusieurs pays, ou `"all"` pour un document d'origine inconnue : identifiants à clé forte masqués partout, identifiants faibles seulement avec leurs mots-clés locaux. Le mode `"auto"` (pays deviné) reste expérimental. |
 | ⚡ **Rapide, sur CPU** | Aucun GPU, aucun appel à un LLM. Noyau optionnel en **Rust** (sans GIL) aux résultats identiques au moteur Python : un message de 2 Ko est traité en moins d'une milliseconde. |
 | 📄 **Documents et tableurs** | PDF, Word, PowerPoint, HTML, e-mails, Excel et CSV sont convertis en **Markdown anonymisé**, prêt pour l'IA. Feuilles masquées, commentaires et métadonnées ne fuient pas. |
@@ -323,18 +325,9 @@ Third-party data, fonts and components, with their licences and attributions: [T
 
 ## Avertissement / Disclaimer
 
-**FR.** Logiciel fourni « en l'état », sans garantie d'aucune sorte, expresse ou implicite.
-Guillaume CLEMENT et Flow Line Intégration déclinent toute responsabilité quant à son utilisation,
-notamment en cas de donnée personnelle non détectée. Aucune détection automatique n'est exhaustive :
-des éléments de contexte (fonction, lieu, date, événement rare) peuvent permettre une ré-identification
-indirecte. Gardien RGPD n'est ni une certification de conformité RGPD ni un conseil juridique ; chaque
-responsable de traitement reste seul responsable de sa conformité.
+**FR.** Gardien RGPD est un outil expérimental et open source, pour contribuer au respect du RGPD : il aide à limiter les données personnelles confiées à une IA, sans suffire à assurer la conformité. Le logiciel (licence MIT) et le service en ligne sont fournis en l'état, sans garantie. L'outil masque des identifiants directs, pas tous, et ne lit pas le sens (santé, opinions, recoupements) : le texte produit peut encore permettre d'identifier quelqu'un. Traitez-le comme des données personnelles et vérifiez les résultats avant de vous y fier. Passer un document dans l'outil est déjà un traitement de données personnelles : vous en restez responsable. En ligne, vos documents passent par notre serveur, sans contrat de sous-traitance : à vous de juger si cet envoi est permis ; sinon, utilisez la [version locale](docs/LOCAL.md). Dans toute la mesure permise par la loi, et sans préjudice des droits qu'elle ne permet pas d'écarter, Flow Line Intégration et les auteurs du projet déclinent toute responsabilité quant à l'usage que vous faites de l'outil et de ses résultats. Ni certification ni conseil juridique.
 
-**EN.** Software provided "as is", without warranty of any kind, express or implied. Guillaume CLEMENT
-and Flow Line Intégration accept no liability for its use, including for undetected personal data.
-No automated detection is exhaustive: contextual details (role, place, date, rare event) may allow
-indirect re-identification. GDPR Guardian is neither a GDPR compliance certification nor legal advice; each
-controller remains solely responsible for its own compliance.
+**EN.** GDPR Guardian is an experimental, open-source tool to help with GDPR compliance: it reduces the personal data you hand to an AI, but is not enough on its own to ensure compliance. The software (MIT licence) and the online service are provided as is, without warranty. The tool masks direct identifiers, not all of them, and does not read meaning (health, opinions, combined clues): its output may still identify someone. Treat it as personal data and check the results before relying on them. Running a document through the tool is itself processing of personal data: you remain responsible for it. Online, your documents go through our server, with no processing agreement: it is for you to decide whether you may send them; if not, use the [local version](docs/LOCAL.md). To the fullest extent permitted by law, and without prejudice to rights it does not allow to be excluded, Flow Line Intégration and the project's authors accept no liability for the use you make of the tool or of its results. Neither a certification nor legal advice.
 
 ---
 

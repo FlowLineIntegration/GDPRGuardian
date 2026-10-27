@@ -673,7 +673,7 @@ verify() {
     [ $((now - age + 1)) -ge "$newest" ] || fail "configuration installée non appliquée (rechargement refusé ?) : sudo systemctl restart nginx / installed configuration not applied"
   done
   echo "ok"
-  local url name host sse headers out errors
+  local url name host sse headers out errors home
   for url in "${API_NAMES[@]/#/https://}"; do
     verify_api "$url"
   done
@@ -711,8 +711,11 @@ print("api/stats :", ", ".join(f"{key}={stats.get(key)}" for key in ("uses_hour"
     echo "api/live : événement « stats » reçu / \"stats\" event received"
     curl -fsS "https://$host/.well-known/security.txt" | grep -E '^(Contact|Expires):' || fail "security.txt ($host)"
     # Vidéo contrôlée quand la page la cite (un site peut tourner sans, le temps d'un lancement) / the video is checked
-    # when the page cites it (a site may run without it until a launch).
-    if curl -fsS "https://$host/" | grep -q '/media/'; then
+    # when the page cites it (a site may run without it until a launch). Page lue en entier d'abord : grep -q en bout
+    # de tube coupe curl dès la balise og:image du <head> (« Failed writing body », faux négatif avec pipefail).
+    # Whole page first: grep -q at the end of a pipe cuts curl at the <head>'s og:image (false negative with pipefail).
+    home=$(curl -fsS "https://$host/" || true)
+    if grep -q '/media/' <<<"$home"; then
       verify_media "$host"
     else
       echo "la page ne cite aucune vidéo : /media/ non contrôlé / the page cites no video: /media/ not checked"

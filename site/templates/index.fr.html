@@ -4,20 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Gardien RGPD · anonymiser avant l’IA, sans perdre le sens</title>
-<meta name="description" content="Filtre de premier niveau, irréversible : déposez vos documents, reprenez-les anonymisés avant de les confier à une IA, la logique du texte intacte. Gratuit, sans clé, sans cookie ; licence MIT, code ouvert sur GitHub.">
+<meta name="description" content="Outil expérimental et open source, pour contribuer au respect du RGPD : un filtre de premier niveau à intégrer aux outils d’IA du marché (MCP, API, skills Claude), qui masque sans retour possible les identifiants directs qu’il reconnaît. Gratuit, sans clé, sans cookie ; licence MIT.">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Gardien RGPD · retirer les noms, garder le sens">
-<meta property="og:description" content="Filtre de premier niveau : anonymisation irréversible des documents avant l’IA, ouverte à tous, sans clé. Licence MIT.">
+<meta property="og:description" content="Outil expérimental et open source, pour contribuer au respect du RGPD : un filtre de premier niveau à intégrer aux outils d’IA du marché. Gratuit, licence MIT.">
 <meta property="og:url" content="https://gardienrgpd.fr/">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Gardien RGPD">
-<meta property="og:image" content="https://gardienrgpd.fr/media/gardien-rgpd-lancement-fr-poster.png?v=3c16c019">
+<meta property="og:image" content="https://gardienrgpd.fr/media/gardien-rgpd-lancement-fr-poster.png?v=e107865c">
 <meta property="og:image:width" content="1920">
 <meta property="og:image:height" content="1080">
-<meta property="og:image:alt" content="Gardien RGPD : anonymisez vos documents, irréversiblement, avant l’IA">
+<meta property="og:image:alt" content="Gardien RGPD : outil expérimental et open source, pour contribuer au respect du RGPD">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://gardienrgpd.fr/">
 <link rel="alternate" hreflang="fr" href="https://gardienrgpd.fr/">
@@ -34,7 +34,7 @@
 <a class="skip" href="#ck-t">Aller à la saisie</a>
 <div class="app" id="poste">
 <header class="bar">
-<h1 class="brand"><a href="#poste"><svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path class="mk" d="M7 4H4v16h3M17 4h3v16h-3"/><rect class="mb" x="7.5" y="10" width="9" height="4"/></svg>Gardien RGPD</a><span><span class="vh">, </span>filtre de premier niveau avant l’IA</span></h1>
+<h1 class="brand"><a href="#poste"><svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path class="mk" d="M7 4H4v16h3M17 4h3v16h-3"/><rect class="mb" x="7.5" y="10" width="9" height="4"/></svg>Gardien RGPD</a><span><span class="vh">, </span>filtre expérimental de premier niveau avant l’IA</span></h1>
 <a class="keep" href="#confidentialite"><i aria-hidden="true"></i><span>Aucun document conservé<span>, ni ici ni sur le serveur</span></span></a>
 <a class="src" target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian" aria-label="Code source sur GitHub">Code<span> source</span></a>
 <nav class="more" aria-label="En savoir plus"><a href="#video">Vidéo</a><a href="#defi">Le défi</a><a href="#histoire">L’histoire</a><a href="#architecture">Architecture</a><a href="#protocole">Protocole et scores</a><a href="#utiliser">Utiliser</a><a href="#appel">L’appel</a><a href="#merci">Merci</a></nav>
@@ -65,6 +65,7 @@
 </fieldset>
 <p class="hint" data-r="hint" hidden>Hors de France, seuls les identifiants du pays sont vérifiés et les noms passent par les lexiques français : textes juridiques de cinq pays (DE, ES, IT, NL, PT), 23 à 42 % des noms masqués, 78 à 89 % des documents avec fuite (mesure interne hors protocole).</p>
 <div class="go"><button class="btn" type="submit" data-r="go" disabled>Anonymiser</button><input class="vh" type="file" id="ck-f" multiple accept=".pdf,.docx,.docm,.dotx,.dotm,.xlsx,.xlsm,.xlsb,.xls,.pptx,.pptm,.ppsx,.potx,.odt,.ott,.fodt,.ods,.odp,.otp,.fodp,.odg,.rtf,.eml,.mht,.mhtml,.msg,.html,.htm,.xhtml,.csv,.tsv,.txt,.text,.md,.markdown"><label class="btn2" for="ck-f">Ajouter des documents</label></div>
+<p class="alert"><b>Outil expérimental, sans garantie</b> : le résultat peut encore identifier quelqu’un. Relisez-le ; vous restez responsable de son usage. <a href="#mentions">Avertissement</a></p>
 <p class="keys vh" data-r="keys">Ctrl + Entrée anonymiser · Ctrl + Maj + C copier · Ctrl + S télécharger · Échap vider la saisie</p>
 <p class="fmts">Envoyé à notre serveur en France (nous sommes un tiers), traité en mémoire, rien n’en est gardé. Pour ne rien envoyer : la <a href="#utiliser">version locale</a>.</p>
 <p class="st" data-r="st" role="status"></p>
@@ -137,9 +138,9 @@
 
 <section class="pn" id="video" aria-labelledby="h-vi"><div class="ph"><p>Vidéo</p><a class="x" href="#poste">Fermer</a></div>
 <h2 id="h-vi" tabindex="-1">La vidéo de lancement</h2>
-<video class="vid" controls preload="none" playsinline poster="/media/gardien-rgpd-lancement-fr-poster.png?v=3c16c019" src="/media/gardien-rgpd-lancement-fr.mp4?v=aaec2e17" aria-labelledby="h-vi"></video>
-<p>Vidéo muette : tout son texte est dans la <a href="/media/gardien-rgpd-lancement-fr-transcript.txt?v=c1ea0ea2" target="_blank" rel="noopener">transcription</a>. Montage court en 4:5, pour les réseaux : <a href="/media/gardien-rgpd-lancement-fr-social.mp4?v=b95af83d" download>MP4, 5,0 Mo</a>.</p>
-<p class="fine">L’indice de la vidéo date de son rendu ; le chiffre à jour : <a href="#protocole">Protocole et scores</a>. « Noms non détectés » (DE, ES, IT, NL, PT) : cas d’un pays choisi sans la France ; avec la France, comme ici, les lexiques français en masquent 23 à 42 %.</p>
+<video class="vid" controls preload="none" playsinline poster="/media/gardien-rgpd-lancement-fr-poster.png?v=e107865c" src="/media/gardien-rgpd-lancement-fr.mp4?v=a6e7dbfb" aria-labelledby="h-vi"></video>
+<p>Vidéo muette : tout son texte est dans la <a href="/media/gardien-rgpd-lancement-fr-transcript.txt?v=dd94a233" target="_blank" rel="noopener">transcription</a>. Montage court en 4:5, pour les réseaux : <a href="/media/gardien-rgpd-lancement-fr-social.mp4?v=110335c5" download>MP4, 5,2 Mo</a>.</p>
+<p class="fine">L’indice de la vidéo date de son rendu ; le chiffre à jour : <a href="#protocole">Protocole et scores</a>.</p>
 </section>
 
 <section class="pn" id="defi" aria-labelledby="h-defi"><div class="ph"><p>Le défi</p><a class="x" href="#poste">Fermer</a></div>
@@ -375,7 +376,8 @@ curl https://api.gdprguardian.com/v1/anonymize/file \
 <h2 id="h-le" tabindex="-1">Mentions légales</h2>
 <p>Éditeur : <a target="_blank" rel="noopener" href="https://www.flowlineintegration.com/">Flow Line Intégration</a>, SASU au capital de 720 679,80 €, 4 rue Maryse Bastié, 69500 Bron, France, RCS Lyon 801 330 606, tél. 04 72 14 92 50. Directeur de la publication : Guillaume CLEMENT, directeur technique Data &amp; IA. Contact : <a href="mailto:contact@gardienrgpd.fr">contact@gardienrgpd.fr</a>.</p>
 <p>Hébergeur : OVH SAS, 2 rue Kellermann, 59100 Roubaix, France, tél. 1007.</p>
-<p>Gardien RGPD 1.0.2, licence MIT, code dans le <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian">dépôt public</a>. Logiciel fourni en l’état, sans garantie. C’est un filtre de premier niveau, automatique, explicable et mesuré : ni une certification de conformité au RGPD, ni un conseil juridique ; chaque responsable de traitement reste responsable de sa conformité.</p>
+<p>Gardien RGPD 1.0.2, licence MIT, code dans le <a target="_blank" rel="noopener" href="https://github.com/FlowLineIntegration/GDPRGuardian">dépôt public</a>.</p>
+<p><b>Avertissement.</b> Gardien RGPD est un outil expérimental et open source, pour contribuer au respect du RGPD : il aide à limiter les données personnelles confiées à une IA, sans suffire à assurer la conformité. Le logiciel (licence MIT) et le service en ligne sont fournis en l’état, sans garantie. L’outil masque des identifiants directs, pas tous, et ne lit pas le sens (santé, opinions, recoupements) : le texte produit peut encore permettre d’identifier quelqu’un. Traitez-le comme des données personnelles et vérifiez les résultats avant de vous y fier. Passer un document dans l’outil est déjà un traitement de données personnelles : vous en restez responsable. En ligne, vos documents passent par notre serveur, sans contrat de sous-traitance : à vous de juger si cet envoi est permis ; sinon, utilisez la <a href="#utiliser">version locale</a>. Dans toute la mesure permise par la loi, et sans préjudice des droits qu’elle ne permet pas d’écarter, Flow Line Intégration et les auteurs du projet déclinent toute responsabilité quant à l’usage que vous faites de l’outil et de ses résultats. Ni certification ni conseil juridique.</p>
 </section>
 
 <section class="pn" id="confidentialite" aria-labelledby="h-co"><div class="ph"><p>Confidentialité</p><a class="x" href="#poste">Fermer</a></div>

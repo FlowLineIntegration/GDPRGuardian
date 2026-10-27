@@ -1,6 +1,6 @@
 GDPR Guardian · launch video · all on-screen text, in order
 Silent video (no voice, no music): this file lists every on-screen text at the moment it appears.
-85.4 s · 1080 x 1350 · 30 fps
+86.8 s · 1080 x 1350 · 30 fps
 
 [00:00] GDPR Guardian
 [00:00] Mr Jean Dupont, 06 12 34 56 78
@@ -41,14 +41,14 @@ Silent video (no voice, no music): this file lists every on-screen text at the m
 [00:56] 95% CI: 96.2–97.6%
 [00:56] Mentions masked 99.3% · precision 99.2% BODACC, 87.7% BOAMP · neutral text masked by mistake 0.07%
 [00:57] Normalised documents: share with no readable direct identifier · protocol 1.1, run of 26 October 2026.
-[01:08] German, Spanish, Italian, Dutch, Portuguese names: not detected.
-[01:11] A first barrier, not a GDPR certification.
-[01:14] GDPR Guardian
-[01:14] The best open-source tool for GDPR and AI!
-[01:18] You be the judge.
-[01:19] gdprguardian.com · gardienrgpd.fr
-[01:20] github.com/FlowLineIntegration/GDPRGuardian
-[01:20] Offered by Flow Line Intégration
-[01:21] Guillaume CLEMENT, CTO Data & AI
-[01:21] Design: Claude Design
-[01:21] MIT licence · version 1.0.1
+[01:08] German, Spanish, Italian, Dutch, Portuguese names: mostly missed (none without France).
+[01:12] A first barrier, not a GDPR certification.
+[01:15] GDPR Guardian
+[01:15] An experimental, open-source tool to help respect the GDPR.
+[01:19] Try it, improve it.
+[01:21] gdprguardian.com · gardienrgpd.fr
+[01:21] github.com/FlowLineIntegration/GDPRGuardian
+[01:22] Offered by Flow Line Intégration
+[01:22] Guillaume CLEMENT, CTO Data & AI
+[01:22] Design: Claude Design
+[01:23] MIT licence, no warranty · version 1.0.1

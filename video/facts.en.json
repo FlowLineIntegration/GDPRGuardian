@@ -22,8 +22,8 @@
       [["Mr "], ["Jean Dupont", "[PERSON_1]", "p1"], [", "], ["06 12 34 56 78", "[PHONE_1]", "p3"]]
     ],
     "kicker": "Anonymise your documents, irreversibly, before they reach an AI.",
-    "line1": "The best open-source tool for GDPR and AI!",
-    "line2": "You be the judge.",
+    "line1": "An experimental, open-source tool to help respect the GDPR.",
+    "line2": "A filter to plug into the AI tools on the market.",
     "urls": "gdprguardian.com · gardienrgpd.fr"
   },
   "problem": {
@@ -128,15 +128,15 @@
     "limits": [
       "Published apart: old newspapers (low-quality OCR), MAPA FR, other languages.",
       "Real corpora already seen while tuning: optimistic figures.",
-      "German, Spanish, Italian, Dutch, Portuguese names: not detected.",
+      "German, Spanish, Italian, Dutch, Portuguese names: mostly missed (none without France).",
       "A first barrier, not a GDPR certification."
     ],
     "link": "The protocol: <m>gdprguardian.com/#protocol</m>"
   },
   "closing": {
     "brand": "GDPR Guardian",
-    "line1": "The best open-source tool for GDPR and AI!",
-    "big": "You be the judge.",
+    "line1": "An experimental, open-source tool to help respect the GDPR.",
+    "big": "Try it, improve it.",
     "urls": "gdprguardian.com · gardienrgpd.fr",
     "repo": "github.com/FlowLineIntegration/GDPRGuardian",
     "credits": [
@@ -144,7 +144,7 @@
       "<b>Guillaume CLEMENT</b>,\nCTO Data & AI",
       "Design:\n<b>Claude Design</b>"
     ],
-    "licence": "MIT licence · version 1.0.1"
+    "licence": "MIT licence, no warranty · version 1.0.1"
   },
   "social": {
     "title": {
@@ -179,7 +179,7 @@
         {"id": "weak", "fig": "{q.f_old_nl}%", "fallback_fig": "—", "label": "of old newspapers with no leak: low-quality OCR, published apart"}
       ],
       "limits": [
-        "German, Spanish, Italian, Dutch, Portuguese names: not detected.",
+        "German, Spanish, Italian, Dutch, Portuguese names: mostly missed (none without France).",
         "A first barrier, not a GDPR certification."
       ]
     },

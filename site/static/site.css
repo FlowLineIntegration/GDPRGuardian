@@ -107,6 +107,9 @@ select{min-height:30px;font:400 13px var(--sans);color:var(--ink);background:var
 .hint[data-r]{color:var(--ink2)}
 .go{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-top:10px}
 .keys{color:var(--ink2)}
+/* Avertissement sous le bouton, toujours visible / disclaimer line under the button, always shown */
+.alert{margin-top:10px;padding:1px 0 1px 10px;border-left:3px solid var(--sig);font-size:12.5px;line-height:1.45;color:var(--ink2)}
+.alert b{color:var(--ink);font-weight:600}
 .st{min-height:1.5em;margin-top:6px;font-size:13px;color:var(--ink)}
 .nojs{margin-top:8px;font-weight:600}
 /* Modes: a radio group above the input, one row per mode with its plain line and its two scores; the custom

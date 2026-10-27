@@ -1,10 +1,10 @@
 # Vidéo de lancement · Launch video
 
 Gardien RGPD / GDPR Guardian 1.0.1. Une vidéo muette sur fond blanc, en français et en anglais, en deux montages :
-le **complet** (1920 × 1080, environ 2 min 52 s) et le **court** pour les fils de réseaux sociaux sur téléphone
-(1080 × 1350, environ 1 min 23 s, texte plus gros, moins de mots). Tout sort d’une seule source, par une seule
+le **complet** (1920 × 1080, environ 2 min 55 s) et le **court** pour les fils de réseaux sociaux sur téléphone
+(1080 × 1350, environ 1 min 26 s, texte plus gros, moins de mots). Tout sort d’une seule source, par une seule
 commande. A silent video on a white background, in French and English, in two cuts: the **full** one (1920 × 1080,
-about 2 min 50 s) and the **short** one for phone feeds (1080 × 1350, about 1 min 24 s, larger type, fewer words).
+about 2 min 54 s) and the **short** one for phone feeds (1080 × 1350, about 1 min 27 s, larger type, fewer words).
 
 | | Français | English |
 |---|---|---|
@@ -38,7 +38,7 @@ une seconde près (`out/review/timeline-en.txt`).
 
 | Début | Partie | Contenu |
 |---:|---|---|
-| 0:00 | Ouverture | Dès la première image : le nom et une ligne de document, « M. Jean Dupont, 06 12 34 56 78 ». Le geste de la marque : ses crochets se referment sur le nom, laissent la barre orange, puis s’ouvrent sur la balise, « M. [PERSONNE_1], [TEL_1] ». Puis « Anonymisez vos documents, irréversiblement, avant l’IA. », la phrase du propriétaire « Le meilleur outil open source pour le RGPD et l’IA ! À vous de juger. » et les deux adresses. |
+| 0:00 | Ouverture | Dès la première image : le nom et une ligne de document, « M. Jean Dupont, 06 12 34 56 78 ». Le geste de la marque : ses crochets se referment sur le nom, laissent la barre orange, puis s’ouvrent sur la balise, « M. [PERSONNE_1], [TEL_1] ». Puis « Anonymisez vos documents, irréversiblement, avant l’IA. », « Outil expérimental et open source, pour contribuer au respect du RGPD. », « Un filtre à intégrer aux outils d’IA du marché. » et les deux adresses. |
 | 0:12 | 01 · Le problème | Contrat, dossier RH, dossier médical, e-mail, chacun avec une donnée visible (nom, IBAN, diagnostic, adresse), partent vers un assistant d’IA : « Les données personnelles arrivent chez un tiers. » |
 | 0:21 | 01 · Le problème | Les réponses actuelles : caviardage manuel, pseudonymisation réversible (la table de correspondance), « [CENSURÉ] » partout, boîtes noires. |
 | 0:32 | 02 · Notre réponse | Un document fictif anonymisé ligne par ligne (sortie réelle, identique avec les paquets 1.0.0 publiés et avec le moteur du dépôt) ; sous le document, sa clé de 256 bits (32 octets) qui disparaît une fois la dernière balise posée : « Clé détruite : aucun retour possible. » Les personnes ont une balise pleine ou cerclée, le reste (e-mail, téléphone, IBAN) une balise simple. |
@@ -47,8 +47,8 @@ une seconde près (`out/review/timeline-en.txt`).
 | 1:10 | 03 · Trois accès | Schéma : site web, MCP, API REST → Gardien RGPD (un processus neuf par requête) → Markdown anonymisé → votre IA ; les documents disparaissent en entrant dans le moteur et en ressortent balisés. « Par MCP, envoyez le fichier : il ne passe pas par le modèle. Un texte collé est déjà parti. » ; la voie 100 % locale. |
 | 1:32 | 04 · Votre version | `git clone`, « Code publié sur GitHub. », licence MIT, vos règles (exemple réel `CLT-204518` → `[CLIENT_ID_1]`), votre serveur (`docker compose`), contribuer (`/issues`). |
 | 1:45 | 05 · Les mesures | Campagne publique du protocole 1.1 (moteur déployé), chiffres lus dans `quality.json` : tests automatisés, part des documents synthétiques sans fuite (et leur nombre), part des documents difficiles sans fuite (toute l’équipe rouge, 51 façons de piéger un texte), 14 jeux de textes réels annotés, dont 6 français, et leurs documents, BOAMP puis BODACC sans fuite avec leurs mentions masquées. Les pourcentages sont des parts de documents sans fuite, la mesure de l’indice, sauf ceux des mentions. |
-| 2:07 | 05 · Les mesures | L’indice de confiance, protocole 1.1 (lu dans `quality.json` ; « Mesure en cours » tant qu’il manque), mentions masquées, précision BODACC et BOAMP, texte neutre masqué à tort, la campagne et ses documents, quatre limites (publiés à part : déguisements volontaires, OCR de mauvaise qualité, MAPA FR ; corpus réels déjà vus pendant la mise au point : chiffres optimistes ; noms allemands, espagnols, italiens, néerlandais, portugais non détectés ; une première barrière), `gardienrgpd.fr/#protocole`. |
-| 2:36 | Fin | « Le meilleur outil open source pour le RGPD et l’IA ! À vous de juger. », adresses, dépôt GitHub, « Offert par Flow Line Intégration », « Guillaume CLEMENT, CTO Data & IA », « Conception : Claude Design », licence MIT. |
+| 2:07 | 05 · Les mesures | L’indice de confiance, protocole 1.1 (lu dans `quality.json` ; « Mesure en cours » tant qu’il manque), mentions masquées, précision BODACC et BOAMP, texte neutre masqué à tort, la campagne et ses documents, quatre limites (publiés à part : déguisements volontaires, OCR de mauvaise qualité, MAPA FR ; corpus réels déjà vus pendant la mise au point : chiffres optimistes ; noms allemands, espagnols, italiens, néerlandais, portugais surtout manqués, aucun sans la France ; une première barrière), `gardienrgpd.fr/#protocole`. |
+| 2:36 | Fin | « Outil expérimental et open source, pour contribuer au respect du RGPD. », « Testez-le, améliorez-le. », adresses, dépôt GitHub, « Offert par Flow Line Intégration », « Guillaume CLEMENT, CTO Data & IA », « Conception : Claude Design », licence MIT, sans garantie. |
 
 Chaque titre arrive avec son contenu (0,35 s d’écart) et les scènes s’enchaînent sans image vide : la suivante
 commence 0,4 s avant la fin du fondu de la précédente.
@@ -195,8 +195,8 @@ Durations follow the text (see “Reading rule”); English timings are within a
 
 1. **Opening (0:00)**: from the very first frame, the name and a line of a document, “Mr Jean Dupont, 06 12 34 56
    78”. The brand’s move: its brackets close over the name, leave the orange bar, then open on the tag, “Mr
-   [PERSON_1], [PHONE_1]”. Then “Anonymise your documents, irreversibly, before they reach an AI.”, the owner’s line
-   “The best open-source tool for GDPR and AI! You be the judge.” and both addresses.
+   [PERSON_1], [PHONE_1]”. Then “Anonymise your documents, irreversibly, before they reach an AI.”, “An experimental,
+   open-source tool to help respect the GDPR.”, “A filter to plug into the AI tools on the market.” and both addresses.
 2. **The problem (0:12)**: a contract, an HR file, a medical record and an e-mail, each with a visible piece of data,
    go to an AI assistant: “Personal data ends up with a third party.” Then today’s answers: manual redaction,
    reversible pseudonymisation, “[REDACTED]” everywhere, black boxes.

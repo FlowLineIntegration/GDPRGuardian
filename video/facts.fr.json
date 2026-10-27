@@ -22,8 +22,8 @@
       [["M. "], ["Jean Dupont", "[PERSONNE_1]", "p1"], [", "], ["06 12 34 56 78", "[TEL_1]", "p3"]]
     ],
     "kicker": "Anonymisez vos documents, irréversiblement, avant l’IA.",
-    "line1": "Le meilleur outil open source pour le RGPD et l’IA\u202f!",
-    "line2": "À vous de juger.",
+    "line1": "Outil expérimental et open source, pour contribuer au respect du RGPD.",
+    "line2": "Un filtre à intégrer aux outils d’IA du marché.",
     "urls": "gardienrgpd.fr · gdprguardian.com"
   },
   "problem": {
@@ -128,15 +128,15 @@
     "limits": [
       "Publiés à part\u202f: presse ancienne (OCR de mauvaise qualité), MAPA FR, autres langues.",
       "Corpus réels déjà vus pendant la mise au point\u202f: chiffres optimistes.",
-      "Noms allemands, espagnols, italiens, néerlandais, portugais\u202f: non détectés.",
+      "Noms allemands, espagnols, italiens, néerlandais, portugais\u202f: surtout manqués (aucun sans la France).",
       "Une première barrière, pas une certification RGPD."
     ],
     "link": "Le protocole\u202f: <m>gardienrgpd.fr/#protocole</m>"
   },
   "closing": {
     "brand": "Gardien RGPD",
-    "line1": "Le meilleur outil open source pour le RGPD et l’IA\u202f!",
-    "big": "À vous de juger.",
+    "line1": "Outil expérimental et open source, pour contribuer au respect du RGPD.",
+    "big": "Testez-le, améliorez-le.",
     "urls": "gardienrgpd.fr · gdprguardian.com",
     "repo": "github.com/FlowLineIntegration/GDPRGuardian",
     "credits": [
@@ -144,7 +144,7 @@
       "<b>Guillaume CLEMENT</b>,\nCTO Data & IA",
       "Conception\u202f:\n<b>Claude Design</b>"
     ],
-    "licence": "Licence MIT · version 1.0.1"
+    "licence": "Licence MIT, sans garantie · version 1.0.1"
   },
   "social": {
     "title": {
@@ -179,7 +179,7 @@
         {"id": "weak", "fig": "{q.f_old_nl} %", "fallback_fig": "—", "label": "de presse ancienne sans fuite : OCR de mauvaise qualité, publiée à part"}
       ],
       "limits": [
-        "Noms allemands, espagnols, italiens, néerlandais, portugais\u202f: non détectés.",
+        "Noms allemands, espagnols, italiens, néerlandais, portugais\u202f: surtout manqués (aucun sans la France).",
         "Première barrière, pas une certification RGPD."
       ]
     },
@@ -219,7 +219,7 @@
     {"figure": "Indice de confiance (valeur, IC 95 %, mentions masquées, documents, date), protocole 1.1", "source": "site/data/quality.json, lu à chaque rendu (confidence_index, confidence_ci_low, confidence_ci_high, mention_recall_pct, protocol_docs, protocol_date) ; « Mesure en cours » tant que l’une des quatre premières manque. Montage court : définition et date de la campagne sur la carte de l’indice"},
     {"figure": "Précision BODACC et BOAMP ; texte neutre masqué à tort", "source": "Garde-fous de la campagne du protocole 1.1 (« Garde-fous » du résultat) : site/data/quality.json (f_bod_pr, f_boa_pr, g_overmask), lu à chaque rendu ; sans ces clés, seule la part des mentions masquées s’affiche ; docs/PROTOCOLE.md § 7 (la précision et le sur-masquage sont toujours publiés à côté de l’indice)"},
     {"figure": "Protocole écrit avant la mesure : 1 019 385 documents, dont 8 478 réels, par le vrai service", "source": "docs/PROTOCOLE.md, résumé (« 1,019,385 documents, of which 1,010,907 synthetic and 8,478 real ») ; version 1.1, même plan de campagne (section « Version 1.1 », point 5), enregistrée avant la campagne (PROTOCOL-REGISTRATION-1.1.json)"},
-    {"figure": "Limites : publiés à part, presse ancienne (OCR de mauvaise qualité), MAPA FR, autres langues ; corpus réels déjà vus, chiffres optimistes ; noms DE, ES, IT, NL, PT non détectés ; première barrière, pas une certification", "source": "docs/PROTOCOLE.md, « Version 1.1 » (familles publiées à part ; moitiés test non aveugles : chiffres des corpus réels optimistes) ; tools/protocol/spec.py (APART_FAMILIES) ; hors périmètre, MAPA DE, ES, IT, NL, PT et LER allemand : 0 % des mentions masquées à la campagne 1.0 (benchmarks/results/) ; README.md, « Avertissement »"},
+    {"figure": "Limites : publiés à part, presse ancienne (OCR de mauvaise qualité), MAPA FR, autres langues ; corpus réels déjà vus, chiffres optimistes ; noms DE, ES, IT, NL, PT surtout manqués (aucun sans la France) ; première barrière, pas une certification", "source": "docs/PROTOCOLE.md, « Version 1.1 » (familles publiées à part ; moitiés test non aveugles : chiffres des corpus réels optimistes) ; tools/protocol/spec.py (APART_FAMILIES) ; hors périmètre, MAPA DE, ES, IT, NL, PT et LER allemand : 0 % des mentions masquées à la campagne 1.0 (benchmarks/results/) ; README.md, « Avertissement »"},
     {"figure": "Le protocole : gardienrgpd.fr/#protocole", "source": "site/templates/index.fr.html, section id=\"protocole\""},
     {"figure": "Offert par Flow Line Intégration ; Guillaume CLEMENT, CTO Data & IA ; Conception : Claude Design ; licence MIT, version 1.0.1","source": "site/templates/index.fr.html, pied de page et panneau « Merci »"}
   ]
