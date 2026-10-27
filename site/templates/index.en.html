@@ -256,6 +256,7 @@
 <li>Leaks found with engine 1.0: a line break inside an identifier, the spaced-out letters of a PDF, slashes or double spaces between digits, the addresses of BOAMP notices, French bank details (RIB) written field by field.</li>
 <li>Text only: the conversion of PDF, Word and Excel files is not measured; a scanned page with no text is dropped.</li>
 <li>Names still missed by engine 1.0.2: written in lower case (“rdv avec julien dupont”), a rare surname that is also a common French word (“Albéric Fontanelle” without “M.”), “né Martin le 12/03/1985”, some pseudonyms.</li>
+<li>Passwords: only direct forms are recognised (“password: …”, “my password is …”); as soon as a word comes in between (“the password for the account: …”), the secret may stay readable.</li>
 <li>Through the API, a country chosen without France masks neither names nor addresses.</li>
 <li>The engine also masks by mistake (Precision column).</li>
 <li>The first level does not read meaning: neither sensitive data (GDPR, Art. 9 and 10) nor cross-checks (job title, place, date) that can re-identify someone. Today: the Claude skills’ second pass, best effort, not measured. Next: the governed LLM stage.</li>

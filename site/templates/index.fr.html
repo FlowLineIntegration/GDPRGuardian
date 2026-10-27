@@ -256,6 +256,7 @@
 <li>Fuites relevées avec le moteur 1.0 : un retour à la ligne à l’intérieur d’un identifiant, les lettres espacées d’un PDF, barres obliques ou doubles espaces entre chiffres, adresses des avis BOAMP, RIB écrit champ par champ.</li>
 <li>Texte seulement : la conversion des PDF, Word et Excel n’est pas mesurée ; une page numérisée sans texte est écartée.</li>
 <li>Noms encore manqués par le moteur 1.0.2 : écrits en minuscules (« rdv avec julien dupont »), nom de famille rare qui est aussi un mot courant (« Albéric Fontanelle » sans « M. »), « né Martin le 12/03/1985 », certains pseudonymes.</li>
+<li>Mots de passe : seules les formes directes sont reconnues (« mot de passe : … », « mon mot de passe est … ») ; dès qu’un mot s’intercale (« le mot de passe du compte : … », « mdp provisoire = … »), le secret peut rester lisible.</li>
 <li>Par l’API, un pays choisi sans la France ne masque ni noms ni adresses.</li>
 <li>Le moteur masque aussi à tort (colonne Précision).</li>
 <li>Le premier niveau ne lit pas le sens : ni données sensibles (RGPD, art. 9 et 10), ni recoupements (fonction, lieu, date) qui peuvent ré-identifier. Aujourd’hui : la seconde passe des skills Claude, au mieux, non mesurée. Ensuite : l’étage LLM gouverné.</li>

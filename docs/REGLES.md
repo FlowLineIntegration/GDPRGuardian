@@ -948,6 +948,12 @@ Avec `explain=true`, le rapport contient une ligne par balise et par raison, **j
   Avec une civilité ou une étiquette (« Mme Claire Fontanelle », « Nom : Fontanelle »), le nom est masqué. Relevé à
   l'audit du 27 octobre 2026 (12 cas sur 129 noms-mots essayés), correction prévue en 1.0.3 ; d'ici là, une règle
   `deny` de l'organisation (§ 3) ou la seconde passe des skills.
+- Mots de passe (`SECRET_PASSWORD_PHRASE`) : seules les formes directes sont reconnues (« Mot de passe :
+  X », « Mon mot de passe est X », « password: X », « my password is X »). Dès qu'un mot s'intercale entre
+  « mot de passe » et le séparateur (« Le mot de passe du compte : X », « mdp provisoire = X », « the password
+  for the account: X »), le secret reste lisible, en mode fort compris. Relevé le 27 octobre 2026 par un essai
+  du MCP avec Claude Opus, vérifié sur le moteur (5 formes sur 8 essayées), correction prévue en 1.0.3 ;
+  d'ici là, une règle `deny` de l'organisation (§ 3) pour les formulations maison.
 - Propagation des valeurs (1.0.2) : une date ordinaire égale à une date de naissance du document est masquée avec
   elle, même quand cette date de naissance a été reconnue par simple proximité d'un indice (rappel d'abord).
 - Un nom de personne écrit sur la même ligne que le code postal, sans séparateur (« Claire Dubois 69003 Lyon »),
